@@ -1,0 +1,1 @@
+Original seamless procedural architectural surfaces authored for Liminal map. 1024px grayscale albedos receive per-room color in Unity materials. Tangent-space normals use OpenGL +Y convention. Ceramic tile field: 8 by 8 tiles.
