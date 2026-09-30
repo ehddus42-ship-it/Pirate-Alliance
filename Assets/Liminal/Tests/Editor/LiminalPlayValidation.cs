@@ -38,6 +38,7 @@ namespace AcRoguelike.Liminal.EditorTests
         static double nextTick;
         static int wantedRoom, originalSeed, healthBeforeBoss;
         static string initialRoute;
+        static VendingMonster arrivalAmbush;
 
         static LiminalPlayValidation()
         {
@@ -363,6 +364,30 @@ namespace AcRoguelike.Liminal.EditorTests
                         initialRoute = RouteIds(run.Rooms);
                         Require(!run.TryUseExit(), "The stage exited before the route was cleared.");
                         report.checks.Add("Premature stage exit rejected.");
+                        arrivalAmbush = run.Rooms[0].GetComponentInChildren<VendingMonster>();
+                        Require(arrivalAmbush && arrivalAmbush.enabled, "Stage 1 arrival has no enabled authored vending ambush.");
+                        Require(arrivalAmbush.State == VendingMonsterState.Dormant && !arrivalAmbush.Health.CanBeTargeted,
+                            "Authored appliance was not dormant at the player spawn.");
+                        Require(run.Rooms.Skip(1).SelectMany(r => r.GetComponentsInChildren<VendingMonster>()).All(m => !m.enabled),
+                            "A future room's ambush was activated early.");
+                        Require(!run.Rooms.SelectMany(r => r.GetComponentsInChildren<Transform>(true)).Any(t => t.name == "MeshySlot__vending_machine"),
+                            "An old decoration was left alongside the monster.");
+                        motor.ResetAt(arrivalAmbush.transform.position + arrivalAmbush.transform.forward * 4 + Vector3.up * .05f);
+                        Next("AwaitArrivalAmbush");
+                        break;
+                    case "AwaitArrivalAmbush":
+                        if (arrivalAmbush.State == VendingMonsterState.Dormant) return;
+                        Require(arrivalAmbush.State == VendingMonsterState.Awakening, "Arrival ambush skipped its emergence.");
+                        report.checks.Add("Stage 1 authored appliance is dormant at spawn and awakens on approach at its original placement.");
+                        Next("ObserveArrivalAmbush");
+                        break;
+                    case "ObserveArrivalAmbush":
+                        if (arrivalAmbush.State == VendingMonsterState.Awakening) return;
+                        Require(arrivalAmbush.Health.CanBeTargeted && arrivalAmbush.limbRenderers.All(r => r.enabled),
+                            "Arrival ambush did not finish unfolding into a targetable monster.");
+                        arrivalAmbush.Health.TakeDamage(arrivalAmbush.Health.maxHealth + 1);
+                        Require(run.LivingEnemyCount == 0, "Optional arrival ambush changed the room-clear counter.");
+                        report.checks.Add("Unvisited rooms stay dormant; existing decorations are removed; arrival ambush death preserves route progress.");
                         wantedRoom = 1;
                         EnterWantedRoom(motor);
                         break;
@@ -370,8 +395,15 @@ namespace AcRoguelike.Liminal.EditorTests
                         if (run.ActiveRoomIndex != wantedRoom) return;
                         var room = run.Rooms[wantedRoom];
                         bool combat = room.kind == LiminalRoomKind.Combat || room.kind == LiminalRoomKind.Boss;
+                        var placedAmbushes = room.GetComponentsInChildren<VendingMonster>();
+                        Require(placedAmbushes.All(m => m.enabled && m.Target == run.PlayerHealth), "Authored ambushes were not initialized on room entry.");
+                        Require(placedAmbushes.Length == run.CurrentStage.ChooseRoute(run.seed, run.StageIndex)[wantedRoom].GetComponentsInChildren<VendingMonster>().Length,
+                            "Runtime duplicated an authored vending monster.");
                         if (combat)
                         {
+                            int regularEnemies = room.kind == LiminalRoomKind.Boss ? 1 : Mathf.Max(1, room.enemySpawns.Length);
+                            Require(run.LivingEnemyCount == regularEnemies + placedAmbushes.Length,
+                                "Room-clear count does not include its authored vending monsters exactly once.");
                             Require(run.LivingEnemyCount > 0, room.name + " spawned no enemies.");
                             Require(room.entranceGate && room.entranceGate.activeSelf && room.exitGate && room.exitGate.activeSelf, room.name + " did not lock its gates.");
                             Require(!run.TryUseExit(), "An uncleared combat room permitted a stage exit.");

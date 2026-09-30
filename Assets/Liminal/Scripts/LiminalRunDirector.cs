@@ -104,6 +104,7 @@ namespace AcRoguelike.Liminal
                 StageIndex = index;
                 foreach (var projectile in FindObjectsByType<TalismanProjectile>(FindObjectsSortMode.None)) Destroy(projectile.gameObject);
                 foreach (var flame in FindObjectsByType<SpiritFlame>(FindObjectsSortMode.None)) Destroy(flame.gameObject);
+                foreach (var can in FindObjectsByType<VendingCanProjectile>(FindObjectsSortMode.None)) Destroy(can.gameObject);
                 BuildRoute(index, false);
                 RenderSettings.ambientLight = CurrentStage.ambientColor;
                 SetPhase(LiminalRunPhase.Exploring);
@@ -162,6 +163,13 @@ namespace AcRoguelike.Liminal
                 attachPosition = room.exit.position;
                 attachRotation = room.exit.rotation;
                 rooms.Add(room);
+                if (!preview)
+                    foreach (var ambush in room.GetComponentsInChildren<VendingMonster>(true))
+                    {
+                        ambush.Initialize(health, room, index);
+                        // Keep authored appliances dormant until the player enters their room.
+                        ambush.enabled = false;
+                    }
                 bool combat = room.kind == LiminalRoomKind.Combat || room.kind == LiminalRoomKind.Boss;
                 room.SetGates(false, !preview && (combat || i == selection.Length - 1));
             }
@@ -187,6 +195,15 @@ namespace AcRoguelike.Liminal
             ActiveRoomIndex = index;
             LiminalRoom room = rooms[index];
             bool combat = room.kind == LiminalRoomKind.Combat || room.kind == LiminalRoomKind.Boss;
+            foreach (var ambush in room.GetComponentsInChildren<VendingMonster>(true))
+            {
+                ambush.enabled = true;
+                if (combat && ambush.Health.IsAlive)
+                {
+                    ambush.Health.Defeated += EnemyDefeated;
+                    living.Add(ambush.Health);
+                }
+            }
             if (combat)
             {
                 room.SetGates(true, true);

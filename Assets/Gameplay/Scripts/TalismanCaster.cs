@@ -50,7 +50,7 @@ namespace AcRoguelike
             float bestScore = float.PositiveInfinity;
             foreach (var enemy in FindObjectsByType<TrainingEnemy>(FindObjectsSortMode.None))
             {
-                if (!enemy.IsAlive) continue;
+                if (!enemy.IsAlive || !enemy.CanBeTargeted) continue;
                 Vector3 delta = enemy.transform.position - transform.position;
                 float distanceSquared = delta.sqrMagnitude;
                 if (distanceSquared >= castRange * castRange) continue;

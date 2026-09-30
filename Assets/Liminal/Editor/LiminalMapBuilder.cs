@@ -860,6 +860,12 @@ namespace AcRoguelike.Liminal.Editor
 
         static void Prop(string key,Vector3 position,float yaw=0)
         {
+            if(key=="vending_machine" && props.GetComponentInParent<LiminalRoom>() &&
+                AssetDatabase.LoadAssetAtPath<GameObject>(VendingMonsterBuilder.PrefabPath))
+            {
+                VendingMonsterPlacement.Create(props,position,Quaternion.Euler(0,yaw,0));
+                return;
+            }
             var holder=Group("MeshySlot__"+key,props).transform;holder.localPosition=position;holder.localRotation=Quaternion.Euler(0,yaw,0);
             var size=PropSize[key];var collider=holder.gameObject.AddComponent<BoxCollider>();collider.center=new Vector3(0,size.y*.5f,0);collider.size=size;
             if(TryPlaceMeshy(holder,key))return;

@@ -15,6 +15,7 @@ namespace AcRoguelike
         public int Health { get; private set; }
         public int HitCount { get; private set; }
         public bool IsAlive => Health > 0;
+        public bool CanBeTargeted { get; set; } = true;
         public Vector3 AimPoint => aimAnchor ? aimAnchor.position : transform.position + Vector3.up;
 
         Collider[] colliders;
