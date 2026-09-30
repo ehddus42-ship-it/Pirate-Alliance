@@ -35,6 +35,10 @@ WASD 이동 · 마우스 좌클릭 부적 · SPACE 회피 · E 출구 · ESC 일
 - `AC Roguelike > Liminal > Backrooms > Capture Room Catalog`: 격리된 PreviewScene에서 20개 방 전체 PNG, 4×5 카탈로그와 4개 입구 시점 이미지를 `Documentation/Liminal/Previews/Backrooms/`에 생성해. 촬영 중에는 셰이더를 동기 컴파일하고 예열 프레임을 한 번 렌더링해.
 - 실제 이동 연결과 전투 진행 검사는 별도의 `LiminalPlayValidation.ValidateTraversal()` / `ValidateStructure()` / `Start()`를 사용해. 실행 조건과 결과 경로는 [설계 문서](Documentation/LiminalDesign.md)에 정리했어.
 
+### 테마 던전 실험실
+
+스테이지 1을 기준으로 한 숲·프로그램 감옥·멸망한 지구·동굴 네 테마 던전이야. 테마마다 동선과 랜드마크가 다른 방 7종이 있어. 한 판은 도착방 → 전투방 3개(다섯 후보에서 시드로 선택) → 출구방이야. 2차 Meshy 모델 28종(모델당 1.3만~3.1만 삼각형)과 1차 12종을 배치했어. 실행·편집 방법은 [스테이지 컨셉 문서](Documentation/StageConcepts/README.md), 방별 설계·카메라 분석·검증은 [바리에이션 계획](Documentation/StageConcepts/VariationPlan.md)에 있어.
+
 ### 저장소 받기
 
 큰 3D 모델과 텍스처는 Git LFS로 관리해. `Stage_1`을 받은 뒤 `git lfs pull`을 실행해 줘. Unity가 패키지를 불러오면 별도 외부 에셋 팩 없이 열 수 있어.

@@ -1,64 +1,127 @@
 # 스테이지 컨셉 실험실
 
-현재 `stage_capture` 브랜치에서 기존 스테이지 1을 기준으로 만든 네 가지 던전 바리에이션이다. 기존 **`Assets/Liminal/Scenes/LiminalRoomGallery.unity`**에 원래 방 20개와 신규 테마 방 20개를 함께 모았다. 기존 방·스테이지·실행 씬은 보존한다.
+`stage_capture` 브랜치에서 기존 스테이지 1을 기준으로 만든 네 가지 던전 바리에이션이다.
+
+- 테마마다 **서로 다른 방 7종**이 있고, 한 판에 그중 5개를 지난다.
+- **`Assets/Liminal/Scenes/LiminalRoomGallery.unity`**에 원래 방 20개와 신규 테마 방 28개를 함께 모았다.
+- 기존 리미널 방·스테이지·실행 씬은 보존한다.
+
+방별 설계, 카메라 분석, 예산과 검증 결과는 [VariationPlan.md](VariationPlan.md)에 있다.
 
 ## 기존 맵과 함께 보기
 
-**AC Roguelike → Liminal → Room Workshop → 전체 맵 갤러리**를 연다. 같은 씬의 왼쪽에는 기존 20개 방, 오른쪽에는 숲·프로그램·폐허·동굴이 열별로 5개씩 배치되어 있다. 두 구역은 연결 바닥으로 이어진다.
+**AC Roguelike → Liminal → Room Workshop → 전체 맵 갤러리**를 연다. 같은 씬에서 두 구역이 연결 바닥으로 이어진다.
 
-Room Workshop의 **같은 갤러리의 숲 · 프로그램 · 폐허 · 동굴 구역 보기** 또는 **AC Roguelike → Stage Concepts → 00 Open Shared Room Gallery**로 새 테마 구역을 바로 볼 수 있다. 방 목록에는 기존 방과 신규 방이 함께 나오며 **씬에서 보기**로 해당 방을 선택한다. 프리팹 연결을 유지하므로 원본 방을 편집하면 갤러리에도 반영된다.
+- 왼쪽: 기존 20개 방
+- 오른쪽: 숲·프로그램·폐허·동굴이 열마다 7개씩
 
-갤러리를 재생성해도 테마 프리팹이 있으면 자동으로 함께 배치한다. **Add Missing Themes to Shared Gallery**는 기존 배치를 보존하면서 누락된 테마 방만 추가한다.
+새 테마 구역으로 바로 가는 방법은 두 가지다.
 
-[통합 갤러리 전체 캡처](Previews/Shared_Gallery.png). 통합 후 40개 방의 ID·프리팹 연결·방 간 겹침을 확인했고, 재동기화 시 중복 오브젝트가 생기지 않는 것도 확인했다. 기존 갤러리 검사 결과는 `Documentation/Liminal/backrooms-validation.json`에 기록했다.
+- Room Workshop의 **같은 갤러리의 숲 · 프로그램 · 폐허 · 동굴 구역 보기**
+- **AC Roguelike → Stage Concepts → 00 Open Shared Room Gallery**
+
+방 목록에는 기존 방과 신규 방이 함께 나오고, **씬에서 보기**로 해당 방을 선택한다. 프리팹 연결을 유지하므로 원본 방을 편집하면 갤러리에도 반영된다.
+
+갤러리를 재생성해도 테마 프리팹이 있으면 자동으로 함께 배치한다. **Add Missing Themes to Shared Gallery**는 기존 배치를 보존한다. 누락된 테마 방만 추가하고, 제목이 바뀐 방의 표지판과 바리에이션 수 표지를 갱신한다. Unity 밖에서는 `Tools/StageConcepts/variations/gallery.py`가 같은 작업을 한다.
 
 ## 실행
 
 Unity 메뉴 **AC Roguelike → Stage Concepts**에서 테마를 열고 Play를 누른다.
 
-| 테마 | 실행 씬 | 핵심 구조물 |
+| 테마 | 실행 씬 | 방 7종 |
 | --- | --- | --- |
-| 판타지 숲 | `Assets/StageConcepts/Scenes/StageConcept_Forest.unity` | 마법 거목, 룬 석문, 거대 버섯, 반딧불과 뿌리 |
-| 프로그램 감옥 | `Assets/StageConcepts/Scenes/StageConcept_Digital.unity` | 서버 기둥, 연산 코어, 데이터 게이트, 회로 바닥과 데이터 장벽 |
-| 멸망한 지구 | `Assets/StageConcepts/Scenes/StageConcept_Ruins.unity` | 붕괴 고층 건물, 끊어진 고가도로, 녹슨 버스, 도로와 철근 잔해 |
-| 동굴 | `Assets/StageConcepts/Scenes/StageConcept_Cave.unity` | 암석 아치, 석순, 수정 군집, 암벽과 지하수 |
+| 판타지 숲 | `Assets/StageConcepts/Scenes/StageConcept_Forest.unity` | 반딧불 오솔길 · 달빛 연못 · 버섯 습지와 나무다리 · 뿌리 회랑 · 수호자 석상의 뿌리 문 · 엘프 성소 · 요정의 고리 |
+| 프로그램 감옥 | `Assets/StageConcepts/Scenes/StageConcept_Digital.unity` | 부팅 패드 · 수용 포드와 감시 로봇 · 메모리 블록 미로 · 대각선 데이터 강 · 데이터 게이트 · 중앙 연산 코어 · 붉은 공백의 손상 섹터 |
+| 멸망한 지구 | `Assets/StageConcepts/Scenes/StageConcept_Ruins.unity` | 고속도로 검문소 · 끊어진 고가도로 · 무너진 주거지 · 버려진 주유소 · 군 대피소 · 싱크홀 대로 · 마른 분수 광장 |
+| 동굴 | `Assets/StageConcepts/Scenes/StageConcept_Cave.unity` | 푸른 균열 · 종유석 회랑 · 자수정 정동 · 지하 호수 · 심연의 문 · 버려진 광산 · 발광 버섯 동굴 |
 
-Play 중 **F1~F4**로 각 던전을 새로 시작할 수 있다. **TAB** 또는 우측 상단 **테마 실험실** 버튼으로 선택 패널을 연다. 이동·전투는 기존 게임과 같다: WASD 이동, SHIFT/SPACE 대시, 마우스 조준/공격, 휠 확대, 출구 E.
+Play 중 **F1~F4**로 각 던전을 새로 시작한다. 선택 패널은 **TAB** 또는 우측 상단 **테마 실험실** 버튼으로 연다. 이동·전투는 기존 게임과 같다.
 
-각 던전은 스테이지 1처럼 **26 × 36.4m 방 5개**, 총 **182m** 길이다. 도착방 → 전투방 3개 → 출구방 구성이다. 중간방은 기존 시드 기반 셔플을 사용하며 각 전투방에 적 3마리를 배치한다. 중앙 폭 5m를 이동로로 확보했다.
+- WASD 이동, SHIFT/SPACE 대시
+- 마우스 조준/공격, 휠 확대
+- E 출구
+
+각 던전은 스테이지 1처럼 **26 × 36.4m 방 5개**, 총 **182m** 길이다.
+
+1. 도착방 01
+2. 중간 전투방 3개: 02·03·04·06·07 다섯 후보에서 시드로 섞어 고른다. 판마다 조합과 순서가 달라진다.
+3. 출구방 05
+
+전투방은 적 3마리를 방마다 다른 위치에 배치한다. 동선은 연못, 개울, 강, 구덩이, 엄폐물 배치에 따라 방마다 다르다. 모든 방은 스폰에서 양쪽 문과 적 스폰까지 이어진다.
 
 ## 편집
 
-- `Assets/StageConcepts/Prefabs/Rooms`의 테마별 5개 프리팹을 편집한다.
-- `Props/MeshySlot__<key>` 아래 모델의 배치와 크기를 조정할 수 있다.
-- `Architecture`는 기본 바닥과 경계 충돌, `Gameplay`는 문·스폰, `Sockets`는 방 연결점, `Lighting`은 그림자 없는 보조 조명이다.
+- 방 레시피는 `Tools/StageConcepts/variations/`의 `forest.py` · `digital.py` · `ruins.py` · `cave.py`다.
+  - `python3 Tools/StageConcepts/variations/build.py --unity`를 실행하면 아래가 다시 쓰이고 이동 검사까지 돈다.
+    - 프리팹·메시·재질·스테이지
+    - `Assets/StageConcepts/Layouts/*.json`
+    - 공유 갤러리
+  - 자세한 절차는 [VariationPlan.md](VariationPlan.md) 5절에 있다.
+- `Assets/StageConcepts/Prefabs/Rooms`의 테마별 7개 프리팹은 Unity에서 직접 편집할 수도 있다.
+  - `Props/MeshySlot__<key>` 아래 모델의 배치와 크기를 조정한다.
+  - `Architecture`는 기본 바닥과 경계 충돌, `Gameplay`는 문·스폰, `Sockets`는 방 연결점, `Lighting`은 그림자 없는 보조 조명이다.
+  - 레시피로 다시 빌드하면 `Props`와 `Lighting`이 새로 쓰인다. 직접 수정한 프리팹은 먼저 복제해 보관한다.
+- **Rebuild Variation Rooms From Layout**: 레이아웃 JSON으로 Unity 프리팹 API를 거쳐 방을 다시 만든다.
+- **Build Four Theme Dungeons**: 위 재빌드 뒤 스테이지 정의, 실행 씬, 빌드 설정, 공유 갤러리까지 갱신한다.
 - 테마 정의는 `Assets/StageConcepts/Stages`, 색보정은 `Assets/StageConcepts/Profiles`에 있다.
-- **Build Four Theme Dungeons**는 이 실험실의 방·씬·재질·메시를 다시 만든다. 프리팹을 직접 수정한 경우 재생성 전에 복제해 보관한다.
 
-## Meshy 및 경량화
+## Meshy 모델
 
-Meshy AI `meshy-7.1` text-to-3D로 12종을 실제 생성했다. API preview/remesh 후 PBR 텍스처를 생성했으며 각 자산의 요청, task ID, 삼각형 수와 사용량은 `Assets/StageConcepts/Art/Meshy/<key>/provenance.json`에 기록되어 있다. 비밀 키는 저장하지 않는다.
+키는 환경 변수 `MESHY_API_KEY`로만 읽고 어디에도 저장하지 않는다. 자산마다 요청, task ID, 삼각형 수와 사용량을 `Assets/StageConcepts/Art/Meshy/<key>/provenance.json`에 기록했다.
 
-- 고유 Meshy 메시 합계 **51,465 삼각형**, 모델당 **2,960~5,867 삼각형**.
-- 최종 GLB 합계 **33.92 MiB**. 고용량 원본을 게임용 텍스처로 최적화했다.
-- 자산마다 메시 1개·머티리얼 1개·PBR 노말맵 포함.
-- 반복 소품 9종은 1K, 거목·붕괴 건물·동굴 아치 3종은 2K.
-- 노말맵은 Meshy에서 생성한 PBR 노말이며 별도의 고해상도 메시 베이크 작업은 수행하지 않았다.
-- 실제 생성 사용량 **390 Meshy API credits**. 동굴 아치는 상자 형태로 나온 첫 후보를 폐기하고 자연 바위 아치로 교체했다.
-- 반복 모델은 같은 메시·재질을 공유하고, 보조 장식은 재질별 메시로 합친다. 충돌은 단순 박스, 보조 조명은 방당 2개 이하로 제한했다.
+**2차 바리에이션 킷 28종**을 `meshy-7.1`로 생성했다.
 
-재생성 도구는 `Tools/StageConcepts/meshy_assets.py`, 텍스처 최적화는 `optimize_meshy_textures.py`다. 대용량 원본·중간 생성물은 git에서 제외된 `Tools/StageConcepts/Source`에 보관한다.
+- 모델당 13k~31k 삼각형이다.
+- 텍스처는 PBR 2K다.
+- 사용량은 900 credits이고, 재생성 3회를 포함한다.
+- 목록과 판정은 [VariationPlan.md](VariationPlan.md) 4절과 [meshy-variations-review.md](meshy-variations-review.md)에 있다.
+- 생성 도구는 `Tools/StageConcepts/meshy_variations.py`다.
+
+**1차 킷 12종**(고목, 거대 버섯, 룬 아치, 서버 모놀리스, 연산 코어, 데이터 게이트, 붕괴 건물, 끊어진 고가도로, 녹슨 버스, 동굴 아치, 석순, 수정 군집)도 계속 쓴다.
+
+- 모델당 2,960~5,867 삼각형이다.
+- 반복 소품은 1K, 큰 모델 3종은 2K 텍스처다.
+- 사용량은 390 credits였다.
+- 생성 도구는 `Tools/StageConcepts/meshy_assets.py`와 `optimize_meshy_textures.py`다.
+
+두 킷을 합쳐 고유 모델 40종을 28개 방의 353곳에 배치했다. 운영 기준은 다음과 같다.
+
+- 반복 모델은 같은 메시·재질을 공유한다.
+- 보조 장식은 방마다 재질별 메시 하나로 합친다.
+- 충돌은 단순 박스다.
+- 보조 조명은 그림자 없는 점광원이다.
+
+대용량 원본·중간 생성물은 git에서 제외된 `Tools/StageConcepts/Source`에 보관한다.
 
 ## 검증 및 캡처
 
 Unity 메뉴 **AC Roguelike → Stage Concepts**:
 
-- **Validate All Concepts**: 20방의 치수·참조·Meshy 연결·삼각수·Astraia 캡슐 이동 경로 및 4개 씬 검사. 결과 `validation.json`.
-- **Validate Play Through All Themes**: 실제 씬 전환·CharacterController 이동·적 생성·전투 게이트·5방 완료·Victory 검사. 결과 `play-validation.json`. 적 처치는 테스트에서 `TakeDamage`를 호출하므로 전투 밸런스 검증은 포함하지 않는다.
-- **Capture Four Themes**: 저장된 테마 씬을 독립 미리보기로 렌더해 `Previews`에 전체방 및 플레이 카메라 PNG를 저장한다.
+- **Validate All Concepts**: 28방과 4개 씬을 검사하고 결과를 `validation.json`에 저장한다.
+  - 치수·참조·Meshy 연결·삼각수
+  - Astraia 캡슐 이동 경로. 다리 데크처럼 1.2m 이하로 높은 바닥을 포함한다.
+  - 스테이지 풀 구성과 시드별 경로
+- **Validate Play Through All Themes**: 실제 씬 전환, CharacterController 이동, 적 생성, 전투 게이트, 5방 완료, Victory를 검사한다. 결과는 `play-validation.json`이다. 적 처치는 테스트에서 `TakeDamage`를 호출하므로 전투 밸런스는 검사하지 않는다.
+- **Capture All Variation Rooms**: 28개 방마다 전체 1장과 게임 카메라 3장을 `Previews/Variations/Unity/`에 저장한다.
+- **Capture Four Themes**: 테마별 01번 방의 전체방·플레이 카메라 PNG를 `Previews`에 저장한다.
 
-최종 검증은 **20/20개 방, 4/4개 스테이지와 씬, 155/155개 Meshy 배치 연결**을 통과했다. 실제 Play 검증에서도 **4개 테마의 이동, 전투방 12개, 출구 Victory**를 확인했다. 상세 수치는 위 JSON 보고서에 있다. 성능 예산 검사는 삼각형 수와 리소스 구조를 다루며 특정 기기의 FPS를 보장하는 벤치마크는 아니다.
+이번 개편은 Unity 에디터 없이 작업했다. 그래서 위 메뉴의 결과 파일(`validation.json`, `play-validation.json`, `Previews/*_Overview.png` 등)은 아직 개편 전 20방 기준이다.
 
-전체방 캡처: [판타지 숲](Previews/Forest_Overview.png) · [프로그램 감옥](Previews/Digital_Overview.png) · [멸망한 지구](Previews/Ruins_Overview.png) · [동굴](Previews/Cave_Overview.png)
+Unity 밖에서는 다음을 확인했다. 상세는 [VariationPlan.md](VariationPlan.md) 7절에 있다.
 
-플레이 카메라 캡처: [판타지 숲](Previews/Forest_Gameplay.png) · [프로그램 감옥](Previews/Digital_Gameplay.png) · [멸망한 지구](Previews/Ruins_Gameplay.png) · [동굴](Previews/Cave_Gameplay.png) · [테마 선택 UI](Previews/Lab_Play.png)
+- `validate.py`: 이동 검사를 그대로 옮긴 판정으로 28/28 통과. 결과는 `variations-traversal.json`이다.
+- `verify_unity.py`: 자산 구조 문제 0건.
+- 공유 갤러리 48개 방 검사 통과.
+- C# 컴파일 통과.
+
+Unity에서 위 메뉴를 한 번 실행하면 공식 보고서와 캡처가 새 방 기준으로 바뀐다.
+
+게임 카메라 미리보기(웹 렌더러, Unity 조명과 평균 색 차이 약 8% 이내):
+
+- 테마 카탈로그: [판타지 숲](Previews/Variations/Forest_Catalog.jpg) · [프로그램 감옥](Previews/Variations/Digital_Catalog.jpg) · [멸망한 지구](Previews/Variations/Ruins_Catalog.jpg) · [동굴](Previews/Variations/Cave_Catalog.jpg)
+- 방별 화면: `Previews/Variations/<방 ID>.jpg`
+
+개편 전 캡처:
+
+- 전체방: [판타지 숲](Previews/Forest_Overview.png) · [프로그램 감옥](Previews/Digital_Overview.png) · [멸망한 지구](Previews/Ruins_Overview.png) · [동굴](Previews/Cave_Overview.png)
+- 테마 선택 UI: [Lab_Play.png](Previews/Lab_Play.png)
