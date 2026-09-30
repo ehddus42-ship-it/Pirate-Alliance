@@ -15,8 +15,40 @@ namespace AcRoguelike.StageConcepts.Editor
     public static class StageConceptCapture
     {
         public const string Output = "Documentation/StageConcepts/Previews";
+        public const string VariationOutput = Output + "/Variations/Unity";
+        // Gameplay framing of IsometricFollowCamera in the concept scenes (distance 24, pitch 55, yaw 35, FOV 36).
+        static readonly float[] GameplayFocusZ = { 6, 18, 30 };
         [MenuItem("AC Roguelike/Stage Concepts/Capture Four Themes")]
         public static void CaptureMenu() { Debug.Log(CaptureAll()); }
+
+        [MenuItem("AC Roguelike/Stage Concepts/Capture All Variation Rooms")]
+        public static void CaptureVariationsMenu() { Debug.Log(CaptureVariations()); }
+
+        /// <summary>One overview and three gameplay-camera images for each of the 28 variation rooms.</summary>
+        public static string CaptureVariations()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Capture in Edit Mode.");
+            int images = 0;
+            for (int theme = 0; theme < StageConceptBuilder.Keys.Length; theme++)
+                for (int index = 1; index <= StageConceptLayoutBuilder.RoomsPerTheme; index++)
+                {
+                    string id = StageConceptBuilder.Keys[theme] + "_" + index.ToString("00");
+                    WithRoom(theme, index, null, (camera, target, room) =>
+                    {
+                        camera.fieldOfView = 44;
+                        Position(camera, new Vector3(0, 2.5f, 18), 54, 48, 32);
+                        Save(camera, target, VariationOutput + "/" + id + "_overview.png");
+                        camera.fieldOfView = 36;
+                        for (int shot = 0; shot < GameplayFocusZ.Length; shot++)
+                        {
+                            Position(camera, new Vector3(0, .6f, GameplayFocusZ[shot]), 24, 55, 35);
+                            Save(camera, target, VariationOutput + "/" + id + "_play" + (shot + 1) + ".png");
+                        }
+                    });
+                    images += 1 + GameplayFocusZ.Length;
+                }
+            return "Saved " + images + " variation review images in " + VariationOutput;
+        }
 
         public static string CaptureAll()
         {
@@ -57,6 +89,22 @@ namespace AcRoguelike.StageConcepts.Editor
         public static string CaptureTheme(int theme)
         {
             string key = StageConceptBuilder.Keys[theme];
+            WithRoom(theme, 1, new Vector3(0,.05f,13), (camera, target, room) =>
+            {
+                camera.fieldOfView=44;
+                Position(camera,new Vector3(0,2.5f,18),54,48,32);
+                Save(camera,target,Output+"/"+key+"_Overview.png");
+                camera.fieldOfView=36;
+                Position(camera,new Vector3(0,.6f,13),24,55,35);
+                Save(camera,target,Output+"/"+key+"_Gameplay.png");
+            });
+            return key + " captured";
+        }
+
+        /// <summary>Opens the theme scene in isolation with one room and the player (at the room's spawn unless given).</summary>
+        static void WithRoom(int theme, int index, Vector3? playerPosition, Action<Camera,RenderTexture,LiminalRoom> shoot)
+        {
+            string key = StageConceptBuilder.Keys[theme];
             var scene = EditorSceneManager.OpenPreviewScene(StageConceptBuilder.Root + "/Scenes/StageConcept_" + key + ".unity");
             var target = new RenderTexture(1600,1000,24,RenderTextureFormat.ARGB32,RenderTextureReadWrite.sRGB);
             bool async = ShaderUtil.allowAsyncCompilation;
@@ -69,7 +117,7 @@ namespace AcRoguelike.StageConcepts.Editor
                     if (light && light.type == LightType.Directional || root.GetComponent<Volume>()) continue;
                     Object.DestroyImmediate(root);
                 }
-                var asset = AssetDatabase.LoadAssetAtPath<GameObject>(StageConceptBuilder.Root + "/Prefabs/Rooms/" + key + "_01.prefab");
+                var asset = AssetDatabase.LoadAssetAtPath<GameObject>(StageConceptBuilder.Root + "/Prefabs/Rooms/" + key + "_" + index.ToString("00") + ".prefab");
                 var room = ((GameObject)PrefabUtility.InstantiatePrefab(asset,scene)).GetComponent<LiminalRoom>();
                 room.SetGates(false,false);
                 var cameraGo = new GameObject("Review camera",typeof(Camera)); SceneManager.MoveGameObjectToScene(cameraGo,scene);
@@ -82,20 +130,14 @@ namespace AcRoguelike.StageConcepts.Editor
                 target.Create(); camera.targetTexture=target;
                 var playerAsset=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Characters/Astraia/AstraiaPlayer.prefab");
                 var player=(GameObject)PrefabUtility.InstantiatePrefab(playerAsset,scene);
-                player.transform.position=new Vector3(0,.05f,13); player.transform.rotation=Quaternion.Euler(0,35,0);
+                player.transform.position=playerPosition ?? room.playerSpawn.position + Vector3.up*.05f; player.transform.rotation=Quaternion.Euler(0,35,0);
                 var animator = player.GetComponentInChildren<Animator>();
                 if (animator && animator.runtimeAnimatorController)
                 {
                     var idle = animator.runtimeAnimatorController.animationClips.FirstOrDefault(c => c.name.IndexOf("idle",StringComparison.OrdinalIgnoreCase)>=0);
                     if (idle) idle.SampleAnimation(animator.gameObject,.25f);
                 }
-                camera.fieldOfView=44;
-                Position(camera,new Vector3(0,2.5f,18),54,48,32);
-                Save(camera,target,Output+"/"+key+"_Overview.png");
-                camera.fieldOfView=36;
-                Position(camera,new Vector3(0,.6f,13),24,55,35);
-                Save(camera,target,Output+"/"+key+"_Gameplay.png");
-                return key + " captured";
+                shoot(camera,target,room);
             }
             finally
             {

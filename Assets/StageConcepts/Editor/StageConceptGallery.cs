@@ -53,7 +53,8 @@ namespace AcRoguelike.StageConcepts.Editor
         // Also used when the original room kit regenerates its gallery.
         public static int AppendToScene(Scene scene)
         {
-            var assets = StageConceptBuilder.Keys.SelectMany(key => Enumerable.Range(1, 5)
+            int count = StageConceptLayoutBuilder.RoomsPerTheme;
+            var assets = StageConceptBuilder.Keys.SelectMany(key => Enumerable.Range(1, count)
                 .Select(i => AssetDatabase.LoadAssetAtPath<GameObject>(RoomFolder + "/" + key + "_" + i.ToString("00") + ".prefab"))).Where(go => go).ToArray();
             if (assets.Length == 0) return 0;
             var root = scene.GetRootGameObjects().FirstOrDefault(go => go.name == RootName);
@@ -61,36 +62,46 @@ namespace AcRoguelike.StageConcepts.Editor
             var existing = scene.GetRootGameObjects().SelectMany(go => go.GetComponentsInChildren<LiminalRoom>(true)).Select(r => r.roomId).ToHashSet();
             var concrete = AssetDatabase.LoadAssetAtPath<Material>(LiminalMapBuilder.Root + "/Materials/Concrete.mat");
             var walkway = Child(root.transform, "Connecting walkways");
-            Box(walkway, "Theme gallery floor", new Vector3(338, -.35f, 147), new Vector3(209, .38f, 323), concrete, true);
+            // Rooms sit 65 m apart along +z; the floor runs from the theme signs to 12 m past the last room.
+            float floorEnd = FloorEnd(count);
+            Box(walkway, "Theme gallery floor", new Vector3(338, -.35f, (floorEnd - 14.5f) / 2), new Vector3(209, .38f, floorEnd + 14.5f), concrete, true, true);
             Box(walkway, "Link to original variations", new Vector3(208, -.35f, -6), new Vector3(56, .38f, 14), concrete, true);
             int added = 0;
             for (int theme = 0; theme < StageConceptBuilder.Keys.Length; theme++)
             {
                 string key = StageConceptBuilder.Keys[theme];
                 var group = Child(root.transform, (theme + 1).ToString("00") + " " + key + " / " + StageConceptNavigator.Titles[theme]);
-                for (int index = 0; index < 5; index++)
+                for (int index = 0; index < count; index++)
                 {
                     string id = key + "_" + (index + 1).ToString("00");
                     var asset = assets.FirstOrDefault(go => go.name == id);
-                    if (!asset || existing.Contains(id)) continue;
-                    var instance = (GameObject)PrefabUtility.InstantiatePrefab(asset, scene);
-                    instance.transform.SetParent(group, false);
-                    instance.transform.localPosition = new Vector3(260 + theme * 52, 0, index * 65);
-                    var room = instance.GetComponent<LiminalRoom>();
-                    room.SetGates(false, false);
-                    PrefabUtility.RecordPrefabInstancePropertyModifications(room.entranceGate);
-                    PrefabUtility.RecordPrefabInstancePropertyModifications(room.exitGate);
-                    Sign(group, id + " / " + room.displayName, instance.transform.localPosition + new Vector3(0, 1.4f, -4), 23, .32f);
-                    existing.Add(id); added++;
+                    if (!asset) continue;
+                    var position = new Vector3(260 + theme * 52, 0, index * 65);
+                    if (!existing.Contains(id))
+                    {
+                        var instance = (GameObject)PrefabUtility.InstantiatePrefab(asset, scene);
+                        instance.transform.SetParent(group, false);
+                        instance.transform.localPosition = position;
+                        var room = instance.GetComponent<LiminalRoom>();
+                        room.SetGates(false, false);
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(room.entranceGate);
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(room.exitGate);
+                        existing.Add(id); added++;
+                    }
+                    // Room titles change when a layout is regenerated; replace signs that show an older title.
+                    ReplaceSign(group, id + " / ", id + " / " + asset.GetComponent<LiminalRoom>().displayName, position + new Vector3(0, 1.4f, -4), 23, .32f);
                 }
-                Sign(group, StageConceptNavigator.Titles[theme] + " / 5개 바리에이션", new Vector3(260 + theme * 52, 2.5f, -13), 27, .5f);
+                ReplaceSign(group, StageConceptNavigator.Titles[theme] + " / ", StageConceptNavigator.Titles[theme] + " / " + count + "개 바리에이션",
+                    new Vector3(260 + theme * 52, 2.5f, -13), 27, .5f);
             }
-            Sign(walkway, "기존 맵 20개  <  |  >  신규 테마 20개", new Vector3(208, 2.5f, -13), 32, .48f);
+            ReplaceSign(walkway, "기존 맵 20개", "기존 맵 20개  <  |  >  신규 테마 " + StageConceptBuilder.Keys.Length * count + "개", new Vector3(208, 2.5f, -13), 32, .48f);
             var guide = scene.GetRootGameObjects().SelectMany(go => go.GetComponentsInChildren<UnityEngine.UI.Text>(true)).FirstOrDefault(t => t.name == "Instructions");
             if (guide) guide.text = "맵 바리에이션 갤러리 / 총 " + existing.Count + "개 방\n왼쪽: 기존 맵 20개 / 오른쪽: 숲 · 프로그램 · 폐허 · 동굴\nWASD 이동 / SHIFT 대시 / SCROLL 확대\nRoom Workshop에서 방 선택 → 씬에서 보기";
             EditorSceneManager.MarkSceneDirty(scene);
             return added;
         }
+
+        static float FloorEnd(int roomsPerTheme) => (roomsPerTheme - 1) * 65 + 48.5f;
 
         public static void FrameThemeArea()
         {
@@ -99,7 +110,8 @@ namespace AcRoguelike.StageConcepts.Editor
             var root = scene.GetRootGameObjects().FirstOrDefault(go => go.name == RootName);
             if (!root) return;
             Selection.activeGameObject = root;
-            SceneView.lastActiveSceneView?.LookAt(new Vector3(338, 0, 146), Quaternion.Euler(65, 0, 0), 205);
+            float floorEnd = FloorEnd(StageConceptLayoutBuilder.RoomsPerTheme);
+            SceneView.lastActiveSceneView?.LookAt(new Vector3(338, 0, (floorEnd - 14.5f) / 2), Quaternion.Euler(65, 0, 0), 205 * (floorEnd + 14.5f) / 323);
         }
 
         static Transform Child(Transform parent, string name)
@@ -111,14 +123,28 @@ namespace AcRoguelike.StageConcepts.Editor
 
         static Transform FindChild(Transform parent, string name) => parent.Cast<Transform>().FirstOrDefault(t => t.name == name);
 
-        static void Box(Transform parent, string name, Vector3 position, Vector3 size, Material material, bool collider)
+        static void Box(Transform parent, string name, Vector3 position, Vector3 size, Material material, bool collider, bool resize = false)
         {
-            if (FindChild(parent, name)) return;
+            var found = FindChild(parent, name);
+            if (found)
+            {
+                if (resize) { found.localPosition = position; found.localScale = size; }
+                return;
+            }
             var go = GameObject.CreatePrimitive(PrimitiveType.Cube); go.name = name; go.transform.SetParent(parent, false);
             go.transform.localPosition = position; go.transform.localScale = size;
             go.GetComponent<Renderer>().sharedMaterial = material;
             go.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
             if (!collider) Object.DestroyImmediate(go.GetComponent<Collider>());
+        }
+
+        /// <summary>Keeps one sign per prefix: signs whose text starts with the prefix but differs are removed.</summary>
+        static void ReplaceSign(Transform parent, string prefix, string text, Vector3 position, float width, float size)
+        {
+            foreach (var stale in parent.Cast<Transform>().Where(t => t.name.StartsWith("Gallery sign / " + prefix, StringComparison.Ordinal) &&
+                         t.name != "Gallery sign / " + text).ToList())
+                Object.DestroyImmediate(stale.gameObject);
+            Sign(parent, text, position, width, size);
         }
 
         static void Sign(Transform parent, string text, Vector3 position, float width, float size)

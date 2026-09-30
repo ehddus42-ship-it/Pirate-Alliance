@@ -21,22 +21,19 @@ namespace AcRoguelike.StageConcepts.Editor
         public static readonly string[] Keys = StageConceptNavigator.Keys;
         static readonly Color[] Ambient = { new Color(.48f,.58f,.51f), new Color(.34f,.43f,.56f), new Color(.57f,.53f,.46f), new Color(.38f,.47f,.55f) };
         static readonly Color[] Accent = { new Color(.25f,1,.68f), new Color(.07f,.8f,1), new Color(1,.43f,.14f), new Color(.2f,.8f,1) };
-        static readonly string[][] RoomTitles = {
-            new[] { "반딧불의 입구", "고목의 제단", "거대 버섯 정원", "잊힌 룬의 성소", "달빛의 경계" },
-            new[] { "부팅 구역", "방화벽 수용소", "메모리 미로", "중앙 연산실", "탈출 프로토콜" },
-            new[] { "도시의 마지막 입구", "끊어진 고가도로", "무너진 주거 지구", "잿빛 대로", "대피소의 흔적" },
-            new[] { "푸른 균열", "종유석 회랑", "수정의 심장", "지하 호수", "심연의 문" }
-        };
-
         [MenuItem("AC Roguelike/Stage Concepts/Build Four Theme Dungeons")]
         public static void BuildMenu() { Debug.Log(BuildAll()); }
 
+        /// <summary>
+        /// Rebuilds the seven variation rooms of each theme from Assets/StageConcepts/Layouts (see
+        /// StageConceptLayoutBuilder), then the stage definitions, concept scenes and the shared gallery.
+        /// Room recipes live in Tools/StageConcepts/variations; regenerate layouts there to change a room.
+        /// </summary>
         public static string BuildAll()
         {
             RequireSavedEditMode();
-            foreach (string folder in new[] { "Prefabs/Rooms", "Stages", "Scenes", "Materials", "Geometry", "Profiles" })
+            foreach (string folder in new[] { "Prefabs/Rooms", "Stages", "Scenes", "Materials", "Profiles" })
                 Directory.CreateDirectory(Root + "/" + folder);
-            Directory.CreateDirectory("Documentation/StageConcepts/Previews");
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
             var source = AssetDatabase.LoadAssetAtPath<LiminalStageDefinition>("Assets/Liminal/Stages/Stage_01.asset");
             if (!source) throw new FileNotFoundException("Stage 1 definition was not found.");
@@ -44,7 +41,12 @@ namespace AcRoguelike.StageConcepts.Editor
             if (source.middleRoomCount != 3 || source.startRoom.localBounds.size.x != 26)
                 throw new InvalidOperationException("Stage 1 layout changed; review the concept dimensions before rebuilding.");
             for (int theme = 0; theme < 4; theme++)
-                BuildTheme(theme, source);
+            {
+                var stage = EnsureStage(theme, source);
+                StageConceptLayoutBuilder.RebuildTheme(theme);
+                AssetDatabase.SaveAssets();
+                CreateScene(theme, stage);
+            }
             var scenes = EditorBuildSettings.scenes.ToList();
             foreach (string key in Keys)
             {
@@ -56,7 +58,7 @@ namespace AcRoguelike.StageConcepts.Editor
             AssetDatabase.SaveAssets();
             StageConceptGallery.Sync();
             StageConceptGallery.OpenGallery();
-            return "Created four Stage 1 sized dungeons and added twenty theme rooms to the shared room gallery.";
+            return "Rebuilt four theme dungeons (seven rooms each, five per run) and synced the shared room gallery.";
         }
 
         public static string RebuildOneTheme(int theme)
@@ -64,63 +66,56 @@ namespace AcRoguelike.StageConcepts.Editor
             RequireSavedEditMode();
             if(theme<0 || theme>=Keys.Length) throw new ArgumentOutOfRangeException(nameof(theme));
             if(!Directory.Exists(Root+"/Stages")) throw new InvalidOperationException("Build the concept kit first.");
-            var source=AssetDatabase.LoadAssetAtPath<LiminalStageDefinition>("Assets/Liminal/Stages/Stage_01.asset");
-            BuildTheme(theme,source); AssetDatabase.SaveAssets();
-            return "Rebuilt "+Keys[theme]+" with current Meshy resources.";
+            StageConceptLayoutBuilder.RebuildTheme(theme); AssetDatabase.SaveAssets();
+            return "Rebuilt "+Keys[theme]+" from its room layouts.";
         }
 
-        static void BuildTheme(int theme,LiminalStageDefinition source)
+        static LiminalStageDefinition EnsureStage(int theme, LiminalStageDefinition source)
         {
-            var rooms = new LiminalRoom[5];
-            for (int roomIndex = 0; roomIndex < 5; roomIndex++) rooms[roomIndex] = CreateRoom(theme, roomIndex, source);
             string path = Root + "/Stages/" + Keys[theme] + ".asset";
             var stage = AssetDatabase.LoadAssetAtPath<LiminalStageDefinition>(path);
             if (!stage) { stage = Object.Instantiate(source); AssetDatabase.CreateAsset(stage, path); }
             stage.name = Keys[theme]; stage.stageId = "concept_" + Keys[theme].ToLowerInvariant();
             stage.title = StageConceptNavigator.Titles[theme];
-            stage.subtitle = "스테이지 1 기반 테마 실험 · 다섯 공간을 지나 출구를 찾아라";
-            stage.startRoom = rooms[0]; stage.endRoom = rooms[4];
-            stage.roomPool = rooms.Skip(1).Take(3).ToArray(); stage.middleRoomCount = 3;
-            stage.isBossStage = false; stage.ambientColor = Ambient[theme];
-            EditorUtility.SetDirty(stage); CreateScene(theme, stage);
+            stage.subtitle = "스테이지 1 기반 테마 실험 · 일곱 공간 중 다섯을 지나 출구를 찾아라";
+            stage.middleRoomCount = 3; stage.isBossStage = false; stage.ambientColor = Ambient[theme];
+            EditorUtility.SetDirty(stage);
+            return stage;
         }
 
-        static LiminalRoom CreateRoom(int theme, int index, LiminalStageDefinition source)
+        /// <summary>Room shell shared by every variation: floor, side walls, doorway blockers, gates, sockets and markers.</summary>
+        public static GameObject CreateShell(int theme, int index, string id)
         {
-            string id = Keys[theme] + "_" + (index + 1).ToString("00");
+            var source = AssetDatabase.LoadAssetAtPath<LiminalStageDefinition>("Assets/Liminal/Stages/Stage_01.asset");
             var root = new GameObject(id);
-            try
-            {
-                var room = root.AddComponent<LiminalRoom>();
-                room.roomId = id; room.displayName = RoomTitles[theme][index];
-                room.kind = index == 0 ? LiminalRoomKind.Arrival : index == 4 ? LiminalRoomKind.Threshold : LiminalRoomKind.Combat;
-                room.localBounds = source.startRoom.localBounds;
-                room.designNotes = "Stage_01 baseline: 26 x 36.4 m, five rooms. Central 5m route and all spawn points remain clear. Meshy props use shared low-poly meshes and PBR normal textures.";
-                var architecture = Group("Architecture", root.transform);
-                var gameplay = Group("Gameplay", root.transform);
-                var sockets = Group("Sockets", root.transform);
-                room.entry = Marker("Entry", sockets, Vector3.zero);
-                room.exit = Marker("Exit", sockets, new Vector3(0,0,36.4f));
-                room.playerSpawn = Marker("PlayerSpawn", gameplay, new Vector3(0,.05f,4));
-                Solid("WalkableFloor", architecture, new Vector3(0,-.25f,18.2f), new Vector3(26,.5f,36.4f));
-                Solid("WestBoundary", architecture, new Vector3(-13.3f,2,18.2f), new Vector3(.6f,4,36.4f));
-                Solid("EastBoundary", architecture, new Vector3(13.3f,2,18.2f), new Vector3(.6f,4,36.4f));
-                foreach (float z in new[] { 0f, 36.4f })
-                    foreach (float x in new[] { -8.2f, 8.2f })
-                        Solid("DoorwayBoundary", architecture, new Vector3(x,1.5f,z), new Vector3(9.6f,3,.35f));
-                room.entranceGate = Gate("EntranceGate", gameplay, 0, theme);
-                room.exitGate = Gate("ExitGate", gameplay, 36.4f, theme);
-                room.SetGates(false, false);
-                room.enemySpawns = index > 0 && index < 4 ? new[] {
-                    Marker("Enemy_A", gameplay, new Vector3(-1.4f,.08f,16)),
-                    Marker("Enemy_B", gameplay, new Vector3(1.4f,.08f,23)),
-                    Marker("Enemy_C", gameplay, new Vector3(0,.08f,29))
-                } : Array.Empty<Transform>();
-                StageConceptScenery.Build(root.transform, theme, index);
-                var prefab = PrefabUtility.SaveAsPrefabAsset(root, Root + "/Prefabs/Rooms/" + id + ".prefab");
-                return prefab.GetComponent<LiminalRoom>();
-            }
-            finally { Object.DestroyImmediate(root); }
+            var room = root.AddComponent<LiminalRoom>();
+            room.roomId = id; room.displayName = id;
+            room.kind = index == StageConceptLayoutBuilder.StartIndex ? LiminalRoomKind.Arrival
+                : index == StageConceptLayoutBuilder.EndIndex ? LiminalRoomKind.Threshold : LiminalRoomKind.Combat;
+            room.localBounds = source.startRoom.localBounds;
+            var architecture = Group("Architecture", root.transform);
+            var gameplay = Group("Gameplay", root.transform);
+            var sockets = Group("Sockets", root.transform);
+            Group("Props", root.transform);
+            Group("Lighting", root.transform);
+            room.entry = Marker("Entry", sockets, Vector3.zero);
+            room.exit = Marker("Exit", sockets, new Vector3(0,0,36.4f));
+            room.playerSpawn = Marker("PlayerSpawn", gameplay, new Vector3(0,.05f,4));
+            Solid("WalkableFloor", architecture, new Vector3(0,-.25f,18.2f), new Vector3(26,.5f,36.4f));
+            Solid("WestBoundary", architecture, new Vector3(-13.3f,2,18.2f), new Vector3(.6f,4,36.4f));
+            Solid("EastBoundary", architecture, new Vector3(13.3f,2,18.2f), new Vector3(.6f,4,36.4f));
+            foreach (float z in new[] { 0f, 36.4f })
+                foreach (float x in new[] { -8.2f, 8.2f })
+                    Solid("DoorwayBoundary", architecture, new Vector3(x,1.5f,z), new Vector3(9.6f,3,.35f));
+            room.entranceGate = Gate("EntranceGate", gameplay, 0, theme);
+            room.exitGate = Gate("ExitGate", gameplay, 36.4f, theme);
+            room.SetGates(false, false);
+            room.enemySpawns = room.kind == LiminalRoomKind.Combat ? new[] {
+                Marker("Enemy_A", gameplay, new Vector3(-1.4f,.08f,16)),
+                Marker("Enemy_B", gameplay, new Vector3(1.4f,.08f,23)),
+                Marker("Enemy_C", gameplay, new Vector3(0,.08f,29))
+            } : Array.Empty<Transform>();
+            return root;
         }
 
         static GameObject Gate(string name, Transform parent, float z, int theme)
@@ -188,7 +183,7 @@ namespace AcRoguelike.StageConcepts.Editor
             string profilePath = Root + "/Profiles/" + Keys[theme] + ".asset";
             var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(profilePath);
             if (!profile) { profile = ScriptableObject.CreateInstance<VolumeProfile>(); AssetDatabase.CreateAsset(profile, profilePath); }
-            var bloom = GetOrAdd<Bloom>(profile); bloom.threshold.Override(1); bloom.intensity.Override(theme == 1 ? .45f : .3f); bloom.scatter.Override(.55f);
+            var bloom = GetOrAdd<Bloom>(profile); bloom.threshold.Override(1); bloom.intensity.Override(theme == 1 ? .35f : .3f); bloom.scatter.Override(.55f);
             var tone = GetOrAdd<Tonemapping>(profile); tone.mode.Override(TonemappingMode.ACES);
             var grade = GetOrAdd<ColorAdjustments>(profile); grade.contrast.Override(6); grade.saturation.Override(theme == 2 ? -12 : 7); grade.postExposure.Override(.55f);
             var vignette = GetOrAdd<Vignette>(profile); vignette.intensity.Override(.18f); vignette.smoothness.Override(.45f);
