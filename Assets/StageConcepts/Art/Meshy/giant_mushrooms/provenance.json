@@ -1,0 +1,52 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "forest",
+  "prompt": "Cluster of three giant fantasy mushrooms growing from a small shared organic root foot, one tall largest cap and two short side caps, bulbous ivory stems, wide rounded umbrella caps with visible gills and simple luminous spots. No flat circular base. Enchanted fairy forest. Single isolated complete game environment prop, full object visible, no background scene, no ground plane, no pedestal, no characters. Strong readable silhouette, efficient low polygon game mesh, large clean forms, fine detail in PBR normal textures, realistic stylized fantasy game quality.",
+  "texture_prompt": "Deep crimson purple mushroom caps with pale cyan luminous speckles, warm ivory stems, fine mushroom gills and fibrous stem normal relief, softly magical forest.",
+  "preview_task_id": "01a0f170-709b-7608-880c-b10ef13fbe4c",
+  "refine_task_id": "01a0f171-a75f-7071-97cd-b1cf84c0835b",
+  "created_utc": "2026-09-30T08:33:28.709107+00:00",
+  "requested_triangles": 3000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 3029,
+    "vertices": 5144,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "bytes": 1882744
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 7997092
+}

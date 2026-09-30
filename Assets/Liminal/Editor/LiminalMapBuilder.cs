@@ -1236,6 +1236,7 @@ namespace AcRoguelike.Liminal.Editor
             }
             CreatePlayer(new Vector3(0,.1f,-1));
             CreateGalleryHud();
+            AcRoguelike.StageConcepts.Editor.StageConceptGallery.AppendToScene(scene);
             EditorSceneManager.SaveScene(scene,GalleryPath);
         }
 

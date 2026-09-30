@@ -1,0 +1,100 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "cave",
+  "prompt": "Single freestanding natural horseshoe rock arch made entirely of fused irregular eroded limestone boulders. Upright inverted U silhouette with two thick rough rocky legs and a curved lumpy rock bridge above. Huge open central hole passes completely through from front to back, visible background through hole. Thin arch depth compared to width. Organic jagged asymmetrical boulder silhouette from every direction, front back and sides are all natural weathered stone. Isolated game environment prop. No cube, no box, no flat planes, no side walls, no back wall, no roof slab, no cave room, no ground plane, no pedestal, no building, no paint, no crystals. Low polygon optimized 5000 triangle mesh, surface erosion carried by normal textures.",
+  "texture_prompt": "Natural unpainted dark neutral grey weathered limestone boulders with warm subtle brown mineral streaks. Rough matte eroded rock surface, fine cracks and pits in normal map, varied stone tones, no blue color, no glow, no metallic sheen, no artificial panels. Organic cave stone.",
+  "preview_task_id": "01a0f17f-6e9f-73a5-a1c4-335eb799abdc",
+  "refine_task_id": "01a0f181-a905-7241-bef8-0068c41ac96f",
+  "created_utc": "2026-09-30T08:51:22.474851+00:00",
+  "requested_triangles": 5000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 5208,
+    "vertices": 7265,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "bytes": 7533376
+  },
+  "consumed_credits": 60,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 2048px; tangent normals renormalized; binary payload compactly repacked.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 8358904,
+  "selected_candidate": "candidate02",
+  "selected_candidate_credits": 30,
+  "candidate_history": [
+    {
+      "candidate": "candidate01",
+      "status": "rejected",
+      "preview_task_id": "01a0f174-8e34-7476-9c5b-9f2445f51a9a",
+      "refine_task_id": "01a0f175-c309-7288-a0bf-da1286831345",
+      "consumed_credits": 30,
+      "triangles": 5586,
+      "source_cache": "Tools/StageConcepts/Source/cavern_arch_candidate01",
+      "reason": "Actual front/back/side renders showed an unwanted cubic exterior with flat roof, closed rear and side walls."
+    },
+    {
+      "candidate": "candidate02",
+      "status": "selected",
+      "preview_task_id": "01a0f17f-6e9f-73a5-a1c4-335eb799abdc",
+      "refine_task_id": "01a0f181-a905-7241-bef8-0068c41ac96f",
+      "consumed_credits": 30,
+      "triangles": 5208,
+      "source_cache": "Tools/StageConcepts/Source/cavern_arch_candidate02",
+      "validation": "Blender PBR renders verified front, back, front-above and back-above: irregular boulder arch, open through hole, no box exterior."
+    }
+  ],
+  "orientation": {
+    "up_axis": "Unity +Y",
+    "front_axis": "Unity +Z; rear -Z is also fully open",
+    "preferred_gameplay_yaw_degrees": {
+      "left_arch": 180,
+      "right_arch": 212
+    }
+  },
+  "validation": {
+    "blender_import": "passed",
+    "render_views": [
+      "front",
+      "back",
+      "front-above",
+      "back-above"
+    ],
+    "triangle_count": 5208,
+    "materials": 1,
+    "pbr_normal_map": true,
+    "all_texture_dimensions": [
+      2048,
+      2048
+    ]
+  }
+}
