@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "forest",
+  "role": "landmark",
+  "prompt": "Massive fallen ancient tree trunk lying horizontally on its side, very long thick log about five times longer than wide, one end splintered and hollow, the other end a short torn root flare, deeply grooved bark, thick moss on the upper side, clusters of pale shelf fungi, a few short broken branch stubs. Rests flat and stable like a natural bridge. Enchanted moonlit forest. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Dark weathered brown oak bark with deep grooves, lush emerald moss on the top side, pale ivory and lavender shelf fungi, damp dark splintered wood inside the hollow end, tiny cyan glowing lichen specks. Fine bark relief in the normal map.",
+  "preview_task_id": "01a0f2bf-fe8f-736e-9f48-01b64b2e8313",
+  "refine_task_id": "01a0f2c0-fa35-74a6-8765-497966168b00",
+  "attempt": 1,
+  "created_utc": "2026-09-30T14:39:32.466984+00:00",
+  "requested_triangles": 26000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    10.5,
+    2.4,
+    2.6
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 26961,
+    "vertices": 32835,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3943858,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1887714,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2798506,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9469050168991089,
+      -0.5484189987182617,
+      -0.3512800335884094
+    ],
+    "unity_bounds_max": [
+      0.9503729939460754,
+      0.5493110418319702,
+      0.3677709996700287
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 10006640
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

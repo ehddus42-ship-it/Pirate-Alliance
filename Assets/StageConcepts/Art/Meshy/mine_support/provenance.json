@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "cave",
+  "role": "prop",
+  "prompt": "Wooden mine tunnel support frame, two thick upright timber posts joined by a heavy crossbeam on top, diagonal braces in the upper corners, iron brackets and nails, an old oil lantern hanging from the crossbeam, a few loose stones at the post feet. Standalone frame with a wide open walk-through gap, no walls, no tunnel. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Dark aged timber with deep grain and splinters, rusty iron brackets, warm amber lantern glass, grey rock dust at the base, detailed wood normal map.",
+  "preview_task_id": "01a0f2cd-fe53-7744-8fcf-9f06492caf3d",
+  "refine_task_id": "01a0f2cf-486b-71c5-a7d7-4e8e20a33afb",
+  "attempt": 1,
+  "created_utc": "2026-09-30T14:56:12.163172+00:00",
+  "requested_triangles": 16000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    4.4,
+    3.8,
+    1.0
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 15309,
+    "vertices": 19489,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3196243,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1539804,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2292053,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9507719874382019,
+      -0.6762700080871582,
+      -0.11918602883815765
+    ],
+    "unity_bounds_max": [
+      0.9515979290008545,
+      0.6526029706001282,
+      0.10717999190092087
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 7837736
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}
