@@ -25,7 +25,7 @@ Hierarchy의 각 방은 `Architecture / Props / Lighting / Gameplay / Sockets`�
 
 ### 조작
 
-WASD 이동 · 마우스 좌클릭 부적 · SPACE 회피 · E 출구 · ESC 일시정지. 전투방을 정리하고 출구에서 증강 하나를 선택한 뒤, 다음 스테이지로 이동해. 세 번째 탐방 스테이지 다음은 보스 방이야.
+WASD 이동 · 마우스 좌클릭 부적 · SPACE 회피 · Q 지원 스킬 · E 출구 · ESC 일시정지. 전투방을 정리하고 출구에서 증강 하나를 선택한 뒤, 다음 스테이지로 이동해. 세 번째 탐방 스테이지 다음은 보스 방이야.
 
 한 세션의 방 수는 기존과 같은 `5+5+5+2=17개`야. 크기 변경으로 직선 보행만 계산하면 약 35초 늘어나지만, 전투·회피·탐색을 포함한 실제 시간은 별도야. 목표인 약 10분(8~12분)의 사람 플레이 시간은 아직 측정하지 않았어.
 
@@ -34,6 +34,10 @@ WASD 이동 · 마우스 좌클릭 부적 · SPACE 회피 · E 출구 · ESC 일
 - `AC Roguelike > Liminal > Backrooms > Validate Dimensions and Gallery`: 크기, 루트 스케일, 소켓·바닥·환경음 범위, Meshy 슬롯 누락, 아치 개구부, 갤러리 중첩을 검사해. 결과는 `Documentation/Liminal/backrooms-validation.json`에 저장해.
 - `AC Roguelike > Liminal > Backrooms > Capture Room Catalog`: 격리된 PreviewScene에서 20개 방 전체 PNG, 4×5 카탈로그와 4개 입구 시점 이미지를 `Documentation/Liminal/Previews/Backrooms/`에 생성해. 촬영 중에는 셰이더를 동기 컴파일하고 예열 프레임을 한 번 렌더링해.
 - 실제 이동 연결과 전투 진행 검사는 별도의 `LiminalPlayValidation.ValidateTraversal()` / `ValidateStructure()` / `Start()`를 사용해. 실행 조건과 결과 경로는 [설계 문서](Documentation/LiminalDesign.md)에 정리했어.
+
+### 지원 캐릭터 · 유니
+
+게이머 지원 캐릭터 유니의 액티브 스킬 **보너스 스테이지!**(Q)를 추가했어. 복셀 운석이 한 번 떨어지고, 머리 위에 5초 동안 1UP이 떠. 그동안 공격할 때마다 팩맨 투사체가 함께 나가서 추가 피해를 줘. 시전하는 동안에는 무적이야. 화면 왼쪽 아래 카드에 일러스트와 쿨타임이 표시되고, `LiminalRun` 씬에서 바로 써 볼 수 있어. 오브젝트는 Meshy로 만든 뒤 복셀로 변환했어. [지원 캐릭터 문서](Documentation/Liminal/SupportSkill/README.md)
 
 ### 저장소 받기
 

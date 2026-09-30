@@ -26,6 +26,10 @@ namespace AcRoguelike.Liminal
             return true;
         }
 
+        /// <summary>Ignores damage for the given time (support skills are cast with a short invulnerability).</summary>
+        public void GrantInvulnerability(float seconds)
+        { invulnerableUntil = Mathf.Max(invulnerableUntil, Time.time + Mathf.Max(0, seconds)); }
+
         public void ResetHealth()
         { maximumHealth = 100; Health = maximumHealth; invulnerableUntil = Time.time + 1; Changed?.Invoke(); }
 
