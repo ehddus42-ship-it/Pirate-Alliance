@@ -14,7 +14,7 @@ namespace AcRoguelike.Liminal.Editor
         string filter="",newName="NewRoomVariation",validation="";
         int seed=73029,stageIndex;
         bool addCloneToStage=true;
-        static readonly string[] StageNames={"01 기다림의 층","02 물이 시작되는 곳","03 마지막 환승","04 모든 출발"};
+        static readonly string[] StageNames={"01 노란 방","02 풀룸","03 마지막 환승","04 끝없는 홀"};
 
         [MenuItem("AC Roguelike/Liminal/Room Workshop")]
         public static void Open()
@@ -30,7 +30,7 @@ namespace AcRoguelike.Liminal.Editor
             using(new EditorGUILayout.HorizontalScope())
             {
                 if(GUILayout.Button("20개 방 갤러리",GUILayout.Height(29)))OpenScene(LiminalMapBuilder.GalleryPath);
-                if(GUILayout.Button("24개 기물 갤러리",GUILayout.Height(29)))OpenScene(LiminalMapBuilder.PropGalleryPath);
+                if(GUILayout.Button("27개 기물 갤러리",GUILayout.Height(29)))OpenScene(LiminalMapBuilder.PropGalleryPath);
                 if(GUILayout.Button("게임 맵 열기",GUILayout.Height(29)))OpenScene(LiminalMapBuilder.RunPath);
             }
             EditorGUILayout.Space(8);

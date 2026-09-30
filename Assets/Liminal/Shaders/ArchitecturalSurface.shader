@@ -13,6 +13,17 @@ Shader "Liminal/Architectural Surface"
     SubShader
     {
         Tags { "RenderType"="Opaque" "RenderPipeline"="UniversalPipeline" }
+        HLSLINCLUDE
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+        TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
+        TEXTURE2D(_BumpMap); SAMPLER(sampler_BumpMap);
+        CBUFFER_START(UnityPerMaterial)
+        float4 _BaseMap_ST;
+        half4 _BaseColor;
+        half _BumpScale, _WorldScale, _Smoothness, _Metallic;
+        CBUFFER_END
+        ENDHLSL
+
         Pass
         {
             Name "ArchitecturalSurface"
@@ -24,16 +35,9 @@ Shader "Liminal/Architectural Surface"
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
+            #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
             #pragma multi_compile _ _CLUSTER_LIGHT_LOOP
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-            TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
-            TEXTURE2D(_BumpMap); SAMPLER(sampler_BumpMap);
-            CBUFFER_START(UnityPerMaterial)
-            float4 _BaseMap_ST;
-            half4 _BaseColor;
-            half _BumpScale, _WorldScale, _Smoothness, _Metallic;
-            CBUFFER_END
             struct Attributes { float4 positionOS:POSITION; float3 normalOS:NORMAL; };
             struct Varyings { float4 positionCS:SV_POSITION; float3 world:TEXCOORD0; float3 normal:TEXCOORD1; float fog:TEXCOORD2; };
             Varyings Vert(Attributes v)
@@ -65,23 +69,42 @@ Shader "Liminal/Architectural Surface"
                 inputData.normalWS=n;
                 inputData.viewDirectionWS=view;
                 inputData.normalizedScreenSpaceUV=GetNormalizedScreenSpaceUV(i.positionCS);
-                half3 color=albedo*max(SampleSH(n),half3(.12,.14,.13));
-                color+=Shade(GetMainLight(TransformWorldToShadowCoord(i.world)),n,view,albedo);
+                AmbientOcclusionFactor ao=GetScreenSpaceAmbientOcclusion(inputData.normalizedScreenSpaceUV);
+                half3 color=albedo*max(SampleSH(n),half3(.12,.14,.13))*ao.indirectAmbientOcclusion;
+                color+=Shade(GetMainLight(TransformWorldToShadowCoord(i.world)),n,view,albedo)*ao.directAmbientOcclusion;
                 #ifdef _ADDITIONAL_LIGHTS
                 #if USE_CLUSTER_LIGHT_LOOP
                 [loop] for(uint lightIndex=0;lightIndex<min(URP_FP_DIRECTIONAL_LIGHTS_COUNT,MAX_VISIBLE_LIGHTS);lightIndex++)
                 {
                     CLUSTER_LIGHT_LOOP_SUBTRACTIVE_LIGHT_CHECK
-                    color+=Shade(GetAdditionalLight(lightIndex,i.world),n,view,albedo);
+                    color+=Shade(GetAdditionalLight(lightIndex,i.world),n,view,albedo)*ao.directAmbientOcclusion;
                 }
                 #endif
                 uint count=GetAdditionalLightsCount();
                 LIGHT_LOOP_BEGIN(count)
-                    color+=Shade(GetAdditionalLight(lightIndex,i.world),n,view,albedo);
+                    color+=Shade(GetAdditionalLight(lightIndex,i.world),n,view,albedo)*ao.directAmbientOcclusion;
                 LIGHT_LOOP_END
                 #endif
                 return half4(MixFog(color,i.fog),1);
             }
+            ENDHLSL
+        }
+        // Contact occlusion follows the architectural geometry rather than the
+        // fine normal-map grain used only by the forward lighting pass.
+        Pass
+        {
+            Name "DepthNormalsOnly"
+            Tags { "LightMode"="DepthNormalsOnly" }
+            ZWrite On
+            Cull Back
+            HLSLPROGRAM
+            #pragma target 3.5
+            #pragma vertex DepthNormalsVertex
+            #pragma fragment DepthNormalsFragment
+            #pragma multi_compile_instancing
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthNormalsPass.hlsl"
             ENDHLSL
         }
         UsePass "Universal Render Pipeline/Lit/ShadowCaster"

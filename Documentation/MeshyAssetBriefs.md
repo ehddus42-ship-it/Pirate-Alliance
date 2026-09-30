@@ -1,13 +1,16 @@
 # Meshy 기물 제작 브리프
 
-작성일: 2026-09-29  
-상태: **Meshy 기물 24종 생성·다운로드 완료 / 209개 배치 지점에 연결 / GLB·방 구조·20개 방 이동 연결 검증 통과**
+작성일: 2026-09-29 / 백룸 개정 갱신: 2026-09-30
 
-Meshy `meshy-7.1`로 만든 24종의 GLB가 `Assets/Liminal/Art/Meshy/<key>/<key>.glb`에 들어 있다. 합계는 560,136,816바이트, 2,345,642삼각형이다. 기물당 약 10만 폴리곤을 목표로 요청했으며 실제 삼각형 수는 84,964~103,874개다. **4K 설정을 요청했지만 실제 반입 텍스처는 2K·4K가 섞여 있다.** 모든 GLB는 텍스처를 내부에 포함하며 외부 이미지 파일에 의존하지 않는다. [실제 파일 검증 기록](Liminal/meshy-assets-validation.json)
+상태: **기존 24종 + 신규 3종 = Meshy 기물 27종 반입 완료 / 현재 198개 배치 지점 모두 연결 / 개정 방 20종 치수·이동 연결 검증 통과**
+
+기존 Meshy `meshy-7.1` GLB 24종은 `Assets/Liminal/Art/Meshy/<key>/<key>.glb`에 보존되어 있다. 이 24종의 합계는 560,136,816바이트, 2,345,642삼각형이다. 기물당 약 10만 폴리곤을 목표로 요청했으며 실제 삼각형 수는 84,964~103,874개다. **기존 24종은 4K 설정을 요청했지만 실제 반입 텍스처가 2K·4K 혼재한다.** 모든 GLB는 텍스처를 내부에 포함하며 외부 이미지 파일에 의존하지 않는다. [기존 24종 파일 검증](Liminal/meshy-assets-validation.json)
+
+신규 `backrooms_workstation`, `poolroom_arch`, `industrial_fan`도 같은 경로 규칙으로 최종 GLB를 확정했다. 3종 합계는 70,576,480바이트·144,604삼각형이며, 실제 내장 base color·normal은 모두 4096×4096, metallic/roughness는 2048×2048이다. 생성 후보 6개에 총 **210 Meshy API credits**를 사용했다. 최종 채택 3개는 105 credits, 품질 비교용 미채택 3개는 105 credits다. 후보 수와 API 단계 수는 다르며 text-to-3D preview 4회·refine 4회·image-to-3D 2회가 기록되어 있다. [신규 3종 GLB·해상도·비용 검증](Liminal/backrooms-meshy-validation.json)
 
 아래 영어 프롬프트와 치수는 디자인 브리프다. 실제 API에 전송한 프롬프트, 생성·재질 작업 식별자, 모델, 요청 해상도와 성공 상태는 각 기물 폴더의 `provenance.json`에서 확인한다. 로커와 공중전화는 첫 결과의 형태를 검토한 뒤 다시 생성해 교체했다. API 키와 비밀 토큰은 기록하지 않는다. 디자인 브리프의 모든 세부 기준이 자동 검사로 보장되는 것은 아니므로, 배치를 바꿀 때는 아래 장면 검수 기준을 다시 적용한다.
 
-20개 방의 Meshy 배치 지점 209개가 모두 채워졌으며 구조 문제는 0개다. 모델 크기를 조정한 최종 배치로 20개 방의 입구·출구·적 생성 지점 이동 연결도 통과했다. 기물 단독 전시는 `Assets/Liminal/Scenes/LiminalPropGallery.unity`, 재사용 프리팹은 `Assets/Liminal/Prefabs/Props`에 있다. [Unity 방 미리보기 20장](Liminal/Previews/room-catalog.jpg) · [구조 검사](Liminal/authoring-validation.txt) · [이동 검사](liminal-traversal-validation.json)
+개정 후 20개 방의 Meshy 배치 지점은 **198곳이며 198곳 모두 연결, 누락 0**이다. 2026-09-30의 최종 치수·충돌·이동 검사가 20/20방을 통과했다. 초기 문서의 209곳은 이전 배치 수다. 기물 단독 전시는 `Assets/Liminal/Scenes/LiminalPropGallery.unity`, 재사용 프리팹은 `Assets/Liminal/Prefabs/Props`에 있다. [현재 20방 카탈로그](Liminal/Previews/Backrooms/Catalog_20Rooms.jpg) · [개정 검사](Liminal/backrooms-validation.json) · [이동 검사](liminal-traversal-validation.json)
 
 공간 의도와 배치 기준은 [LiminalDesign.md](LiminalDesign.md)를 따른다.
 
@@ -20,7 +23,7 @@ Meshy `meshy-7.1`로 만든 24종의 GLB가 `Assets/Liminal/Art/Meshy/<key>/<key
 - 긴 안내 문구와 번호는 생성 텍스처에 맡기지 않는다. 필요한 글자와 발광 표시는 Unity에서 별도로 붙인다.
 - 기물 한 종류를 독립적으로 생성한다. 배경 벽, 바닥, 전시 받침대, 인물과 주변 장식은 제외한다.
 - 생성 결과의 실제 크기와 방향은 반입 후 조정한다. 아래 치수는 **게임 안에서 맞출 목표치**다.
-- 축은 Unity 기준 `X = 너비`, `Y = 높이`, `Z = 깊이`다. 전면은 `+Z`, 바닥 중심은 배치 기준점으로 삼는다. 원본 출력이 다른 축을 사용하면 게임용 부모 오브젝트에서 보정한다.
+- 축은 Unity 기준 `X = 너비`, `Y = 높이`, `Z = 깊이`다. 원본의 앞면·중심점은 생성 기록에 남기고, 방 배치용 부모 오브젝트에서는 검수한 로컬 `-Z` 앞면과 바닥 중심으로 보정한다. 원본 출력의 축이나 중심점을 그대로 게임 배치 기준이라고 가정하지 않는다.
 - PBR 재료는 베이스 컬러, 거칠기/매끄러움, 금속성, 노멀을 실제 결과에 맞게 확인한다. 텍스처 이름만 보고 올바른 채널이라고 가정하지 않는다.
 
 ## 01. 대기 벤치 / Waiting Bench / `waiting_bench`
@@ -370,6 +373,44 @@ Meshy `meshy-7.1`로 만든 24종의 GLB가 `Assets/Liminal/Art/Meshy/<key>/<key
 
 **검수 기준:** 격자 교차점이 연결되고 빈 마름모 공간이 유지된다. 접이식 구조가 벽처럼 한 덩어리로 뭉개지지 않는다. 받침과 충돌을 맞춰 막힌 길임을 명확히 읽게 한다.
 
+## 25. 백룸 사무 작업대 / Backrooms Workstation / `backrooms_workstation`
+
+**게임용 배치 기준:** 너비 3.3m × 높이 1.75m × 깊이 1.9m. 생성 원본의 실측 크기가 아니라 `PropSize`의 정규화 기준이며, 원본 비례를 유지해 맞춘다.
+
+**사용 위치:** 노란 대합실, 무인 사무실, 복사기 대기실과 노란 기둥 홀. 머스터드색 천 파티션, 상아색 책상, CRT 모니터와 서랍을 하나의 큰 사무 가구 덩어리로 읽히게 한다. 의자는 별도 기물로 배치한다.
+
+**제작 방식:** 이미지 기준 `image-to-3d`, `meshy-7.1`, 목표 50,000 폴리곤. 최종 결과는 44,513삼각형·29,054,632바이트다. 노란 공간의 색과 넓은 책상 상판을 유지하도록 생성 후보를 비교했다.
+
+**검수 기준:** CRT와 책상·파티션의 관계가 쿼터뷰에서도 구별된다. 파티션을 중앙 전투 바닥까지 밀어 넣지 않는다. 모델 원본은 그대로 보존하고 배치용 부모의 방향·충돌을 조정한다.
+
+[최종 GLB](../Assets/Liminal/Art/Meshy/backrooms_workstation/backrooms_workstation.glb) · [생성 기록](../Assets/Liminal/Art/Meshy/backrooms_workstation/provenance.json) · [참고 이미지 프롬프트](../Assets/Liminal/Art/Meshy/backrooms_workstation/reference_prompt.txt)
+
+## 26. 풀룸 타일 아치 / Poolroom Arch / `poolroom_arch`
+
+**게임용 배치 기준:** 너비 4.2m × 높이 4.5m × 깊이 1.15m. 생성 요청의 치수와 게임 배치 기준은 다르며, 원본 비례를 유지해 정규화한다.
+
+**사용 위치:** 푸른 수영장, 분수 홀과 물의 아치 회랑. 상아색 타일과 아래쪽 청록색 띠를 가진 둥근 사각 개구부로 풀룸의 반복 구조를 만든다. 마른 중앙 이동 축 바깥에 배치한다.
+
+**제작 방식:** `text-to-3d` 후 재질 생성, `meshy-7.1`, 목표 50,000 폴리곤. 최종 결과는 50,314삼각형·19,133,896바이트다. 첫 형태를 검토한 뒤 넓고 막히지 않은 개구부를 가진 결과로 교체했다.
+
+**검수 기준:** 아래를 가로막는 받침이나 전체 문틀을 채우는 충돌 상자를 만들지 않는다. 재사용 프리팹은 좌우 발 두 개의 BoxCollider를 사용하며, 최종 검증에서 중앙 충돌 간격 약 2.403m와 통행 여유를 확인했다. 앞뒤에서 타일과 개구부가 이어진다.
+
+[최종 GLB](../Assets/Liminal/Art/Meshy/poolroom_arch/poolroom_arch.glb) · [생성 기록](../Assets/Liminal/Art/Meshy/poolroom_arch/provenance.json) · [개구부 검사](Liminal/backrooms-validation.json)
+
+## 27. 산업용 대형 환풍기 / Industrial Fan / `industrial_fan`
+
+**게임용 배치 기준:** 너비 3.4m × 높이 3.4m × 깊이 0.7m. 원본 비례를 유지해 정규화하고 벽면 높이에 배치한다.
+
+**사용 위치:** 끝없는 노란 홀의 뒤쪽 외곽. 크림색 사각 케이스 안의 어두운 원형 그릴과 큰 날개가 보스 공간의 크기를 보여 준다. 중앙 카펫과 보스 공격 예고는 비워 둔다.
+
+**제작 방식:** 최종 채택본은 `text-to-3d` 후 재질 생성, `meshy-7.1`, 목표 50,000 폴리곤. 최종 결과는 49,777삼각형·22,387,952바이트다. 별도의 이미지 기반 후보도 생성되었으나 Unity 보스 공간에서 확인한 현재 모델을 최종본으로 유지했다.
+
+**검수 기준:** 밝은 사각 외곽과 어두운 원형 내부가 한눈에 구별된다. 게임 카메라에서 그릴 뒤 날개가 형태로 읽히며 벽과 겹쳐 깜박이지 않도록 배치한다.
+
+[최종 GLB](../Assets/Liminal/Art/Meshy/industrial_fan/industrial_fan.glb) · [생성 기록](../Assets/Liminal/Art/Meshy/industrial_fan/provenance.json)
+
+신규 3종 공통으로 GLB 2.0·파일 길이·UV·노멀·재료 연결·내장 이미지 해상도를 검사했다. 요청은 4K였지만 실제 PBR 맵은 base color·normal 4K와 metallic/roughness 2K의 조합이다. [검증 JSON](Liminal/backrooms-meshy-validation.json)
+
 ## 공통 반입 및 장면 검수
 
 1. 생성 결과를 정면, 측면, 뒷면과 게임 카메라 거리에서 확인한다.
@@ -386,7 +427,7 @@ Meshy `meshy-7.1`로 만든 24종의 GLB가 `Assets/Liminal/Art/Meshy/<key>/<key
 
 ## 제작 기록
 
-24종 모두 Meshy 성공 기록과 GLB 2.0 형식, 파일 길이, 내장 텍스처 검사를 통과했다. 아래 삼각형 수는 실제 GLB에서 읽은 값이다. 가장 큰 개별 파일은 푸드코트 테이블의 33,419,172바이트다. 생성 결과의 이용 조건은 소유자의 Meshy 계정 요금제와 약관을 따른다.
+기존 24종의 제작 기록은 아래에 보존하고 신규 3종을 끝에 추가했다. 두 검증 JSON에서 Meshy 성공 기록과 GLB 2.0 형식, 파일 길이, 내장 텍스처를 확인할 수 있다. 아래 삼각형 수는 실제 GLB에서 읽은 값이다. 가장 큰 개별 파일은 푸드코트 테이블의 33,419,172바이트다. 생성 결과의 이용 조건은 소유자의 Meshy 계정 요금제와 약관을 따른다.
 
 | 기물 | GLB 원본 | 실제 삼각형 | 생성 기록 | 추가 기록 |
 | --- | --- | ---: | --- | --- |
@@ -414,3 +455,6 @@ Meshy `meshy-7.1`로 만든 24종의 GLB가 `Assets/Liminal/Art/Meshy/<key>/<key
 | 형광등 기구 | [fluorescent_fixture](../Assets/Liminal/Art/Meshy/fluorescent_fixture/fluorescent_fixture.glb) | 84,964 | [provenance](../Assets/Liminal/Art/Meshy/fluorescent_fixture/provenance.json) | 완료 |
 | 푸드코트 테이블 | [foodcourt_table](../Assets/Liminal/Art/Meshy/foodcourt_table/foodcourt_table.glb) | 98,314 | [provenance](../Assets/Liminal/Art/Meshy/foodcourt_table/provenance.json) | 완료 |
 | 접이식 가림대 | [folding_barrier](../Assets/Liminal/Art/Meshy/folding_barrier/folding_barrier.glb) | 103,874 | [provenance](../Assets/Liminal/Art/Meshy/folding_barrier/provenance.json) | 완료 |
+| 백룸 사무 작업대 | [backrooms_workstation](../Assets/Liminal/Art/Meshy/backrooms_workstation/backrooms_workstation.glb) | 44,513 | [provenance](../Assets/Liminal/Art/Meshy/backrooms_workstation/provenance.json) | 이미지 기반 최종본 확정 |
+| 풀룸 타일 아치 | [poolroom_arch](../Assets/Liminal/Art/Meshy/poolroom_arch/poolroom_arch.glb) | 50,314 | [provenance](../Assets/Liminal/Art/Meshy/poolroom_arch/provenance.json) | 개구부 형태 교체·두 발 충돌 검증 |
+| 산업용 대형 환풍기 | [industrial_fan](../Assets/Liminal/Art/Meshy/industrial_fan/industrial_fan.glb) | 49,777 | [provenance](../Assets/Liminal/Art/Meshy/industrial_fan/provenance.json) | Unity 보스 공간에서 최종본 확정 |

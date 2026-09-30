@@ -1,0 +1,290 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1423549590017965947
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 841073811431162222}
+  - component: {fileID: 8706131703622998894}
+  - component: {fileID: 2391701106956649541}
+  - component: {fileID: 4761310756996976047}
+  - component: {fileID: 1850669615606182953}
+  m_Layer: 0
+  m_Name: AstraiaPlayer
+  m_TagString: Player
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &841073811431162222
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1423549590017965947}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4752460923144078124}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!143 &8706131703622998894
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1423549590017965947}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 1.65
+  m_Radius: 0.24
+  m_SlopeLimit: 45
+  m_StepOffset: 0.24
+  m_SkinWidth: 0.025
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0.84, z: 0}
+--- !u!114 &2391701106956649541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1423549590017965947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de21ebd13ec1545469911ef9a0a9ddf5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AcRoguelike.PlayerMotor
+  visual: {fileID: 4752460923144078124}
+  animator: {fileID: 4405195413063210530}
+  viewCamera: {fileID: 0}
+  aimMarker: {fileID: 0}
+  moveSpeed: 4.2
+  walkSpeed: 2.1
+  dashSpeed: 12.5
+  dashDuration: 0.24
+  dashCooldown: 0.72
+  turnSpeed: 720
+  attackTurnSpeed: 1440
+  aimDeadRadius: 0.65
+  maxTorsoYaw: 62
+  torsoTurnSpeed: 400
+  acceleration: 24
+  deceleration: 38
+  faceMovementDirection: 1
+--- !u!114 &4761310756996976047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1423549590017965947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c240a3e1ba23b984a8ad2018dbb6ff19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AcRoguelike.TalismanCaster
+  talismanPrefab: {fileID: 2696658077219829728, guid: 0fe94ab81956f314fbfa5d5c53763013, type: 3}
+  spiritFlamePrefab: {fileID: 9065434347881200195, guid: 524c2b9fb8c71ab40972c554b3ddabf8, type: 3}
+  impactPrefab: {fileID: 7473972246957107936, guid: 14f6acb7e1b04724cb45844b36c3ded9, type: 3}
+  castOrigin: {fileID: 3696650137524313887}
+  castRange: 14
+  cooldown: 0.7
+  flameCount: 4
+  holdToCast: 0
+  requireLineOfSight: 1
+  externalInput: 1
+--- !u!114 &1850669615606182953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1423549590017965947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f404903f571d4b1b8573ef2b3c29f603, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AcRoguelike.PlayerCombat
+  attackDurations:
+  - 0.52
+  - 0.56
+  - 0.7
+  hitTimes:
+  - 0.18
+  - 0.2
+  - 0.27
+  attackOrigins:
+  - {fileID: 3696650137524313887}
+  - {fileID: 520622611194757851}
+  - {fileID: 3696650137524313887}
+  attackMovementMultiplier: 0.18
+  inputBuffer: 0.22
+  comboQueueWindow: 0.2
+  comboRecovery: 0.14
+  holdToAttack: 1
+  referenceCooldown: 0.7
+  animationBlend: 0.07
+--- !u!1 &4268059416697940779
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 520622611194757851}
+  m_Layer: 0
+  m_Name: Astraia Left Cast Origin
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &520622611194757851
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4268059416697940779}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.05}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6105536614337966586}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5655342802996653360
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3696650137524313887}
+  m_Layer: 0
+  m_Name: Astraia Cast Origin
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3696650137524313887
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5655342802996653360}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.05}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4461032677440285825}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &4247275952555826330
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 841073811431162222}
+    m_Modifications:
+    - target: {fileID: 2826141280958361953, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+      propertyPath: m_Name
+      value: AstraiaVisual
+      objectReference: {fileID: 0}
+    - target: {fileID: 8864624475540004790, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8864624475540004790, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8864624475540004790, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8864624475540004790, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8864624475540004790, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8864624475540004790, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8864624475540004790, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8864624475540004790, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8864624475540004790, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8864624475540004790, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 7947274211882921312, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 520622611194757851}
+    - targetCorrespondingSourceObject: {fileID: 511615320651919387, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3696650137524313887}
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+--- !u!95 &4405195413063210530 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 563863762456939192, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+  m_PrefabInstance: {fileID: 4247275952555826330}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &4461032677440285825 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 511615320651919387, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+  m_PrefabInstance: {fileID: 4247275952555826330}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &4752460923144078124 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8864624475540004790, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+  m_PrefabInstance: {fileID: 4247275952555826330}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &6105536614337966586 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7947274211882921312, guid: 53a179a1bccf9184fac6ec03c10f9727, type: 3}
+  m_PrefabInstance: {fileID: 4247275952555826330}
+  m_PrefabAsset: {fileID: 0}

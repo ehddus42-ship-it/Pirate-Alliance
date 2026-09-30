@@ -14,6 +14,8 @@ namespace AcRoguelike
         public int flameCount = 4;
         public bool holdToCast;
         public bool requireLineOfSight;
+        [Tooltip("When enabled, PlayerCombat emits casts at the attack animation's hit time.")]
+        public bool externalInput;
 
         public int CastCount { get; private set; }
         public TrainingEnemy LastTarget { get; private set; }
@@ -24,6 +26,7 @@ namespace AcRoguelike
 
         void Update()
         {
+            if (externalInput || !Application.isFocused || Time.timeScale <= 0) { leftButtonWasHeld = false; return; }
             bool leftButtonHeld = Mouse.current != null && Mouse.current.leftButton.isPressed;
             if (leftButtonHeld && (!leftButtonWasHeld || holdToCast)) TryCast();
             leftButtonWasHeld = leftButtonHeld;
@@ -31,30 +34,51 @@ namespace AcRoguelike
 
         public bool TryCast()
         {
-            if (Time.time < nextCastTime || !talismanPrefab || !spiritFlamePrefab)
-                return false;
+            if (Time.time < nextCastTime) return false;
+            return Cast(FindTarget(Vector3.zero));
+        }
 
+        /// <summary>Finds a target in the aimed forward cone without snapping to enemies behind the character.</summary>
+        public TrainingEnemy FindAnimationTarget(Vector3 direction) => FindTarget(Vector3.ProjectOnPlane(direction, Vector3.up).normalized);
+
+        // PlayerCombat owns the cadence for animation-driven casts, including cooldown upgrades.
+        public bool TryCastFromAnimation(TrainingEnemy target) => isActiveAndEnabled && externalInput && Cast(target);
+
+        TrainingEnemy FindTarget(Vector3 aimDirection)
+        {
             TrainingEnemy nearest = null;
-            float closestSquared = castRange * castRange;
+            float bestScore = float.PositiveInfinity;
             foreach (var enemy in FindObjectsByType<TrainingEnemy>(FindObjectsSortMode.None))
             {
                 if (!enemy.IsAlive) continue;
-                if (requireLineOfSight && !CanSee(enemy)) continue;
-                float distanceSquared = (enemy.transform.position - transform.position).sqrMagnitude;
-                if (distanceSquared >= closestSquared) continue;
-                closestSquared = distanceSquared;
+                Vector3 delta = enemy.transform.position - transform.position;
+                float distanceSquared = delta.sqrMagnitude;
+                if (distanceSquared >= castRange * castRange) continue;
+                float alignment = aimDirection.sqrMagnitude > .01f
+                    ? Vector3.Dot(aimDirection, Vector3.ProjectOnPlane(delta, Vector3.up).normalized) : 1;
+                if (alignment < .5f) continue;
+                float score = distanceSquared * (1 + (1 - alignment) * 2);
+                if (score >= bestScore || (requireLineOfSight && !CanSee(enemy))) continue;
+                bestScore = score;
                 nearest = enemy;
             }
-            if (!nearest) return false;
+            return nearest;
+        }
+
+        bool Cast(TrainingEnemy target)
+        {
+            if (!talismanPrefab || !spiritFlamePrefab || !target || !target.IsAlive) return false;
+            if ((target.transform.position - transform.position).sqrMagnitude >= castRange * castRange) return false;
+            if (requireLineOfSight && !CanSee(target)) return false;
 
             Vector3 origin = castOrigin
                 ? castOrigin.position
                 : transform.position + Vector3.up * 1.2f + transform.forward * .35f;
-            var projectile = Instantiate(talismanPrefab, origin, Quaternion.identity)
-                .GetComponent<TalismanProjectile>();
-            if (!projectile) return false;
-            projectile.Initialize(nearest, spiritFlamePrefab, impactPrefab, flameCount);
-            LastTarget = nearest;
+            var projectileObject = Instantiate(talismanPrefab, origin, Quaternion.identity);
+            var projectile = projectileObject.GetComponent<TalismanProjectile>();
+            if (!projectile) { Destroy(projectileObject); return false; }
+            projectile.Initialize(target, spiritFlamePrefab, impactPrefab, flameCount);
+            LastTarget = target;
             CastCount++;
             nextCastTime = Time.time + cooldown;
             return true;

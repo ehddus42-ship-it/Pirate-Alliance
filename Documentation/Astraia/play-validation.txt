@@ -1,0 +1,11 @@
+Astraia play validation: passed
+PASS Player setup | expected: PlayerMotor + PlayerCombat + TalismanCaster + visual + controller | observed: present
+PASS Ground contact | expected: standing on temporary floor | observed: (1000.000, 0.010, 1000.000)
+PASS Walking speed | expected: 2.100 m/s +/- 0.35 | observed: 2.099 m/s
+PASS Running speed | expected: 4.200 m/s +/- 0.40 | observed: 4.206 m/s
+PASS Decelerate to stop | expected: speed < 0.08 m/s | observed: 0.000 m/s
+PASS Free dash distance | expected: 3.000 m +/- 0.30; exactly one dash; finished | observed: 3.000 m; dash delta=1; active=False
+PASS Wall stops dash | expected: dash cancelled on contact; player center z <= 1001.060 | observed: travel=0.885 m; center z=1000.885; cancelled=True
+PASS Three-hit combo and projectiles | expected: attack indices 0/1/2; exactly 3 attacks and 3 casts; one completed combo; target damaged | observed: attacks=3; casts=3; observed states=3; combos=1; damage=90
+PASS Dash cancels attack before hit | expected: attack started, then one dash; no cast; attack idle | observed: started=True; casts=0; dashes=1; attack index=-1
+PASS Reset cancels pending attack | expected: attack cancelled; no delayed cast or dash | observed: started=True; casts=0; attack index=-1; dash=False

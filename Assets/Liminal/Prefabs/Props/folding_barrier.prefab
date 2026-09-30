@@ -30,7 +30,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8485068956665725537}
+  - {fileID: 1302334123276548862}
   m_Father: {fileID: 676124379435958630}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &5945738501788567154
@@ -63,7 +63,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 676124379435958630}
-  - component: {fileID: 7800550178813153241}
   m_Layer: 0
   m_Name: folding_barrier
   m_TagString: Untagged
@@ -87,21 +86,7 @@ Transform:
   - {fileID: 3910200139748715984}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7800550178813153241
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1449641667244698115}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065dd2f7325def441bada45d898ad271, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AcRoguelike.Liminal.LiminalSignageAtlas
-  font: {fileID: 12800000, guid: 74ca4780c556b7c4bb5f4faf06d4f150, type: 3}
-  material: {fileID: 2100000, guid: 8c9715c7199e13c41b7d892ce2606435, type: 2}
---- !u!1001 &6492451669110278259
+--- !u!1001 &4452378721670672620
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -170,8 +155,8 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 3150474306388093854, guid: 28f2079440a5c424393150e95f18d702, type: 3}
---- !u!4 &8485068956665725537 stripped
+--- !u!4 &1302334123276548862 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3447742079981357586, guid: 28f2079440a5c424393150e95f18d702, type: 3}
-  m_PrefabInstance: {fileID: 6492451669110278259}
+  m_PrefabInstance: {fileID: 4452378721670672620}
   m_PrefabAsset: {fileID: 0}

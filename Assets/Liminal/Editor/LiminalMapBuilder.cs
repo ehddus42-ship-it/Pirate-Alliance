@@ -14,7 +14,7 @@ using Object = UnityEngine.Object;
 namespace AcRoguelike.Liminal.Editor
 {
     /// <summary>Initial authoring kit. Existing room prefabs and scenes are preserved by BuildMissing.</summary>
-    public static class LiminalMapBuilder
+    public static partial class LiminalMapBuilder
     {
         public const string Root = "Assets/Liminal";
         public const string RoomFolder = Root + "/Prefabs/Rooms";
@@ -106,7 +106,7 @@ namespace AcRoguelike.Liminal.Editor
             AssetDatabase.SaveAssets();
             EditorSceneManager.OpenScene(GalleryPath);
             FrameGallery();
-            Debug.Log("LIMINAL_KIT_READY: 20 room variations, 4 stages, editable gallery and run scenes. " + ValidateAll());
+            Debug.Log("LIMINAL_KIT_READY: 20 room variations, 4 stages, editable gallery and run scenes. " + ValidateAll("Documentation/Liminal/backrooms-authoring-validation.txt"));
         }
 
         static void PrepareMaterials()
@@ -141,6 +141,7 @@ namespace AcRoguelike.Liminal.Editor
             var water=AssetDatabase.LoadAssetAtPath<Material>(waterPath);
             if(!water){water=new Material(Shader.Find("Liminal/Quiet Water") ?? Shader.Find("Universal Render Pipeline/Lit"));AssetDatabase.CreateAsset(water,waterPath);}
             Mats["Water"]=water;
+            PrepareBackroomsMaterials();
             signageFont=AssetDatabase.LoadAssetAtPath<Font>(Root+"/Art/Fonts/NotoSansKR-Regular.ttf") ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             string fontMaterialPath=Root+"/Materials/SignageFont.mat";
             signageMaterial=AssetDatabase.LoadAssetAtPath<Material>(fontMaterialPath);
@@ -236,18 +237,20 @@ namespace AcRoguelike.Liminal.Editor
             room.entranceGate.SetActive(false);room.exitGate.SetActive(false);
             switch(index)
             {
-                case 0:Arrival(false);break;case 1:Arrival(true);break;
-                case 2:Office(false);break;case 3:Office(true);break;
+                case 0:BackroomsArrival();break;case 1:Arrival(true);break;
+                case 2:BackroomsMaze();break;case 3:BackroomsOffice();break;
                 case 4:Pool(false);break;case 5:Pool(true);break;
                 case 6:Mall(false);break;case 7:Mall(true);break;
                 case 8:Transit(false);break;case 9:Transit(true);break;
-                case 10:Service();break;case 11:Boss();break;
-                case 12:Laundry();break;case 13:CopyWaiting();break;case 14:Parking();break;
+                case 10:Service();break;case 11:BackroomsBoss();break;
+                case 12:Laundry();break;case 13:BackroomsCopyCourt();break;case 14:Parking();break;
                 case 15:PhoneCourt();break;case 16:Arcade();break;case 17:BentPool();break;
-                case 18:IndoorGarden();break;case 19:ChairArchive();break;
+                case 18:IndoorGarden();break;case 19:BackroomsPillarHall();break;
             }
-            if(index!=11)ExtraProps(index);
+            if(index!=11 && index!=0 && index!=2 && index!=3 && index!=13 && index!=19)ExtraProps(index);
             FloorArrow(new Vector3(0,.02f,2),"Paint_Teal");FloorArrow(new Vector3(0,.02f,length-3),"Paint_Teal");
+            ApplyBackroomsIdentity(root, index);
+            ExpandRoomFootprint(root, index);
             return root;
         }
 
@@ -538,12 +541,8 @@ namespace AcRoguelike.Liminal.Editor
 
         static void PoolLadder(float x,float z,int side)
         {
-            for(int s=-1;s<=1;s+=2)
-            {
-                Shape("Pool ladder handrail",PrimitiveType.Cylinder,new Vector3(x,.65f,z+s*.4f),new Vector3(.045f,.65f,.045f),"Chrome");
-                Box("Pool ladder top",new Vector3(x+side*.35f,1.25f,z+s*.4f),new Vector3(.72f,.055f,.055f),"Chrome",props,false);
-            }
-            for(int i=0;i<3;i++)Box("Pool ladder rung",new Vector3(x,.25f+i*.30f,z),new Vector3(.055f,.055f,.86f),"Chrome",props,false);
+            // Keep the manufactured object connected when room spacing changes.
+            Prop("pool_ladder",new Vector3(x,0,z),side>0?270:90);
         }
 
         static void Mall(bool wrongChairs)
@@ -853,7 +852,10 @@ namespace AcRoguelike.Liminal.Editor
             {"laundry_washer",new Vector3(1.25f,1.22f,.94f)}, {"laundry_dryer",new Vector3(1.25f,2.35f,.94f)},
             {"trash_bin",new Vector3(.7f,1.0f,.7f)}, {"caution_sign",new Vector3(.65f,.9f,.55f)},
             {"wall_clock",new Vector3(.65f,.65f,.1f)}, {"fluorescent_fixture",new Vector3(2.1f,.22f,.5f)},
-            {"foodcourt_table",new Vector3(2.6f,1.05f,2.6f)}, {"folding_barrier",new Vector3(2.7f,1.0f,.45f)}
+            {"foodcourt_table",new Vector3(2.6f,1.05f,2.6f)}, {"folding_barrier",new Vector3(2.7f,1.0f,.45f)},
+            {"backrooms_workstation",new Vector3(3.3f,1.75f,1.9f)},
+            {"poolroom_arch",new Vector3(4.2f,4.5f,1.15f)},
+            {"industrial_fan",new Vector3(3.4f,3.4f,.7f)}
         };
 
         static void Prop(string key,Vector3 position,float yaw=0)
@@ -870,6 +872,7 @@ namespace AcRoguelike.Liminal.Editor
                 case "reception_desk":ProxyReception(t);break;case "janitor_cart":ProxyCart(t);break;
                 default:ProxyService(t,key);break;
             }
+            if(key=="poolroom_arch")ConfigurePoolArchCollision(holder,size);
         }
 
         static void ProxyBench(Transform t)
@@ -1122,6 +1125,7 @@ namespace AcRoguelike.Liminal.Editor
             instance.transform.SetParent(holder,false);instance.transform.localRotation=orientation;instance.transform.localScale=Vector3.one*factor;instance.transform.localPosition=new Vector3(-b.center.x*factor,-b.min.y*factor,-b.center.z*factor);
             foreach(var c in instance.GetComponentsInChildren<Collider>(true))Object.DestroyImmediate(c);
             var collision=holder.GetComponent<BoxCollider>();if(collision){collision.size=b.size*factor;collision.center=Vector3.up*b.size.y*factor*.5f;}
+            if(key=="poolroom_arch")ConfigurePoolArchCollision(holder,b.size*factor);
             return true;
         }
 
@@ -1162,8 +1166,8 @@ namespace AcRoguelike.Liminal.Editor
         static void CreatePropGallery()
         {
             var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);Environment(true);
-            var gallery=Group("MESHY PROP GALLERY / 24 REPLACEABLE OBJECTS");architecture=Group("Display Architecture").transform;props=Group("Display Labels").transform;
-            Box("Walkable prop inspection gallery",new Vector3(12,-.18f,20),new Vector3(40,.36f,53),"Concrete");
+            var gallery=Group("MESHY PROP GALLERY / 27 REPLACEABLE OBJECTS");architecture=Group("Display Architecture").transform;props=Group("Display Labels").transform;
+            Box("Walkable prop inspection gallery",new Vector3(12,-.18f,24),new Vector3(40,.36f,61),"Concrete");
             int index=0;foreach(var pair in PropSize)
             {
                 var p=new Vector3(index%4*8,0,index/4*8);index++;
@@ -1176,31 +1180,34 @@ namespace AcRoguelike.Liminal.Editor
 
         static void CreateStages(bool overwrite)
         {
-            string[] titles={"기다림의 층","물이 시작되는 곳","마지막 환승","모든 출발"};
-            string[] subtitles={"승객 없이 계속되는 도착 안내","불빛만 남은 물의 회랑","모든 표지판은 출구를 약속한다","마지막 안내원을 기다려 주세요"};
-            int[][] pools={new[]{2,3,6,13,16,19},new[]{4,5,12,17,18,19},new[]{7,8,9,14,15,16},new int[0]};
+            string[] titles={"노란 방","풀룸","마지막 환승","끝없는 홀"};
+            string[] subtitles={"노란 벽지와 꺼지지 않는 형광등","하얀 타일 너머 청록색 물결","셔터가 내려간 빈 환승 시설","모든 방이 모이는 마지막 공간"};
+            int[][] pools={new[]{2,3,13,19},new[]{4,5,12,17,18},new[]{6,7,8,9,14,15,16},new int[0]};
             for(int i=0;i<4;i++)
             {
                 string path=Root+"/Stages/Stage_"+(i+1).ToString("00")+".asset";
                 var stage=AssetDatabase.LoadAssetAtPath<LiminalStageDefinition>(path);if(stage&&!overwrite)continue;
                 if(!stage){stage=ScriptableObject.CreateInstance<LiminalStageDefinition>();AssetDatabase.CreateAsset(stage,path);}
-                stage.stageId="liminal_"+(i+1);stage.title=titles[i];stage.subtitle=subtitles[i];stage.startRoom=Room(i==0?0:1);stage.endRoom=Room(i==3?11:10);stage.roomPool=pools[i].Select(Room).ToArray();stage.middleRoomCount=i==3?0:3;stage.isBossStage=i==3;stage.ambientColor=i==0?new Color(.25f,.28f,.245f):new Color(.22f,.28f,.27f);EditorUtility.SetDirty(stage);
+                stage.stageId="liminal_"+(i+1);stage.title=titles[i];stage.subtitle=subtitles[i];stage.startRoom=Room(i==0?0:1);stage.endRoom=Room(i==3?11:10);stage.roomPool=pools[i].Select(Room).ToArray();stage.middleRoomCount=i==3?0:3;stage.isBossStage=i==3;stage.ambientColor=i==0||i==3?new Color(.48f,.44f,.30f):new Color(.39f,.47f,.48f);EditorUtility.SetDirty(stage);
             }
         }
 
         static void Environment(bool gallery)
         {
-            RenderSettings.ambientMode=AmbientMode.Flat;RenderSettings.ambientLight=new Color(.25f,.28f,.245f);RenderSettings.fog=false;
-            var sun=Group("Soft architectural fill").AddComponent<Light>();sun.type=LightType.Directional;sun.color=new Color(.92f,.95f,.86f);sun.intensity=.32f;sun.shadows=LightShadows.Soft;sun.transform.rotation=Quaternion.Euler(58,-35,0);
+            RenderSettings.ambientMode=AmbientMode.Flat;RenderSettings.ambientLight=new Color(.45f,.46f,.37f);RenderSettings.fog=false;
+            var sun=Group("Soft architectural fill").AddComponent<Light>();sun.type=LightType.Directional;sun.color=new Color(1f,.97f,.86f);sun.intensity=.68f;sun.shadows=LightShadows.Soft;sun.shadowStrength=.65f;sun.transform.rotation=Quaternion.Euler(58,-35,0);
             QualitySettings.shadowDistance=55;
+            CreateBackroomsGrade();
         }
 
         static GameObject CreatePlayer(Vector3 position)
         {
-            var prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Liminal/Prefabs/Explorer/LiminalExplorer.prefab");
+            var prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Characters/Astraia/AstraiaPlayer.prefab");
+            if(!prefab)prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Liminal/Prefabs/Explorer/LiminalExplorer.prefab");
             if(!prefab)throw new FileNotFoundException("Standalone LiminalExplorer prefab is required.");
-            var player=(GameObject)PrefabUtility.InstantiatePrefab(prefab);player.name="Player / Explorer";player.transform.position=position;
+            var player=(GameObject)PrefabUtility.InstantiatePrefab(prefab);player.name="Player / Astraia";player.transform.position=position;
             var cameraGo=Group("Main Camera");cameraGo.tag="MainCamera";var cam=cameraGo.AddComponent<Camera>();cameraGo.AddComponent<AudioListener>();cam.fieldOfView=36;cam.nearClipPlane=.1f;cam.farClipPlane=220;cam.clearFlags=CameraClearFlags.SolidColor;cam.backgroundColor=new Color(.08f,.12f,.115f);cam.allowHDR=true;
+            var cameraData=cameraGo.AddComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();cameraData.renderPostProcessing=true;cameraData.volumeLayerMask=1;cameraData.antialiasing=UnityEngine.Rendering.Universal.AntialiasingMode.SubpixelMorphologicalAntiAliasing;cameraData.antialiasingQuality=UnityEngine.Rendering.Universal.AntialiasingQuality.High;
             var follow=cameraGo.AddComponent<IsometricFollowCamera>();follow.target=player.transform;follow.distance=20;follow.pitch=58;follow.yaw=35;follow.Snap();
             var motor=player.GetComponent<PlayerMotor>();if(motor){motor.viewCamera=cam;var marker=Group("Aim marker").transform;motor.aimMarker=marker;}
             return player;
@@ -1211,10 +1218,10 @@ namespace AcRoguelike.Liminal.Editor
             var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);Environment(true);
             var gallery=Group("ROOM GALLERY / 20 EDITABLE VARIATIONS");
             var floorRoot=Group("Gallery Walkways").transform;architecture=floorRoot;
-            Box("Gallery connecting floor",new Vector3(52.5f,-.35f,100),new Vector3(146,.38f,232),"Concrete",floorRoot);
+            Box("Gallery connecting floor",new Vector3(78,-.35f,147),new Vector3(209,.38f,323),"Concrete",floorRoot);
             for(int i=0;i<RoomIds.Length;i++)
             {
-                int column=i%4,row=i/4;var position=new Vector3(column*35,0,row*43);
+                int column=i%4,row=i/4;var position=new Vector3(column*52,0,row*65);
                 var instance=(GameObject)PrefabUtility.InstantiatePrefab(Room(i).gameObject);instance.name=RoomIds[i]+" / EDIT PREFAB TO CHANGE RUN";instance.transform.SetParent(gallery.transform,false);instance.transform.localPosition=position;
                 var room=instance.GetComponent<LiminalRoom>();if(room.entranceGate)room.entranceGate.SetActive(false);if(room.exitGate)room.exitGate.SetActive(false);
                 props=Group("Gallery Labels",floorRoot).transform;
@@ -1247,10 +1254,10 @@ namespace AcRoguelike.Liminal.Editor
         public static void FrameGallery()
         {
             var room=Object.FindObjectsByType<LiminalRoom>(FindObjectsInactive.Include,FindObjectsSortMode.None).OrderBy(r=>r.roomId).FirstOrDefault();
-            if(room){Selection.activeGameObject=room.gameObject;SceneView.lastActiveSceneView?.Frame(new Bounds(room.transform.position+new Vector3(0,1,13),new Vector3(23,8,30)),false);}
+            if(room){Selection.activeGameObject=room.gameObject;SceneView.lastActiveSceneView?.Frame(new Bounds(room.transform.TransformPoint(room.localBounds.center),room.localBounds.size+new Vector3(3,0,3)),false);}
         }
 
-        public static string ValidateAll()
+        public static string ValidateAll(string reportPath="Documentation/Liminal/authoring-validation.txt")
         {
             int rooms=0,errors=0,anchors=0,models=0;var messages=new List<string>();
             foreach(string guid in AssetDatabase.FindAssets("t:Prefab",new[]{RoomFolder}))
@@ -1263,7 +1270,7 @@ namespace AcRoguelike.Liminal.Editor
             }
             string result=rooms+" rooms; "+errors+" structural issues; "+models+"/"+anchors+" Meshy anchors populated.";
             foreach(var message in messages)Debug.LogError(message);
-            Directory.CreateDirectory("Documentation/Liminal");File.WriteAllText("Documentation/Liminal/authoring-validation.txt",result+"\n"+string.Join("\n",messages));
+            Directory.CreateDirectory(Path.GetDirectoryName(reportPath));File.WriteAllText(reportPath,result+"\n"+string.Join("\n",messages));
             return result;
         }
     }
