@@ -1,0 +1,547 @@
+{
+ "roomId": "Forest_06",
+ "displayName": "잊힌 엘프 성소",
+ "kind": "Combat",
+ "notes": "Forgotten elven sanctuary: a ruined round shrine on a cobbled plaza that the route circles, with broken pillars as cover.",
+ "playerSpawn": {
+  "x": 0.0,
+  "y": 0.05,
+  "z": 4.0
+ },
+ "enemySpawns": [
+  {
+   "x": -5.8,
+   "y": 0.08,
+   "z": 20.0
+  },
+  {
+   "x": 5.8,
+   "y": 0.08,
+   "z": 22.5
+  },
+  {
+   "x": 0.4,
+   "y": 0.08,
+   "z": 30.6
+  }
+ ],
+ "decor": [
+  {
+   "material": "Forest_Bark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_06_Forest_Bark.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Cobble",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_06_Forest_Cobble.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Earth",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_06_Forest_Earth.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Firefly",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_06_Forest_Firefly.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Forest_Flower",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_06_Forest_Flower.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Forest_Foliage",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_06_Forest_Foliage.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_FoliageDeep",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_06_Forest_FoliageDeep.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_FoliageLight",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_06_Forest_FoliageLight.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Moss",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_06_Forest_Moss.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_MossLight",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_06_Forest_MossLight.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Reed",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_06_Forest_Reed.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Rune",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_06_Forest_Rune.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Forest_Stone",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_06_Forest_Stone.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_StoneDark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_06_Forest_StoneDark.asset",
+   "castShadows": true
+  }
+ ],
+ "models": [
+  {
+   "key": "elven_shrine",
+   "position": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 21.0
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 7.2,
+    "y": 6.0,
+    "z": 7.2
+   },
+   "modelYaw": 0.0,
+   "scale": 3.7844285,
+   "offset": {
+    "x": -0.00227,
+    "y": 2.30417,
+    "z": 0.00227
+   }
+  },
+  {
+   "key": "guardian_statue",
+   "position": {
+    "x": -4.4,
+    "y": 0.0,
+    "z": 12.2
+   },
+   "yaw": 180,
+   "targetSize": {
+    "x": 2.6,
+    "y": 6.0,
+    "z": 2.4
+   },
+   "modelYaw": 0.0,
+   "scale": 3.15411,
+   "offset": {
+    "x": -0.00266,
+    "y": 3.00183,
+    "z": -0.00142
+   }
+  },
+  {
+   "key": "guardian_statue",
+   "position": {
+    "x": 4.4,
+    "y": 0.0,
+    "z": 12.2
+   },
+   "yaw": 180,
+   "targetSize": {
+    "x": 2.6,
+    "y": 6.0,
+    "z": 2.4
+   },
+   "modelYaw": 0.0,
+   "scale": 3.15411,
+   "offset": {
+    "x": -0.00266,
+    "y": 3.00183,
+    "z": -0.00142
+   }
+  },
+  {
+   "key": "stone_lantern",
+   "position": {
+    "x": -2.6,
+    "y": 0.0,
+    "z": 5.5
+   },
+   "yaw": 0.0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 2.1,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.1040423,
+   "offset": {
+    "x": -0.00081,
+    "y": 1.05071,
+    "z": 0.00025
+   }
+  },
+  {
+   "key": "stone_lantern",
+   "position": {
+    "x": 2.6,
+    "y": 0.0,
+    "z": 5.5
+   },
+   "yaw": 0.0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 2.1,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.1040423,
+   "offset": {
+    "x": -0.00081,
+    "y": 1.05071,
+    "z": 0.00025
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 17.06084,
+    "y": 1.00581,
+    "z": 6.0
+   },
+   "yaw": 354.8443811145717,
+   "targetSize": {
+    "x": 8.5,
+    "y": 13.1692,
+    "z": 8.5
+   },
+   "modelYaw": 0.0,
+   "scale": 4.9503251,
+   "offset": {
+    "x": -0.06642,
+    "y": 4.71171,
+    "z": 0.01134
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 15.87728,
+    "y": 0.49821,
+    "z": 20.0
+   },
+   "yaw": 213.43507747190813,
+   "targetSize": {
+    "x": 8.5,
+    "y": 14.57543,
+    "z": 8.5
+   },
+   "modelYaw": 0.0,
+   "scale": 4.9503251,
+   "offset": {
+    "x": -0.06642,
+    "y": 4.71171,
+    "z": 0.01134
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 15.80269,
+    "y": 0.71108,
+    "z": 33.0
+   },
+   "yaw": 201.22614923422603,
+   "targetSize": {
+    "x": 8.5,
+    "y": 15.90776,
+    "z": 8.5
+   },
+   "modelYaw": 0.0,
+   "scale": 4.9503251,
+   "offset": {
+    "x": -0.06642,
+    "y": 4.71171,
+    "z": 0.01134
+   }
+  }
+ ],
+ "colliders": [
+  {
+   "name": "Shrine skirt",
+   "center": {
+    "x": 0.0,
+    "y": 1.5,
+    "z": 21.0
+   },
+   "size": {
+    "x": 4.6,
+    "y": 3.0,
+    "z": 4.6
+   },
+   "yaw": 45.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Pillar 0",
+   "center": {
+    "x": 5.85048,
+    "y": 1.5,
+    "z": 29.35535
+   },
+   "size": {
+    "x": 1.1,
+    "y": 3.0,
+    "z": 1.1
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Pillar 1",
+   "center": {
+    "x": 10.04504,
+    "y": 1.5,
+    "z": 22.77121
+   },
+   "size": {
+    "x": 1.1,
+    "y": 3.0,
+    "z": 1.1
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Pillar 2",
+   "center": {
+    "x": 8.35535,
+    "y": 1.5,
+    "z": 15.14952
+   },
+   "size": {
+    "x": 1.1,
+    "y": 3.0,
+    "z": 1.1
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Pillar 3",
+   "center": {
+    "x": -8.35535,
+    "y": 1.5,
+    "z": 15.14952
+   },
+   "size": {
+    "x": 1.1,
+    "y": 3.0,
+    "z": 1.1
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Pillar 4",
+   "center": {
+    "x": -10.04504,
+    "y": 1.5,
+    "z": 22.77121
+   },
+   "size": {
+    "x": 1.1,
+    "y": 3.0,
+    "z": 1.1
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Pillar 5",
+   "center": {
+    "x": -5.85048,
+    "y": 1.5,
+    "z": 29.35535
+   },
+   "size": {
+    "x": 1.1,
+    "y": 3.0,
+    "z": 1.1
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Toppled pillar",
+   "center": {
+    "x": -7.55,
+    "y": 0.5,
+    "z": 29.55
+   },
+   "size": {
+    "x": 5.3,
+    "y": 1.0,
+    "z": 1.0
+   },
+   "yaw": 45.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Undergrowth east",
+   "center": {
+    "x": 12.35,
+    "y": 1.0,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.8,
+    "y": 2.0,
+    "z": 34.0
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Undergrowth west",
+   "center": {
+    "x": -12.45,
+    "y": 1.0,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.6,
+    "y": 2.0,
+    "z": 34.0
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__elven_shrine",
+   "center": {
+    "x": 0.0,
+    "y": 1.5,
+    "z": 21.0
+   },
+   "size": {
+    "x": 4.6,
+    "y": 3.0,
+    "z": 4.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__guardian_statue",
+   "center": {
+    "x": -4.4,
+    "y": 1.5,
+    "z": 12.2
+   },
+   "size": {
+    "x": 1.6,
+    "y": 3.0,
+    "z": 1.6
+   },
+   "yaw": 180.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__guardian_statue",
+   "center": {
+    "x": 4.4,
+    "y": 1.5,
+    "z": 12.2
+   },
+   "size": {
+    "x": 1.6,
+    "y": 3.0,
+    "z": 1.6
+   },
+   "yaw": 180.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__stone_lantern",
+   "center": {
+    "x": -2.6,
+    "y": 1.0,
+    "z": 5.5
+   },
+   "size": {
+    "x": 0.8,
+    "y": 2.0,
+    "z": 0.8
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__stone_lantern",
+   "center": {
+    "x": 2.6,
+    "y": 1.0,
+    "z": 5.5
+   },
+   "size": {
+    "x": 0.8,
+    "y": 2.0,
+    "z": 0.8
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  }
+ ],
+ "lights": [
+  {
+   "name": "Lantern -3,6",
+   "position": {
+    "x": -2.6,
+    "y": 1.6,
+    "z": 5.5
+   },
+   "color": "#ffb86a",
+   "intensity": 1.5,
+   "range": 6.5
+  },
+  {
+   "name": "Shrine rune glow",
+   "position": {
+    "x": 0.0,
+    "y": 1.2,
+    "z": 21.0
+   },
+   "color": "#63ffd1",
+   "intensity": 2.6,
+   "range": 10.0
+  },
+  {
+   "name": "Moonbeam",
+   "position": {
+    "x": 0.0,
+    "y": 8.0,
+    "z": 21.0
+   },
+   "color": "#b8ccff",
+   "intensity": 1.8,
+   "range": 14.0
+  }
+ ]
+}

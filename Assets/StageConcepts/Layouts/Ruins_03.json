@@ -1,0 +1,694 @@
+{
+ "roomId": "Ruins_03",
+ "displayName": "무너진 주거지",
+ "kind": "Combat",
+ "notes": "Collapsed residential street: apartment facades close in on both sides and rubble slides narrow the middle to a gauntlet.",
+ "playerSpawn": {
+  "x": 0.0,
+  "y": 0.05,
+  "z": 4.0
+ },
+ "enemySpawns": [
+  {
+   "x": 0.6,
+   "y": 0.08,
+   "z": 14.0
+  },
+  {
+   "x": -1.4,
+   "y": 0.08,
+   "z": 23.0
+  },
+  {
+   "x": 2.2,
+   "y": 0.08,
+   "z": 30.8
+  }
+ ],
+ "decor": [
+  {
+   "material": "Ruins_Asphalt",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_Asphalt.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_AsphaltPatch",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_AsphaltPatch.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Brick",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_Brick.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Concrete",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_Concrete.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_ConcreteDark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_ConcreteDark.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Dirt",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_Dirt.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Ember",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_Ember.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Ruins_FadedRoadPaint",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_FadedRoadPaint.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Fire",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_Fire.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Ruins_RustedSteel",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_RustedSteel.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Sidewalk",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_Sidewalk.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Soot",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_Soot.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Water",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_Water.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Weeds",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_Weeds.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_WindowVoid",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_03_Ruins_WindowVoid.asset",
+   "castShadows": true
+  }
+ ],
+ "models": [
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 5.6,
+    "y": 0.0,
+    "z": 18.5
+   },
+   "yaw": 20,
+   "targetSize": {
+    "x": 5.0,
+    "y": 1.9,
+    "z": 4.0
+   },
+   "modelYaw": 0.0,
+   "scale": 2.1521274,
+   "offset": {
+    "x": -0.01262,
+    "y": 0.74347,
+    "z": 0.01696
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": -5.8,
+    "y": 0.0,
+    "z": 17.0
+   },
+   "yaw": 200,
+   "targetSize": {
+    "x": 4.6,
+    "y": 1.9,
+    "z": 3.68
+   },
+   "modelYaw": 0.0,
+   "scale": 1.9799572,
+   "offset": {
+    "x": -0.01161,
+    "y": 0.68399,
+    "z": 0.0156
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 6.2,
+    "y": 0.0,
+    "z": 33.5
+   },
+   "yaw": 110,
+   "targetSize": {
+    "x": 3.4,
+    "y": 1.9,
+    "z": 2.72
+   },
+   "modelYaw": 0.0,
+   "scale": 1.4634466,
+   "offset": {
+    "x": -0.00858,
+    "y": 0.50556,
+    "z": 0.01153
+   }
+  },
+  {
+   "key": "burned_car",
+   "position": {
+    "x": -2.6,
+    "y": 0.0,
+    "z": 28.5
+   },
+   "yaw": 25,
+   "targetSize": {
+    "x": 2.0,
+    "y": 1.5,
+    "z": 4.2
+   },
+   "modelYaw": 90.0,
+   "scale": 1.861086,
+   "offset": {
+    "x": 0.00185,
+    "y": 0.75003,
+    "z": 0.0002
+   }
+  },
+  {
+   "key": "bus_stop_ruin",
+   "position": {
+    "x": 7.2,
+    "y": 0.0,
+    "z": 22.2
+   },
+   "yaw": 270,
+   "targetSize": {
+    "x": 4.0,
+    "y": 2.7,
+    "z": 1.7
+   },
+   "modelYaw": 0.0,
+   "scale": 1.5530676,
+   "offset": {
+    "x": -0.00078,
+    "y": 1.14724,
+    "z": -0.01724
+   }
+  },
+  {
+   "key": "ruined_tower",
+   "position": {
+    "x": 18.5,
+    "y": 0.0,
+    "z": 18.0
+   },
+   "yaw": 97.25037700175156,
+   "targetSize": {
+    "x": 8.5,
+    "y": 17.64964,
+    "z": 9.0
+   },
+   "modelYaw": 0.0,
+   "scale": 9.2980502,
+   "offset": {
+    "x": -0.00948,
+    "y": 8.84945,
+    "z": -0.00874
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 16.40953,
+    "y": 0.0,
+    "z": 22.22432
+   },
+   "yaw": 73.39544550998639,
+   "targetSize": {
+    "x": 3.6,
+    "y": 1.5,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6140956,
+   "offset": {
+    "x": -0.00946,
+    "y": 0.5576,
+    "z": 0.01272
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 16.30895,
+    "y": 0.0,
+    "z": 29.03462
+   },
+   "yaw": 202.58286761662958,
+   "targetSize": {
+    "x": 3.6,
+    "y": 1.5,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6140956,
+   "offset": {
+    "x": -0.00946,
+    "y": 0.5576,
+    "z": 0.01272
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 15.80931,
+    "y": 0.0,
+    "z": 29.09136
+   },
+   "yaw": 32.862408748012655,
+   "targetSize": {
+    "x": 3.6,
+    "y": 1.5,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6140956,
+   "offset": {
+    "x": -0.00946,
+    "y": 0.5576,
+    "z": 0.01272
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 15.36347,
+    "y": 0.0,
+    "z": 23.90201
+   },
+   "yaw": 233.52477139100878,
+   "targetSize": {
+    "x": 3.6,
+    "y": 1.5,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6140956,
+   "offset": {
+    "x": -0.00946,
+    "y": 0.5576,
+    "z": 0.01272
+   }
+  },
+  {
+   "key": "concrete_barricade",
+   "position": {
+    "x": -6.6,
+    "y": 0.0,
+    "z": 0.45
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 3.3,
+    "y": 1.25,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 0.8263594,
+   "offset": {
+    "x": -0.00028,
+    "y": 0.62731,
+    "z": 0.00842
+   }
+  },
+  {
+   "key": "concrete_barricade",
+   "position": {
+    "x": 6.6,
+    "y": 0.0,
+    "z": 0.45
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 3.3,
+    "y": 1.25,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 0.8263594,
+   "offset": {
+    "x": -0.00028,
+    "y": 0.62731,
+    "z": 0.00842
+   }
+  },
+  {
+   "key": "concrete_barricade",
+   "position": {
+    "x": -6.6,
+    "y": 0.0,
+    "z": 35.95
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 3.3,
+    "y": 1.25,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 0.8263594,
+   "offset": {
+    "x": -0.00028,
+    "y": 0.62731,
+    "z": 0.00842
+   }
+  },
+  {
+   "key": "concrete_barricade",
+   "position": {
+    "x": 6.6,
+    "y": 0.0,
+    "z": 35.95
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 3.3,
+    "y": 1.25,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 0.8263594,
+   "offset": {
+    "x": -0.00028,
+    "y": 0.62731,
+    "z": 0.00842
+   }
+  }
+ ],
+ "colliders": [
+  {
+   "name": "Block east 4",
+   "center": {
+    "x": 10.4,
+    "y": 1.5,
+    "z": 4.5
+   },
+   "size": {
+    "x": 4.4,
+    "y": 3.0,
+    "z": 6.0
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Block east 13",
+   "center": {
+    "x": 10.4,
+    "y": 1.5,
+    "z": 13.0
+   },
+   "size": {
+    "x": 4.4,
+    "y": 3.0,
+    "z": 7.0
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Block east 28",
+   "center": {
+    "x": 10.4,
+    "y": 1.5,
+    "z": 27.5
+   },
+   "size": {
+    "x": 4.4,
+    "y": 3.0,
+    "z": 6.5
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Block west 8",
+   "center": {
+    "x": -10.2,
+    "y": 1.5,
+    "z": 8.0
+   },
+   "size": {
+    "x": 4.2,
+    "y": 3.0,
+    "z": 6.0
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Block west 24",
+   "center": {
+    "x": -10.2,
+    "y": 1.5,
+    "z": 24.0
+   },
+   "size": {
+    "x": 4.2,
+    "y": 3.0,
+    "z": 7.0
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Block west 33",
+   "center": {
+    "x": -10.2,
+    "y": 1.5,
+    "z": 33.0
+   },
+   "size": {
+    "x": 4.2,
+    "y": 3.0,
+    "z": 4.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Lamp post 4,10",
+   "center": {
+    "x": 4.2,
+    "y": 1.5,
+    "z": 10.0
+   },
+   "size": {
+    "x": 0.35,
+    "y": 3.0,
+    "z": 0.35
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Lamp post -4,30",
+   "center": {
+    "x": -4.4,
+    "y": 1.5,
+    "z": 30.5
+   },
+   "size": {
+    "x": 0.35,
+    "y": 3.0,
+    "z": 0.35
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Barrel -3,11",
+   "center": {
+    "x": -3.4,
+    "y": 0.5,
+    "z": 11.2
+   },
+   "size": {
+    "x": 0.6,
+    "y": 1.0,
+    "z": 0.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Debris band east",
+   "center": {
+    "x": 12.3,
+    "y": 1.0,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.0,
+    "z": 33.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Debris band west",
+   "center": {
+    "x": -12.35,
+    "y": 1.0,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.0,
+    "z": 33.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__rubble_pile",
+   "center": {
+    "x": 5.6,
+    "y": 0.9,
+    "z": 18.5
+   },
+   "size": {
+    "x": 3.6,
+    "y": 1.8,
+    "z": 2.9
+   },
+   "yaw": 20.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__rubble_pile",
+   "center": {
+    "x": -5.8,
+    "y": 0.9,
+    "z": 17.0
+   },
+   "size": {
+    "x": 3.312,
+    "y": 1.8,
+    "z": 2.668
+   },
+   "yaw": 200.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__rubble_pile",
+   "center": {
+    "x": 6.2,
+    "y": 0.9,
+    "z": 33.5
+   },
+   "size": {
+    "x": 2.448,
+    "y": 1.8,
+    "z": 1.972
+   },
+   "yaw": 110.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__burned_car",
+   "center": {
+    "x": -2.6,
+    "y": 0.8,
+    "z": 28.5
+   },
+   "size": {
+    "x": 1.7,
+    "y": 1.6,
+    "z": 3.57
+   },
+   "yaw": 25.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__bus_stop_ruin",
+   "center": {
+    "x": 7.2,
+    "y": 1.2,
+    "z": 22.2
+   },
+   "size": {
+    "x": 3.6,
+    "y": 2.4,
+    "z": 1.3
+   },
+   "yaw": 270.0,
+   "pitch": 0.0,
+   "walkable": false
+  }
+ ],
+ "lights": [
+  {
+   "name": "Streetlight 4,10",
+   "position": {
+    "x": 3.0,
+    "y": 4.0,
+    "z": 10.0
+   },
+   "color": "#ffb46a",
+   "intensity": 1.7,
+   "range": 8.5
+  },
+  {
+   "name": "Barrel fire -3,11",
+   "position": {
+    "x": -3.4,
+    "y": 1.4,
+    "z": 11.2
+   },
+   "color": "#ff8a3a",
+   "intensity": 2.0,
+   "range": 7.0
+  },
+  {
+   "name": "Street glow",
+   "position": {
+    "x": 0.0,
+    "y": 5.0,
+    "z": 20.0
+   },
+   "color": "#ffc68a",
+   "intensity": 1.2,
+   "range": 11.0
+  }
+ ]
+}

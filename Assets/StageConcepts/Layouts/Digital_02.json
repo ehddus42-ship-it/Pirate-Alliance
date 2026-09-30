@@ -1,0 +1,944 @@
+{
+ "roomId": "Digital_02",
+ "displayName": "방화벽 수용소",
+ "kind": "Combat",
+ "notes": "Firewall detention: pod rows on both walls, a kneeling warden robot splitting the hall and two beam barriers forcing a zigzag.",
+ "playerSpawn": {
+  "x": 0.0,
+  "y": 0.05,
+  "z": 4.0
+ },
+ "enemySpawns": [
+  {
+   "x": -4.2,
+   "y": 0.08,
+   "z": 17.0
+  },
+  {
+   "x": 4.5,
+   "y": 0.08,
+   "z": 22.5
+  },
+  {
+   "x": -3.2,
+   "y": 0.08,
+   "z": 31.2
+  }
+ ],
+ "decor": [
+  {
+   "material": "Program_Cyan",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_02_Program_Cyan.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Floor",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_02_Program_Floor.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_FloorDark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_02_Program_FloorDark.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Frame",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_02_Program_Frame.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Grid",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_02_Program_Grid.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Hazard",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_02_Program_Hazard.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Magenta",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_02_Program_Magenta.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Panels",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_02_Program_Panels.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Red",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_02_Program_Red.asset",
+   "castShadows": false
+  }
+ ],
+ "models": [
+  {
+   "key": "containment_pod",
+   "position": {
+    "x": 9.6,
+    "y": 0.0,
+    "z": 6.0
+   },
+   "yaw": 270,
+   "targetSize": {
+    "x": 2.4,
+    "y": 4.6,
+    "z": 2.4
+   },
+   "modelYaw": 0.0,
+   "scale": 2.399177,
+   "offset": {
+    "x": -0.00406,
+    "y": 2.28375,
+    "z": 0.00174
+   }
+  },
+  {
+   "key": "containment_pod",
+   "position": {
+    "x": 9.6,
+    "y": 0.0,
+    "z": 11.0
+   },
+   "yaw": 270,
+   "targetSize": {
+    "x": 2.4,
+    "y": 4.6,
+    "z": 2.4
+   },
+   "modelYaw": 0.0,
+   "scale": 2.399177,
+   "offset": {
+    "x": -0.00406,
+    "y": 2.28375,
+    "z": 0.00174
+   }
+  },
+  {
+   "key": "containment_pod",
+   "position": {
+    "x": 9.6,
+    "y": 0.0,
+    "z": 16.0
+   },
+   "yaw": 270,
+   "targetSize": {
+    "x": 2.4,
+    "y": 4.6,
+    "z": 2.4
+   },
+   "modelYaw": 0.0,
+   "scale": 2.399177,
+   "offset": {
+    "x": -0.00406,
+    "y": 2.28375,
+    "z": 0.00174
+   }
+  },
+  {
+   "key": "containment_pod",
+   "position": {
+    "x": 9.6,
+    "y": 0.0,
+    "z": 21.0
+   },
+   "yaw": 270,
+   "targetSize": {
+    "x": 2.4,
+    "y": 4.6,
+    "z": 2.4
+   },
+   "modelYaw": 0.0,
+   "scale": 2.399177,
+   "offset": {
+    "x": -0.00406,
+    "y": 2.28375,
+    "z": 0.00174
+   }
+  },
+  {
+   "key": "containment_pod",
+   "position": {
+    "x": 9.6,
+    "y": 0.0,
+    "z": 26.0
+   },
+   "yaw": 270,
+   "targetSize": {
+    "x": 2.4,
+    "y": 4.6,
+    "z": 2.4
+   },
+   "modelYaw": 0.0,
+   "scale": 2.399177,
+   "offset": {
+    "x": -0.00406,
+    "y": 2.28375,
+    "z": 0.00174
+   }
+  },
+  {
+   "key": "containment_pod",
+   "position": {
+    "x": 9.6,
+    "y": 0.0,
+    "z": 31.0
+   },
+   "yaw": 270,
+   "targetSize": {
+    "x": 2.4,
+    "y": 4.6,
+    "z": 2.4
+   },
+   "modelYaw": 0.0,
+   "scale": 2.399177,
+   "offset": {
+    "x": -0.00406,
+    "y": 2.28375,
+    "z": 0.00174
+   }
+  },
+  {
+   "key": "containment_pod",
+   "position": {
+    "x": -9.8,
+    "y": 0.0,
+    "z": 8.5
+   },
+   "yaw": 90,
+   "targetSize": {
+    "x": 2.1,
+    "y": 3.6,
+    "z": 2.1
+   },
+   "modelYaw": 0.0,
+   "scale": 1.8923375,
+   "offset": {
+    "x": -0.0032,
+    "y": 1.8013,
+    "z": 0.00137
+   }
+  },
+  {
+   "key": "containment_pod",
+   "position": {
+    "x": -9.8,
+    "y": 0.0,
+    "z": 16.5
+   },
+   "yaw": 90,
+   "targetSize": {
+    "x": 2.1,
+    "y": 3.6,
+    "z": 2.1
+   },
+   "modelYaw": 0.0,
+   "scale": 1.8923375,
+   "offset": {
+    "x": -0.0032,
+    "y": 1.8013,
+    "z": 0.00137
+   }
+  },
+  {
+   "key": "containment_pod",
+   "position": {
+    "x": -9.8,
+    "y": 0.0,
+    "z": 24.5
+   },
+   "yaw": 90,
+   "targetSize": {
+    "x": 2.1,
+    "y": 3.6,
+    "z": 2.1
+   },
+   "modelYaw": 0.0,
+   "scale": 1.8923375,
+   "offset": {
+    "x": -0.0032,
+    "y": 1.8013,
+    "z": 0.00137
+   }
+  },
+  {
+   "key": "containment_pod",
+   "position": {
+    "x": -9.8,
+    "y": 0.0,
+    "z": 32.0
+   },
+   "yaw": 90,
+   "targetSize": {
+    "x": 2.1,
+    "y": 3.6,
+    "z": 2.1
+   },
+   "modelYaw": 0.0,
+   "scale": 1.8923375,
+   "offset": {
+    "x": -0.0032,
+    "y": 1.8013,
+    "z": 0.00137
+   }
+  },
+  {
+   "key": "sentinel_robot",
+   "position": {
+    "x": 0.4,
+    "y": 0.0,
+    "z": 19.6
+   },
+   "yaw": 180,
+   "targetSize": {
+    "x": 4.0,
+    "y": 5.4,
+    "z": 3.8
+   },
+   "modelYaw": 0.0,
+   "scale": 2.6654323,
+   "offset": {
+    "x": 0.04489,
+    "y": 2.54183,
+    "z": -0.00096
+   }
+  },
+  {
+   "key": "firewall_pylon",
+   "position": {
+    "x": -8.4,
+    "y": 0.0,
+    "z": 11.5
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 3.4,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.7877508,
+   "offset": {
+    "x": 0.00055,
+    "y": 1.70158,
+    "z": 0.00183
+   }
+  },
+  {
+   "key": "firewall_pylon",
+   "position": {
+    "x": -5.0,
+    "y": 0.0,
+    "z": 11.5
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 3.4,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.7877508,
+   "offset": {
+    "x": 0.00055,
+    "y": 1.70158,
+    "z": 0.00183
+   }
+  },
+  {
+   "key": "firewall_pylon",
+   "position": {
+    "x": -1.6,
+    "y": 0.0,
+    "z": 11.5
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 3.4,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.7877508,
+   "offset": {
+    "x": 0.00055,
+    "y": 1.70158,
+    "z": 0.00183
+   }
+  },
+  {
+   "key": "firewall_pylon",
+   "position": {
+    "x": 1.6,
+    "y": 0.0,
+    "z": 27.0
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 3.4,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.7877508,
+   "offset": {
+    "x": 0.00055,
+    "y": 1.70158,
+    "z": 0.00183
+   }
+  },
+  {
+   "key": "firewall_pylon",
+   "position": {
+    "x": 5.0,
+    "y": 0.0,
+    "z": 27.0
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 3.4,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.7877508,
+   "offset": {
+    "x": 0.00055,
+    "y": 1.70158,
+    "z": 0.00183
+   }
+  },
+  {
+   "key": "firewall_pylon",
+   "position": {
+    "x": 8.4,
+    "y": 0.0,
+    "z": 27.0
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 3.4,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.7877508,
+   "offset": {
+    "x": 0.00055,
+    "y": 1.70158,
+    "z": 0.00183
+   }
+  },
+  {
+   "key": "security_turret",
+   "position": {
+    "x": 6.4,
+    "y": 0.0,
+    "z": 8.0
+   },
+   "yaw": 220,
+   "targetSize": {
+    "x": 1.8,
+    "y": 2.2,
+    "z": 1.8
+   },
+   "modelYaw": 0.0,
+   "scale": 1.079865,
+   "offset": {
+    "x": 0.00044,
+    "y": 1.02752,
+    "z": 0.00011
+   }
+  },
+  {
+   "key": "security_turret",
+   "position": {
+    "x": -6.4,
+    "y": 0.0,
+    "z": 31.5
+   },
+   "yaw": 40,
+   "targetSize": {
+    "x": 1.6,
+    "y": 2.0,
+    "z": 1.6
+   },
+   "modelYaw": 0.0,
+   "scale": 0.95988,
+   "offset": {
+    "x": 0.00039,
+    "y": 0.91335,
+    "z": 9e-05
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 19.03834,
+    "y": 0.0,
+    "z": 4.0
+   },
+   "yaw": 87.33235252511558,
+   "targetSize": {
+    "x": 5.2,
+    "y": 14.92043,
+    "z": 5.2
+   },
+   "modelYaw": 0.0,
+   "scale": 4.1691289,
+   "offset": {
+    "x": -0.00832,
+    "y": 3.96391,
+    "z": -0.01645
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 18.87505,
+    "y": 0.0,
+    "z": 17.0
+   },
+   "yaw": 98.84101774007998,
+   "targetSize": {
+    "x": 5.2,
+    "y": 14.53155,
+    "z": 5.2
+   },
+   "modelYaw": 0.0,
+   "scale": 4.1691289,
+   "offset": {
+    "x": -0.00832,
+    "y": 3.96391,
+    "z": -0.01645
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 19.06613,
+    "y": 0.0,
+    "z": 30.0
+   },
+   "yaw": 85.78846210917273,
+   "targetSize": {
+    "x": 5.2,
+    "y": 11.04322,
+    "z": 5.2
+   },
+   "modelYaw": 0.0,
+   "scale": 4.1691289,
+   "offset": {
+    "x": -0.00832,
+    "y": 3.96391,
+    "z": -0.01645
+   }
+  }
+ ],
+ "colliders": [
+  {
+   "name": "Firewall beam 12",
+   "center": {
+    "x": -5.0,
+    "y": 1.2,
+    "z": 11.5
+   },
+   "size": {
+    "x": 6.8,
+    "y": 2.4,
+    "z": 0.3
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Firewall beam 27",
+   "center": {
+    "x": 5.0,
+    "y": 1.2,
+    "z": 27.0
+   },
+   "size": {
+    "x": 6.8,
+    "y": 2.4,
+    "z": 0.3
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Rack line east",
+   "center": {
+    "x": 12.3,
+    "y": 1.2,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.4,
+    "z": 33.4
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Rack line west",
+   "center": {
+    "x": -12.4,
+    "y": 1.2,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.4,
+    "z": 33.4
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__containment_pod",
+   "center": {
+    "x": 9.6,
+    "y": 1.5,
+    "z": 6.0
+   },
+   "size": {
+    "x": 1.8,
+    "y": 3.0,
+    "z": 1.8
+   },
+   "yaw": 270.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__containment_pod",
+   "center": {
+    "x": 9.6,
+    "y": 1.5,
+    "z": 11.0
+   },
+   "size": {
+    "x": 1.8,
+    "y": 3.0,
+    "z": 1.8
+   },
+   "yaw": 270.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__containment_pod",
+   "center": {
+    "x": 9.6,
+    "y": 1.5,
+    "z": 16.0
+   },
+   "size": {
+    "x": 1.8,
+    "y": 3.0,
+    "z": 1.8
+   },
+   "yaw": 270.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__containment_pod",
+   "center": {
+    "x": 9.6,
+    "y": 1.5,
+    "z": 21.0
+   },
+   "size": {
+    "x": 1.8,
+    "y": 3.0,
+    "z": 1.8
+   },
+   "yaw": 270.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__containment_pod",
+   "center": {
+    "x": 9.6,
+    "y": 1.5,
+    "z": 26.0
+   },
+   "size": {
+    "x": 1.8,
+    "y": 3.0,
+    "z": 1.8
+   },
+   "yaw": 270.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__containment_pod",
+   "center": {
+    "x": 9.6,
+    "y": 1.5,
+    "z": 31.0
+   },
+   "size": {
+    "x": 1.8,
+    "y": 3.0,
+    "z": 1.8
+   },
+   "yaw": 270.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__containment_pod",
+   "center": {
+    "x": -9.8,
+    "y": 1.5,
+    "z": 8.5
+   },
+   "size": {
+    "x": 1.6,
+    "y": 3.0,
+    "z": 1.6
+   },
+   "yaw": 90.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__containment_pod",
+   "center": {
+    "x": -9.8,
+    "y": 1.5,
+    "z": 16.5
+   },
+   "size": {
+    "x": 1.6,
+    "y": 3.0,
+    "z": 1.6
+   },
+   "yaw": 90.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__containment_pod",
+   "center": {
+    "x": -9.8,
+    "y": 1.5,
+    "z": 24.5
+   },
+   "size": {
+    "x": 1.6,
+    "y": 3.0,
+    "z": 1.6
+   },
+   "yaw": 90.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__containment_pod",
+   "center": {
+    "x": -9.8,
+    "y": 1.5,
+    "z": 32.0
+   },
+   "size": {
+    "x": 1.6,
+    "y": 3.0,
+    "z": 1.6
+   },
+   "yaw": 90.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__sentinel_robot",
+   "center": {
+    "x": 0.4,
+    "y": 1.5,
+    "z": 19.6
+   },
+   "size": {
+    "x": 3.0,
+    "y": 3.0,
+    "z": 2.8
+   },
+   "yaw": 180.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__firewall_pylon",
+   "center": {
+    "x": -8.4,
+    "y": 1.5,
+    "z": 11.5
+   },
+   "size": {
+    "x": 0.7,
+    "y": 3.0,
+    "z": 0.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__firewall_pylon",
+   "center": {
+    "x": -5.0,
+    "y": 1.5,
+    "z": 11.5
+   },
+   "size": {
+    "x": 0.7,
+    "y": 3.0,
+    "z": 0.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__firewall_pylon",
+   "center": {
+    "x": -1.6,
+    "y": 1.5,
+    "z": 11.5
+   },
+   "size": {
+    "x": 0.7,
+    "y": 3.0,
+    "z": 0.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__firewall_pylon",
+   "center": {
+    "x": 1.6,
+    "y": 1.5,
+    "z": 27.0
+   },
+   "size": {
+    "x": 0.7,
+    "y": 3.0,
+    "z": 0.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__firewall_pylon",
+   "center": {
+    "x": 5.0,
+    "y": 1.5,
+    "z": 27.0
+   },
+   "size": {
+    "x": 0.7,
+    "y": 3.0,
+    "z": 0.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__firewall_pylon",
+   "center": {
+    "x": 8.4,
+    "y": 1.5,
+    "z": 27.0
+   },
+   "size": {
+    "x": 0.7,
+    "y": 3.0,
+    "z": 0.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__security_turret",
+   "center": {
+    "x": 6.4,
+    "y": 1.0,
+    "z": 8.0
+   },
+   "size": {
+    "x": 1.3,
+    "y": 2.0,
+    "z": 1.3
+   },
+   "yaw": 220.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__security_turret",
+   "center": {
+    "x": -6.4,
+    "y": 1.0,
+    "z": 31.5
+   },
+   "size": {
+    "x": 1.2,
+    "y": 2.0,
+    "z": 1.2
+   },
+   "yaw": 40.0,
+   "pitch": 0.0,
+   "walkable": false
+  }
+ ],
+ "lights": [
+  {
+   "name": "Warden core",
+   "position": {
+    "x": 0.4,
+    "y": 3.0,
+    "z": 17.5
+   },
+   "color": "#ff3a6a",
+   "intensity": 1.8,
+   "range": 8.0
+  },
+  {
+   "name": "Pods east",
+   "position": {
+    "x": 7.8,
+    "y": 3.0,
+    "z": 14.0
+   },
+   "color": "#37c6ff",
+   "intensity": 1.8,
+   "range": 10.0
+  },
+  {
+   "name": "Pods west",
+   "position": {
+    "x": -8.0,
+    "y": 2.4,
+    "z": 27.0
+   },
+   "color": "#37c6ff",
+   "intensity": 1.4,
+   "range": 8.0
+  }
+ ]
+}

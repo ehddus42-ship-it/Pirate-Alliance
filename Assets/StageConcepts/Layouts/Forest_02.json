@@ -1,0 +1,694 @@
+{
+ "roomId": "Forest_02",
+ "displayName": "달빛 연못",
+ "kind": "Combat",
+ "notes": "Moonlit pond fills the west-centre; the route bends round its east bank with a plank jetty into the water.",
+ "playerSpawn": {
+  "x": 0.0,
+  "y": 0.05,
+  "z": 4.0
+ },
+ "enemySpawns": [
+  {
+   "x": 6.8,
+   "y": 0.08,
+   "z": 14.0
+  },
+  {
+   "x": 3.2,
+   "y": 0.08,
+   "z": 25.0
+  },
+  {
+   "x": -3.0,
+   "y": 0.08,
+   "z": 30.5
+  }
+ ],
+ "decor": [
+  {
+   "material": "Forest_Bark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_Bark.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Earth",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_Earth.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Firefly",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_Firefly.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Forest_Flower",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_Flower.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Forest_Foliage",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_Foliage.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_FoliageDeep",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_FoliageDeep.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_FoliageLight",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_FoliageLight.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Lily",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_Lily.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Moss",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_Moss.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_MossLight",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_MossLight.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Path",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_Path.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Plank",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_Plank.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Reed",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_Reed.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Roots",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_Roots.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Rune",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_Rune.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Forest_Stone",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_Stone.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_StoneDark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_StoneDark.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Water",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_02_Forest_Water.asset",
+   "castShadows": true
+  }
+ ],
+ "models": [
+  {
+   "key": "stone_lantern",
+   "position": {
+    "x": -2.6,
+    "y": 0.0,
+    "z": 15.2
+   },
+   "yaw": 0.0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 2.1,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.1040423,
+   "offset": {
+    "x": -0.00081,
+    "y": 1.05071,
+    "z": 0.00025
+   }
+  },
+  {
+   "key": "mossy_boulders",
+   "position": {
+    "x": -9.8,
+    "y": 0.0,
+    "z": 10.5
+   },
+   "yaw": 110,
+   "targetSize": {
+    "x": 3.6,
+    "y": 2.0,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.2675846,
+   "offset": {
+    "x": 0.00366,
+    "y": 1.001,
+    "z": -0.00105
+   }
+  },
+  {
+   "key": "mossy_boulders",
+   "position": {
+    "x": 0.8,
+    "y": 0.0,
+    "z": 22.8
+   },
+   "yaw": 20,
+   "targetSize": {
+    "x": 2.8,
+    "y": 1.5,
+    "z": 2.4
+   },
+   "modelYaw": 0.0,
+   "scale": 0.9506884,
+   "offset": {
+    "x": 0.00275,
+    "y": 0.75075,
+    "z": -0.00079
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 10.5,
+    "y": 0.0,
+    "z": 7.5
+   },
+   "yaw": 140,
+   "targetSize": {
+    "x": 6.5,
+    "y": 11.0,
+    "z": 6.5
+   },
+   "modelYaw": 0.0,
+   "scale": 3.7855427,
+   "offset": {
+    "x": -0.05079,
+    "y": 3.60308,
+    "z": 0.00867
+   }
+  },
+  {
+   "key": "giant_mushrooms",
+   "position": {
+    "x": 9.8,
+    "y": 0.0,
+    "z": 29.5
+   },
+   "yaw": 250,
+   "targetSize": {
+    "x": 3.6,
+    "y": 3.4,
+    "z": 3.4
+   },
+   "modelYaw": 0.0,
+   "scale": 1.898513,
+   "offset": {
+    "x": -0.00042,
+    "y": 1.63081,
+    "z": 0.0001
+   }
+  },
+  {
+   "key": "giant_mushrooms",
+   "position": {
+    "x": -10.3,
+    "y": 0.0,
+    "z": 27.6
+   },
+   "yaw": 10,
+   "targetSize": {
+    "x": 2.6,
+    "y": 2.4,
+    "z": 2.6
+   },
+   "modelYaw": 0.0,
+   "scale": 1.3711483,
+   "offset": {
+    "x": -0.0003,
+    "y": 1.17781,
+    "z": 7e-05
+   }
+  },
+  {
+   "key": "stone_lantern",
+   "position": {
+    "x": 3.4,
+    "y": 0.0,
+    "z": 5.2
+   },
+   "yaw": 0.0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 2.1,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.1040423,
+   "offset": {
+    "x": -0.00081,
+    "y": 1.05071,
+    "z": 0.00025
+   }
+  },
+  {
+   "key": "stone_lantern",
+   "position": {
+    "x": 7.7,
+    "y": 0.0,
+    "z": 21.0
+   },
+   "yaw": 0.0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 2.1,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.1040423,
+   "offset": {
+    "x": -0.00081,
+    "y": 1.05071,
+    "z": 0.00025
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 17.91301,
+    "y": 1.51956,
+    "z": 4.0
+   },
+   "yaw": 288.6836689375338,
+   "targetSize": {
+    "x": 8.5,
+    "y": 16.28918,
+    "z": 8.5
+   },
+   "modelYaw": 0.0,
+   "scale": 4.9503251,
+   "offset": {
+    "x": -0.06642,
+    "y": 4.71171,
+    "z": 0.01134
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 17.09634,
+    "y": 1.14714,
+    "z": 17.0
+   },
+   "yaw": 97.73118290047489,
+   "targetSize": {
+    "x": 8.5,
+    "y": 15.40216,
+    "z": 8.5
+   },
+   "modelYaw": 0.0,
+   "scale": 4.9503251,
+   "offset": {
+    "x": -0.06642,
+    "y": 4.71171,
+    "z": 0.01134
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 16.40084,
+    "y": 0.77866,
+    "z": 31.0
+   },
+   "yaw": 66.30860268778854,
+   "targetSize": {
+    "x": 8.5,
+    "y": 14.48725,
+    "z": 8.5
+   },
+   "modelYaw": 0.0,
+   "scale": 4.9503251,
+   "offset": {
+    "x": -0.06642,
+    "y": 4.71171,
+    "z": 0.01134
+   }
+  }
+ ],
+ "colliders": [
+  {
+   "name": "Pond_0",
+   "center": {
+    "x": -2.01214,
+    "y": 0.35,
+    "z": 10.22571
+   },
+   "size": {
+    "x": 1.71833,
+    "y": 0.7,
+    "z": 2.48626
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Pond_1",
+   "center": {
+    "x": -3.45891,
+    "y": 0.35,
+    "z": 12.71196
+   },
+   "size": {
+    "x": 7.39292,
+    "y": 0.7,
+    "z": 2.48626
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Pond_2",
+   "center": {
+    "x": -4.38539,
+    "y": 0.35,
+    "z": 14.15255
+   },
+   "size": {
+    "x": 10.27961,
+    "y": 0.7,
+    "z": 0.39491
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Pond_3",
+   "center": {
+    "x": -6.13408,
+    "y": 0.35,
+    "z": 15.2
+   },
+   "size": {
+    "x": 7.06815,
+    "y": 0.7,
+    "z": 1.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Pond_4",
+   "center": {
+    "x": -4.40918,
+    "y": 0.35,
+    "z": 16.24567
+   },
+   "size": {
+    "x": 11.12761,
+    "y": 0.7,
+    "z": 0.39135
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Pond_5",
+   "center": {
+    "x": -4.40951,
+    "y": 0.35,
+    "z": 17.68448
+   },
+   "size": {
+    "x": 11.17477,
+    "y": 0.7,
+    "z": 2.48626
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Pond_6",
+   "center": {
+    "x": -4.36906,
+    "y": 0.35,
+    "z": 20.17073
+   },
+   "size": {
+    "x": 9.84231,
+    "y": 0.7,
+    "z": 2.48626
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Pond_7",
+   "center": {
+    "x": -2.8976,
+    "y": 0.35,
+    "z": 22.65699
+   },
+   "size": {
+    "x": 5.44342,
+    "y": 0.7,
+    "z": 2.48626
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Pond_8",
+   "center": {
+    "x": -2.31491,
+    "y": 0.35,
+    "z": 25.14325
+   },
+   "size": {
+    "x": 1.51711,
+    "y": 0.7,
+    "z": 2.48626
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Undergrowth east",
+   "center": {
+    "x": 12.35,
+    "y": 1.0,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.8,
+    "y": 2.0,
+    "z": 34.0
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Undergrowth west",
+   "center": {
+    "x": -12.45,
+    "y": 1.0,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.6,
+    "y": 2.0,
+    "z": 34.0
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__stone_lantern",
+   "center": {
+    "x": -2.6,
+    "y": 1.0,
+    "z": 15.2
+   },
+   "size": {
+    "x": 0.8,
+    "y": 2.0,
+    "z": 0.8
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__mossy_boulders",
+   "center": {
+    "x": -9.8,
+    "y": 1.0,
+    "z": 10.5
+   },
+   "size": {
+    "x": 1.46562,
+    "y": 2.0,
+    "z": 1.59788
+   },
+   "yaw": 110.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__mossy_boulders",
+   "center": {
+    "x": 0.8,
+    "y": 0.75,
+    "z": 22.8
+   },
+   "size": {
+    "x": 1.09921,
+    "y": 1.5,
+    "z": 1.19841
+   },
+   "yaw": 20.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__ancient_tree",
+   "center": {
+    "x": 10.5,
+    "y": 1.5,
+    "z": 7.5
+   },
+   "size": {
+    "x": 2.2,
+    "y": 3.0,
+    "z": 2.2
+   },
+   "yaw": 140.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__giant_mushrooms",
+   "center": {
+    "x": 9.8,
+    "y": 1.5,
+    "z": 29.5
+   },
+   "size": {
+    "x": 2.376,
+    "y": 3.0,
+    "z": 2.20095
+   },
+   "yaw": 250.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__giant_mushrooms",
+   "center": {
+    "x": -10.3,
+    "y": 1.18023,
+    "z": 27.6
+   },
+   "size": {
+    "x": 1.716,
+    "y": 2.36046,
+    "z": 1.58958
+   },
+   "yaw": 10.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__stone_lantern",
+   "center": {
+    "x": 3.4,
+    "y": 1.0,
+    "z": 5.2
+   },
+   "size": {
+    "x": 0.8,
+    "y": 2.0,
+    "z": 0.8
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__stone_lantern",
+   "center": {
+    "x": 7.7,
+    "y": 1.0,
+    "z": 21.0
+   },
+   "size": {
+    "x": 0.8,
+    "y": 2.0,
+    "z": 0.8
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  }
+ ],
+ "lights": [
+  {
+   "name": "Lantern 3,5",
+   "position": {
+    "x": 3.4,
+    "y": 1.6,
+    "z": 5.2
+   },
+   "color": "#ffb86a",
+   "intensity": 1.5,
+   "range": 6.5
+  },
+  {
+   "name": "Lantern 8,21",
+   "position": {
+    "x": 7.7,
+    "y": 1.6,
+    "z": 21.0
+   },
+   "color": "#ffb86a",
+   "intensity": 1.5,
+   "range": 6.5
+  },
+  {
+   "name": "Moon on the pond",
+   "position": {
+    "x": -4.0,
+    "y": 5.0,
+    "z": 17.5
+   },
+   "color": "#a9c7ff",
+   "intensity": 2.4,
+   "range": 13.0
+  }
+ ]
+}

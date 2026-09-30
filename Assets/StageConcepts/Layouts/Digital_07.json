@@ -1,0 +1,416 @@
+{
+ "roomId": "Digital_07",
+ "displayName": "손상된 섹터",
+ "kind": "Combat",
+ "notes": "Corrupted sector: missing floor panels open red voids along an S-route; toppled racks and glitch cubes spill across the floor.",
+ "playerSpawn": {
+  "x": 0.0,
+  "y": 0.05,
+  "z": 4.0
+ },
+ "enemySpawns": [
+  {
+   "x": 3.4,
+   "y": 0.08,
+   "z": 11.5
+  },
+  {
+   "x": -2.0,
+   "y": 0.08,
+   "z": 18.5
+  },
+  {
+   "x": -1.5,
+   "y": 0.08,
+   "z": 27.5
+  }
+ ],
+ "decor": [
+  {
+   "material": "Program_Cyan",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_07_Program_Cyan.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Floor",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_07_Program_Floor.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_FloorDark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_07_Program_FloorDark.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Frame",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_07_Program_Frame.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Grid",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_07_Program_Grid.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Hazard",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_07_Program_Hazard.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Magenta",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_07_Program_Magenta.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Panels",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_07_Program_Panels.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Red",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_07_Program_Red.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Void",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_07_Program_Void.asset",
+   "castShadows": true
+  }
+ ],
+ "models": [
+  {
+   "key": "broken_server_rack",
+   "position": {
+    "x": -8.6,
+    "y": 0.0,
+    "z": 15.5
+   },
+   "yaw": 40,
+   "targetSize": {
+    "x": 3.4,
+    "y": 2.6,
+    "z": 2.4
+   },
+   "modelYaw": 0.0,
+   "scale": 1.7877188,
+   "offset": {
+    "x": -2e-05,
+    "y": 0.81558,
+    "z": -0.0314
+   }
+  },
+  {
+   "key": "broken_server_rack",
+   "position": {
+    "x": 9.0,
+    "y": 0.0,
+    "z": 22.0
+   },
+   "yaw": 210,
+   "targetSize": {
+    "x": 3.2,
+    "y": 2.4,
+    "z": 2.2
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6725598,
+   "offset": {
+    "x": -2e-05,
+    "y": 0.76305,
+    "z": -0.02938
+   }
+  },
+  {
+   "key": "broken_server_rack",
+   "position": {
+    "x": -1.2,
+    "y": 0.0,
+    "z": 33.0
+   },
+   "yaw": 100,
+   "targetSize": {
+    "x": 2.6,
+    "y": 2.0,
+    "z": 1.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.3670791,
+   "offset": {
+    "x": -2e-05,
+    "y": 0.62368,
+    "z": -0.02401
+   }
+  },
+  {
+   "key": "security_turret",
+   "position": {
+    "x": 8.6,
+    "y": 0.0,
+    "z": 7.4
+   },
+   "yaw": 250,
+   "targetSize": {
+    "x": 1.6,
+    "y": 2.0,
+    "z": 1.6
+   },
+   "modelYaw": 0.0,
+   "scale": 0.95988,
+   "offset": {
+    "x": 0.00039,
+    "y": 0.91335,
+    "z": 9e-05
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 16.49078,
+    "y": 0.0,
+    "z": 12.0
+   },
+   "yaw": 99.986862984583,
+   "targetSize": {
+    "x": 5.2,
+    "y": 12.7244,
+    "z": 5.2
+   },
+   "modelYaw": 0.0,
+   "scale": 4.1691289,
+   "offset": {
+    "x": -0.00832,
+    "y": 3.96391,
+    "z": -0.01645
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 17.14676,
+    "y": 0.0,
+    "z": 26.0
+   },
+   "yaw": 95.22479785431469,
+   "targetSize": {
+    "x": 5.2,
+    "y": 12.48737,
+    "z": 5.2
+   },
+   "modelYaw": 0.0,
+   "scale": 4.1691289,
+   "offset": {
+    "x": -0.00832,
+    "y": 3.96391,
+    "z": -0.01645
+   }
+  }
+ ],
+ "colliders": [
+  {
+   "name": "Void -6,9",
+   "center": {
+    "x": -5.5,
+    "y": 0.35,
+    "z": 9.0
+   },
+   "size": {
+    "x": 3.3,
+    "y": 0.7,
+    "z": 2.7
+   },
+   "yaw": 10.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Void 6,15",
+   "center": {
+    "x": 5.8,
+    "y": 0.35,
+    "z": 15.0
+   },
+   "size": {
+    "x": 3.5,
+    "y": 0.7,
+    "z": 2.9
+   },
+   "yaw": -8.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Void -5,22",
+   "center": {
+    "x": -4.8,
+    "y": 0.35,
+    "z": 22.5
+   },
+   "size": {
+    "x": 3.9,
+    "y": 0.7,
+    "z": 2.7
+   },
+   "yaw": 15.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Void 5,29",
+   "center": {
+    "x": 5.2,
+    "y": 0.35,
+    "z": 29.0
+   },
+   "size": {
+    "x": 3.1,
+    "y": 0.7,
+    "z": 2.3
+   },
+   "yaw": -12.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Rack line east",
+   "center": {
+    "x": 12.3,
+    "y": 1.2,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.4,
+    "z": 33.4
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Rack line west",
+   "center": {
+    "x": -12.4,
+    "y": 1.2,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.4,
+    "z": 33.4
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__broken_server_rack",
+   "center": {
+    "x": -8.6,
+    "y": 0.80893,
+    "z": 15.5
+   },
+   "size": {
+    "x": 2.244,
+    "y": 1.61787,
+    "z": 1.55197
+   },
+   "yaw": 40.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__broken_server_rack",
+   "center": {
+    "x": 9.0,
+    "y": 0.75683,
+    "z": 22.0
+   },
+   "size": {
+    "x": 2.09945,
+    "y": 1.51365,
+    "z": 1.452
+   },
+   "yaw": 210.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__broken_server_rack",
+   "center": {
+    "x": -1.2,
+    "y": 0.6186,
+    "z": 33.0
+   },
+   "size": {
+    "x": 1.716,
+    "y": 1.23719,
+    "z": 1.1868
+   },
+   "yaw": 100.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__security_turret",
+   "center": {
+    "x": 8.6,
+    "y": 1.0,
+    "z": 7.4
+   },
+   "size": {
+    "x": 1.2,
+    "y": 2.0,
+    "z": 1.2
+   },
+   "yaw": 250.0,
+   "pitch": 0.0,
+   "walkable": false
+  }
+ ],
+ "lights": [
+  {
+   "name": "Corruption A",
+   "position": {
+    "x": -5.5,
+    "y": 1.2,
+    "z": 9.0
+   },
+   "color": "#ff2a4a",
+   "intensity": 1.8,
+   "range": 7.0
+  },
+  {
+   "name": "Corruption B",
+   "position": {
+    "x": 5.8,
+    "y": 1.2,
+    "z": 15.0
+   },
+   "color": "#ff2a4a",
+   "intensity": 1.8,
+   "range": 7.0
+  },
+  {
+   "name": "Corruption C",
+   "position": {
+    "x": -4.8,
+    "y": 1.2,
+    "z": 22.5
+   },
+   "color": "#ff2a4a",
+   "intensity": 1.8,
+   "range": 7.0
+  },
+  {
+   "name": "Corruption D",
+   "position": {
+    "x": 5.2,
+    "y": 1.2,
+    "z": 29.0
+   },
+   "color": "#ff2a4a",
+   "intensity": 1.6,
+   "range": 7.0
+  }
+ ]
+}

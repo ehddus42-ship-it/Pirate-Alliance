@@ -1,0 +1,689 @@
+{
+ "roomId": "Digital_05",
+ "displayName": "탈출 프로토콜",
+ "kind": "Threshold",
+ "notes": "Escape protocol: firewall pylons line the approach to the data gateway; upload beams rise beside it into the grid void.",
+ "playerSpawn": {
+  "x": 0.0,
+  "y": 0.05,
+  "z": 4.0
+ },
+ "enemySpawns": [],
+ "decor": [
+  {
+   "material": "Program_Cyan",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_05_Program_Cyan.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Data",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_05_Program_Data.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Floor",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_05_Program_Floor.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_FloorDark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_05_Program_FloorDark.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Frame",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_05_Program_Frame.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Grid",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_05_Program_Grid.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Hazard",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_05_Program_Hazard.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Magenta",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_05_Program_Magenta.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Panels",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_05_Program_Panels.asset",
+   "castShadows": true
+  }
+ ],
+ "models": [
+  {
+   "key": "firewall_pylon",
+   "position": {
+    "x": -4.2,
+    "y": 0.0,
+    "z": 6.0
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 3.6,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.8929126,
+   "offset": {
+    "x": 0.00058,
+    "y": 1.80167,
+    "z": 0.00194
+   }
+  },
+  {
+   "key": "firewall_pylon",
+   "position": {
+    "x": 4.2,
+    "y": 0.0,
+    "z": 6.0
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 3.6,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.8929126,
+   "offset": {
+    "x": 0.00058,
+    "y": 1.80167,
+    "z": 0.00194
+   }
+  },
+  {
+   "key": "firewall_pylon",
+   "position": {
+    "x": -4.2,
+    "y": 0.0,
+    "z": 12.0
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 3.6,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.8929126,
+   "offset": {
+    "x": 0.00058,
+    "y": 1.80167,
+    "z": 0.00194
+   }
+  },
+  {
+   "key": "firewall_pylon",
+   "position": {
+    "x": 4.2,
+    "y": 0.0,
+    "z": 12.0
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 3.6,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.8929126,
+   "offset": {
+    "x": 0.00058,
+    "y": 1.80167,
+    "z": 0.00194
+   }
+  },
+  {
+   "key": "firewall_pylon",
+   "position": {
+    "x": -4.2,
+    "y": 0.0,
+    "z": 18.0
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 3.6,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.8929126,
+   "offset": {
+    "x": 0.00058,
+    "y": 1.80167,
+    "z": 0.00194
+   }
+  },
+  {
+   "key": "firewall_pylon",
+   "position": {
+    "x": 4.2,
+    "y": 0.0,
+    "z": 18.0
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 3.6,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.8929126,
+   "offset": {
+    "x": 0.00058,
+    "y": 1.80167,
+    "z": 0.00194
+   }
+  },
+  {
+   "key": "firewall_pylon",
+   "position": {
+    "x": -4.2,
+    "y": 0.0,
+    "z": 24.0
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 3.6,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.8929126,
+   "offset": {
+    "x": 0.00058,
+    "y": 1.80167,
+    "z": 0.00194
+   }
+  },
+  {
+   "key": "firewall_pylon",
+   "position": {
+    "x": 4.2,
+    "y": 0.0,
+    "z": 24.0
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 3.6,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.8929126,
+   "offset": {
+    "x": 0.00058,
+    "y": 1.80167,
+    "z": 0.00194
+   }
+  },
+  {
+   "key": "data_gateway",
+   "position": {
+    "x": 0.0,
+    "y": 0.4,
+    "z": 33.6
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 8.0,
+    "y": 8.4,
+    "z": 3.2
+   },
+   "modelYaw": 0.0,
+   "scale": 3.732309,
+   "offset": {
+    "x": 0.0008,
+    "y": 2.79528,
+    "z": 0.01285
+   }
+  },
+  {
+   "key": "containment_pod",
+   "position": {
+    "x": -8.6,
+    "y": 0.0,
+    "z": 16.0
+   },
+   "yaw": 90,
+   "targetSize": {
+    "x": 2.4,
+    "y": 4.6,
+    "z": 2.4
+   },
+   "modelYaw": 0.0,
+   "scale": 2.399177,
+   "offset": {
+    "x": -0.00406,
+    "y": 2.28375,
+    "z": 0.00174
+   }
+  },
+  {
+   "key": "sentinel_robot",
+   "position": {
+    "x": 8.4,
+    "y": 0.0,
+    "z": 20.0
+   },
+   "yaw": 250,
+   "targetSize": {
+    "x": 3.6,
+    "y": 5.0,
+    "z": 3.4
+   },
+   "modelYaw": 0.0,
+   "scale": 2.3848605,
+   "offset": {
+    "x": 0.04016,
+    "y": 2.27427,
+    "z": -0.00086
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": -12.0,
+    "y": 0.0,
+    "z": 46.0
+   },
+   "yaw": 37.24060626084248,
+   "targetSize": {
+    "x": 5.0,
+    "y": 16.0,
+    "z": 5.0
+   },
+   "modelYaw": 0.0,
+   "scale": 4.0087778,
+   "offset": {
+    "x": -0.008,
+    "y": 3.81145,
+    "z": -0.01581
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 12.0,
+    "y": 0.0,
+    "z": 44.0
+   },
+   "yaw": 52.45529953851443,
+   "targetSize": {
+    "x": 5.0,
+    "y": 18.0,
+    "z": 5.0
+   },
+   "modelYaw": 0.0,
+   "scale": 4.0087778,
+   "offset": {
+    "x": -0.008,
+    "y": 3.81145,
+    "z": -0.01581
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": -4.0,
+    "y": 0.0,
+    "z": 55.0
+   },
+   "yaw": 1.603227426651661,
+   "targetSize": {
+    "x": 5.0,
+    "y": 22.0,
+    "z": 5.0
+   },
+   "modelYaw": 0.0,
+   "scale": 4.0087778,
+   "offset": {
+    "x": -0.008,
+    "y": 3.81145,
+    "z": -0.01581
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 18.0,
+    "y": 0.0,
+    "z": 54.0
+   },
+   "yaw": 67.45181260128422,
+   "targetSize": {
+    "x": 5.0,
+    "y": 20.0,
+    "z": 5.0
+   },
+   "modelYaw": 0.0,
+   "scale": 4.0087778,
+   "offset": {
+    "x": -0.008,
+    "y": 3.81145,
+    "z": -0.01581
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 16.9234,
+    "y": 0.0,
+    "z": 5.0
+   },
+   "yaw": 88.66598860433032,
+   "targetSize": {
+    "x": 5.2,
+    "y": 12.90144,
+    "z": 5.2
+   },
+   "modelYaw": 0.0,
+   "scale": 4.1691289,
+   "offset": {
+    "x": -0.00832,
+    "y": 3.96391,
+    "z": -0.01645
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 17.11499,
+    "y": 0.0,
+    "z": 17.0
+   },
+   "yaw": 82.16667761842692,
+   "targetSize": {
+    "x": 5.2,
+    "y": 12.96891,
+    "z": 5.2
+   },
+   "modelYaw": 0.0,
+   "scale": 4.1691289,
+   "offset": {
+    "x": -0.00832,
+    "y": 3.96391,
+    "z": -0.01645
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 17.74153,
+    "y": 0.0,
+    "z": 29.0
+   },
+   "yaw": 95.20729126404659,
+   "targetSize": {
+    "x": 5.2,
+    "y": 11.20417,
+    "z": 5.2
+   },
+   "modelYaw": 0.0,
+   "scale": 4.1691289,
+   "offset": {
+    "x": -0.00832,
+    "y": 3.96391,
+    "z": -0.01645
+   }
+  }
+ ],
+ "colliders": [
+  {
+   "name": "Gateway tower -1",
+   "center": {
+    "x": -3.5,
+    "y": 1.5,
+    "z": 33.6
+   },
+   "size": {
+    "x": 1.4,
+    "y": 3.0,
+    "z": 2.4
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Gateway tower 1",
+   "center": {
+    "x": 3.5,
+    "y": 1.5,
+    "z": 33.6
+   },
+   "size": {
+    "x": 1.4,
+    "y": 3.0,
+    "z": 2.4
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Rack line east",
+   "center": {
+    "x": 12.3,
+    "y": 1.2,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.4,
+    "z": 33.4
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Rack line west",
+   "center": {
+    "x": -12.4,
+    "y": 1.2,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.4,
+    "z": 33.4
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__firewall_pylon",
+   "center": {
+    "x": -4.2,
+    "y": 1.5,
+    "z": 6.0
+   },
+   "size": {
+    "x": 0.7,
+    "y": 3.0,
+    "z": 0.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__firewall_pylon",
+   "center": {
+    "x": 4.2,
+    "y": 1.5,
+    "z": 6.0
+   },
+   "size": {
+    "x": 0.7,
+    "y": 3.0,
+    "z": 0.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__firewall_pylon",
+   "center": {
+    "x": -4.2,
+    "y": 1.5,
+    "z": 12.0
+   },
+   "size": {
+    "x": 0.7,
+    "y": 3.0,
+    "z": 0.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__firewall_pylon",
+   "center": {
+    "x": 4.2,
+    "y": 1.5,
+    "z": 12.0
+   },
+   "size": {
+    "x": 0.7,
+    "y": 3.0,
+    "z": 0.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__firewall_pylon",
+   "center": {
+    "x": -4.2,
+    "y": 1.5,
+    "z": 18.0
+   },
+   "size": {
+    "x": 0.7,
+    "y": 3.0,
+    "z": 0.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__firewall_pylon",
+   "center": {
+    "x": 4.2,
+    "y": 1.5,
+    "z": 18.0
+   },
+   "size": {
+    "x": 0.7,
+    "y": 3.0,
+    "z": 0.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__firewall_pylon",
+   "center": {
+    "x": -4.2,
+    "y": 1.5,
+    "z": 24.0
+   },
+   "size": {
+    "x": 0.7,
+    "y": 3.0,
+    "z": 0.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__firewall_pylon",
+   "center": {
+    "x": 4.2,
+    "y": 1.5,
+    "z": 24.0
+   },
+   "size": {
+    "x": 0.7,
+    "y": 3.0,
+    "z": 0.7
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__containment_pod",
+   "center": {
+    "x": -8.6,
+    "y": 1.5,
+    "z": 16.0
+   },
+   "size": {
+    "x": 1.8,
+    "y": 3.0,
+    "z": 1.8
+   },
+   "yaw": 90.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__sentinel_robot",
+   "center": {
+    "x": 8.4,
+    "y": 1.5,
+    "z": 20.0
+   },
+   "size": {
+    "x": 2.6,
+    "y": 3.0,
+    "z": 2.6
+   },
+   "yaw": 250.0,
+   "pitch": 0.0,
+   "walkable": false
+  }
+ ],
+ "lights": [
+  {
+   "name": "Gateway",
+   "position": {
+    "x": 0.0,
+    "y": 4.0,
+    "z": 32.0
+   },
+   "color": "#7df3ff",
+   "intensity": 3.0,
+   "range": 12.0
+  },
+  {
+   "name": "Upload column",
+   "position": {
+    "x": 0.0,
+    "y": 6.0,
+    "z": 48.0
+   },
+   "color": "#9ff8ff",
+   "intensity": 3.0,
+   "range": 20.0
+  }
+ ]
+}

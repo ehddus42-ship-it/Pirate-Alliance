@@ -1,0 +1,657 @@
+{
+ "roomId": "Ruins_07",
+ "displayName": "폐허 광장",
+ "kind": "Combat",
+ "notes": "Ruined plaza: a dry fountain in a paved square with dead planters and benches, a bus shelter and a fallen billboard.",
+ "playerSpawn": {
+  "x": 0.0,
+  "y": 0.05,
+  "z": 4.0
+ },
+ "enemySpawns": [
+  {
+   "x": -5.6,
+   "y": 0.08,
+   "z": 17.5
+  },
+  {
+   "x": 5.8,
+   "y": 0.08,
+   "z": 20.8
+  },
+  {
+   "x": 0.0,
+   "y": 0.08,
+   "z": 29.2
+  }
+ ],
+ "decor": [
+  {
+   "material": "Ruins_Brick",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_07_Ruins_Brick.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Concrete",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_07_Ruins_Concrete.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_ConcreteDark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_07_Ruins_ConcreteDark.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Dirt",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_07_Ruins_Dirt.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Ember",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_07_Ruins_Ember.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Ruins_FadedRoadPaint",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_07_Ruins_FadedRoadPaint.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Fire",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_07_Ruins_Fire.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Ruins_RustedSteel",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_07_Ruins_RustedSteel.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Sidewalk",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_07_Ruins_Sidewalk.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Soot",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_07_Ruins_Soot.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Water",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_07_Ruins_Water.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Weeds",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_07_Ruins_Weeds.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_WindowVoid",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_07_Ruins_WindowVoid.asset",
+   "castShadows": true
+  }
+ ],
+ "models": [
+  {
+   "key": "bus_stop_ruin",
+   "position": {
+    "x": -9.4,
+    "y": 0.0,
+    "z": 28.0
+   },
+   "yaw": 90,
+   "targetSize": {
+    "x": 4.2,
+    "y": 2.8,
+    "z": 1.8
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6444246,
+   "offset": {
+    "x": -0.00082,
+    "y": 1.21472,
+    "z": -0.01826
+   }
+  },
+  {
+   "key": "collapsed_billboard",
+   "position": {
+    "x": 8.6,
+    "y": 0.0,
+    "z": 9.0
+   },
+   "yaw": 250,
+   "targetSize": {
+    "x": 7.6,
+    "y": 6.6,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 3.9967039,
+   "offset": {
+    "x": -0.00309,
+    "y": 2.28535,
+    "z": 0.03422
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 8.4,
+    "y": 0.0,
+    "z": 30.0
+   },
+   "yaw": 60,
+   "targetSize": {
+    "x": 3.6,
+    "y": 1.6,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6140956,
+   "offset": {
+    "x": -0.00946,
+    "y": 0.5576,
+    "z": 0.01272
+   }
+  },
+  {
+   "key": "burned_car",
+   "position": {
+    "x": -8.2,
+    "y": 0.0,
+    "z": 8.0
+   },
+   "yaw": 130,
+   "targetSize": {
+    "x": 2.0,
+    "y": 1.5,
+    "z": 4.2
+   },
+   "modelYaw": 90.0,
+   "scale": 1.861086,
+   "offset": {
+    "x": 0.00185,
+    "y": 0.75003,
+    "z": 0.0002
+   }
+  },
+  {
+   "key": "ruined_tower",
+   "position": {
+    "x": 18.5,
+    "y": 0.0,
+    "z": 6.0
+   },
+   "yaw": 87.26977474884927,
+   "targetSize": {
+    "x": 8.5,
+    "y": 17.47588,
+    "z": 9.0
+   },
+   "modelYaw": 0.0,
+   "scale": 9.2065087,
+   "offset": {
+    "x": -0.00939,
+    "y": 8.76232,
+    "z": -0.00865
+   }
+  },
+  {
+   "key": "ruined_tower",
+   "position": {
+    "x": 18.0,
+    "y": 0.0,
+    "z": 27.0
+   },
+   "yaw": 103.86356219933566,
+   "targetSize": {
+    "x": 8.5,
+    "y": 17.01496,
+    "z": 9.0
+   },
+   "modelYaw": 0.0,
+   "scale": 8.9636924,
+   "offset": {
+    "x": -0.00914,
+    "y": 8.53122,
+    "z": -0.00843
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 14.916,
+    "y": 0.0,
+    "z": 30.1928
+   },
+   "yaw": 62.22747389602057,
+   "targetSize": {
+    "x": 3.6,
+    "y": 1.5,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6140956,
+   "offset": {
+    "x": -0.00946,
+    "y": 0.5576,
+    "z": 0.01272
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 14.37262,
+    "y": 0.0,
+    "z": 5.46777
+   },
+   "yaw": 266.3205492883605,
+   "targetSize": {
+    "x": 3.6,
+    "y": 1.5,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6140956,
+   "offset": {
+    "x": -0.00946,
+    "y": 0.5576,
+    "z": 0.01272
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 16.28541,
+    "y": 0.0,
+    "z": 18.6653
+   },
+   "yaw": 102.3876364495974,
+   "targetSize": {
+    "x": 3.6,
+    "y": 1.5,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6140956,
+   "offset": {
+    "x": -0.00946,
+    "y": 0.5576,
+    "z": 0.01272
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 15.41716,
+    "y": 0.0,
+    "z": 15.2874
+   },
+   "yaw": 53.5414372936395,
+   "targetSize": {
+    "x": 3.6,
+    "y": 1.5,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6140956,
+   "offset": {
+    "x": -0.00946,
+    "y": 0.5576,
+    "z": 0.01272
+   }
+  },
+  {
+   "key": "concrete_barricade",
+   "position": {
+    "x": -6.6,
+    "y": 0.0,
+    "z": 0.45
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 3.3,
+    "y": 1.25,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 0.8263594,
+   "offset": {
+    "x": -0.00028,
+    "y": 0.62731,
+    "z": 0.00842
+   }
+  },
+  {
+   "key": "concrete_barricade",
+   "position": {
+    "x": 6.6,
+    "y": 0.0,
+    "z": 0.45
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 3.3,
+    "y": 1.25,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 0.8263594,
+   "offset": {
+    "x": -0.00028,
+    "y": 0.62731,
+    "z": 0.00842
+   }
+  },
+  {
+   "key": "concrete_barricade",
+   "position": {
+    "x": -6.6,
+    "y": 0.0,
+    "z": 35.95
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 3.3,
+    "y": 1.25,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 0.8263594,
+   "offset": {
+    "x": -0.00028,
+    "y": 0.62731,
+    "z": 0.00842
+   }
+  },
+  {
+   "key": "concrete_barricade",
+   "position": {
+    "x": 6.6,
+    "y": 0.0,
+    "z": 35.95
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 3.3,
+    "y": 1.25,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 0.8263594,
+   "offset": {
+    "x": -0.00028,
+    "y": 0.62731,
+    "z": 0.00842
+   }
+  }
+ ],
+ "colliders": [
+  {
+   "name": "Fountain basin",
+   "center": {
+    "x": 0.0,
+    "y": 0.6,
+    "z": 19.0
+   },
+   "size": {
+    "x": 6.6,
+    "y": 1.2,
+    "z": 6.6
+   },
+   "yaw": 45.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Fountain basin square",
+   "center": {
+    "x": 0.0,
+    "y": 0.6,
+    "z": 19.0
+   },
+   "size": {
+    "x": 6.6,
+    "y": 1.2,
+    "z": 6.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Planter 0",
+   "center": {
+    "x": 2.53095,
+    "y": 0.6,
+    "z": 25.95373
+   },
+   "size": {
+    "x": 1.6,
+    "y": 1.2,
+    "z": 1.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Planter 1",
+   "center": {
+    "x": 6.95373,
+    "y": 0.6,
+    "z": 16.46905
+   },
+   "size": {
+    "x": 1.6,
+    "y": 1.2,
+    "z": 1.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Planter 2",
+   "center": {
+    "x": -2.53095,
+    "y": 0.6,
+    "z": 12.04627
+   },
+   "size": {
+    "x": 1.6,
+    "y": 1.2,
+    "z": 1.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Planter 3",
+   "center": {
+    "x": -6.95373,
+    "y": 0.6,
+    "z": 21.53095
+   },
+   "size": {
+    "x": 1.6,
+    "y": 1.2,
+    "z": 1.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Lamp post 5,3",
+   "center": {
+    "x": 5.0,
+    "y": 1.5,
+    "z": 3.0
+   },
+   "size": {
+    "x": 0.35,
+    "y": 3.0,
+    "z": 0.35
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Lamp post -5,34",
+   "center": {
+    "x": -5.2,
+    "y": 1.5,
+    "z": 34.0
+   },
+   "size": {
+    "x": 0.35,
+    "y": 3.0,
+    "z": 0.35
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Barrel 3,12",
+   "center": {
+    "x": 3.0,
+    "y": 0.5,
+    "z": 12.4
+   },
+   "size": {
+    "x": 0.6,
+    "y": 1.0,
+    "z": 0.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Debris band east",
+   "center": {
+    "x": 12.3,
+    "y": 1.0,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.0,
+    "z": 33.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Debris band west",
+   "center": {
+    "x": -12.35,
+    "y": 1.0,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.0,
+    "z": 33.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__bus_stop_ruin",
+   "center": {
+    "x": -9.4,
+    "y": 1.3,
+    "z": 28.0
+   },
+   "size": {
+    "x": 3.8,
+    "y": 2.6,
+    "z": 1.4
+   },
+   "yaw": 90.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__collapsed_billboard",
+   "center": {
+    "x": 8.6,
+    "y": 1.5,
+    "z": 9.0
+   },
+   "size": {
+    "x": 4.6,
+    "y": 3.0,
+    "z": 1.6
+   },
+   "yaw": 250.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__rubble_pile",
+   "center": {
+    "x": 8.4,
+    "y": 0.75,
+    "z": 30.0
+   },
+   "size": {
+    "x": 2.6,
+    "y": 1.5,
+    "z": 2.2
+   },
+   "yaw": 60.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__burned_car",
+   "center": {
+    "x": -8.2,
+    "y": 0.8,
+    "z": 8.0
+   },
+   "size": {
+    "x": 1.7,
+    "y": 1.6,
+    "z": 3.57
+   },
+   "yaw": 130.0,
+   "pitch": 0.0,
+   "walkable": false
+  }
+ ],
+ "lights": [
+  {
+   "name": "Streetlight 5,3",
+   "position": {
+    "x": 3.8,
+    "y": 4.0,
+    "z": 3.0
+   },
+   "color": "#ffb46a",
+   "intensity": 1.7,
+   "range": 8.5
+  },
+  {
+   "name": "Barrel fire 3,12",
+   "position": {
+    "x": 3.0,
+    "y": 1.4,
+    "z": 12.4
+   },
+   "color": "#ff8a3a",
+   "intensity": 2.0,
+   "range": 7.0
+  }
+ ]
+}

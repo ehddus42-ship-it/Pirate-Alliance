@@ -1,0 +1,641 @@
+{
+ "roomId": "Forest_04",
+ "displayName": "뿌리 회랑",
+ "kind": "Combat",
+ "notes": "Root corridor: a fallen giant blocks the west, a root gate squeezes the route before a clearing opens north.",
+ "playerSpawn": {
+  "x": 0.0,
+  "y": 0.05,
+  "z": 4.0
+ },
+ "enemySpawns": [
+  {
+   "x": -1.0,
+   "y": 0.08,
+   "z": 25.5
+  },
+  {
+   "x": 4.6,
+   "y": 0.08,
+   "z": 29.0
+  },
+  {
+   "x": -6.0,
+   "y": 0.08,
+   "z": 31.5
+  }
+ ],
+ "decor": [
+  {
+   "material": "Forest_Bark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_Bark.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Earth",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_Earth.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Firefly",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_Firefly.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Forest_Flower",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_Flower.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Forest_Foliage",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_Foliage.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_FoliageDeep",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_FoliageDeep.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_FoliageLight",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_FoliageLight.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Moss",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_Moss.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_MossLight",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_MossLight.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Path",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_Path.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Reed",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_Reed.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Roots",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_Roots.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Rune",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_Rune.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Forest_Stone",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_Stone.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_StoneDark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_04_Forest_StoneDark.asset",
+   "castShadows": true
+  }
+ ],
+ "models": [
+  {
+   "key": "fallen_giant_log",
+   "position": {
+    "x": -7.4,
+    "y": 0.0,
+    "z": 16.6
+   },
+   "yaw": 12,
+   "targetSize": {
+    "x": 11.0,
+    "y": 3.2,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 5.7977797,
+   "offset": {
+    "x": -0.01005,
+    "y": 3.17961,
+    "z": -0.04781
+   }
+  },
+  {
+   "key": "root_archway",
+   "position": {
+    "x": 1.7,
+    "y": 0.0,
+    "z": 18.5
+   },
+   "yaw": -6,
+   "targetSize": {
+    "x": 7.6,
+    "y": 6.0,
+    "z": 2.8
+   },
+   "modelYaw": 0.0,
+   "scale": 3.0388307,
+   "offset": {
+    "x": -0.00372,
+    "y": 2.14112,
+    "z": 0.0661
+   }
+  },
+  {
+   "key": "mossy_boulders",
+   "position": {
+    "x": 7.2,
+    "y": 0.0,
+    "z": 17.2
+   },
+   "yaw": 70,
+   "targetSize": {
+    "x": 4.2,
+    "y": 2.4,
+    "z": 3.8
+   },
+   "modelYaw": 0.0,
+   "scale": 1.5211015,
+   "offset": {
+    "x": 0.00439,
+    "y": 1.20119,
+    "z": -0.00126
+   }
+  },
+  {
+   "key": "mossy_boulders",
+   "position": {
+    "x": -3.2,
+    "y": 0.0,
+    "z": 11.0
+   },
+   "yaw": 180,
+   "targetSize": {
+    "x": 2.6,
+    "y": 1.5,
+    "z": 2.2
+   },
+   "modelYaw": 0.0,
+   "scale": 0.9506884,
+   "offset": {
+    "x": 0.00275,
+    "y": 0.75075,
+    "z": -0.00079
+   }
+  },
+  {
+   "key": "root_archway",
+   "position": {
+    "x": 0.9,
+    "y": 0.0,
+    "z": 8.6
+   },
+   "yaw": 8,
+   "targetSize": {
+    "x": 6.6,
+    "y": 5.2,
+    "z": 2.6
+   },
+   "modelYaw": 0.0,
+   "scale": 2.8217714,
+   "offset": {
+    "x": -0.00346,
+    "y": 1.98819,
+    "z": 0.06138
+   }
+  },
+  {
+   "key": "fallen_giant_log",
+   "position": {
+    "x": 6.8,
+    "y": 0.0,
+    "z": 25.4
+   },
+   "yaw": 150,
+   "targetSize": {
+    "x": 7.0,
+    "y": 2.4,
+    "z": 2.4
+   },
+   "modelYaw": 0.0,
+   "scale": 3.6894962,
+   "offset": {
+    "x": -0.0064,
+    "y": 2.02339,
+    "z": -0.03042
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 8.2,
+    "y": 0.0,
+    "z": 30.2
+   },
+   "yaw": 20,
+   "targetSize": {
+    "x": 7.2,
+    "y": 12.0,
+    "z": 7.2
+   },
+   "modelYaw": 0.0,
+   "scale": 4.1932165,
+   "offset": {
+    "x": -0.05626,
+    "y": 3.9911,
+    "z": 0.0096
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 10.6,
+    "y": 0.0,
+    "z": 5.0
+   },
+   "yaw": 300,
+   "targetSize": {
+    "x": 6.0,
+    "y": 10.0,
+    "z": 6.0
+   },
+   "modelYaw": 0.0,
+   "scale": 3.4943471,
+   "offset": {
+    "x": -0.04688,
+    "y": 3.32592,
+    "z": 0.008
+   }
+  },
+  {
+   "key": "stone_lantern",
+   "position": {
+    "x": 3.9,
+    "y": 0.0,
+    "z": 13.6
+   },
+   "yaw": 0.0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 2.1,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.1040423,
+   "offset": {
+    "x": -0.00081,
+    "y": 1.05071,
+    "z": 0.00025
+   }
+  },
+  {
+   "key": "stone_lantern",
+   "position": {
+    "x": -2.3,
+    "y": 0.0,
+    "z": 27.6
+   },
+   "yaw": 0.0,
+   "targetSize": {
+    "x": 0.9,
+    "y": 2.1,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 1.1040423,
+   "offset": {
+    "x": -0.00081,
+    "y": 1.05071,
+    "z": 0.00025
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 15.93546,
+    "y": 0.44781,
+    "z": 12.0
+   },
+   "yaw": 268.7114406421631,
+   "targetSize": {
+    "x": 8.5,
+    "y": 16.1588,
+    "z": 8.5
+   },
+   "modelYaw": 0.0,
+   "scale": 4.9503251,
+   "offset": {
+    "x": -0.06642,
+    "y": 4.71171,
+    "z": 0.01134
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 16.76998,
+    "y": 0.88372,
+    "z": 24.0
+   },
+   "yaw": 143.96773319965263,
+   "targetSize": {
+    "x": 8.5,
+    "y": 15.38016,
+    "z": 8.5
+   },
+   "modelYaw": 0.0,
+   "scale": 4.9503251,
+   "offset": {
+    "x": -0.06642,
+    "y": 4.71171,
+    "z": 0.01134
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 18.49688,
+    "y": 1.77169,
+    "z": 34.0
+   },
+   "yaw": 179.50864979339485,
+   "targetSize": {
+    "x": 8.5,
+    "y": 13.6719,
+    "z": 8.5
+   },
+   "modelYaw": 0.0,
+   "scale": 4.9503251,
+   "offset": {
+    "x": -0.06642,
+    "y": 4.71171,
+    "z": 0.01134
+   }
+  }
+ ],
+ "colliders": [
+  {
+   "name": "Fallen log",
+   "center": {
+    "x": -7.4,
+    "y": 1.2,
+    "z": 16.6
+   },
+   "size": {
+    "x": 10.4,
+    "y": 2.4,
+    "z": 2.0
+   },
+   "yaw": 12.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Root gate -1",
+   "center": {
+    "x": -1.55,
+    "y": 1.5,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.4,
+    "y": 3.0,
+    "z": 2.0
+   },
+   "yaw": -6.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Root gate 1",
+   "center": {
+    "x": 4.95,
+    "y": 1.5,
+    "z": 18.8
+   },
+   "size": {
+    "x": 1.4,
+    "y": 3.0,
+    "z": 2.0
+   },
+   "yaw": -6.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Root arch south -1",
+   "center": {
+    "x": -1.95,
+    "y": 1.5,
+    "z": 8.2
+   },
+   "size": {
+    "x": 1.2,
+    "y": 3.0,
+    "z": 1.8
+   },
+   "yaw": 8.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Root arch south 1",
+   "center": {
+    "x": 3.75,
+    "y": 1.5,
+    "z": 9.0
+   },
+   "size": {
+    "x": 1.2,
+    "y": 3.0,
+    "z": 1.8
+   },
+   "yaw": 8.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Fallen log north",
+   "center": {
+    "x": 6.8,
+    "y": 1.0,
+    "z": 25.4
+   },
+   "size": {
+    "x": 6.4,
+    "y": 2.0,
+    "z": 1.7
+   },
+   "yaw": 150.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Undergrowth east",
+   "center": {
+    "x": 12.35,
+    "y": 1.0,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.8,
+    "y": 2.0,
+    "z": 34.0
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Undergrowth west",
+   "center": {
+    "x": -12.45,
+    "y": 1.0,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.6,
+    "y": 2.0,
+    "z": 34.0
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__mossy_boulders",
+   "center": {
+    "x": 7.2,
+    "y": 1.2,
+    "z": 17.2
+   },
+   "size": {
+    "x": 1.75874,
+    "y": 2.4,
+    "z": 1.91746
+   },
+   "yaw": 70.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__mossy_boulders",
+   "center": {
+    "x": -3.2,
+    "y": 0.75,
+    "z": 11.0
+   },
+   "size": {
+    "x": 1.09921,
+    "y": 1.5,
+    "z": 1.19841
+   },
+   "yaw": 180.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__ancient_tree",
+   "center": {
+    "x": 8.2,
+    "y": 1.5,
+    "z": 30.2
+   },
+   "size": {
+    "x": 2.4,
+    "y": 3.0,
+    "z": 2.4
+   },
+   "yaw": 20.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__ancient_tree",
+   "center": {
+    "x": 10.6,
+    "y": 1.5,
+    "z": 5.0
+   },
+   "size": {
+    "x": 2.0,
+    "y": 3.0,
+    "z": 2.0
+   },
+   "yaw": 300.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__stone_lantern",
+   "center": {
+    "x": 3.9,
+    "y": 1.0,
+    "z": 13.6
+   },
+   "size": {
+    "x": 0.8,
+    "y": 2.0,
+    "z": 0.8
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__stone_lantern",
+   "center": {
+    "x": -2.3,
+    "y": 1.0,
+    "z": 27.6
+   },
+   "size": {
+    "x": 0.8,
+    "y": 2.0,
+    "z": 0.8
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  }
+ ],
+ "lights": [
+  {
+   "name": "Lantern 4,14",
+   "position": {
+    "x": 3.9,
+    "y": 1.6,
+    "z": 13.6
+   },
+   "color": "#ffb86a",
+   "intensity": 1.5,
+   "range": 6.5
+  },
+  {
+   "name": "Lantern -2,28",
+   "position": {
+    "x": -2.3,
+    "y": 1.6,
+    "z": 27.6
+   },
+   "color": "#ffb86a",
+   "intensity": 1.5,
+   "range": 6.5
+  },
+  {
+   "name": "Clearing moonbeam",
+   "position": {
+    "x": -1.0,
+    "y": 6.0,
+    "z": 29.0
+   },
+   "color": "#b3ccff",
+   "intensity": 2.2,
+   "range": 12.0
+  }
+ ]
+}

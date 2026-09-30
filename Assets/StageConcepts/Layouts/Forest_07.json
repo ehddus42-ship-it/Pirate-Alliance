@@ -1,0 +1,546 @@
+{
+ "roomId": "Forest_07",
+ "displayName": "요정의 고리",
+ "kind": "Combat",
+ "notes": "Fairy ring glade: an open meadow inside a broken circle of standing stones, a mushroom ring glowing at its heart.",
+ "playerSpawn": {
+  "x": 0.0,
+  "y": 0.05,
+  "z": 4.0
+ },
+ "enemySpawns": [
+  {
+   "x": 3.8,
+   "y": 0.08,
+   "z": 14.0
+  },
+  {
+   "x": -4.2,
+   "y": 0.08,
+   "z": 23.5
+  },
+  {
+   "x": 4.4,
+   "y": 0.08,
+   "z": 26.5
+  }
+ ],
+ "decor": [
+  {
+   "material": "Forest_Bark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_Bark.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Earth",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_Earth.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Firefly",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_Firefly.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Forest_Flower",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_Flower.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Forest_Foliage",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_Foliage.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_FoliageDeep",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_FoliageDeep.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_FoliageLight",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_FoliageLight.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Moss",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_Moss.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_MossLight",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_MossLight.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_MushroomCap",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_MushroomCap.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Forest_MushroomGill",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_MushroomGill.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Path",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_Path.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Reed",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_Reed.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_Rune",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_Rune.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Forest_Stone",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_Stone.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Forest_StoneDark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Forest_07_Forest_StoneDark.asset",
+   "castShadows": true
+  }
+ ],
+ "models": [
+  {
+   "key": "rune_arch",
+   "position": {
+    "x": -10.4,
+    "y": 0.0,
+    "z": 20.5
+   },
+   "yaw": 90,
+   "targetSize": {
+    "x": 6.0,
+    "y": 6.6,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 3.1600967,
+   "offset": {
+    "x": -0.0015,
+    "y": 3.00734,
+    "z": 0.0015
+   }
+  },
+  {
+   "key": "mossy_boulders",
+   "position": {
+    "x": 8.8,
+    "y": 0.0,
+    "z": 8.5
+   },
+   "yaw": 40,
+   "targetSize": {
+    "x": 4.0,
+    "y": 2.2,
+    "z": 3.4
+   },
+   "modelYaw": 0.0,
+   "scale": 1.3943431,
+   "offset": {
+    "x": 0.00403,
+    "y": 1.10109,
+    "z": -0.00115
+   }
+  },
+  {
+   "key": "mossy_boulders",
+   "position": {
+    "x": 8.0,
+    "y": 0.0,
+    "z": 31.0
+   },
+   "yaw": 220,
+   "targetSize": {
+    "x": 3.4,
+    "y": 1.8,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.1408261,
+   "offset": {
+    "x": 0.00329,
+    "y": 0.9009,
+    "z": -0.00094
+   }
+  },
+  {
+   "key": "guardian_statue",
+   "position": {
+    "x": 10.8,
+    "y": 0.0,
+    "z": 20.0
+   },
+   "yaw": 270,
+   "targetSize": {
+    "x": 2.4,
+    "y": 5.4,
+    "z": 2.2
+   },
+   "modelYaw": 0.0,
+   "scale": 2.838699,
+   "offset": {
+    "x": -0.00239,
+    "y": 2.70164,
+    "z": -0.00128
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": -9.8,
+    "y": 0.0,
+    "z": 4.2
+   },
+   "yaw": 10,
+   "targetSize": {
+    "x": 5.0,
+    "y": 7.5,
+    "z": 5.0
+   },
+   "modelYaw": 0.0,
+   "scale": 2.9119559,
+   "offset": {
+    "x": -0.03907,
+    "y": 2.7716,
+    "z": 0.00667
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 15.61364,
+    "y": 0.55055,
+    "z": 7.0
+   },
+   "yaw": 351.7207767915962,
+   "targetSize": {
+    "x": 8.5,
+    "y": 13.3734,
+    "z": 8.5
+   },
+   "modelYaw": 0.0,
+   "scale": 4.9503251,
+   "offset": {
+    "x": -0.06642,
+    "y": 4.71171,
+    "z": 0.01134
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 18.10421,
+    "y": 1.74922,
+    "z": 19.5
+   },
+   "yaw": 38.00343595797416,
+   "targetSize": {
+    "x": 8.5,
+    "y": 14.82645,
+    "z": 8.5
+   },
+   "modelYaw": 0.0,
+   "scale": 4.9503251,
+   "offset": {
+    "x": -0.06642,
+    "y": 4.71171,
+    "z": 0.01134
+   }
+  },
+  {
+   "key": "ancient_tree",
+   "position": {
+    "x": 17.63042,
+    "y": 1.50292,
+    "z": 32.0
+   },
+   "yaw": 148.354966591093,
+   "targetSize": {
+    "x": 8.5,
+    "y": 13.83488,
+    "z": 8.5
+   },
+   "modelYaw": 0.0,
+   "scale": 4.9503251,
+   "offset": {
+    "x": -0.06642,
+    "y": 4.71171,
+    "z": 0.01134
+   }
+  }
+ ],
+ "colliders": [
+  {
+   "name": "Standing stone 0",
+   "center": {
+    "x": 1.98466,
+    "y": 1.5,
+    "z": 28.38652
+   },
+   "size": {
+    "x": 1.1,
+    "y": 3.0,
+    "z": 0.9
+   },
+   "yaw": 105.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Standing stone 1",
+   "center": {
+    "x": 7.81384,
+    "y": 1.5,
+    "z": 24.1
+   },
+   "size": {
+    "x": 1.1,
+    "y": 3.0,
+    "z": 0.9
+   },
+   "yaw": 150.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Standing stone 2",
+   "center": {
+    "x": 8.95415,
+    "y": 1.5,
+    "z": 17.90244
+   },
+   "size": {
+    "x": 1.1,
+    "y": 3.0,
+    "z": 0.9
+   },
+   "yaw": 190.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Standing stone 3",
+   "center": {
+    "x": 4.3,
+    "y": 1.5,
+    "z": 11.53257
+   },
+   "size": {
+    "x": 1.1,
+    "y": 3.0,
+    "z": 0.9
+   },
+   "yaw": 240.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Standing stone 4",
+   "center": {
+    "x": -4.55714,
+    "y": 1.5,
+    "z": 11.16197
+   },
+   "size": {
+    "x": 1.1,
+    "y": 3.0,
+    "z": 0.9
+   },
+   "yaw": 295.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Standing stone 5",
+   "center": {
+    "x": -9.52105,
+    "y": 1.5,
+    "z": 16.35341
+   },
+   "size": {
+    "x": 1.1,
+    "y": 3.0,
+    "z": 0.9
+   },
+   "yaw": 340.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Standing stone 6",
+   "center": {
+    "x": -8.81384,
+    "y": 1.5,
+    "z": 24.1
+   },
+   "size": {
+    "x": 1.1,
+    "y": 3.0,
+    "z": 0.9
+   },
+   "yaw": 390.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Standing stone 7",
+   "center": {
+    "x": -3.78339,
+    "y": 1.5,
+    "z": 28.14517
+   },
+   "size": {
+    "x": 1.1,
+    "y": 3.0,
+    "z": 0.9
+   },
+   "yaw": 430.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Undergrowth east",
+   "center": {
+    "x": 12.35,
+    "y": 1.0,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.8,
+    "y": 2.0,
+    "z": 34.0
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Undergrowth west",
+   "center": {
+    "x": -12.45,
+    "y": 1.0,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.6,
+    "y": 2.0,
+    "z": 34.0
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__rune_arch",
+   "center": {
+    "x": -10.4,
+    "y": 1.5,
+    "z": 20.5
+   },
+   "size": {
+    "x": 1.2,
+    "y": 3.0,
+    "z": 5.4
+   },
+   "yaw": 90.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__mossy_boulders",
+   "center": {
+    "x": 8.8,
+    "y": 1.1,
+    "z": 8.5
+   },
+   "size": {
+    "x": 1.61218,
+    "y": 2.2,
+    "z": 1.75767
+   },
+   "yaw": 40.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__mossy_boulders",
+   "center": {
+    "x": 8.0,
+    "y": 0.9,
+    "z": 31.0
+   },
+   "size": {
+    "x": 1.31905,
+    "y": 1.8,
+    "z": 1.43809
+   },
+   "yaw": 220.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__guardian_statue",
+   "center": {
+    "x": 10.8,
+    "y": 1.5,
+    "z": 20.0
+   },
+   "size": {
+    "x": 1.5,
+    "y": 3.0,
+    "z": 1.5
+   },
+   "yaw": 270.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__ancient_tree",
+   "center": {
+    "x": -9.8,
+    "y": 1.5,
+    "z": 4.2
+   },
+   "size": {
+    "x": 1.8,
+    "y": 3.0,
+    "z": 1.8
+   },
+   "yaw": 10.0,
+   "pitch": 0.0,
+   "walkable": false
+  }
+ ],
+ "lights": [
+  {
+   "name": "Fairy ring",
+   "position": {
+    "x": -0.5,
+    "y": 1.4,
+    "z": 19.5
+   },
+   "color": "#d1a6ff",
+   "intensity": 2.4,
+   "range": 9.5
+  },
+  {
+   "name": "Arch rune",
+   "position": {
+    "x": -9.0,
+    "y": 2.6,
+    "z": 20.5
+   },
+   "color": "#63ffd1",
+   "intensity": 1.4,
+   "range": 7.0
+  }
+ ]
+}
