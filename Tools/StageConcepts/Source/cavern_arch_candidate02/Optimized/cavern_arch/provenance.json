@@ -1,0 +1,52 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "cave",
+  "prompt": "Single freestanding natural horseshoe rock arch made entirely of fused irregular eroded limestone boulders. Upright inverted U silhouette with two thick rough rocky legs and a curved lumpy rock bridge above. Huge open central hole passes completely through from front to back, visible background through hole. Thin arch depth compared to width. Organic jagged asymmetrical boulder silhouette from every direction, front back and sides are all natural weathered stone. Isolated game environment prop. No cube, no box, no flat planes, no side walls, no back wall, no roof slab, no cave room, no ground plane, no pedestal, no building, no paint, no crystals. Low polygon optimized 5000 triangle mesh, surface erosion carried by normal textures.",
+  "texture_prompt": "Natural unpainted dark neutral grey weathered limestone boulders with warm subtle brown mineral streaks. Rough matte eroded rock surface, fine cracks and pits in normal map, varied stone tones, no blue color, no glow, no metallic sheen, no artificial panels. Organic cave stone.",
+  "preview_task_id": "01a0f17f-6e9f-73a5-a1c4-335eb799abdc",
+  "refine_task_id": "01a0f181-a905-7241-bef8-0068c41ac96f",
+  "created_utc": "2026-09-30T08:51:22.474851+00:00",
+  "requested_triangles": 5000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 5208,
+    "vertices": 7265,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "bytes": 7533376
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 2048px; tangent normals renormalized; binary payload compactly repacked.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 8358904
+}
