@@ -170,6 +170,12 @@ namespace AcRoguelike.Liminal
                         // Keep authored appliances dormant until the player enters their room.
                         ambush.enabled = false;
                     }
+                if (!preview)
+                    foreach (var signal in room.GetComponentsInChildren<TrafficLightBoss>(true))
+                    {
+                        signal.Initialize(health, room, index);
+                        signal.enabled = false;
+                    }
                 bool combat = room.kind == LiminalRoomKind.Combat || room.kind == LiminalRoomKind.Boss;
                 room.SetGates(false, !preview && (combat || i == selection.Length - 1));
             }
@@ -204,11 +210,23 @@ namespace AcRoguelike.Liminal
                     living.Add(ambush.Health);
                 }
             }
+            // A room that authors its own boss replaces the generic silhouette boss.
+            bool authoredBoss = false;
+            foreach (var signal in room.GetComponentsInChildren<TrafficLightBoss>(true))
+            {
+                signal.enabled = true;
+                if (combat && signal.Health.IsAlive)
+                {
+                    signal.Health.Defeated += EnemyDefeated;
+                    living.Add(signal.Health);
+                    authoredBoss = true;
+                }
+            }
             if (combat)
             {
                 room.SetGates(true, true);
                 bool boss = room.kind == LiminalRoomKind.Boss;
-                int count = boss ? 1 : Mathf.Max(1, room.enemySpawns == null ? 0 : room.enemySpawns.Length);
+                int count = authoredBoss ? 0 : boss ? 1 : Mathf.Max(1, room.enemySpawns == null ? 0 : room.enemySpawns.Length);
                 for (int i = 0; i < count; i++)
                 {
                     Transform marker = room.enemySpawns != null && i < room.enemySpawns.Length ? room.enemySpawns[i] : null;

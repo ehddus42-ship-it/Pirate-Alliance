@@ -109,6 +109,13 @@ namespace AcRoguelike.Liminal
                             (enemy.Health.Health < enemy.Health.maxHealth / 2 ? "    ·    두 번째 호출" : "");
                         break;
                     }
+            if (run.CurrentStage.isBossStage && run.LivingEnemyCount > 0)
+                foreach (var signal in FindObjectsByType<TrafficLightBoss>(FindObjectsSortMode.None))
+                    if (signal.enabled && signal.Health && signal.Health.IsAlive && signal.State != TrafficLightBossState.Dormant)
+                    {
+                        bossLabel.text = $"{signal.displayName}    {signal.Health.Health} / {signal.Health.maxHealth}" + (signal.Enraged ? "    ·    점멸" : "");
+                        break;
+                    }
             if (run.Phase == LiminalRunPhase.AugmentChoice && Keyboard.current != null)
             {
                 if (Keyboard.current.digit1Key.wasPressedThisFrame) run.SelectAugment(0);
