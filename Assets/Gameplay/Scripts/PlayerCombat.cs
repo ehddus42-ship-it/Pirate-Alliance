@@ -25,7 +25,7 @@ namespace AcRoguelike
         public float animationBlend = .07f;
 
         public bool IsAttacking => AttackIndex >= 0;
-        /// <summary>Zero-based attack index, or -1 when idle. Maps to Animator states Attack1, Attack2 and Attack3.</summary>
+        /// <summary>Zero-based attack index, or -1 when idle. Maps to Animator states Attack1 to Attack4.</summary>
         public int AttackIndex { get; private set; } = -1;
         public Vector3 AttackDirection { get; private set; }
         public float AnimationSpeed => 1f / attackTimeScale;
@@ -34,6 +34,8 @@ namespace AcRoguelike
         public int CompletedComboCount { get; private set; }
         public int SuccessfulCastCount { get; private set; }
         public InputAction AttackAction => attack;
+        /// <summary>Hits in one combo: one per configured attack duration, at most the four Animator attack states.</summary>
+        public int ComboLength => Mathf.Clamp(attackDurations != null ? attackDurations.Length : 3, 1, AttackStates.Length);
 
         PlayerMotor motor;
         TalismanCaster caster;
@@ -55,7 +57,8 @@ namespace AcRoguelike
         {
             Animator.StringToHash("Base Layer.Attack1"),
             Animator.StringToHash("Base Layer.Attack2"),
-            Animator.StringToHash("Base Layer.Attack3")
+            Animator.StringToHash("Base Layer.Attack3"),
+            Animator.StringToHash("Base Layer.Attack4")
         };
 
         void Awake()
@@ -140,19 +143,19 @@ namespace AcRoguelike
                 }
                 else if (caster.TryCastFromAnimation(attackTarget)) SuccessfulCastCount++;
             }
-            if (AttackIndex < AttackStates.Length - 1 && attackClock >= duration - Mathf.Max(0, comboQueueWindow))
+            if (AttackIndex < ComboLength - 1 && attackClock >= duration - Mathf.Max(0, comboQueueWindow))
             {
                 if (bufferRemaining > 0 || (holdToAttack && held))
                 { nextQueued = true; bufferRemaining = 0; }
             }
             if (attackClock < duration) return;
-            if (nextQueued && AttackIndex < AttackStates.Length - 1)
+            if (nextQueued && AttackIndex < ComboLength - 1)
             {
                 BeginAttack(AttackIndex + 1);
                 return;
             }
 
-            bool finishedCombo = AttackIndex == AttackStates.Length - 1;
+            bool finishedCombo = AttackIndex == ComboLength - 1;
             if (finishedCombo) CompletedComboCount++;
             EndAttack();
             recoveryRemaining = finishedCombo ? Mathf.Max(0, comboRecovery) * attackTimeScale : 0;

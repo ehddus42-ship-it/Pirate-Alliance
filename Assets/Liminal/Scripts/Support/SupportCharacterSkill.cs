@@ -138,9 +138,16 @@ namespace AcRoguelike.Liminal
                 if (d < bestDistance) { bestDistance = d; best = enemy; }
             }
             if (best) return new Vector3(best.transform.position.x, player.position.y, best.transform.position.z);
-            Vector3 forward = Vector3.ProjectOnPlane(player.forward, Vector3.up);
+            Vector3 forward = Vector3.ProjectOnPlane(Facing(player), Vector3.up);
             if (forward.sqrMagnitude < .01f) forward = Vector3.forward;
             return player.position + forward.normalized * 5f;
+        }
+
+        // PlayerMotor turns its visual child; the root keeps its spawn rotation.
+        static Vector3 Facing(Transform player)
+        {
+            var motor = player.GetComponent<PlayerMotor>();
+            return motor && motor.visual ? motor.visual.forward : player.forward;
         }
 
         void FireChomper()
@@ -148,9 +155,10 @@ namespace AcRoguelike.Liminal
             Transform player = run.player;
             Vector3 origin = caster && caster.castOrigin ? caster.castOrigin.position : player.position + Vector3.up * 1.1f;
             TrainingEnemy target = caster && caster.LastTarget && caster.LastTarget.IsAlive ? caster.LastTarget : null;
-            Vector3 side = Vector3.Cross(Vector3.up, player.forward).normalized;
+            Vector3 facing = Facing(player);
+            Vector3 side = Vector3.Cross(Vector3.up, facing).normalized;
             var chomper = new GameObject("Support Skill / Voxel Chomper").AddComponent<SupportChomper>();
-            chomper.Launch(origin + side * (ChompersFired % 2 == 0 ? .45f : -.45f), player.forward, target, chomperDamage, chomperModel);
+            chomper.Launch(origin + side * (ChompersFired % 2 == 0 ? .45f : -.45f), facing, target, chomperDamage, chomperModel);
             ChompersFired++;
         }
 

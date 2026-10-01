@@ -141,7 +141,8 @@ namespace AcRoguelike.Validation
                 var observedIndices = new HashSet<int>();
                 combat.SetAutomationInput(true, true);
                 float comboWait = 0;
-                while (combat.AttackCount - attacksBefore < 3 && comboWait < 6)
+                int comboLength = combat.ComboLength;
+                while (combat.AttackCount - attacksBefore < comboLength && comboWait < 8)
                 {
                     yield return Wait(.04f);
                     comboWait += .04f;
@@ -156,9 +157,9 @@ namespace AcRoguelike.Validation
                 }
                 yield return Wait(.6f);
                 int attackDelta = combat.AttackCount - attacksBefore, castDelta = caster.CastCount - castsBefore;
-                Check("Three-hit combo and projectiles", attackDelta == 3 && castDelta == 3 && combat.CompletedComboCount == combosBefore + 1
-                    && observedIndices.Count == 3 && target.Health < target.maxHealth && !combat.IsAttacking,
-                    "attack indices 0/1/2; exactly 3 attacks and 3 casts; one completed combo; target damaged",
+                Check("Full katana combo hits", attackDelta == comboLength && castDelta == comboLength && combat.CompletedComboCount == combosBefore + 1
+                    && observedIndices.Count == comboLength && target.Health < target.maxHealth && !combat.IsAttacking,
+                    "every attack index; one cast per attack; one completed combo; target damaged",
                     "attacks=" + attackDelta + "; casts=" + castDelta + "; observed states=" + observedIndices.Count
                     + "; combos=" + (combat.CompletedComboCount - combosBefore) + "; damage=" + (target.maxHealth - target.Health));
 

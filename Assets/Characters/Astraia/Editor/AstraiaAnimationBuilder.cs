@@ -21,8 +21,9 @@ namespace AcRoguelike.EditorTools
             {
                 if (EditorApplication.isPlayingOrWillChangePlaymode) return;
                 if (!File.Exists(AstraiaAnimationBuilder.ControllerPath)) return;
-                if (File.Exists(AstraiaAnimationBuilder.Folder + "/Astraia_Slash_03.anim")) return;
-                Debug.Log("[Astraia] Building katana slash motions (Attack1-3) for the melee basic attack.");
+                if (File.Exists(AstraiaAnimationBuilder.Folder + "/Astraia_Katana_04.anim")) return;
+                if (!File.Exists(AstraiaAnimationBuilder.KatanaFolder + "/Katana_IaiDraw.fbx")) return;
+                Debug.Log("[Astraia] Building katana combo motions (Attack1-4) for the melee basic attack.");
                 AstraiaAnimationBuilder.Build();
             };
         }
@@ -45,8 +46,8 @@ namespace AcRoguelike.EditorTools
             var walk = FindClip("HumanF@Walk01_Forward");
             var run = FindClip("HumanF@Run01_Forward");
             var sprint = FindClip("HumanF@Sprint01_Forward");
-            // Katana basic attack (MeleeSlash): horizontal cut, rising backhand, iai draw-cut finisher.
-            var attacks = new[] { MakeSlash(idle, 0), MakeSlash(idle, 1), MakeSlash(idle, 2) };
+            // Katana basic attack (MeleeSlash): four motion-captured cuts in the style of Yae Sakura.
+            var attacks = MakeKatanaCombo() ?? new[] { MakeSlash(idle, 0), MakeSlash(idle, 1), MakeSlash(idle, 2) };
             var dash = MakeDash(sprint);
             var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(ControllerPath);
             if (controller)
@@ -77,7 +78,7 @@ namespace AcRoguelike.EditorTools
             sm.defaultState = locomotion;
             for (int i = 0; i < attacks.Length; i++)
             {
-                var state = sm.AddState("Attack" + (i + 1), new Vector3(510 + i * 220, 180));
+                var state = sm.AddState("Attack" + (i + 1), new Vector3(510 + i * 220, 180 + (i % 2) * 70));
                 state.motion = attacks[i];
                 state.speedParameter = "AttackSpeed";
                 state.speedParameterActive = true;
@@ -169,7 +170,74 @@ namespace AcRoguelike.EditorTools
             return Save(clip);
         }
 
-        // Durations and hit frames match MeleeSlash / PlayerCombat (0.44 / 0.48 / 0.66 s, hits at 0.15 / 0.17 / 0.30 s).
+        public const string KatanaFolder = Folder + "/Katana";
+
+        /// <summary>
+        /// Source motions (Meshy rig + library / text-to-motion, imported as Humanoid) and the part of each used for one
+        /// combo hit: start and end in seconds, and the playback speed baked into the clip. The segment bounds sit at
+        /// the slowest sword-tip moments around each cut, so consecutive hits chain without a pose jump.
+        /// Timing must match MeleeSlash.Durations / HitTimes.
+        /// </summary>
+        static readonly (string file, float start, float end, float speed)[] KatanaSegments =
+        {
+            ("Katana_QuickCombo", 0f, .83f, 1.35f),   // descending cut, hit at 0.50 s
+            ("Katana_QuickCombo", .83f, 1.77f, 1.35f), // follow-up cut, hit at 1.28 s
+            ("Katana_SpinSlash", .15f, .90f, 1.3f),   // spinning cut, hit at 0.63 s
+            ("Katana_IaiDraw", .10f, 1.70f, 1.2f),    // iai draw at 0.70 s and second cut at 1.10 s, then zanshin
+        };
+
+        static AnimationClip[] MakeKatanaCombo()
+        {
+            var clips = new AnimationClip[KatanaSegments.Length];
+            for (int i = 0; i < clips.Length; i++)
+            {
+                var (file, start, end, speed) = KatanaSegments[i];
+                string path = KatanaFolder + "/" + file + ".fbx";
+                var source = AssetDatabase.LoadAllAssetsAtPath(path).OfType<AnimationClip>()
+                    .Where(c => !c.name.StartsWith("__preview__", StringComparison.Ordinal)).OrderByDescending(c => c.length).FirstOrDefault();
+                if (!source || !AnimationUtility.GetCurveBindings(source).Any(b => b.type == typeof(Animator)))
+                {
+                    Debug.LogWarning("[Astraia] Humanoid katana motion missing (" + path + "); using the procedural slashes. Run git lfs pull.");
+                    return null;
+                }
+                clips[i] = Segment(source, "Astraia_Katana_0" + (i + 1), start, Mathf.Min(end, source.length), speed);
+            }
+            return clips;
+        }
+
+        static AnimationClip Segment(AnimationClip source, string name, float start, float end, float speed)
+        {
+            var clip = new AnimationClip { name = name, frameRate = 60 };
+            const float step = 1f / 60f;
+            foreach (var binding in AnimationUtility.GetCurveBindings(source))
+            {
+                if (binding.type != typeof(Animator)) continue;
+                var curve = AnimationUtility.GetEditorCurve(source, binding);
+                var keys = new List<Keyframe>();
+                for (float t = start; t <= end + 1e-4f; t += step) keys.Add(new Keyframe((t - start) / speed, curve.Evaluate(t)));
+                var segment = new AnimationCurve(keys.ToArray());
+                for (int k = 0; k < segment.length; k++)
+                {
+                    AnimationUtility.SetKeyLeftTangentMode(segment, k, AnimationUtility.TangentMode.Linear);
+                    AnimationUtility.SetKeyRightTangentMode(segment, k, AnimationUtility.TangentMode.Linear);
+                }
+                AnimationUtility.SetEditorCurve(clip, binding, segment);
+            }
+            var settings = AnimationUtility.GetAnimationClipSettings(clip);
+            settings.loopTime = false;
+            // Body rotation (the spin) and height stay in the pose; horizontal root travel is dropped, because the
+            // CharacterController and MeleeSlash's lunge move the player.
+            settings.loopBlendOrientation = true;
+            settings.loopBlendPositionY = true;
+            settings.loopBlendPositionXZ = false;
+            settings.keepOriginalOrientation = true;
+            settings.keepOriginalPositionY = true;
+            settings.keepOriginalPositionXZ = false;
+            AnimationUtility.SetAnimationClipSettings(clip, settings);
+            return Save(clip);
+        }
+
+        // Procedural fallback slashes (used only when the katana FBX motions are not available).
         public static readonly float[] SlashDurations = { .44f, .48f, .66f };
         public static readonly float[] SlashHits = { .15f, .17f, .30f };
 
