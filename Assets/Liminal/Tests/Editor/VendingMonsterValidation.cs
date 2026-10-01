@@ -145,7 +145,14 @@ namespace AcRoguelike.Liminal.EditorTests
                     case 11:
                         if(elapsed<.1)break;
                         Check(monster.State==VendingMonsterState.Dead&&!monster.warning.enabled,"Defeat cancels attacks and telegraphs.");
-                        Check(!monster.GetComponent<CharacterController>().enabled&&!monster.limbRenderers.Any(r=>r.enabled),"Defeat disables collision and all limb renderers.");
+                        var death=monster.GetComponent<VendingMonsterDeath>();
+                        Check(!monster.GetComponent<CharacterController>().enabled&&death&&death.Playing,"Defeat disables collision and plays the knock-back death.");
+                        Go(12);break;
+                    case 12:
+                        var dying=monster.GetComponent<VendingMonsterDeath>();
+                        if(dying&&!dying.Finished&&elapsed<5)break;
+                        Check(dying&&dying.Finished&&!monster.limbRenderers.Any(r=>r.enabled)&&!monster.Health.visibleRenderers.Any(r=>r&&r.enabled),
+                            "Death ends with the limbs retracted and the machine hidden.");
                         Finish(true,null);break;
                 }
             }

@@ -28,6 +28,12 @@ namespace AcRoguelike.Liminal
         public LineRenderer warning;
         public AudioSource voice;
         public AudioClip emergeSound, footstepSound, canPullSound, throwSound, impactSound;
+        [Header("Hit reaction")]
+        [Tooltip("Knockback speed of a normal hit (m/s); scaled by the hit's impact.")]
+        public float knockbackSpeed = 3.4f;
+        [Tooltip("How far the cabinet rocks back per normal hit (degrees).")]
+        public float hitTilt = 16f;
+        public float staggerTime = .2f;
         public VendingMonsterState State { get; private set; } = VendingMonsterState.Dormant;
         public TrainingEnemy Health { get; private set; }
         public int ChargeCount { get; private set; }
@@ -45,12 +51,18 @@ namespace AcRoguelike.Liminal
         bool initialized, hitDuringCharge, canPulled, canReleased, aimLocked;
         Vector3 chargeDirection, lockedThrowPoint;
         GameObject heldCan;
+        // Hit reaction: a damped spring rocks the cabinet away from the hit, a squash pops back, the arms lag behind.
+        Vector3 knockback, tiltAxis = Vector3.right;
+        float tilt, tiltVelocity, squash, staggerUntil;
 
         void Awake()
         {
             Health = GetComponent<TrainingEnemy>(); body = GetComponent<CharacterController>();
             if (!animator) animator = GetComponentInChildren<Animator>();
             Health.Defeated += OnDefeated;
+            Health.Damaged += OnDamaged;
+            // The monster plays its own death: knocked flying, limbs shrivel back in, crashes onto its back, sinks.
+            Health.deferDeathVisuals = true;
         }
 
         void Start()
@@ -75,6 +87,7 @@ namespace AcRoguelike.Liminal
             if (!player) player = FindFirstObjectByType<LiminalPlayerHealth>();
             if (!player || !player.IsAlive) { if (warning) warning.enabled = false; return; }
             stateTime += Time.deltaTime;
+            UpdateKnockback();
             Vector3 delta = player.transform.position - transform.position; delta.y = 0;
             float distance = delta.magnitude;
             if (State == VendingMonsterState.Dormant)
@@ -98,7 +111,7 @@ namespace AcRoguelike.Liminal
                         else SetState(VendingMonsterState.CanThrow);
                         break;
                     }
-                    bool walk = distance > 4;
+                    bool walk = distance > 4 && Time.time >= staggerUntil;
                     if (walk)
                     {
                         if (State != VendingMonsterState.Chase) SetState(VendingMonsterState.Chase);
@@ -143,6 +156,7 @@ namespace AcRoguelike.Liminal
 
         void LateUpdate()
         {
+            ApplyHitPose();
             if(State!=VendingMonsterState.CanThrow || !Health || !Health.IsAlive || Time.deltaTime<=0) return;
             // Event fallback also runs after Animator evaluation, covering large frame steps.
             if(!canPulled && stateTime>=VendingMonsterRig.CanGrabTime) PullCan();
@@ -255,6 +269,71 @@ namespace AcRoguelike.Liminal
         }
         void StepSound(float interval) { footstepTime -= Time.deltaTime; if (footstepTime <= 0) { Play(footstepSound, .32f); footstepTime = interval; } }
         void Play(AudioClip clip, float volume) { if (voice && clip) voice.PlayOneShot(clip, volume); }
+        void OnDamaged(TrainingEnemy enemy, int amount)
+        {
+            if (!enemy.IsAlive || State == VendingMonsterState.Dormant) return;
+            Vector3 direction = HitDirection();
+            float impact = Mathf.Clamp(enemy.LastHitImpact, .3f, 2f);
+            // Heavy appliance: a charge barely moves, a wind-up gives a little, everything else is shoved back.
+            float weight = State == VendingMonsterState.Charging ? .2f : State == VendingMonsterState.ChargeWindup || State == VendingMonsterState.Awakening ? .55f : 1f;
+            knockback += direction * knockbackSpeed * impact * weight;
+            Vector3 axis = Vector3.Cross(Vector3.up, direction);
+            if (axis.sqrMagnitude > .001f) tiltAxis = axis.normalized;
+            tiltVelocity += hitTilt * 15f * impact * Mathf.Lerp(.5f, 1f, weight);
+            squash = Mathf.Max(squash, .09f * impact);
+            if (weight >= 1) staggerUntil = Time.time + staggerTime * Mathf.Min(impact, 1.6f);
+            // A hit during the charge wind-up delays the charge a little instead of cancelling it.
+            if (State == VendingMonsterState.ChargeWindup) stateTime = Mathf.Max(0, stateTime - .07f);
+            Vector3 coins = dispenserSocket ? dispenserSocket.position : Health.AimPoint;
+            VendingMonsterDeath.SpillCoins(coins, direction, impact > 1.2f ? 5 : 2);
+            Play(impactSound, .22f);
+        }
+
+        Vector3 HitDirection()
+        {
+            Vector3 direction = Health ? Health.LastHitDirection : Vector3.zero;
+            if (direction.sqrMagnitude < .01f && player) direction = transform.position - player.transform.position;
+            direction.y = 0;
+            return direction.sqrMagnitude > .001f ? direction.normalized : -transform.forward;
+        }
+
+        void UpdateKnockback()
+        {
+            if (knockback.sqrMagnitude < .0025f) { knockback = Vector3.zero; return; }
+            Move(knockback * Time.deltaTime);
+            knockback = Vector3.MoveTowards(knockback, Vector3.zero, 20f * Time.deltaTime);
+        }
+
+        /// <summary>Runs after the Animator: rocks the whole visual on its feet and lets the arms lag behind the jolt.</summary>
+        void ApplyHitPose()
+        {
+            if (!animator || State == VendingMonsterState.Dead) return;
+            float dt = Time.deltaTime;
+            if (dt > 0)
+            {
+                // Under-damped spring (about 2.9 Hz): the cabinet tips away, swings back past upright, settles.
+                const float omega = 18f, damping = .32f;
+                tiltVelocity += (-omega * omega * tilt - 2 * damping * omega * tiltVelocity) * dt;
+                tilt = Mathf.Clamp(tilt + tiltVelocity * dt, -hitTilt * 1.8f, hitTilt * 2.4f);
+                squash = Mathf.MoveTowards(squash, 0, .6f * dt);
+            }
+            Transform visual = animator.transform;
+            if (visual == transform) return;
+            Vector3 localAxis = Quaternion.Inverse(transform.rotation) * tiltAxis;
+            visual.localRotation = Quaternion.AngleAxis(tilt, localAxis);
+            // Impact squash: shorter and wider for a moment, then back.
+            visual.localScale = new Vector3(1 + squash * .55f, 1 - squash, 1 + squash * .55f);
+            if (Mathf.Abs(tilt) < .05f) return;
+            if (rig && State != VendingMonsterState.Dormant)
+            {
+                // The arms hang on for a moment while the body is shoved: they swing the opposite way, a bit later.
+                foreach (var arm in new[] { rig.leftArm, rig.rightArm })
+                    if (arm != null && arm.upper) arm.upper.rotation = Quaternion.AngleAxis(-tilt * 1.7f, tiltAxis) * arm.upper.rotation;
+                foreach (var arm in new[] { rig.leftArm, rig.rightArm })
+                    if (arm != null && arm.lower) arm.lower.rotation = Quaternion.AngleAxis(-tilt * 1.1f, tiltAxis) * arm.lower.rotation;
+            }
+        }
+
         void OnDefeated(TrainingEnemy _)
         {
             State = VendingMonsterState.Dead; Health.CanBeTargeted = false;
@@ -264,8 +343,13 @@ namespace AcRoguelike.Liminal
                 if (can.transform.IsChildOf(transform)) Destroy(can.gameObject);
             if (body) body.enabled = false;
             if (voice) voice.Stop();
+            knockback = Vector3.zero;
+            // A separate component plays the death, so it also runs while this behaviour is disabled.
+            var death = GetComponent<VendingMonsterDeath>();
+            if (!death) death = gameObject.AddComponent<VendingMonsterDeath>();
+            death.Play(this, HitDirection(), Mathf.Clamp(Health ? Health.LastHitImpact : 1, .6f, 2f));
         }
-        void OnDestroy() { if (Health) Health.Defeated -= OnDefeated; if (heldCan) Destroy(heldCan); }
+        void OnDestroy() { if (Health) { Health.Defeated -= OnDefeated; Health.Damaged -= OnDamaged; } if (heldCan) Destroy(heldCan); }
         void OnDrawGizmosSelected() { Gizmos.color = new Color(.1f, .85f, .7f, .7f); Gizmos.DrawWireSphere(transform.position, detectionRadius); }
     }
 }
