@@ -76,6 +76,25 @@ namespace AcRoguelike
         public GameObject katanaModel;
 
         public int HitCount { get; private set; }
+        /// <summary>Counter window after a just dodge: cuts deal more damage and land as heavy hits.</summary>
+        public bool CounterActive => Time.unscaledTime < counterUntil;
+        public float counterMultiplier = 1.6f;
+        [Tooltip("Permanent damage multiplier (lobby upgrades).")]
+        public float damageMultiplier = 1f;
+        float counterUntil;
+
+        bool weaponHidden;
+
+        /// <summary>Hides the katana (lobby outfit) or shows it again.</summary>
+        public void SetWeaponVisible(bool visible)
+        {
+            weaponHidden = !visible;
+            EnsureKatana();
+            if (katana) katana.gameObject.SetActive(visible);
+            if (!visible) { CancelSecondHit(); EndSwing(); }
+        }
+
+        public void GrantCounter(float seconds) => counterUntil = Mathf.Max(counterUntil, Time.unscaledTime + seconds);
         public TrainingEnemy LastHitTarget { get; private set; }
 
         PlayerCombat combat;
@@ -129,6 +148,7 @@ namespace AcRoguelike
             lungeUntil = 0;
             var swing = swings[Mathf.Clamp(index, 0, swings.Length - 1)];
             if (swing.dash) HitFeedback.Dust(transform.position, .7f);
+            HitFeedback.Play(HitFeedback.Sfx.Swing, swing.finisher ? .8f : .55f, swing.finisher ? .85f : 1.1f);
             if (target && target.IsAlive)
             {
                 Vector3 to = Vector3.ProjectOnPlane(target.transform.position - transform.position, Vector3.up);
@@ -171,7 +191,10 @@ namespace AcRoguelike
         bool Cut(Swing swing, int baseDamage, float from, float to, float roll, TrainingEnemy preferred, Vector3 direction, bool second)
         {
             Vector3 chest = transform.position + Vector3.up * 1.05f;
-            bool heavy = swing.finisher && (second || swing.secondHitDelay <= 0);
+            bool counter = CounterActive;
+            baseDamage = Mathf.RoundToInt(baseDamage * Mathf.Max(.1f, damageMultiplier));
+            bool heavy = counter || swing.finisher && (second || swing.secondHitDelay <= 0);
+            if (counter) baseDamage = Mathf.RoundToInt(baseDamage * counterMultiplier);
             bool launch = swing.finisher && second;
             // The arc plays even on a miss, so every swing reads as a cut.
             HitFeedback.SlashArc(chest, direction, from, to, swing.arcRadius, roll, heavy ? .95f : .62f,
@@ -320,7 +343,7 @@ namespace AcRoguelike
 
         void LateUpdate()
         {
-            if (!katana) return;
+            if (!katana || weaponHidden) return;
             if (drawn && hand)
             {
                 // Grip from the humanoid hand: fingers point from the wrist to the knuckles, the blade leaves the fist

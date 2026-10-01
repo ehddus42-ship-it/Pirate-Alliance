@@ -31,6 +31,10 @@ namespace AcRoguelike
         public Vector3 AimPoint { get; private set; }
         public Vector3 PlanarVelocity { get; private set; }
         public int DashCount { get; private set; }
+        /// <summary>Time.time when the latest dash started (for just-dodge timing).</summary>
+        public float LastDashStart { get; private set; } = -10;
+        /// <summary>A successful just dodge refunds the dash.</summary>
+        public void ResetDashCooldown() => cooldownRemaining = 0;
         public InputAction MoveAction => move;
         public InputAction DashAction => dash;
         public InputAction WalkAction => walk;
@@ -168,6 +172,7 @@ namespace AcRoguelike
                 dashDirection = desired.sqrMagnitude > .01f ? desired.normalized : visual.forward;
                 dashDirection = Vector3.ProjectOnPlane(dashDirection, Vector3.up).normalized;
                 dashRemaining = Mathf.Max(.01f, dashDuration); cooldownRemaining = dashCooldown; DashCount++;
+                LastDashStart = Time.time;
                 if (combat) combat.CancelAttack(false);
                 HitFeedback.CancelHitStop();
                 torsoYaw = 0;

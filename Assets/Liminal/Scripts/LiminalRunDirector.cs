@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 namespace AcRoguelike.Liminal
 {
-    public enum LiminalRunPhase { Exploring, AugmentChoice, NextStageChoice, Victory, Defeat, Paused, InvalidConfiguration }
+    public enum LiminalRunPhase { Exploring, AugmentChoice, NextStageChoice, Victory, Defeat, Paused, InvalidConfiguration, Lobby }
 
     [DisallowMultipleComponent]
     public sealed class LiminalRunDirector : MonoBehaviour
@@ -14,6 +14,11 @@ namespace AcRoguelike.Liminal
         public Transform player;
         public Font hudFont;
         public int seed = 73029;
+        [Tooltip("Start in the walkable hunter lobby (talk to the agent, use the gate) instead of straight in a gate.")]
+        public bool startInLobby = true;
+        /// <summary>Magic stones earned in the current run, paid out on returning to the lobby.</summary>
+        public int PendingReward { get; private set; }
+        public LiminalLobby Lobby => lobby;
         public int StageIndex { get; private set; }
         public int ActiveRoomIndex { get; private set; }
         public int LivingEnemyCount => living.Count;
@@ -37,6 +42,10 @@ namespace AcRoguelike.Liminal
         TalismanCaster caster;
         LiminalPlayerHealth health;
         LiminalHud hud;
+        LiminalLobby lobby;
+        PlayerCombat combat;
+        int runsStarted;
+        static readonly Vector3 LobbyOffset = new Vector3(0, 0, -420);
         float originalMoveSpeed, originalWalkSpeed, originalCooldown;
         int originalFlames;
         bool initialized;
@@ -52,6 +61,7 @@ namespace AcRoguelike.Liminal
             {
                 motor = player.GetComponent<PlayerMotor>();
                 caster = player.GetComponent<TalismanCaster>();
+                combat = player.GetComponent<PlayerCombat>();
                 health = player.GetComponent<LiminalPlayerHealth>() ?? player.gameObject.AddComponent<LiminalPlayerHealth>();
                 health.Died += OnPlayerDied;
             }
@@ -60,7 +70,8 @@ namespace AcRoguelike.Liminal
             hud = gameObject.AddComponent<LiminalHud>();
             hud.Initialize(this, hudFont);
             initialized = true;
-            StartNewRun(seed);
+            if (startInLobby) EnterLobby();
+            else StartNewRun(seed);
         }
 
         public void StartNewRun(int newSeed)
@@ -68,6 +79,7 @@ namespace AcRoguelike.Liminal
             if (!initialized) return;
             seed = newSeed;
             StageIndex = 0;
+            PendingReward = 0;
             AugmentHistory = "증강 없음";
             if (motor) { motor.moveSpeed = originalMoveSpeed; motor.walkSpeed = originalWalkSpeed; }
             if (caster) { caster.cooldown = originalCooldown; caster.flameCount = originalFlames; }
@@ -77,6 +89,7 @@ namespace AcRoguelike.Liminal
 
         void Update()
         {
+            if (Phase == LiminalRunPhase.Lobby) return;
             if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 if (Phase == LiminalRunPhase.Exploring) SetPhase(LiminalRunPhase.Paused);
@@ -359,6 +372,8 @@ namespace AcRoguelike.Liminal
             if (cleared[index]) return;
             cleared[index] = true;
             ClearedRoomCount++;
+            var kind = rooms[index].kind;
+            PendingReward += kind == LiminalRoomKind.Boss ? 150 : kind == LiminalRoomKind.Combat ? 15 : 5;
             rooms[index].SetGates(false, index == rooms.Count - 1);
         }
 
@@ -380,6 +395,7 @@ namespace AcRoguelike.Liminal
         public bool TryUseExit()
         {
             if (!ExitAvailable) return false;
+            PendingReward += 40;
             SetPhase(StageIndex >= stages.Length - 1 ? LiminalRunPhase.Victory : LiminalRunPhase.AugmentChoice);
             return true;
         }
@@ -407,11 +423,59 @@ namespace AcRoguelike.Liminal
         void SetPhase(LiminalRunPhase phase)
         {
             Phase = phase;
-            bool exploring = phase == LiminalRunPhase.Exploring;
-            Time.timeScale = exploring ? 1 : 0;
-            if (motor) motor.enabled = exploring;
+            bool exploring = phase == LiminalRunPhase.Exploring, inLobby = phase == LiminalRunPhase.Lobby;
+            Time.timeScale = exploring || inLobby ? 1 : 0;
+            if (motor) motor.enabled = exploring || inLobby;
             if (caster) caster.enabled = exploring;
+            // No sword swings in the lobby: everyday clothes, everyday walk.
+            if (combat) { if (!exploring) combat.CancelAttack(); combat.enabled = exploring; }
             if (hud) hud.RefreshPhase();
+        }
+
+        // ---- lobby ---------------------------------------------------------------------------------------
+        /// <summary>
+        /// The hunter lobby: earnings are paid out, the dungeon route is cleared, and the player walks the
+        /// association plaza in everyday clothes until they use the gate.
+        /// </summary>
+        public void EnterLobby()
+        {
+            if (!initialized) return;
+            if (PendingReward > 0) HunterProgress.Earn(PendingReward);
+            PendingReward = 0;
+            ClearRoute();
+            if (health) health.ResetHealth();
+            if (!lobby) lobby = LiminalLobby.Build(this, transform.position + LobbyOffset, hud);
+            SetPhase(LiminalRunPhase.Lobby);
+            lobby.Enter(player);
+            RoomChanged?.Invoke();
+        }
+
+        public void ReturnToLobby() => EnterLobby();
+
+        /// <summary>Leaves the lobby through the gate: combat outfit, permanent upgrades, a fresh run.</summary>
+        public void EnterDungeon()
+        {
+            if (!initialized || Phase != LiminalRunPhase.Lobby) return;
+            if (lobby) lobby.Leave(player);
+            if (player) HunterProgress.Apply(player.gameObject);
+            int runSeed = runsStarted++ == 0 ? seed : unchecked(seed + 104729 * runsStarted);
+            StartNewRun(runSeed);
+        }
+
+        void ClearRoute()
+        {
+            foreach (var enemy in living) if (enemy) enemy.Defeated -= EnemyDefeated;
+            living.Clear();
+            rooms.Clear();
+            visited = new bool[0];
+            cleared = new bool[0];
+            ActiveRoomIndex = -1;
+            ClearedRoomCount = 0;
+            foreach (var p in FindObjectsByType<PaperProjectile>(FindObjectsSortMode.None)) Destroy(p.gameObject);
+            foreach (var p in FindObjectsByType<BinaryProjectile>(FindObjectsSortMode.None)) Destroy(p.gameObject);
+            foreach (var p in FindObjectsByType<VendingCanProjectile>(FindObjectsSortMode.None)) Destroy(p.gameObject);
+            var route = transform.Find("GeneratedRoute");
+            if (route) { route.gameObject.SetActive(false); Destroy(route.gameObject); }
         }
 
         void OnDestroy()

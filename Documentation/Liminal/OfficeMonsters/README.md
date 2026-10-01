@@ -32,7 +32,7 @@
 | 피격 | 맞은 반대쪽으로 젖혀졌다가 스프링처럼 흔들리며 돌아온다. 맞는 순간 납작해졌다 복원되고, 뒤로 밀리며 잠깐 멈칫한다. 무거운 동작(로커 돌진, 복사기 부채꼴 발사) 중에는 덜 밀린다. |
 | 사망 | 공격 방향으로 날아가 등으로 쓰러진다. 쿵 떨어지며 먼지·불꽃·화면 흔들림이 나고, 한 번 튄다. 누워 있다가 바닥으로 가라앉아 사라진다. |
 | 맵 흔들림 | 무거운 착지는 카메라를 흔든다. 플레이어와 가까울수록 세다(16m 밖은 흔들림 없음). |
-| 예고선 | 모든 공격은 바닥 예고선을 먼저 보여 준다. 대시로 피할 수 있다. |
+| 예고선 | 모든 공격은 바닥 텔레그래프를 먼저 보여 준다. 공격이 준비되는 만큼 붉은 면이 차오르고, 직전에 하얗게 깜빡인다([HitFeel](../HitFeel/README.md#텔레그래프-telegraph-telegraphoverlay)). 대시로 피할 수 있고, 맞기 직전에 피하면 저스트 회피가 된다. 위 미리보기 GIF는 예전 선 모양 예고선이다. |
 
 ## 복사기 (`CopierMonster`)
 
@@ -94,7 +94,7 @@ Inspector가 아니라 코드의 기본값으로 생성된다. 각 클래스의 
 | --- | --- |
 | `CopierMonster` | `hopDistance`, `hopHeight`, `preferredDistance`, `fanSheets`, `fanHalfAngle`, `fanRange`, `fanDamage`, `snipeSheets`, `snipeDamage` |
 | `LockerMonster` | `walkSpeed`, `grabRange`, `throwDamage`, `throwSpeed`, `slamDamage` |
-| `MonitorTurret` | `fireInterval`, `telegraph`, `projectileSpeed`, `range`, `damage` |
+| `MonitorTurret` | `fireInterval`, `telegraphTime`, `projectileSpeed`, `range`, `damage` |
 
 체력은 스테이지마다 올라간다.
 

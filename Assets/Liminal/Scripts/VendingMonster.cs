@@ -57,6 +57,8 @@ namespace AcRoguelike.Liminal
 
         void Awake()
         {
+            // The charge line keeps its LineRenderer (logic and tests) but is drawn as a premium telegraph.
+            TelegraphOverlay.Attach(warning, VendingMonsterRig.WindupDuration);
             Health = GetComponent<TrainingEnemy>(); body = GetComponent<CharacterController>();
             if (!animator) animator = GetComponentInChildren<Animator>();
             Health.Defeated += OnDefeated;

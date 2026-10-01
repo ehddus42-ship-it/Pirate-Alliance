@@ -11,7 +11,7 @@ namespace AcRoguelike.Liminal
     /// - the hit reaction: a damped spring rocks the prop away from the hit, with an impact squash, a knockback
     ///   and a short stagger;
     /// - the death: knocked flying, it falls over, crashes with dust and a camera shake, lies there, then sinks;
-    /// - floor telegraphs and distance-scaled "the floor shook" camera shakes.
+    /// - premium floor telegraphs (<see cref="Telegraph"/>) and distance-scaled "the floor shook" camera shakes.
     /// Subclasses only write a procedural pose (<see cref="poseOffset"/>, <see cref="poseRotation"/>,
     /// <see cref="poseScale"/>) and their attacks in <see cref="Think"/>.
     /// </summary>
@@ -29,7 +29,7 @@ namespace AcRoguelike.Liminal
         protected CharacterController body;
         /// <summary>Hit-reaction pivot (at the feet). Its child <see cref="pose"/> carries the procedural animation.</summary>
         protected Transform visual, pose;
-        protected LineRenderer warning;
+        protected Telegraph telegraph;
         protected int stage;
         protected Vector3 poseOffset;
         protected Quaternion poseRotation = Quaternion.identity;
@@ -67,7 +67,7 @@ namespace AcRoguelike.Liminal
             Health.deferDeathVisuals = true;
             Health.Damaged -= OnDamaged; Health.Damaged += OnDamaged;
             Health.Defeated -= OnDefeated; Health.Defeated += OnDefeated;
-            if (!warning) warning = LiminalMonsterKit.Telegraph(transform, owned);
+            if (!telegraph) telegraph = Telegraph.Create(transform);
             OnSetup();
         }
 
@@ -75,7 +75,7 @@ namespace AcRoguelike.Liminal
         {
             if (!Health || !Health.IsAlive || dying || Time.deltaTime <= 0) return;
             if (!player) player = FindFirstObjectByType<LiminalPlayerHealth>();
-            if (!player || !player.IsAlive) { if (warning) warning.enabled = false; return; }
+            if (!player || !player.IsAlive) { if (telegraph) telegraph.Hide(); return; }
             float dt = Time.deltaTime;
             if (knockback.sqrMagnitude > .0025f)
             {
@@ -208,7 +208,7 @@ namespace AcRoguelike.Liminal
             if (dying) return;
             dying = true;
             IsWindingUp = false;
-            if (warning) warning.enabled = false;
+            if (telegraph) telegraph.Hide();
             if (body) body.enabled = false;
             StartCoroutine(Death());
         }
@@ -265,39 +265,23 @@ namespace AcRoguelike.Liminal
         }
 
         // ---- telegraphs ------------------------------------------------------------------------------------
+        public bool TelegraphVisible => telegraph && telegraph.Visible;
+
         protected void TelegraphFan(Vector3 origin, Vector3 forward, float radius, float halfAngle, float progress)
         {
-            if (!warning) return;
-            const int arc = 24;
-            warning.positionCount = arc + 3;
-            origin.y = transform.position.y + .06f;
-            warning.SetPosition(0, origin);
-            for (int i = 0; i <= arc; i++)
-            {
-                float a = Mathf.Lerp(-halfAngle, halfAngle, i / (float)arc);
-                warning.SetPosition(i + 1, origin + Quaternion.Euler(0, a, 0) * forward * radius);
-            }
-            warning.SetPosition(arc + 2, origin);
-            Style(progress);
+            if (!telegraph) return;
+            origin.y = transform.position.y;
+            telegraph.Fan(origin, forward, radius, halfAngle, progress);
         }
 
         protected void TelegraphLine(Vector3 origin, Vector3 forward, float length, float halfWidth, float progress)
         {
-            if (!warning) return;
-            origin.y = transform.position.y + .06f;
-            Vector3 side = Vector3.Cross(Vector3.up, forward).normalized * halfWidth;
-            warning.positionCount = 5;
-            warning.SetPositions(new[] { origin - side, origin + side, origin + forward * length + side, origin + forward * length - side, origin - side });
-            Style(progress);
+            if (!telegraph) return;
+            origin.y = transform.position.y;
+            telegraph.Line(origin, forward, length, halfWidth, progress);
         }
 
-        void Style(float progress)
-        {
-            warning.enabled = true;
-            warning.widthMultiplier = .04f + .1f * Mathf.Clamp01(progress);
-            warning.startColor = warning.endColor = Color.Lerp(new Color(1, .72f, .28f), new Color(1, .18f, .12f), progress);
-        }
-
-        protected void HideTelegraph() { if (warning) warning.enabled = false; }
+        /// <summary>The telegraphed attack fires now: the telegraph bursts and fades.</summary>
+        protected void HideTelegraph() { if (telegraph) telegraph.Release(); }
     }
 }

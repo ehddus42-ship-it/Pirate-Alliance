@@ -73,6 +73,7 @@ namespace AcRoguelike.Liminal
 
         void Awake()
         {
+            TelegraphOverlay.Attach(warning, TrafficLightBossRig.CarReleaseTime - TrafficLightBossRig.CarAimTime);
             Health = GetComponent<TrainingEnemy>(); body = GetComponent<CharacterController>();
             if (!animator) animator = GetComponentInChildren<Animator>();
             Health.Defeated += OnDefeated;

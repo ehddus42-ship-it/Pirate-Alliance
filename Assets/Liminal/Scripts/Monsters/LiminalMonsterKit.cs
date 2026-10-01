@@ -77,24 +77,6 @@ namespace AcRoguelike.Liminal
             return any ? bounds : new Bounds(Vector3.up * .5f, Vector3.one);
         }
 
-        public static LineRenderer Telegraph(Transform parent, List<Object> owned)
-        {
-            var go = new GameObject("AttackTelegraph") { layer = 2 };
-            go.transform.SetParent(parent, false);
-            var line = go.AddComponent<LineRenderer>();
-            line.useWorldSpace = true;
-            line.numCornerVertices = 3;
-            line.numCapVertices = 3;
-            line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            line.receiveShadows = false;
-            var material = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit") ?? Shader.Find("Sprites/Default"));
-            material.color = new Color(1, .45f, .15f);
-            owned.Add(material);
-            line.sharedMaterial = material;
-            line.enabled = false;
-            return line;
-        }
-
         public static Material Lit(Color color, float smoothness = .5f, float metallic = 0)
         {
             var m = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));

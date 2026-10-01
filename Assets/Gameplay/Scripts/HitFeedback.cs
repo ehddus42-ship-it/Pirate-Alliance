@@ -21,6 +21,11 @@ namespace AcRoguelike
         static Font numberFont;
         static float stopScale = -1;
         static Coroutine stopRoutine;
+        static bool slowMotion;
+        static AudioSource sfxSource;
+        static readonly Dictionary<Sfx, AudioClip> sfxClips = new Dictionary<Sfx, AudioClip>();
+
+        public enum Sfx { Swing, Hit, HeavyHit, JustDodge, Hurt, Thud }
 
         sealed class Runner : MonoBehaviour { }
 
@@ -76,7 +81,7 @@ namespace AcRoguelike
         /// <summary>Briefly slows the game for impact. Never overrides a pause (time scale 0 or a phase change).</summary>
         public static void HitStop(float seconds, float scale = .06f)
         {
-            if (seconds <= 0) return;
+            if (seconds <= 0 || slowMotion) return;
             if (stopScale < 0 && Mathf.Abs(Time.timeScale - 1) > .001f) return;
             if (stopRoutine != null) Host.StopCoroutine(stopRoutine);
             stopRoutine = Host.StartCoroutine(HitStopRoutine(seconds, scale));
@@ -85,12 +90,27 @@ namespace AcRoguelike
         /// <summary>Ends a running hit stop at once (a dash must never be slowed by the hit it cancels).</summary>
         public static void CancelHitStop()
         {
-            if (stopScale < 0) return;
+            if (stopScale < 0 || slowMotion) return;
             if (stopRoutine != null && runner) runner.StopCoroutine(stopRoutine);
             stopRoutine = null;
             if (Mathf.Abs(Time.timeScale - stopScale) < .0001f) Time.timeScale = 1;
             stopScale = -1;
         }
+
+        /// <summary>
+        /// Just-dodge slow motion: the whole world drops to `scale` for `seconds` of real time, then eases back.
+        /// Hit stops are ignored while it runs, and a new dash does not cancel it.
+        /// </summary>
+        public static void SlowMotion(float seconds, float scale)
+        {
+            if (seconds <= 0) return;
+            if (stopScale < 0 && Mathf.Abs(Time.timeScale - 1) > .001f) return; // paused
+            if (stopRoutine != null) Host.StopCoroutine(stopRoutine);
+            slowMotion = true;
+            stopRoutine = Host.StartCoroutine(HitStopRoutine(seconds, scale));
+        }
+
+        public static bool InSlowMotion => slowMotion;
 
         static IEnumerator HitStopRoutine(float seconds, float scale)
         {
@@ -99,7 +119,7 @@ namespace AcRoguelike
             float end = Time.unscaledTime + seconds;
             while (Time.unscaledTime < end)
             {
-                if (Mathf.Abs(Time.timeScale - stopScale) > .0001f) { stopScale = -1; yield break; } // paused meanwhile
+                if (Mathf.Abs(Time.timeScale - stopScale) > .0001f) { stopScale = -1; slowMotion = false; yield break; } // paused meanwhile
                 // Ease back in during the last third so the release does not pop.
                 float left = (end - Time.unscaledTime) / seconds;
                 if (left < .35f) Time.timeScale = stopScale = Mathf.Lerp(1, scale, left / .35f);
@@ -107,6 +127,7 @@ namespace AcRoguelike
             }
             if (Mathf.Abs(Time.timeScale - stopScale) < .0001f) Time.timeScale = 1;
             stopScale = -1;
+            slowMotion = false;
         }
 
         public static void Shake(float amplitude, float duration)
@@ -139,8 +160,119 @@ namespace AcRoguelike
             Sparks(point, direction, heavy ? 22 : 13, heavy ? 1.5f : 1f);
             Petals(point, heavy ? 12 : 6);
             Ring(point, direction, heavy ? 1.6f : 1.0f);
-            if (enemy) Flash(enemy);
+            if (enemy)
+            {
+                Flash(enemy);
+                // The struck body shudders through the hit stop: the impact frame reads as a real collision.
+                var body = enemy.transform.Find("Visual");
+                Jitter(body ? body : enemy.transform.childCount > 0 ? enemy.transform.GetChild(0) : null, heavy ? .1f : .06f, heavy ? .2f : .13f);
+            }
             DamageNumber(point + Vector3.up * .5f, damage, heavy);
+            Play(heavy ? Sfx.HeavyHit : Sfx.Hit, heavy ? .9f : .7f);
+        }
+
+        /// <summary>Shakes a transform's local position for a moment of real time (works during hit stop).</summary>
+        public static void Jitter(Transform target, float amplitude, float seconds)
+        {
+            if (!target) return;
+            var jitter = target.GetComponent<ImpactJitter>();
+            if (!jitter) jitter = target.gameObject.AddComponent<ImpactJitter>();
+            jitter.Play(amplitude, seconds);
+        }
+
+        /// <summary>Tints every renderer under `root` for a moment (player hurt flash, generic objects).</summary>
+        public static void FlashObject(GameObject root, Color color, float seconds = .12f)
+        {
+            if (!root) return;
+            var flash = root.GetComponent<HitFlash>();
+            if (!flash) flash = root.AddComponent<HitFlash>();
+            flash.Trigger(color, seconds);
+        }
+
+        // ---- sound ----------------------------------------------------------------------------------------
+        /// <summary>Procedurally synthesised one-shots, so the hit feel needs no audio assets.</summary>
+        public static void Play(Sfx kind, float volume = 1, float pitch = 1)
+        {
+            if (!sfxSource)
+            {
+                sfxSource = Host.gameObject.AddComponent<AudioSource>();
+                sfxSource.playOnAwake = false;
+                sfxSource.spatialBlend = 0;
+                sfxSource.ignoreListenerPause = false;
+            }
+            if (!sfxClips.TryGetValue(kind, out var clip) || !clip) sfxClips[kind] = clip = Synthesize(kind);
+            sfxSource.pitch = pitch * Random.Range(.95f, 1.05f);
+            sfxSource.PlayOneShot(clip, volume);
+        }
+
+        static AudioClip Synthesize(Sfx kind)
+        {
+            const int rate = 44100;
+            float length = kind switch { Sfx.Swing => .2f, Sfx.Hit => .16f, Sfx.HeavyHit => .4f, Sfx.JustDodge => .9f, Sfx.Hurt => .3f, _ => .35f };
+            int n = Mathf.CeilToInt(length * rate);
+            var data = new float[n];
+            var random = new System.Random((int)kind * 7919 + 13);
+            float low = 0, band = 0;
+            for (int i = 0; i < n; i++)
+            {
+                float t = i / (float)rate, u = t / length;
+                float noise = (float)(random.NextDouble() * 2 - 1);
+                float v = 0;
+                switch (kind)
+                {
+                    case Sfx.Swing:
+                    {
+                        // Air whoosh: noise through a band that sweeps up, swelling then cut off.
+                        float cutoff = Mathf.Lerp(.05f, .35f, u);
+                        low += cutoff * (noise - low); band += cutoff * (low - band);
+                        v = (low - band) * 3.2f * Mathf.Sin(Mathf.PI * Mathf.Pow(u, .7f));
+                        break;
+                    }
+                    case Sfx.Hit:
+                    {
+                        // Slash impact: a bright crack, then a short low thump.
+                        float crack = noise * Mathf.Exp(-t * 90f);
+                        float thump = Mathf.Sin(2 * Mathf.PI * Mathf.Lerp(180, 70, u) * t) * Mathf.Exp(-t * 28f);
+                        v = crack * .7f + thump * .8f;
+                        break;
+                    }
+                    case Sfx.HeavyHit:
+                    {
+                        float crack = noise * Mathf.Exp(-t * 45f);
+                        float thump = Mathf.Sin(2 * Mathf.PI * Mathf.Lerp(120, 45, u) * t) * Mathf.Exp(-t * 11f);
+                        float ring = Mathf.Sin(2 * Mathf.PI * 1250 * t) * Mathf.Exp(-t * 9f) * .25f;
+                        v = crack * .6f + thump + ring;
+                        break;
+                    }
+                    case Sfx.JustDodge:
+                    {
+                        // Glassy time-stop chime over a reversed swell of air.
+                        float chime = (Mathf.Sin(2 * Mathf.PI * 1320 * t) + .6f * Mathf.Sin(2 * Mathf.PI * 1980 * t) + .3f * Mathf.Sin(2 * Mathf.PI * 2640 * t))
+                                      * Mathf.Exp(-t * 4.5f) * Mathf.Clamp01(t * 60f);
+                        low += .08f * (noise - low);
+                        float swell = low * Mathf.Pow(Mathf.Clamp01(1 - u * 3f), 2) * 2.5f;
+                        v = chime * .35f + swell;
+                        break;
+                    }
+                    case Sfx.Hurt:
+                    {
+                        float thud = Mathf.Sin(2 * Mathf.PI * Mathf.Lerp(140, 60, u) * t) * Mathf.Exp(-t * 14f);
+                        v = Mathf.Clamp(thud * 1.6f, -1, 1) * .8f + noise * Mathf.Exp(-t * 60f) * .5f;
+                        break;
+                    }
+                    default:
+                    {
+                        float thud = Mathf.Sin(2 * Mathf.PI * Mathf.Lerp(80, 38, u) * t) * Mathf.Exp(-t * 9f);
+                        low += .05f * (noise - low);
+                        v = thud + low * Mathf.Exp(-t * 12f) * 2f;
+                        break;
+                    }
+                }
+                data[i] = Mathf.Clamp(v, -1, 1) * .85f;
+            }
+            var clip = AudioClip.Create("Sfx " + kind, n, 1, rate, false);
+            clip.SetData(data, 0);
+            return clip;
         }
 
         public static void Sparks(Vector3 point, Vector3 direction, int count, float scale)
@@ -443,18 +575,25 @@ namespace AcRoguelike
         static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
         static readonly int Emission = Shader.PropertyToID("_EmissionColor");
 
-        public void Trigger()
+        Color tint = new Color(1f, .93f, .96f), glow = new Color(1f, .7f, .85f) * 1.5f;
+
+        public void Trigger() => Trigger(new Color(1f, .93f, .96f), .09f);
+
+        public void Trigger(Color color, float seconds)
         {
+            tint = color;
+            glow = color * 1.5f;
             if (renderers == null) renderers = GetComponentsInChildren<Renderer>(true);
             block ??= new MaterialPropertyBlock();
-            until = Time.time + .09f;
+            // Real time, so the flash does not linger through a hit stop.
+            until = Time.unscaledTime + seconds;
             enabled = true;
             Apply(true);
         }
 
         void Update()
         {
-            if (Time.time < until) return;
+            if (Time.unscaledTime < until) return;
             Apply(false);
             enabled = false;
         }
@@ -467,8 +606,8 @@ namespace AcRoguelike
                 if (on)
                 {
                     block.Clear();
-                    block.SetColor(BaseColor, new Color(1f, .93f, .96f));
-                    block.SetColor(Emission, new Color(1f, .7f, .85f) * 1.5f);
+                    block.SetColor(BaseColor, tint);
+                    block.SetColor(Emission, glow);
                     r.SetPropertyBlock(block);
                 }
                 else r.SetPropertyBlock(null);
@@ -614,5 +753,32 @@ namespace AcRoguelike
             meshRenderer.SetPropertyBlock(block);
             transform.localScale = Vector3.one * (1 + .04f * t);
         }
+    }
+
+    /// <summary>Real-time positional shudder of a struck body, decaying to rest.</summary>
+    sealed class ImpactJitter : MonoBehaviour
+    {
+        float amplitude, until, duration;
+        Vector3 offset;
+
+        public void Play(float amount, float seconds)
+        {
+            amplitude = Mathf.Max(amplitude * Mathf.Clamp01((until - Time.unscaledTime) / Mathf.Max(.001f, duration)), amount);
+            duration = seconds;
+            until = Time.unscaledTime + seconds;
+            enabled = true;
+        }
+
+        void LateUpdate()
+        {
+            transform.localPosition -= offset;
+            float left = (until - Time.unscaledTime) / Mathf.Max(.001f, duration);
+            if (left <= 0) { offset = Vector3.zero; enabled = false; return; }
+            float a = amplitude * left * left;
+            offset = new Vector3(Random.Range(-a, a), Random.Range(-a, a) * .35f, Random.Range(-a, a));
+            transform.localPosition += offset;
+        }
+
+        void OnDisable() { transform.localPosition -= offset; offset = Vector3.zero; }
     }
 }

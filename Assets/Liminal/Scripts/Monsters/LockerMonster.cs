@@ -170,7 +170,10 @@ namespace AcRoguelike.Liminal
                     {
                         var motor = player.GetComponent<PlayerMotor>();
                         Vector3 offset = player.transform.position + Vector3.up * .9f - grabTarget;
-                        bool caught = motor && !motor.IsDashing && !motor.IsLaunched && offset.magnitude < 1.05f;
+                        bool inReach = offset.magnitude < 1.05f;
+                        bool caught = motor && !player.IsEvading && !motor.IsLaunched && inReach;
+                        // Slipping the grab with a dash at the last moment is a just dodge.
+                        if (inReach && player.IsEvading) player.NotifyDodged();
                         if (caught)
                         {
                             heldMotor = motor;

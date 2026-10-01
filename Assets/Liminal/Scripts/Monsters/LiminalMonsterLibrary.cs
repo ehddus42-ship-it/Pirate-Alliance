@@ -13,6 +13,15 @@ namespace AcRoguelike.Liminal
         public GameObject photocopier;
         public GameObject lockers;
         public GameObject trafficLightBoss;
+        [Header("Lobby dressing (concept-map props)")]
+        public GameObject foldingBarrier;
+        public GameObject cautionSign;
+        public GameObject waitingBench;
+        public GameObject planter;
+        public GameObject vendingMachine;
+        public GameObject trashBin;
+        public GameObject directoryKiosk;
+        public GameObject waterDispenser;
 
         public const string ResourcePath = "LiminalMonsters/LiminalMonsterLibrary";
         public const string MonitorPath = "LiminalMonsters/crt_monitor";

@@ -359,6 +359,15 @@ namespace AcRoguelike.Liminal.EditorTests
                 switch (state)
                 {
                     case "AwaitRun":
+                        // The run now starts in the walkable hunter lobby; the gate starts the dungeon.
+                        if (run.Phase == LiminalRunPhase.Lobby)
+                        {
+                            Require(run.Lobby && run.Lobby.Agent, "The hunter lobby or its association agent is missing.");
+                            Require(run.Rooms.Count == 0, "The lobby kept a dungeon route alive.");
+                            report.checks.Add("Run starts in the hunter lobby with the association agent and the gate.");
+                            run.EnterDungeon();
+                            return;
+                        }
                         if (run.Rooms.Count == 0 || run.ActiveRoomIndex != 0) return;
                         originalSeed = run.seed;
                         initialRoute = RouteIds(run.Rooms);

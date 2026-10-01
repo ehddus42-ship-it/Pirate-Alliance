@@ -13,7 +13,7 @@ namespace AcRoguelike.Liminal
     public sealed class MonitorTurret : LiminalPropMonster
     {
         public float fireInterval = 2.8f;
-        public float telegraph = .6f;
+        public float telegraphTime = .6f;
         public float projectileSpeed = 9.5f;
         public float range = 16f;
         public int damage = 10;
@@ -107,14 +107,14 @@ namespace AcRoguelike.Liminal
             if (!aiming && Time.time >= nextShot && distance < range && CanSeePlayer(.6f))
             {
                 aiming = true;
-                nextShot = Time.time + telegraph;
+                nextShot = Time.time + telegraphTime;
                 aimDirection = to.normalized;
                 aimYaw = Quaternion.LookRotation(to).eulerAngles.y;
             }
             if (aiming)
             {
                 IsWindingUp = true;
-                float p = 1 - Mathf.Clamp01((nextShot - Time.time) / telegraph);
+                float p = 1 - Mathf.Clamp01((nextShot - Time.time) / telegraphTime);
                 // The aim locks a little before the shot, so a sidestep at the end dodges it.
                 if (p < .55f && to.sqrMagnitude > .1f) aimDirection = to.normalized;
                 flare = p;
