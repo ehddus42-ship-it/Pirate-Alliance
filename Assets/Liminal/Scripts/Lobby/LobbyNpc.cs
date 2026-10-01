@@ -32,6 +32,7 @@ namespace AcRoguelike.Liminal
             public int active;
             public float seam = -1;   // cross-fade progress, or -1 when not crossing the loop seam
             public float weight;      // weight in the main mixer
+            public bool seamless;     // end pose already matches the start (walk cycles): wrap, do not cross-fade
             public float Length => clip ? clip.length : 0;
             public double Time => players[active].GetTime();
         }
@@ -142,7 +143,8 @@ namespace AcRoguelike.Liminal
             mixer = AnimationMixerPlayable.Create(graph, clips.Count);
             for (int i = 0; i < clips.Count; i++)
             {
-                var track = new Track { label = clips[i].label, clip = clips[i].clip };
+                // Walk cycles are authored seamless; cross-fading them would blend opposite strides.
+                var track = new Track { label = clips[i].label, clip = clips[i].clip, seamless = clips[i].label == "walk" };
                 track.mixer = AnimationMixerPlayable.Create(graph, 2);
                 for (int k = 0; k < 2; k++)
                 {
@@ -252,7 +254,7 @@ namespace AcRoguelike.Liminal
         static void Seam(Track track, float dt)
         {
             float length = track.Length;
-            if (length < LoopBlend * 3) { if (track.Time >= length) track.players[track.active].SetTime(track.Time % Math.Max(.01f, length)); return; }
+            if (track.seamless || length < LoopBlend * 3) { if (track.Time >= length) track.players[track.active].SetTime(track.Time % Math.Max(.01f, length)); return; }
             if (track.seam < 0 && track.Time >= length - LoopBlend)
             {
                 track.players[1 - track.active].SetTime(0);
@@ -531,7 +533,7 @@ namespace AcRoguelike.Liminal
     public sealed class HeldBoard : MonoBehaviour
     {
         Transform hand, forearm, body;
-        float side, height;
+        float side, height, halfWidth;
         const float Clearance = .2f;
 
         public static HeldBoard Attach(LobbyNpc npc, bool leftHand, Vector3 size, Material board, Material clip, Material face, List<UnityEngine.Object> owned)
@@ -545,6 +547,7 @@ namespace AcRoguelike.Liminal
             held.hand = hand; held.forearm = forearm; held.body = npc.transform;
             held.side = leftHand ? -1 : 1;
             held.height = size.y;
+            held.halfWidth = size.x * .5f;
             Part(go.transform, PrimitiveType.Cube, Vector3.zero, size, board);
             // Metal clip at the top edge and the association emblem on the outward face.
             Part(go.transform, PrimitiveType.Cube, new Vector3(0, size.y * .46f, size.z * .6f), new Vector3(size.x * .45f, size.y * .07f, size.z * 1.4f), clip);
@@ -582,7 +585,8 @@ namespace AcRoguelike.Liminal
             Vector3 centre = hand.position - up * (height * .36f) + outward * .045f;
             Vector3 sideways = body.right * side;
             float lateral = Vector3.Dot(centre - body.position, sideways);
-            if (lateral < Clearance) centre += sideways * (Clearance - lateral);
+            // Capped so the gripped top edge never leaves the hand (the bow brings the hands to the front).
+            if (lateral < Clearance) centre += sideways * Mathf.Min(Clearance - lateral, Mathf.Max(0, halfWidth - .03f));
             transform.SetPositionAndRotation(centre, Quaternion.LookRotation(outward, up));
         }
     }
