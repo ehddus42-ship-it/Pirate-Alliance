@@ -306,7 +306,10 @@ namespace AcRoguelike.Liminal
                 }
             }
             if (hud) hud.ShowPrompt("E", Nearest != null ? Nearest.label : null);
-            if (agent) agent.LookAt(Nearest != null && Nearest.anchor == agent.transform && run.player ? run.player.position : (Vector3?)null);
+            bool atAgent = agent && Nearest != null && Nearest.anchor == agent.transform && run.player;
+            if (agent) agent.LookAt(atAgent ? run.player.position : (Vector3?)null);
+            // The agent greets the hunter with a formal bow the first time they walk up in this visit.
+            if (atAgent && !greeted) { greeted = true; agent.PlayOnce("bow"); }
             if (interact && Nearest != null) Nearest.use();
         }
 
@@ -385,12 +388,7 @@ namespace AcRoguelike.Liminal
         void OpenUpgrades()
         {
             if (!hud || !hud.Canvas) return;
-            if (agent)
-            {
-                agent.Talk(true);
-                // A formal bow the first time the hunter walks up in this visit, then she talks.
-                if (!greeted) { greeted = true; agent.PlayOnce("bow"); }
-            }
+            if (agent) agent.Talk(true);
             ShowWindow(new Vector2(760, 470));
             var content = window.transform.Find("Window") as RectTransform;
             var font = hud.Font;

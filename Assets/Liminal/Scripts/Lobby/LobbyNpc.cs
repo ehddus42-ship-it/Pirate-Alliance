@@ -144,11 +144,22 @@ namespace AcRoguelike.Liminal
             if (!keepPhase) inputs[index].SetTime(0);
         }
 
-        /// <summary>Conversation with the player: the talking loop, facing the player.</summary>
+        /// <summary>Conversation with the player: the talking loop, facing the player. A greeting in progress is cut
+        /// short so the conversation starts at once.</summary>
         public void Talk(bool on)
         {
             talking = on;
+            if (on) StopOnce();
             Play(on ? "talk" : "idle");
+        }
+
+        /// <summary>Ends a one-shot early; it fades back into the loop.</summary>
+        public void StopOnce()
+        {
+            if (once < 0) return;
+            once = -1;
+            var done = onceDone; onceDone = null;
+            done?.Invoke();
         }
 
         public void LookAt(Vector3? target) => lookTarget = target;
