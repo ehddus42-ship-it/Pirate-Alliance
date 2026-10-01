@@ -59,6 +59,7 @@ namespace AcRoguelike.Liminal
         PlayerMotor motor;
         Animator combatAnimator;
         GameObject combatModel, casualModel;
+        readonly List<GameObject> hiddenCombatParts = new List<GameObject>();
         Color previousAmbient;
 
         // ---- construction ----------------------------------------------------------------------------------
@@ -358,7 +359,29 @@ namespace AcRoguelike.Liminal
             if (casual && !casualModel) casualModel = CreateCasual(m);
             if (casualModel && combatModel)
             {
-                combatModel.SetActive(!casual);
+                if (casualModel.transform.IsChildOf(combatModel.transform))
+                {
+                    // The combat Animator sits on motor.visual itself, which also parents the casual model: switching
+                    // that GameObject off would hide the casual outfit too. Hide its other children (the combat mesh
+                    // and armature) and stop its Animator instead.
+                    if (casual)
+                    {
+                        hiddenCombatParts.Clear();
+                        foreach (Transform child in combatModel.transform)
+                            if (child != casualModel.transform && child.gameObject.activeSelf)
+                            {
+                                hiddenCombatParts.Add(child.gameObject);
+                                child.gameObject.SetActive(false);
+                            }
+                    }
+                    else
+                    {
+                        foreach (var part in hiddenCombatParts) if (part) part.SetActive(true);
+                        hiddenCombatParts.Clear();
+                    }
+                    if (combatAnimator) combatAnimator.enabled = !casual;
+                }
+                else combatModel.SetActive(!casual);
                 casualModel.SetActive(casual);
                 m.animator = casual ? casualModel.GetComponent<Animator>() : combatAnimator;
             }
@@ -368,13 +391,14 @@ namespace AcRoguelike.Liminal
         {
             var source = Resources.Load<GameObject>(PlayerCasualPath);
             if (!source || !m.visual || !combatModel) return null;
+            // Measure the combat model before the casual one is parented under the same visual root.
+            float target = LobbyNpc.Height(combatModel.transform, 1.62f);
             var go = Instantiate(source, m.visual);
             go.name = "CasualOutfit";
             go.transform.localPosition = Vector3.zero;
             go.transform.localRotation = Quaternion.identity;
             foreach (var c in go.GetComponentsInChildren<Collider>(true)) Destroy(c);
             // Match the combat model's height so the camera and interactions feel the same.
-            float target = LobbyNpc.Height(combatModel.transform, 1.62f);
             LobbyNpc.FitHeight(go.transform, target);
             LobbyNpc.Skin(go, PlayerCasualTexture, owned);
             var animator = go.GetComponent<Animator>() ?? go.AddComponent<Animator>();
