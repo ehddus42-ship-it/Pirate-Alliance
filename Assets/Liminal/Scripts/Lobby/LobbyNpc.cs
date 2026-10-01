@@ -9,20 +9,36 @@ namespace AcRoguelike.Liminal
     /// <summary>
     /// A Hunter Association official in the lobby, made with Meshy (see Tools/LiminalLobby/meshy_lobby.py):
     /// - the rigged model is `LiminalLobby/{name}/{name}` and its clips are `LiminalLobby/{name}/{name}@{label}`
-    ///   (armature-only Humanoid FBX files, retargeted onto the model);
-    /// - clips play through a Playables mixer: looping states cross-fade, and one-shots (a bow) return to the loop;
+    ///   (skinned Humanoid FBX files from the same rig, retargeted onto the model);
+    /// - clips play through a Playables mixer. Looping states cross-fade into each other, and each loop also
+    ///   cross-fades into its own start at the end, since the library clips' first and last frames differ. One-shots
+    ///   (a bow) return to the loop;
+    /// - the feet are kept on the ground: most library clips carry the body 7–9 cm higher than the rest pose, so
+    ///   the model is lowered each frame until the lower toe sits where it does in the rest pose;
     /// - the NPC turns toward a look target or the player, otherwise back to its rest direction.
     /// <see cref="LobbyRoutine"/> drives what ambient officials do.
     /// </summary>
     public sealed class LobbyNpc : MonoBehaviour
     {
-        const float Fade = .3f;
+        const float Fade = .3f, LoopBlend = .35f;
+
+        /// <summary>One clip, played by two playables so a loop can cross-fade from its end into its start.</summary>
+        sealed class Track
+        {
+            public string label;
+            public AnimationClip clip;
+            public AnimationMixerPlayable mixer;
+            public readonly AnimationClipPlayable[] players = new AnimationClipPlayable[2];
+            public int active;
+            public float seam = -1;   // cross-fade progress, or -1 when not crossing the loop seam
+            public float weight;      // weight in the main mixer
+            public float Length => clip ? clip.length : 0;
+            public double Time => players[active].GetTime();
+        }
 
         PlayableGraph graph;
         AnimationMixerPlayable mixer;
-        readonly List<AnimationClipPlayable> inputs = new List<AnimationClipPlayable>();
-        readonly List<string> labels = new List<string>();
-        float[] weights = Array.Empty<float>();
+        readonly List<Track> tracks = new List<Track>();
         int loop, once = -1;
         float onceEnd;
         Action onceDone;
@@ -30,19 +46,29 @@ namespace AcRoguelike.Liminal
         Vector3? lookTarget;
         bool talking;
         Animator animator;
+        Transform model, leftToe, rightToe;
+        Vector3 modelBase;
+        float restToe, ground;
+        bool grounded;
 
         public string Character { get; private set; }
         public float ModelHeight { get; private set; }
         public bool Talking => talking;
         public Animator Animator => animator;
-        public string Current => once >= 0 ? labels[once] : loop < labels.Count ? labels[loop] : null;
-        public bool Has(string label) => labels.IndexOf(label) >= 0;
+        public string Current => once >= 0 ? tracks[once].label : loop < tracks.Count ? tracks[loop].label : null;
+        public bool Has(string label) => Index(label) >= 0;
         public bool PlayingOnce => once >= 0;
         public float TurnSpeed { get; set; } = 240;
 
         public static string ModelPath(string character) => $"LiminalLobby/{character}/{character}";
         public static string ClipPath(string character, string label) => $"LiminalLobby/{character}/{character}@{label}";
         public static string TexturePath(string character) => $"LiminalLobby/{character}/{character}_albedo";
+
+        int Index(string label)
+        {
+            for (int i = 0; i < tracks.Count; i++) if (tracks[i].label == label) return i;
+            return -1;
+        }
 
         /// <summary>Spawns an official at a lobby-local position. The first available label is the default loop.</summary>
         public static LobbyNpc Create(Transform parent, string character, string[] clipLabels, Vector3 localPosition, float yaw,
@@ -78,6 +104,16 @@ namespace AcRoguelike.Liminal
             var body = root.AddComponent<CapsuleCollider>();
             body.center = Vector3.up * height * .5f; body.radius = .3f; body.height = height;
             npc.animator = model.GetComponent<Animator>();
+            npc.model = model.transform;
+            npc.modelBase = model.transform.localPosition;
+            // Rest-pose toe height (the model is still in its bind pose here), the reference for grounding.
+            npc.leftToe = npc.Bone(HumanBodyBones.LeftToes, "LeftToeBase");
+            npc.rightToe = npc.Bone(HumanBodyBones.RightToes, "RightToeBase");
+            if (npc.leftToe && npc.rightToe)
+            {
+                npc.restToe = Mathf.Min(npc.leftToe.position.y, npc.rightToe.position.y) - root.transform.position.y;
+                npc.grounded = true;
+            }
             var clips = new List<(string, AnimationClip)>();
             foreach (var label in clipLabels)
             {
@@ -106,16 +142,22 @@ namespace AcRoguelike.Liminal
             mixer = AnimationMixerPlayable.Create(graph, clips.Count);
             for (int i = 0; i < clips.Count; i++)
             {
-                var playable = AnimationClipPlayable.Create(graph, clips[i].clip);
+                var track = new Track { label = clips[i].label, clip = clips[i].clip };
+                track.mixer = AnimationMixerPlayable.Create(graph, 2);
+                for (int k = 0; k < 2; k++)
+                {
+                    track.players[k] = AnimationClipPlayable.Create(graph, track.clip);
+                    graph.Connect(track.players[k], 0, track.mixer, k);
+                }
                 // A random phase so a row of identical guards does not move in lockstep.
-                playable.SetTime(UnityEngine.Random.value * clips[i].clip.length);
-                graph.Connect(playable, 0, mixer, i);
-                inputs.Add(playable);
-                labels.Add(clips[i].label);
+                track.players[0].SetTime(UnityEngine.Random.value * track.Length);
+                track.mixer.SetInputWeight(0, 1);
+                track.mixer.SetInputWeight(1, 0);
+                graph.Connect(track.mixer, 0, mixer, i);
+                tracks.Add(track);
             }
-            weights = new float[clips.Count];
-            weights[0] = 1;
-            for (int i = 0; i < clips.Count; i++) mixer.SetInputWeight(i, weights[i]);
+            tracks[0].weight = 1;
+            for (int i = 0; i < tracks.Count; i++) mixer.SetInputWeight(i, tracks[i].weight);
             output.SetSourcePlayable(mixer);
             graph.Play();
         }
@@ -123,11 +165,9 @@ namespace AcRoguelike.Liminal
         /// <summary>Cross-fades to a looping state. Unknown labels fall back to the default loop.</summary>
         public void Play(string label)
         {
-            int index = labels.IndexOf(label);
+            int index = Index(label);
             if (index < 0) index = 0;
-            if (index == loop) return;
             loop = index;
-            if (once < 0 && index < inputs.Count) Restart(index, keepPhase: true);
         }
 
         /// <summary>
@@ -136,20 +176,17 @@ namespace AcRoguelike.Liminal
         /// </summary>
         public bool PlayOnce(string label, Action done = null, float maxSeconds = 0)
         {
-            int index = labels.IndexOf(label);
+            int index = Index(label);
             if (index < 0) { done?.Invoke(); return false; }
+            var track = tracks[index];
             once = index;
-            var clip = inputs[index].GetAnimationClip();
-            float length = clip ? clip.length : 0;
-            onceEnd = maxSeconds > 0 ? Mathf.Min(length, maxSeconds) : length;
+            onceEnd = maxSeconds > 0 ? Mathf.Min(track.Length, maxSeconds) : track.Length;
             onceDone = done;
-            Restart(index, keepPhase: false);
+            track.seam = -1;
+            track.players[track.active].SetTime(0);
+            track.mixer.SetInputWeight(track.active, 1);
+            track.mixer.SetInputWeight(1 - track.active, 0);
             return true;
-        }
-
-        void Restart(int index, bool keepPhase)
-        {
-            if (!keepPhase) inputs[index].SetTime(0);
         }
 
         /// <summary>Conversation with the player: the talking loop, facing the player. A greeting in progress is cut
@@ -177,25 +214,24 @@ namespace AcRoguelike.Liminal
 
         void Update()
         {
-            if (graph.IsValid() && inputs.Count > 0)
+            if (graph.IsValid() && tracks.Count > 0)
             {
+                float dt = Time.deltaTime;
                 int target = once >= 0 ? once : loop;
-                for (int i = 0; i < inputs.Count; i++)
-                {
-                    if (i != once) Wrap(inputs[i]);
-                    weights[i] = Mathf.MoveTowards(weights[i], i == target ? 1 : 0, Time.deltaTime / Fade);
-                }
                 float sum = 0;
-                foreach (var w in weights) sum += w;
-                for (int i = 0; i < inputs.Count; i++) mixer.SetInputWeight(i, sum > .001f ? weights[i] / sum : (i == target ? 1 : 0));
-                if (once >= 0)
+                for (int i = 0; i < tracks.Count; i++)
                 {
-                    if (inputs[once].GetTime() >= onceEnd - Fade)
-                    {
-                        once = -1;
-                        var done = onceDone; onceDone = null;
-                        done?.Invoke();
-                    }
+                    var track = tracks[i];
+                    if (i != once) Seam(track, dt);
+                    track.weight = Mathf.MoveTowards(track.weight, i == target ? 1 : 0, dt / Fade);
+                    sum += track.weight;
+                }
+                for (int i = 0; i < tracks.Count; i++) mixer.SetInputWeight(i, sum > .001f ? tracks[i].weight / sum : (i == target ? 1 : 0));
+                if (once >= 0 && tracks[once].Time >= onceEnd - Fade)
+                {
+                    once = -1;
+                    var done = onceDone; onceDone = null;
+                    done?.Invoke();
                 }
             }
             Quaternion want = (transform.parent ? transform.parent.rotation : Quaternion.identity) * Quaternion.Euler(0, restYaw, 0);
@@ -209,12 +245,43 @@ namespace AcRoguelike.Liminal
             transform.rotation = Quaternion.RotateTowards(transform.rotation, want, TurnSpeed * Time.deltaTime);
         }
 
-        static void Wrap(AnimationClipPlayable playable)
+        /// <summary>
+        /// Loops a clip without a pop: near its end the second player starts the clip again and the two cross-fade
+        /// over <see cref="LoopBlend"/> seconds (the clips are not authored as seamless loops).
+        /// </summary>
+        static void Seam(Track track, float dt)
         {
-            if (!playable.IsValid()) return;
-            var clip = playable.GetAnimationClip();
-            // The FBX clips are not authored as loops: wrap them by hand.
-            if (clip && clip.length > .01f && playable.GetTime() >= clip.length) playable.SetTime(playable.GetTime() % clip.length);
+            float length = track.Length;
+            if (length < LoopBlend * 3) { if (track.Time >= length) track.players[track.active].SetTime(track.Time % Math.Max(.01f, length)); return; }
+            if (track.seam < 0 && track.Time >= length - LoopBlend)
+            {
+                track.players[1 - track.active].SetTime(0);
+                track.seam = 0;
+            }
+            if (track.seam < 0) return;
+            track.seam += dt / LoopBlend;
+            if (track.seam >= 1)
+            {
+                track.active = 1 - track.active;
+                track.seam = -1;
+                track.mixer.SetInputWeight(track.active, 1);
+                track.mixer.SetInputWeight(1 - track.active, 0);
+                return;
+            }
+            float k = Mathf.SmoothStep(0, 1, track.seam);
+            track.mixer.SetInputWeight(track.active, 1 - k);
+            track.mixer.SetInputWeight(1 - track.active, k);
+        }
+
+        void LateUpdate()
+        {
+            // Ground the feet after the animation has posed the skeleton this frame: lower (or raise) the model until
+            // the lower toe sits at its rest-pose height. Smoothed, so a stepping foot does not jolt the body.
+            if (!grounded || !model || !leftToe || !rightToe) return;
+            float toe = Mathf.Min(leftToe.position.y, rightToe.position.y) - transform.position.y - ground;
+            float want = Mathf.Clamp(restToe - toe, -.25f, .1f);
+            ground = Mathf.Lerp(ground, want, 1 - Mathf.Exp(-Time.deltaTime * 14));
+            model.localPosition = modelBase + Vector3.up * ground;
         }
 
         void OnDestroy() { if (graph.IsValid()) graph.Destroy(); }
@@ -289,7 +356,8 @@ namespace AcRoguelike.Liminal
     /// <summary>
     /// What an ambient official does. There is no text anywhere, only motion:
     /// - <see cref="Mode.Station"/>: stands at a post, now and then plays an activity (a guard looks around).
-    /// - <see cref="Mode.Chat"/>: faces a partner and alternates talking and listening.
+    /// - <see cref="Mode.Chat"/>: faces a partner and takes turns talking; one clock drives both, so exactly one of the
+    ///   pair talks at a time.
     /// - <see cref="Mode.Patrol"/>: walks a loop of points, pausing at each (and taking a phone call at some).
     /// Everyone notices the player. Within <see cref="Notice"/> metres an official turns to look and greets once
     /// with its "greet" clip (staff bow, guards salute). Greeting again needs the player to step back beyond
@@ -301,6 +369,7 @@ namespace AcRoguelike.Liminal
 
         Mode mode;
         LobbyNpc npc, partner;
+        LobbyRoutine leader;   // chat: the partner whose clock drives the turn-taking (null on the leader)
         string activity;
         Vector3[] path;
         int next;
@@ -317,13 +386,16 @@ namespace AcRoguelike.Liminal
         public static LobbyRoutine Station(LobbyNpc npc, string activity, int seed)
             => Add(npc, Mode.Station, activity, seed);
 
-        public static LobbyRoutine Chat(LobbyNpc npc, LobbyNpc partner, string activity, bool startTalking, int seed)
+        /// <summary>Two officials in conversation: `first` talks first, then they take turns on one shared clock.</summary>
+        public static (LobbyRoutine, LobbyRoutine) ChatPair(LobbyNpc first, string firstActivity, LobbyNpc second, string secondActivity, int seed)
         {
-            var r = Add(npc, Mode.Chat, activity, seed);
-            r.partner = partner;
-            r.busy = !startTalking;
-            r.clock = 0;
-            return r;
+            var a = Add(first, Mode.Chat, firstActivity, seed);
+            var b = Add(second, Mode.Chat, secondActivity, seed + 1);
+            a.partner = second; b.partner = first;
+            a.busy = true;
+            a.clock = a.Range(3f, 6f);
+            b.leader = a;
+            return (a, b);
         }
 
         public static LobbyRoutine Patrol(LobbyNpc npc, Vector3[] localPath, string pauseActivity, float speed, int seed)
@@ -379,11 +451,15 @@ namespace AcRoguelike.Liminal
                     break;
                 case Mode.Chat:
                     npc.LookAt(near ? player.position : partner ? partner.transform.position : (Vector3?)null);
-                    clock -= dt;
-                    if (clock <= 0)
+                    if (leader) busy = !leader.busy;
+                    else
                     {
-                        busy = !busy;
-                        clock = busy ? Range(3f, 6f) : Range(2.5f, 5f);
+                        clock -= dt;
+                        if (clock <= 0)
+                        {
+                            busy = !busy;
+                            clock = busy ? Range(3f, 6f) : Range(2.5f, 5f);
+                        }
                     }
                     npc.Play(busy && !near ? activity : "idle");
                     break;
@@ -422,8 +498,10 @@ namespace AcRoguelike.Liminal
                 return;
             }
             Vector3 dir = d.normalized;
-            // Someone in the way: stop, look at them, carry on when they move.
-            if (player && toPlayer.magnitude < 1.4f && Vector3.Dot(dir, toPlayer.normalized) > .35f)
+            // Someone in the way (ahead and close to the line of travel): stop, look at them, carry on when they move.
+            float ahead = Vector3.Dot(dir, toPlayer);
+            float aside = (toPlayer - dir * ahead).magnitude;
+            if (player && ahead > 0 && ahead < 1.4f && aside < .65f)
             {
                 walking = false;
                 npc.Play("idle");
@@ -445,12 +523,16 @@ namespace AcRoguelike.Liminal
     /// <summary>
     /// A clipboard or file folder held by its top edge, after the concept art. It follows the hand bone in world
     /// space (independent of the rig's bone axes): the board hangs below the hand, tilted a little with the forearm,
-    /// its face turned away from the body, so it stays a plausible grip when the arm gestures.
+    /// its face turned away from the body, so it stays a plausible grip when the arm gestures. It is kept at least
+    /// <see cref="Clearance"/> to the side of the body's centre line, so a hand that comes in (a bow) does not push it
+    /// into the hip. Runs after <see cref="LobbyNpc"/> has grounded the model.
     /// </summary>
+    [DefaultExecutionOrder(100)]
     public sealed class HeldBoard : MonoBehaviour
     {
         Transform hand, forearm, body;
         float side, height;
+        const float Clearance = .2f;
 
         public static HeldBoard Attach(LobbyNpc npc, bool leftHand, Vector3 size, Material board, Material clip, Material face, List<UnityEngine.Object> owned)
         {
@@ -497,7 +579,11 @@ namespace AcRoguelike.Liminal
             if (outward.sqrMagnitude < 1e-6f) outward = Vector3.ProjectOnPlane(body.forward, up);
             outward.Normalize();
             // Gripped near its top edge: the board hangs below the hand, just outside the leg.
-            transform.SetPositionAndRotation(hand.position - up * (height * .36f) + outward * .045f, Quaternion.LookRotation(outward, up));
+            Vector3 centre = hand.position - up * (height * .36f) + outward * .045f;
+            Vector3 sideways = body.right * side;
+            float lateral = Vector3.Dot(centre - body.position, sideways);
+            if (lateral < Clearance) centre += sideways * (Clearance - lateral);
+            transform.SetPositionAndRotation(centre, Quaternion.LookRotation(outward, up));
         }
     }
 }

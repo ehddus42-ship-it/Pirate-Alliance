@@ -13,8 +13,8 @@
 Text characters are generated in an A-pose (text-to-3D preview + refine). Association officials follow the
 concept art instead: the reference crops in Tools/LiminalLobby/Reference are redrawn as full-body A-pose
 character sheets (image-to-image, two candidate models), one candidate is picked, then image-to-3D builds it
-in an A-pose. Every character is rigged with Meshy rigging and animated with library actions; officials keep
-only the armature in their clip FBX files (the mesh lives once in <name>.fbx). The API key is read from MESHY_API_KEY only. Task ids are kept in
+in an A-pose. Every character is rigged with Meshy rigging and animated with library actions; each clip is the
+skinned FBX (same hierarchy and bind pose as <name>.fbx, so Humanoid retargeting matches). The API key is read from MESHY_API_KEY only. Task ids are kept in
 Tools/LiminalLobby/Source/<character>/state.json (git-ignored) so a rerun resumes the same paid tasks.
 """
 import argparse
@@ -268,12 +268,15 @@ def generate_official(name):
         aid = step('anim_' + label, lambda: api('/v1/animations', dict(rig_task_id=rig_id, action_id=action,
                                                                     post_process=dict(operation_type='extract_armature')))['result'])
         anim = wait('/v1/animations', aid, 'anim_' + label, folder)
-        url = anim.get('result', {}).get('processed_armature_fbx_url') or anim.get('result', {}).get('animation_fbx_url')
+        # The skinned clip, not the armature-only one: it keeps the model's exact hierarchy (Armature/Hips...) and
+        # its bind pose, so Unity builds each clip's Humanoid avatar from the same rest pose as the model. The
+        # armature-only file has Hips at its root and no bind pose, which skews the retargeting.
+        url = anim.get('result', {}).get('animation_fbx_url')
         if url:
             fetch(url, out / f'{name}@{label}.fbx')
     save(out / 'provenance.json', dict(provider='Meshy AI', model=MODEL, concept_model=CONCEPT_MODELS[state['pick']],
                                        apis=['image-to-image v1', 'image-to-3d v1 (a-pose)', 'rigging v1',
-                                             'animations v1 (extract_armature)'],
+                                             'animations v1 (skinned clip FBX)'],
                                        reference=spec['refs'], concept_prompt=spec['concept'] + CONCEPT_STYLE,
                                        height_m=spec['height'], library_actions={l: a for l, a in spec['actions']},
                                        tasks=state, created_utc=datetime.datetime.now(datetime.timezone.utc).isoformat()))

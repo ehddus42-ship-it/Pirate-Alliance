@@ -184,13 +184,14 @@ namespace AcRoguelike.Liminal
 
             // Ambient staff: a senior official briefing a junior by the rest corner, and a clerk walking his rounds
             // around the emblem, clear of the lamps and of the spawn point (he stops for the player and takes calls).
+            // 0.82 m/s is the stride speed of the walk clip, so his feet do not skate.
             var officer = Official(OfficerCharacter, new[] { "idle", "chat", "walk", "greet" }, new Vector3(8.9f, 0, 6.9f), 60, 1.6f, "Officer");
             var director = Official(DirectorCharacter, new[] { "idle", "talk", "greet" }, new Vector3(10.1f, 0, 7.6f), 240, 1.75f, "Director");
-            LobbyRoutine.Chat(officer, director, "chat", false, 21);
-            LobbyRoutine.Chat(director, officer, "talk", true, 22);
+            LobbyRoutine.ChatPair(director, "talk", officer, "chat", 21);
             var clerk = Official(ClerkCharacter, new[] { "idle", "walk", "phone", "greet" }, new Vector3(-6.5f, 0, -1f), 180, 1.76f, "Clerk");
-            HeldBoard.Attach(clerk, true, new Vector3(.24f, .32f, .02f), Mat(null, new Color(.16f, .22f, .42f), .3f), clipMat, null, owned);
-            LobbyRoutine.Patrol(clerk, new[] { new Vector3(-6.5f, 0, -1f), new Vector3(-5.2f, 0, -7f), new Vector3(5.4f, 0, -7f), new Vector3(6.4f, 0, -.5f) }, "phone", 1.15f, 31);
+            // The folder is in his right hand: the left one holds the phone during calls.
+            HeldBoard.Attach(clerk, false, new Vector3(.24f, .32f, .02f), Mat(null, new Color(.16f, .22f, .42f), .3f), clipMat, null, owned);
+            LobbyRoutine.Patrol(clerk, new[] { new Vector3(-6.5f, 0, -1f), new Vector3(-5.2f, 0, -7f), new Vector3(5.4f, 0, -7f), new Vector3(6.4f, 0, -.5f) }, "phone", .82f, 31);
 
             // The gate entry trigger.
             var gateMark = new GameObject("GateEntry").transform;
