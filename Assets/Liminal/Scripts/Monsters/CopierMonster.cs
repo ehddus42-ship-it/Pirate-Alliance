@@ -35,7 +35,9 @@ namespace AcRoguelike.Liminal
         public int SheetsFired { get; private set; }
         public int Landings { get; private set; }
 
-        float stateTime, hopTime, nextAttack, rattle, kick;
+        float stateTime, hopTime, nextAttack, rattle, kick, recoil;
+        Vector3 rattleApplied;
+        Quaternion rattleTurn = Quaternion.identity;
         int hopPhase, fired, pattern;
         float sweepSign = 1;
         Vector3 hopDirection, aimForward;
@@ -55,8 +57,19 @@ namespace AcRoguelike.Liminal
         protected override void Think(float dt, Vector3 to, float distance)
         {
             stateTime += dt;
+            // Last frame's shake is removed before the states pose the body again, so it never accumulates.
+            poseOffset -= rattleApplied;
+            rattleApplied = Vector3.zero;
+            poseRotation *= Quaternion.Inverse(rattleTurn);
+            rattleTurn = Quaternion.identity;
             rattle = Mathf.MoveTowards(rattle, 0, dt * 2.5f);
             kick = Mathf.MoveTowards(kick, 0, dt * 6f);
+            // Firing pushes the whole copier back for real: it stays where the recoil left it.
+            if (recoil > 0)
+            {
+                MoveBody(-transform.forward * recoil * dt);
+                recoil = Mathf.MoveTowards(recoil, 0, dt * 7f);
+            }
             bool staggered = Time.time < staggerUntil;
             switch (State)
             {
@@ -93,6 +106,7 @@ namespace AcRoguelike.Liminal
                         Fire(Quaternion.Euler(0, angle, 0) * aimForward, 10.5f, fanRange, fanDamage);
                         fired++;
                         kick = 1;
+                        recoil = Mathf.Max(recoil, 1.3f);
                     }
                     if (t >= 1.15f) Enter(CopierState.Recover);
                     break;
@@ -115,6 +129,7 @@ namespace AcRoguelike.Liminal
                             Fire(Vector3.ProjectOnPlane(lead, Vector3.up).normalized, 13f, snipeRange, snipeDamage);
                             fired = shot + 1;
                             kick = 1.4f;
+                            recoil = Mathf.Max(recoil, 2.4f);
                         }
                     }
                     if (shot >= snipeSheets) { IsWindingUp = false; HideTelegraph(); Enter(CopierState.Recover); }
@@ -183,8 +198,11 @@ namespace AcRoguelike.Liminal
         {
             if (rattle <= 0 && kick <= 0) return;
             float r = rattle * rattle;
-            poseRotation *= Quaternion.Euler(Mathf.Sin(Time.time * 61) * 2.2f * r - kick * 5f, Mathf.Sin(Time.time * 47) * 1.5f * r, Mathf.Sin(Time.time * 53) * 2.4f * r);
-            poseOffset += new Vector3(Mathf.Sin(Time.time * 71) * .012f * r, 0, -kick * .05f);
+            rattleTurn = Quaternion.Euler(Mathf.Sin(Time.time * 61) * 2.2f * r - kick * 5f, Mathf.Sin(Time.time * 47) * 1.5f * r, Mathf.Sin(Time.time * 53) * 2.4f * r);
+            poseRotation *= rattleTurn;
+            // A transient offset (removed next frame); the actual push back is the body recoil above.
+            rattleApplied = new Vector3(Mathf.Sin(Time.time * 71) * .012f * r, 0, -kick * .05f);
+            poseOffset += rattleApplied;
         }
 
         void Fire(Vector3 direction, float speed, float range, int damage)
