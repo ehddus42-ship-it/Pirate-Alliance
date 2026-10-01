@@ -8,6 +8,29 @@ using UnityEngine;
 
 namespace AcRoguelike.EditorTools
 {
+    /// <summary>
+    /// Builds the katana motions once when the project opens on a machine that still has the old talisman clips,
+    /// so the melee basic attack plays without a manual step. Menu: AC Roguelike/Astraia/Rebuild Katana Motions.
+    /// </summary>
+    [InitializeOnLoad]
+    static class AstraiaKatanaMotionInstaller
+    {
+        static AstraiaKatanaMotionInstaller()
+        {
+            EditorApplication.delayCall += () =>
+            {
+                if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+                if (!File.Exists(AstraiaAnimationBuilder.ControllerPath)) return;
+                if (File.Exists(AstraiaAnimationBuilder.Folder + "/Astraia_Slash_03.anim")) return;
+                Debug.Log("[Astraia] Building katana slash motions (Attack1-3) for the melee basic attack.");
+                AstraiaAnimationBuilder.Build();
+            };
+        }
+
+        [MenuItem("AC Roguelike/Astraia/Rebuild Katana Motions")]
+        static void Rebuild() { AstraiaAnimationBuilder.Build(); Debug.Log("[Astraia] Katana motions rebuilt."); }
+    }
+
     /// <summary>Rebuildable Humanoid motion set. No root translation competes with the collision motor.</summary>
     public static class AstraiaAnimationBuilder
     {
@@ -22,7 +45,8 @@ namespace AcRoguelike.EditorTools
             var walk = FindClip("HumanF@Walk01_Forward");
             var run = FindClip("HumanF@Run01_Forward");
             var sprint = FindClip("HumanF@Sprint01_Forward");
-            var attacks = new[] { MakeAttack(idle, 0, .52f), MakeAttack(idle, 1, .56f), MakeAttack(idle, 2, .70f) };
+            // Katana basic attack (MeleeSlash): horizontal cut, rising backhand, iai draw-cut finisher.
+            var attacks = new[] { MakeSlash(idle, 0), MakeSlash(idle, 1), MakeSlash(idle, 2) };
             var dash = MakeDash(sprint);
             var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(ControllerPath);
             if (controller)
@@ -143,6 +167,105 @@ namespace AcRoguelike.EditorTools
                 Gesture(clip, "Chest Twist Left-Right", duration, -.16f, .06f, .01f);
             }
             return Save(clip);
+        }
+
+        // Durations and hit frames match MeleeSlash / PlayerCombat (0.44 / 0.48 / 0.66 s, hits at 0.15 / 0.17 / 0.30 s).
+        public static readonly float[] SlashDurations = { .44f, .48f, .66f };
+        public static readonly float[] SlashHits = { .15f, .17f, .30f };
+
+        static AnimationClip MakeSlash(AnimationClip idle, int index)
+        {
+            float d = SlashDurations[index], h = SlashHits[index];
+            var clip = PoseClip(idle, "Astraia_Slash_0" + (index + 1), d, .2f);
+            // A closed right hand around the grip for every swing.
+            foreach (string finger in new[] { "Index", "Middle", "Ring", "Little" })
+                for (int j = 1; j <= 3; j++) Hold(clip, "RightHand." + finger + "." + j + " Stretched", d, -.75f);
+            Hold(clip, "RightHand.Thumb.2 Stretched", d, -.35f);
+            Hold(clip, "RightHand.Thumb.3 Stretched", d, -.35f);
+            float w = h * .55f, f = h + .08f, r = d * .82f;
+            if (index == 0)
+            {
+                // Right-to-left horizontal cut: wind back to the right, whip across the body, follow through left.
+                Keys(clip, "Right Arm Front-Back", d, (w, .55f), (h, -.85f), (f, -1f), (r, -.6f));
+                Keys(clip, "Right Arm Down-Up", d, (w, .15f), (h, -.05f), (f, -.25f), (r, -.45f));
+                Keys(clip, "Right Forearm Stretch", d, (w, -.45f), (h, .75f), (f, .6f), (r, .2f));
+                Keys(clip, "Right Arm Twist In-Out", d, (w, .35f), (h, -.3f), (f, -.35f));
+                Keys(clip, "Right Hand Down-Up", d, (w, .3f), (h, -.2f), (f, -.3f));
+                Keys(clip, "Chest Twist Left-Right", d, (w, -.35f), (h, .3f), (f, .4f), (r, .15f));
+                Keys(clip, "Spine Twist Left-Right", d, (w, -.18f), (h, .16f), (f, .2f));
+                Keys(clip, "Head Turn Left-Right", d, (w, .1f), (h, -.08f));
+                Keys(clip, "Left Arm Down-Up", d, (w, -.45f), (h, -.3f), (f, -.35f));
+                Keys(clip, "Left Arm Front-Back", d, (w, -.3f), (h, .35f), (f, .3f));
+                Keys(clip, "Right Upper Leg Front-Back", d, (w, .1f), (h, .35f), (f, .35f), (r, .15f));
+                Keys(clip, "Right Lower Leg Stretch", d, (h, .55f), (f, .55f));
+                Keys(clip, "Left Upper Leg Front-Back", d, (h, -.2f), (f, -.2f));
+            }
+            else if (index == 1)
+            {
+                // Rising backhand: from low across the body up and out to the right.
+                Keys(clip, "Right Arm Front-Back", d, (w, -.9f), (h, .15f), (f, .35f), (r, .1f));
+                Keys(clip, "Right Arm Down-Up", d, (w, -.65f), (h, .55f), (f, .7f), (r, .1f));
+                Keys(clip, "Right Forearm Stretch", d, (w, .1f), (h, .85f), (f, .8f), (r, .3f));
+                Keys(clip, "Right Arm Twist In-Out", d, (w, -.5f), (h, .3f), (f, .35f));
+                Keys(clip, "Right Hand Down-Up", d, (w, -.35f), (h, .35f), (f, .4f));
+                Keys(clip, "Chest Twist Left-Right", d, (w, .4f), (h, -.25f), (f, -.35f), (r, -.1f));
+                Keys(clip, "Spine Twist Left-Right", d, (w, .2f), (h, -.15f), (f, -.18f));
+                Keys(clip, "Chest Front-Back", d, (w, .15f), (h, -.12f), (f, -.15f));
+                Keys(clip, "Head Nod Down-Up", d, (w, -.08f), (h, .1f));
+                Keys(clip, "Left Arm Down-Up", d, (w, -.4f), (h, -.55f));
+                Keys(clip, "Left Arm Front-Back", d, (w, .3f), (h, -.25f));
+                Keys(clip, "Left Upper Leg Front-Back", d, (w, .1f), (h, .3f), (f, .3f), (r, .1f));
+                Keys(clip, "Left Lower Leg Stretch", d, (h, .5f), (f, .5f));
+                Keys(clip, "Right Upper Leg Front-Back", d, (h, -.18f), (f, -.18f));
+            }
+            else
+            {
+                // Iai finisher: sink into a draw stance with the hand at the left hip, then one wide cut to the right
+                // with a deep lunge, and hold the finish (zanshin) before recovering.
+                float hold = h + .2f;
+                Keys(clip, "Right Arm Front-Back", d, (w, -.75f), (h * .85f, -.6f), (h, .7f), (hold, .85f), (r, .3f));
+                Keys(clip, "Right Arm Down-Up", d, (w, -.75f), (h * .85f, -.7f), (h, -.02f), (hold, .05f), (r, -.35f));
+                Keys(clip, "Right Forearm Stretch", d, (w, -.35f), (h * .85f, -.2f), (h, .9f), (hold, .9f), (r, .3f));
+                Keys(clip, "Right Arm Twist In-Out", d, (w, -.4f), (h, .25f), (hold, .3f));
+                Keys(clip, "Right Hand Down-Up", d, (w, -.3f), (h, .1f), (hold, .15f));
+                Keys(clip, "Chest Twist Left-Right", d, (w, .5f), (h * .85f, .45f), (h, -.45f), (hold, -.5f), (r, -.15f));
+                Keys(clip, "Spine Twist Left-Right", d, (w, .25f), (h, -.22f), (hold, -.25f));
+                Keys(clip, "Spine Front-Back", d, (w, .25f), (h, .35f), (hold, .3f), (r, .1f));
+                Keys(clip, "Chest Front-Back", d, (w, .1f), (h, .15f), (hold, .12f));
+                Keys(clip, "Head Turn Left-Right", d, (w, -.15f), (h, .12f));
+                Keys(clip, "Left Arm Down-Up", d, (w, -.6f), (h * .85f, -.6f), (h, -.25f), (hold, -.2f));
+                Keys(clip, "Left Arm Front-Back", d, (w, .55f), (h, -.45f), (hold, -.5f));
+                Keys(clip, "Left Forearm Stretch", d, (w, -.6f), (h, .5f), (hold, .5f));
+                Keys(clip, "Right Upper Leg Front-Back", d, (w, .35f), (h, .7f), (hold, .7f), (r, .2f));
+                Keys(clip, "Right Lower Leg Stretch", d, (w, .1f), (h, .35f), (hold, .35f), (r, .8f));
+                Keys(clip, "Left Upper Leg Front-Back", d, (w, .15f), (h, -.45f), (hold, -.45f), (r, -.1f));
+                Keys(clip, "Left Lower Leg Stretch", d, (w, .2f), (h, .45f), (hold, .45f), (r, .85f));
+            }
+            return Save(clip);
+        }
+
+        static void Hold(AnimationClip clip, string property, float length, float value)
+        {
+            var binding = EditorCurveBinding.FloatCurve("", typeof(Animator), property);
+            AnimationUtility.SetEditorCurve(clip, binding, AnimationCurve.Constant(0, length, value));
+        }
+
+        /// <summary>Keys a muscle at the given times; the clip starts and ends on the idle pose value.</summary>
+        static void Keys(AnimationClip clip, string property, float length, params (float time, float value)[] keys)
+        {
+            var binding = EditorCurveBinding.FloatCurve("", typeof(Animator), property);
+            var old = AnimationUtility.GetEditorCurve(clip, binding);
+            float start = old != null ? old.Evaluate(0) : 0;
+            var frames = new List<Keyframe> { new Keyframe(0, start) };
+            foreach (var (time, value) in keys) if (time > 0 && time < length) frames.Add(new Keyframe(time, value));
+            frames.Add(new Keyframe(length, start));
+            var curve = new AnimationCurve(frames.ToArray());
+            for (int i = 0; i < curve.length; i++)
+            {
+                AnimationUtility.SetKeyLeftTangentMode(curve, i, AnimationUtility.TangentMode.ClampedAuto);
+                AnimationUtility.SetKeyRightTangentMode(curve, i, AnimationUtility.TangentMode.ClampedAuto);
+            }
+            AnimationUtility.SetEditorCurve(clip, binding, curve);
         }
 
         static void Gesture(AnimationClip clip, string property, float length, float anticipate, float strike, float follow)

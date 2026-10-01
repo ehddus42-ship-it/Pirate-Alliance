@@ -14,6 +14,18 @@ namespace AcRoguelike
         public Vector3 focusOffset;
         Vector3 focus, damping;
         bool initialized;
+        float shakeAmplitude, shakeUntil, shakeDuration;
+
+        /// <summary>Short camera shake for hit feedback; stronger calls replace weaker ones.</summary>
+        public void AddShake(float amplitude, float duration)
+        {
+            float remaining = Mathf.Max(0, shakeUntil - Time.unscaledTime);
+            float current = shakeDuration > 0 ? shakeAmplitude * remaining / shakeDuration : 0;
+            if (amplitude < current) return;
+            shakeAmplitude = amplitude;
+            shakeDuration = Mathf.Max(.01f, duration);
+            shakeUntil = Time.unscaledTime + shakeDuration;
+        }
         void LateUpdate()
         {
             if (!target) return;
@@ -22,7 +34,15 @@ namespace AcRoguelike
             if (!initialized) { focus = target.position + Vector3.up * .55f + focusOffset; initialized = true; }
             focus = Vector3.SmoothDamp(focus, target.position + Vector3.up * .55f + focusOffset, ref damping, followSmoothTime);
             Quaternion rotation = Quaternion.Euler(pitch, yaw, 0);
-            transform.SetPositionAndRotation(focus + rotation * Vector3.back * distance, rotation);
+            Vector3 shake = Vector3.zero;
+            float left = shakeUntil - Time.unscaledTime;
+            if (left > 0)
+            {
+                float k = shakeAmplitude * left / shakeDuration;
+                float t = Time.unscaledTime * 63f;
+                shake = rotation * new Vector3(Mathf.Sin(t) * k, Mathf.Sin(t * 1.37f + 1.1f) * k, 0);
+            }
+            transform.SetPositionAndRotation(focus + rotation * Vector3.back * distance + shake, rotation);
         }
         public void Snap()
         {

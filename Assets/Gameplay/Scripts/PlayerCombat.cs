@@ -37,6 +37,7 @@ namespace AcRoguelike
 
         PlayerMotor motor;
         TalismanCaster caster;
+        MeleeSlash melee;
         TrainingEnemy attackTarget;
         InputAction attack;
         Animator cachedAnimator;
@@ -61,6 +62,9 @@ namespace AcRoguelike
         {
             motor = GetComponent<PlayerMotor>();
             caster = GetComponent<TalismanCaster>();
+            // The basic attack is a katana combo; the caster still provides target selection and cast counting.
+            melee = GetComponent<MeleeSlash>();
+            if (!melee) melee = gameObject.AddComponent<MeleeSlash>();
             previousExternalInput = caster.externalInput;
             attack = new InputAction("Attack", InputActionType.Button);
             attack.AddBinding("<Mouse>/leftButton");
@@ -130,7 +134,11 @@ namespace AcRoguelike
             if (!hitResolved && attackClock >= HitTime(AttackIndex))
             {
                 hitResolved = true;
-                if (caster.TryCastFromAnimation(attackTarget)) SuccessfulCastCount++;
+                if (melee && melee.isActiveAndEnabled)
+                {
+                    if (melee.ResolveSwing(AttackIndex, attackTarget, AttackDirection)) SuccessfulCastCount++;
+                }
+                else if (caster.TryCastFromAnimation(attackTarget)) SuccessfulCastCount++;
             }
             if (AttackIndex < AttackStates.Length - 1 && attackClock >= duration - Mathf.Max(0, comboQueueWindow))
             {
@@ -169,6 +177,7 @@ namespace AcRoguelike
                 Vector3 targetDirection = Vector3.ProjectOnPlane(attackTarget.transform.position - transform.position, Vector3.up);
                 if (targetDirection.sqrMagnitude > .01f) AttackDirection = targetDirection.normalized;
             }
+            if (melee && melee.isActiveAndEnabled) melee.BeginSwing(index, attackTarget, AttackDirection);
             if (Has(Attacking, AnimatorControllerParameterType.Bool)) cachedAnimator.SetBool(Attacking, true);
             if (Has(AttackIndexParameter, AnimatorControllerParameterType.Int)) cachedAnimator.SetInteger(AttackIndexParameter, index);
             if (Has(AttackSpeed, AnimatorControllerParameterType.Float)) cachedAnimator.SetFloat(AttackSpeed, 1f / attackTimeScale);
@@ -183,6 +192,7 @@ namespace AcRoguelike
 
         void EndAttack(bool returnToLocomotion = true)
         {
+            if (melee && AttackIndex >= 0) melee.EndSwing();
             AttackIndex = -1;
             attackTarget = null;
             attackClock = 0;

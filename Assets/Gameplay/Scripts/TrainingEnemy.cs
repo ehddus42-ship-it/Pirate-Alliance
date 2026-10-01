@@ -11,6 +11,14 @@ namespace AcRoguelike
         public float respawnDelay = 4f;
         public bool respawnOnDeath = true;
         public event System.Action<TrainingEnemy> Defeated;
+        /// <summary>Raised for every hit that deals damage (amount, still alive afterwards).</summary>
+        public event System.Action<TrainingEnemy, int> Damaged;
+        [Tooltip("When set, the owner plays its own death (knock-up, landing) and calls HideNow when it is done.")]
+        public bool deferDeathVisuals;
+        /// <summary>Horizontal direction of the latest hit, set by attackers before TakeDamage (zero when unknown).</summary>
+        public Vector3 LastHitDirection { get; set; }
+        /// <summary>Strength of the latest hit, 1 for a normal slash; finishers are larger.</summary>
+        public float LastHitImpact { get; set; } = 1;
 
         public int Health { get; private set; }
         public int HitCount { get; private set; }
@@ -33,16 +41,24 @@ namespace AcRoguelike
             if (!IsAlive || damage <= 0) return;
             HitCount++;
             Health = Mathf.Max(0, Health - damage);
+            Damaged?.Invoke(this, damage);
             if (Health == 0)
             {
                 Defeated?.Invoke(this);
                 if (respawnOnDeath) StartCoroutine(Respawn());
-                else
+                else if (deferDeathVisuals)
                 {
-                    foreach (var renderer in visibleRenderers) if (renderer) renderer.enabled = false;
                     foreach (var collider in colliders) if (collider) collider.enabled = false;
                 }
+                else HideNow();
             }
+        }
+
+        /// <summary>Hides the defeated body (renderers and colliders).</summary>
+        public void HideNow()
+        {
+            foreach (var renderer in visibleRenderers) if (renderer) renderer.enabled = false;
+            foreach (var collider in colliders) if (collider) collider.enabled = false;
         }
 
         public void Configure(int health, bool shouldRespawn)

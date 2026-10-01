@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace AcRoguelike.Liminal
@@ -40,6 +41,9 @@ namespace AcRoguelike.Liminal
             body.stepOffset = .25f;
             Health.Configure(boss ? 850 : 60 + stage * 18, false);
             Health.Defeated += OnDefeated;
+            Health.Damaged += OnDamaged;
+            // This enemy plays its own death: knocked into the air, lands lying down, then fades out.
+            Health.deferDeathVisuals = true;
             moveSpeed = boss ? 1.1f : 1.5f + stage * .12f;
             damage = boss ? 24 : 12 + stage * 3;
             nextAttack = Time.time + 1.2f + (transform.GetSiblingIndex() % 4) * .35f;
@@ -50,6 +54,17 @@ namespace AcRoguelike.Liminal
         void Update()
         {
             if (!Health || !Health.IsAlive || !player || !player.IsAlive || !room || Time.deltaTime <= 0) return;
+            if (knockback.sqrMagnitude > .0025f)
+            {
+                if (body && body.enabled) body.Move(knockback * Time.deltaTime + Vector3.down * (4 * Time.deltaTime));
+                knockback = Vector3.MoveTowards(knockback, Vector3.zero, 26f * Time.deltaTime);
+            }
+            if (Time.time < staggerUntil)
+            {
+                // Flinch: lean away from the hit while the stagger lasts; wind-ups keep running so they stay dodgeable.
+                if (visual) visual.localRotation = Quaternion.Euler(-14f * (staggerUntil - Time.time) / .25f, 0, 0);
+                if (!windingUp) return;
+            }
             animationTime += Time.deltaTime;
             if (visual)
             {
@@ -173,14 +188,78 @@ namespace AcRoguelike.Liminal
             warning.enabled = false;
         }
 
+        Vector3 knockback;
+        float staggerUntil;
+
+        void OnDamaged(TrainingEnemy enemy, int amount)
+        {
+            if (!enemy.IsAlive) return;
+            Vector3 direction = HitDirection();
+            float impact = Mathf.Max(.2f, enemy.LastHitImpact);
+            knockback = direction * (isBoss ? .9f : 4.2f) * impact;
+            staggerUntil = Time.time + (isBoss ? .05f : .22f) * Mathf.Min(impact, 1.8f);
+            // A hit during a wind-up delays the strike a little instead of cancelling it.
+            if (windingUp && !isBoss) attackAt += .08f;
+        }
+
+        Vector3 HitDirection()
+        {
+            Vector3 direction = Health ? Health.LastHitDirection : Vector3.zero;
+            if (direction.sqrMagnitude < .01f && player) direction = transform.position - player.transform.position;
+            direction.y = 0;
+            return direction.sqrMagnitude > .001f ? direction.normalized : -transform.forward;
+        }
+
         void OnDefeated(TrainingEnemy _)
         {
             if (warning) warning.enabled = false;
             if (body) body.enabled = false;
+            StartCoroutine(DeathFlight());
+        }
+
+        IEnumerator DeathFlight()
+        {
+            Vector3 direction = HitDirection();
+            float impact = Mathf.Clamp(Health ? Health.LastHitImpact : 1, .6f, 2f);
+            float ground = transform.position.y;
+            Vector3 velocity = direction * (isBoss ? 1.6f : 5.2f * impact) + Vector3.up * (isBoss ? 2.4f : 6.2f + impact);
+            Quaternion start = transform.rotation;
+            // Fall over backwards, away from the attacker.
+            Quaternion lying = Quaternion.AngleAxis(90f, Vector3.Cross(Vector3.up, direction)) * Quaternion.LookRotation(-direction);
+            float air = 0;
+            int bounces = 0;
+            while (bounces < 2 && air < 3f)
+            {
+                float dt = Time.deltaTime;
+                air += dt;
+                velocity.y -= 24f * dt;
+                Vector3 p = transform.position + velocity * dt;
+                float tip = Mathf.Clamp01(air / .45f);
+                transform.rotation = Quaternion.Slerp(start, lying, tip * tip * (3 - 2 * tip));
+                if (p.y <= ground + .3f && velocity.y < 0)
+                {
+                    p.y = ground + .3f;
+                    bounces++;
+                    velocity = new Vector3(velocity.x * .35f, bounces == 1 ? 2.4f : 0, velocity.z * .35f);
+                    HitFeedback.Dust(new Vector3(p.x, ground, p.z), bounces == 1 ? 1f : .6f);
+                    if (bounces == 1) HitFeedback.Shake(.06f, .12f);
+                }
+                transform.position = p;
+                yield return null;
+            }
+            transform.rotation = lying;
+            yield return new WaitForSeconds(.9f);
+            for (float t = 0; t < .6f; t += Time.deltaTime)
+            {
+                transform.position += Vector3.down * (1.1f * Time.deltaTime);
+                yield return null;
+            }
+            HitFeedback.Dust(new Vector3(transform.position.x, ground, transform.position.z), .5f);
+            if (Health) Health.HideNow();
         }
         void OnDestroy()
         {
-            if (Health) Health.Defeated -= OnDefeated;
+            if (Health) { Health.Defeated -= OnDefeated; Health.Damaged -= OnDamaged; }
             if (warningMaterial) Destroy(warningMaterial);
         }
 
