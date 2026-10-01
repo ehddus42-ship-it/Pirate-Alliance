@@ -259,7 +259,8 @@ namespace AcRoguelike
                     if (approach > room) delta -= toward * (approach - room);
                 }
             }
-            body.Move(delta);
+            // Keep a little downward push so the move never reads as leaving the ground.
+            body.Move(delta + Vector3.down * .02f);
         }
 
         /// <summary>Screen tilt of a cut: level for a flat sweep, steep for a diagonal one, mirrored by the sweep side.</summary>
@@ -311,8 +312,8 @@ namespace AcRoguelike
             {
                 Vector3 delta = Vector3.ProjectOnPlane(lungeTarget - transform.position, Vector3.up);
                 float step = lungeSpeed * Time.deltaTime;
-                if (delta.magnitude <= step) { body.Move(delta); lungeUntil = 0; }
-                else body.Move(delta.normalized * step);
+                if (delta.magnitude <= step) { body.Move(delta + Vector3.down * .02f); lungeUntil = 0; }
+                else body.Move(delta.normalized * step + Vector3.down * .02f);
             }
             if (drawn && !(combat && combat.IsAttacking) && secondHit == null && Time.time > sheatheAt) Draw(false);
         }

@@ -82,6 +82,16 @@ namespace AcRoguelike
             stopRoutine = Host.StartCoroutine(HitStopRoutine(seconds, scale));
         }
 
+        /// <summary>Ends a running hit stop at once (a dash must never be slowed by the hit it cancels).</summary>
+        public static void CancelHitStop()
+        {
+            if (stopScale < 0) return;
+            if (stopRoutine != null && runner) runner.StopCoroutine(stopRoutine);
+            stopRoutine = null;
+            if (Mathf.Abs(Time.timeScale - stopScale) < .0001f) Time.timeScale = 1;
+            stopScale = -1;
+        }
+
         static IEnumerator HitStopRoutine(float seconds, float scale)
         {
             stopScale = scale;
