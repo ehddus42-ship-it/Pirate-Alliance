@@ -23,7 +23,7 @@ namespace AcRoguelike.EditorTools
                 if (!File.Exists(AstraiaAnimationBuilder.ControllerPath)) return;
                 if (File.Exists(AstraiaAnimationBuilder.Folder + "/" + AstraiaAnimationBuilder.ComboVersion + ".anim")) return;
                 if (!File.Exists(AstraiaAnimationBuilder.KatanaFolder + "/Katana_IaiDraw.fbx")) return;
-                Debug.Log("[Astraia] Building the katana combo motions (Attack1-5) for the melee basic attack.");
+                Debug.Log("[Astraia] Building the katana combo motions (Attack1-6) for the melee basic attack.");
                 AstraiaAnimationBuilder.Build();
             };
         }
@@ -64,7 +64,7 @@ namespace AcRoguelike.EditorTools
             var walk = FindClip("HumanF@Walk01_Forward");
             var run = FindClip("HumanF@Run01_Forward");
             var sprint = FindClip("HumanF@Sprint01_Forward");
-            // Katana basic attack (MeleeSlash): five full-body motion-captured hits in the style of Yae Sakura.
+            // Katana basic attack (MeleeSlash): six fast full-body motion-captured hits in the style of Yae Sakura.
             var attacks = MakeKatanaCombo() ?? new[] { MakeSlash(idle, 0), MakeSlash(idle, 1), MakeSlash(idle, 2) };
             var dash = MakeDash(sprint);
             var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(ControllerPath);
@@ -200,15 +200,16 @@ namespace AcRoguelike.EditorTools
         /// </summary>
         static readonly (string file, float start, float end, float speed, float aimTime, float aimRel)[] KatanaSegments =
         {
-            ("Katana_Flurry", .36f, .86f, 1.15f, .68f, 54f),      // stepping low sweep, right to left
-            ("Katana_Flurry", .86f, 1.68f, 1.2f, 1.12f, 21f),     // rising backhand, then a cut back across (2 hits)
-            ("Katana_Pirouette", 1.42f, 2.05f, 1.15f, 1.85f, -24f), // full-turn pirouette cut (aim kept loose so the turn stays whole)
-            ("Katana_DashSlash", .28f, 1.30f, 1.45f, .80f, 13f),  // low dash, descending cut and a low backhand (2 hits)
-            ("Katana_IaiDraw", .10f, 1.70f, 1.2f, .70f, 63f),     // iai draw and a heavy second cut, then zanshin
+            ("Katana_Flurry", .48f, .84f, 1.6f, .68f, 54f),        // ta: stepping low sweep, right to left
+            ("Katana_Flurry", .90f, 1.24f, 1.6f, 1.12f, 51f),      // ta: rising backhand, left to right
+            ("Katana_Flurry", 1.26f, 1.66f, 1.55f, 1.48f, 1f),     // tak: cut back across
+            ("Katana_Pirouette", 1.55f, 2.05f, 1.45f, 1.85f, -24f), // full-turn pirouette cut (aim kept loose so the turn stays whole)
+            ("Katana_DashSlash", .40f, 1.26f, 1.7f, .80f, 13f),   // low dash through the target, two cuts
+            ("Katana_IaiDraw", .45f, 1.40f, 1.45f, .70f, 63f),    // iai draw and a heavy second cut, short zanshin
         };
 
         /// <summary>Bumped when the combo changes, so the installer rebuilds clips made by an older version.</summary>
-        public const string ComboVersion = "Astraia_Katana_05";
+        public const string ComboVersion = "Astraia_Katana_06";
 
         static AnimationClip[] MakeKatanaCombo()
         {

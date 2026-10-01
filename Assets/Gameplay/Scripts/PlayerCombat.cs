@@ -27,7 +27,7 @@ namespace AcRoguelike
         public float returnBlend = .1f;
 
         public bool IsAttacking => AttackIndex >= 0;
-        /// <summary>Zero-based attack index, or -1 when idle. Maps to Animator states Attack1 to Attack5.</summary>
+        /// <summary>Zero-based attack index, or -1 when idle. Maps to Animator states Attack1 to Attack6.</summary>
         public int AttackIndex { get; private set; } = -1;
         public Vector3 AttackDirection { get; private set; }
         public float AnimationSpeed => 1f / attackTimeScale;
@@ -61,7 +61,8 @@ namespace AcRoguelike
             Animator.StringToHash("Base Layer.Attack2"),
             Animator.StringToHash("Base Layer.Attack3"),
             Animator.StringToHash("Base Layer.Attack4"),
-            Animator.StringToHash("Base Layer.Attack5")
+            Animator.StringToHash("Base Layer.Attack5"),
+            Animator.StringToHash("Base Layer.Attack6")
         };
 
         void Awake()
@@ -122,7 +123,7 @@ namespace AcRoguelike
             recoveryRemaining = Mathf.Max(0, recoveryRemaining - dt);
             bufferRemaining = Mathf.Max(0, bufferRemaining - dt);
             if (pressed) bufferRemaining = Mathf.Max(.01f, inputBuffer);
-            if (motor.IsDashing)
+            if (motor.IsDashing || motor.IsHeld || motor.IsLaunched)
             {
                 if (IsAttacking) CancelAttack(false);
                 // A fresh press during the end of a dodge may carry into the next action.

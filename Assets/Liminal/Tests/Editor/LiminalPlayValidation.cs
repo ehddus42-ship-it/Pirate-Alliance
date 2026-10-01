@@ -401,15 +401,19 @@ namespace AcRoguelike.Liminal.EditorTests
                             "Runtime duplicated an authored vending monster.");
                         if (combat)
                         {
-                            int regularEnemies = room.kind == LiminalRoomKind.Boss ? 1 : Mathf.Max(1, room.enemySpawns.Length);
-                            Require(run.LivingEnemyCount == regularEnemies + placedAmbushes.Length,
-                                "Room-clear count does not include its authored vending monsters exactly once.");
+                            int roomEnemies = room.GetComponentsInChildren<TrainingEnemy>().Count(e => e.IsAlive);
+                            Require(run.LivingEnemyCount == roomEnemies,
+                                "Room-clear count does not include every monster in the room (vending ambushes, office monsters, monitors) exactly once.");
+                            Require(room.kind == LiminalRoomKind.Boss || room.GetComponentsInChildren<LiminalPropMonster>().Length >= Mathf.Max(1, room.enemySpawns.Length),
+                                "A combat room did not spawn its office monsters.");
+                            Require(!room.GetComponentsInChildren<Transform>().Any(t => t.name == "MeshySlot__photocopier" || t.name == "MeshySlot__lockers"),
+                                "A copier or locker prop was left next to its monster.");
                             Require(run.LivingEnemyCount > 0, room.name + " spawned no enemies.");
                             Require(room.entranceGate && room.entranceGate.activeSelf && room.exitGate && room.exitGate.activeSelf, room.name + " did not lock its gates.");
                             Require(!run.TryUseExit(), "An uncleared combat room permitted a stage exit.");
                             if (room.kind == LiminalRoomKind.Boss)
                             {
-                                var boss = room.GetComponentsInChildren<LiminalEnemy>().First(e => e.isBoss);
+                                var boss = room.GetComponentsInChildren<TrafficLightBoss>().First();
                                 healthBeforeBoss = run.PlayerHealth.Health;
                                 motor.ResetAt(boss.transform.position + room.transform.right * 5);
                                 Next("ObserveBoss");
@@ -419,8 +423,9 @@ namespace AcRoguelike.Liminal.EditorTests
                         else Next("CheckClear");
                         break;
                     case "ObserveBoss":
-                        var activeBoss = run.Rooms[wantedRoom].GetComponentsInChildren<LiminalEnemy>().First(e => e.isBoss);
-                        report.bossTelegraphObserved |= activeBoss.IsWindingUp;
+                        var activeBoss = run.Rooms[wantedRoom].GetComponentsInChildren<TrafficLightBoss>().First();
+                        report.bossTelegraphObserved |= activeBoss.State == TrafficLightBossState.FieldCast || activeBoss.State == TrafficLightBossState.CarThrow
+                            || (activeBoss.warning && activeBoss.warning.enabled);
                         if (run.PlayerHealth.Health < healthBeforeBoss)
                         {
                             report.bossDamageObserved = true;

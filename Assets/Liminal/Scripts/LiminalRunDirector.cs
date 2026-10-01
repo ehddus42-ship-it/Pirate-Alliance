@@ -12,7 +12,6 @@ namespace AcRoguelike.Liminal
     {
         public LiminalStageDefinition[] stages = new LiminalStageDefinition[0];
         public Transform player;
-        public GameObject enemyPrefab;
         public Font hudFont;
         public int seed = 73029;
         public int StageIndex { get; private set; }
@@ -170,6 +169,9 @@ namespace AcRoguelike.Liminal
                         // Keep authored appliances dormant until the player enters their room.
                         ambush.enabled = false;
                     }
+                // Boss rooms that do not author their own boss get the traffic light boss.
+                if (!preview && room.kind == LiminalRoomKind.Boss && room.GetComponentsInChildren<TrafficLightBoss>(true).Length == 0)
+                    PlaceBoss(room);
                 if (!preview)
                     foreach (var signal in room.GetComponentsInChildren<TrafficLightBoss>(true))
                     {
@@ -226,24 +228,118 @@ namespace AcRoguelike.Liminal
             {
                 room.SetGates(true, true);
                 bool boss = room.kind == LiminalRoomKind.Boss;
-                int count = authoredBoss ? 0 : boss ? 1 : Mathf.Max(1, room.enemySpawns == null ? 0 : room.enemySpawns.Length);
-                for (int i = 0; i < count; i++)
-                {
-                    Transform marker = room.enemySpawns != null && i < room.enemySpawns.Length ? room.enemySpawns[i] : null;
-                    Vector3 p = marker ? marker.position : room.transform.TransformPoint(room.localBounds.center + Vector3.forward * 3);
-                    if (!marker) p.y = room.transform.position.y + .05f;
-                    GameObject go = enemyPrefab ? Instantiate(enemyPrefab, p, room.transform.rotation, room.transform)
-                        : LiminalEnemy.CreateSilhouette(p, room.transform, boss);
-                    var target = go.GetComponent<TrainingEnemy>() ?? go.AddComponent<TrainingEnemy>();
-                    var enemy = go.GetComponent<LiminalEnemy>() ?? go.AddComponent<LiminalEnemy>();
-                    enemy.Initialize(health, room, StageIndex, boss);
-                    target.Defeated += EnemyDefeated;
-                    living.Add(target);
-                }
-                hud.Notify(boss ? "관리자가 기다리고 있어.\n바닥의 예고선을 보고 회피해." : room.displayName + "\n잔상을 정리하면 문이 열려.", 4);
+                if (!authoredBoss) SpawnOfficeMonsters(room, index, boss);
+                hud.Notify(boss ? "교차로의 신호등이 깨어나고 있어.\n바닥의 예고선을 보고 회피해."
+                    : room.displayName + "\n사무용품들이 깨어났어. 모두 정리하면 문이 열려.", 4);
             }
             else MarkRoomCleared(index);
             RoomChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// The room's own copier and locker props wake up as monsters where they stand. Each spawn marker adds a
+        /// copier or a locker, and CRT monitor turrets are scattered around the room: on the floor, tipped over,
+        /// or on top of furniture.
+        /// </summary>
+        void SpawnOfficeMonsters(LiminalRoom room, int roomIndex, bool boss)
+        {
+            var random = new System.Random(seed * 31 + StageIndex * 977 + roomIndex * 131);
+            var spawned = new List<LiminalPropMonster>();
+            foreach (var slot in room.GetComponentsInChildren<Transform>(true))
+            {
+                if (!slot.gameObject.activeInHierarchy) continue;
+                bool copier = slot.name == "MeshySlot__photocopier", locker = slot.name == "MeshySlot__lockers";
+                if (!copier && !locker) continue;
+                Vector3 p = slot.position;
+                p.y = room.transform.position.y + .05f;
+                slot.gameObject.SetActive(false);
+                spawned.Add(copier ? CopierMonster.Create(p, slot.rotation, room.transform) : LockerMonster.Create(p, slot.rotation, room.transform));
+            }
+            int markers = room.enemySpawns == null ? 0 : room.enemySpawns.Length;
+            int count = boss ? 4 : Mathf.Max(1, markers);
+            for (int i = 0; i < count; i++)
+            {
+                Transform marker = i < markers ? room.enemySpawns[i] : null;
+                Vector3 p = marker ? marker.position : room.transform.TransformPoint(room.localBounds.center + Vector3.forward * (3 + i * 2.5f));
+                p.y = room.transform.position.y + .05f;
+                Quaternion facing = Quaternion.LookRotation(Vector3.ProjectOnPlane(room.entry.position - p, Vector3.up).normalized + Vector3.forward * .001f);
+                bool locker = (i + roomIndex + random.Next(2)) % 2 == 1;
+                spawned.Add(locker ? LockerMonster.Create(p, facing, room.transform) : CopierMonster.Create(p, facing, room.transform));
+            }
+            if (!boss)
+            {
+                int monitors = 2 + markers / 2 + (StageIndex >= 2 ? 1 : 0);
+                foreach (var placement in MonitorPlacements(room, monitors, random, spawned))
+                {
+                    var monitor = MonitorTurret.Create(placement.position, Quaternion.Euler(0, (float)random.NextDouble() * 360, 0), room.transform);
+                    spawned.Add(monitor);
+                    monitor.Setup(health, room, StageIndex);
+                    monitor.Place(placement.tilt);
+                    Register(monitor.Health);
+                }
+            }
+            foreach (var monster in spawned)
+            {
+                if (monster is MonitorTurret) continue;
+                monster.Setup(health, room, StageIndex);
+                Register(monster.Health);
+            }
+        }
+
+        void Register(TrainingEnemy enemy)
+        {
+            enemy.Defeated += EnemyDefeated;
+            living.Add(enemy);
+        }
+
+        struct MonitorPlacement { public Vector3 position; public Quaternion tilt; }
+
+        /// <summary>
+        /// Scattered, not arranged: random open spots in the room (away from the entry). A spot on top of low
+        /// furniture is used as is. Each monitor gets a careless tilt: slightly crooked, tipped back or forward,
+        /// or lying on its side.
+        /// </summary>
+        List<MonitorPlacement> MonitorPlacements(LiminalRoom room, int count, System.Random random, List<LiminalPropMonster> others)
+        {
+            var result = new List<MonitorPlacement>();
+            float floor = room.transform.position.y;
+            var b = room.localBounds;
+            for (int attempt = 0; attempt < count * 30 && result.Count < count; attempt++)
+            {
+                var local = new Vector3(Mathf.Lerp(b.min.x + 2.5f, b.max.x - 2.5f, (float)random.NextDouble()), 0,
+                                        Mathf.Lerp(b.min.z + 4f, b.max.z - 2.5f, (float)random.NextDouble()));
+                Vector3 world = room.transform.TransformPoint(local);
+                if (Vector3.Distance(world, room.entry.position) < 6f) continue;
+                if (room.playerSpawn && Vector3.Distance(world, room.playerSpawn.position) < 5f) continue;
+                if (!Physics.Raycast(new Vector3(world.x, floor + 3f, world.z), Vector3.down, out var hit, 3.5f, ~0, QueryTriggerInteraction.Ignore)) continue;
+                if (hit.point.y - floor > 1.35f || hit.collider.GetComponentInParent<LiminalPropMonster>()) continue;
+                Vector3 spot = hit.point + Vector3.up * .02f;
+                if (Physics.CheckSphere(spot + Vector3.up * .42f, .3f, ~0, QueryTriggerInteraction.Ignore)) continue;
+                bool crowded = false;
+                foreach (var m in others) if (m && Vector3.Distance(m.transform.position, spot) < 2.4f) { crowded = true; break; }
+                foreach (var placed in result) if (Vector3.Distance(placed.position, spot) < 3f) { crowded = true; break; }
+                if (crowded) continue;
+                double roll = random.NextDouble();
+                Quaternion tilt = roll < .45 ? Quaternion.Euler(Range(random, -7, 7), 0, Range(random, -9, 9))
+                    : roll < .75 ? Quaternion.Euler(Range(random, -24, -12) * (random.Next(2) == 0 ? 1 : -1), 0, Range(random, -6, 6))
+                    : Quaternion.Euler(0, 0, random.Next(2) == 0 ? 88 : -88);
+                result.Add(new MonitorPlacement { position = spot, tilt = tilt });
+            }
+            return result;
+        }
+
+        static float Range(System.Random random, float a, float b) => Mathf.Lerp(a, b, (float)random.NextDouble());
+
+        void PlaceBoss(LiminalRoom room)
+        {
+            var library = LiminalMonsterLibrary.Instance;
+            if (!library || !library.trafficLightBoss) return;
+            Transform marker = room.enemySpawns != null && room.enemySpawns.Length > 0 ? room.enemySpawns[0] : null;
+            Vector3 p = marker ? marker.position : room.transform.TransformPoint(room.localBounds.center);
+            p.y = room.transform.position.y;
+            Vector3 toEntry = Vector3.ProjectOnPlane(room.entry.position - p, Vector3.up);
+            var boss = Instantiate(library.trafficLightBoss, p, toEntry.sqrMagnitude > .01f ? Quaternion.LookRotation(toEntry) : room.transform.rotation, room.transform);
+            boss.name = "TrafficLightBoss";
         }
 
         void EnemyDefeated(TrainingEnemy enemy)

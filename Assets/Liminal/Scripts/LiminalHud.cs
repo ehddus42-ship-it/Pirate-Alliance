@@ -97,18 +97,10 @@ namespace AcRoguelike.Liminal
                 healthFill.rectTransform.sizeDelta = new Vector2(252f * run.PlayerHealth.Health / run.PlayerHealth.maximumHealth, 9);
             }
             objectiveLabel.text = run.ExitAvailable ? "[E] 다음 구역으로 이동"
-                : run.LivingEnemyCount > 0 ? $"잔상 {run.LivingEnemyCount}개 · 정리하면 문이 열려\n바닥 예고선 밖으로 회피해"
+                : run.LivingEnemyCount > 0 ? $"깨어난 사무용품 {run.LivingEnemyCount}개 · 정리하면 문이 열려\n바닥 예고선 밖으로 회피해"
                 : "열린 문을 따라 다음 공간으로\n" + $"SEED {run.seed}";
             if (Time.unscaledTime > toastUntil) toastLabel.text = "";
             bossLabel.text = "";
-            if (run.CurrentStage.isBossStage && run.LivingEnemyCount > 0)
-                foreach (var enemy in FindObjectsByType<LiminalEnemy>(FindObjectsSortMode.None))
-                    if (enemy.isBoss && enemy.Health && enemy.Health.IsAlive)
-                    {
-                        bossLabel.text = $"관리자    {enemy.Health.Health} / {enemy.Health.maxHealth}" +
-                            (enemy.Health.Health < enemy.Health.maxHealth / 2 ? "    ·    두 번째 호출" : "");
-                        break;
-                    }
             if (run.CurrentStage.isBossStage && run.LivingEnemyCount > 0)
                 foreach (var signal in FindObjectsByType<TrafficLightBoss>(FindObjectsSortMode.None))
                     if (signal.enabled && signal.Health && signal.Health.IsAlive && signal.State != TrafficLightBossState.Dormant)

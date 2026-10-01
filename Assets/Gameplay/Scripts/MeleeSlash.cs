@@ -4,9 +4,9 @@ using UnityEngine;
 namespace AcRoguelike
 {
     /// <summary>
-    /// Katana basic attack modelled on Yae Sakura (Honkai Impact 3rd, A-rank): a five-hit, full-body combo of a
-    /// stepping sweep, a rising backhand and return cut, a pirouette cut, a low dash cutting twice and an iai draw
-    /// finisher that cuts twice. PlayerCombat owns input, combo timing and the Animator; this component holds the
+    /// Katana basic attack modelled on Yae Sakura (Honkai Impact 3rd, A-rank): a fast six-hit, full-body combo:
+    /// three quick stepping cuts (ta-ta-tak), a pirouette cut, a low dash through the target cutting twice and
+    /// an iai draw finisher that cuts twice. PlayerCombat owns input, combo timing and the Animator; this component holds the
     /// sword, carries the player by the motion's own steps (root motion) and a short dash toward the target, tests
     /// the hit arc, deals damage and plays the hit feedback. Motions are retargetable Humanoid clips (see
     /// Documentation/PlayerMelee), and the sword grip is derived from humanoid hand and finger bones, so nothing here
@@ -33,36 +33,36 @@ namespace AcRoguelike
         }
 
         // Clip timing measured from the motion capture (sword-tip speed peaks), at the baked playback speed.
-        public static readonly float[] Durations = { .435f, .683f, .548f, .703f, 1.333f };
-        public static readonly float[] HitTimes = { .278f, .217f, .374f, .359f, .50f };
+        public static readonly float[] Durations = { .225f, .213f, .258f, .345f, .506f, .655f };
+        public static readonly float[] HitTimes = { .125f, .138f, .142f, .207f, .235f, .172f };
 
         // Arcs follow the measured sword-tip path around the hips during each cut (0 = toward the target, + = right;
         // roll lifts the right end).
         public Swing[] swings =
         {
-            // 1: stepping low sweep, right to left.
-            new Swing { damage = 16, range = 2.6f, halfAngle = 80, impact = .9f, hitStop = .045f, shake = .04f,
+            // 1-3: ta-ta-tak. Three quick stepping cuts from one flurry: low sweep, rising backhand, cut back across.
+            new Swing { damage = 12, range = 2.6f, halfAngle = 80, impact = .8f, hitStop = .035f, shake = .03f,
                 arcFrom = 84, arcTo = -88, arcRoll = -8, arcRadius = 1.8f },
-            // 2: rising backhand left to right, then a cut back across.
-            new Swing { damage = 12, range = 2.6f, halfAngle = 80, impact = .8f, hitStop = .04f, shake = .035f,
-                arcFrom = -127, arcTo = 98, arcRoll = 12, arcRadius = 1.8f,
-                secondHitDelay = .30f, secondDamage = 15, secondArcFrom = 97, secondArcTo = -98, secondArcRoll = -10 },
-            // 3: pirouette: one full turn with the blade out.
-            new Swing { damage = 22, range = 2.8f, halfAngle = 180, impact = 1.15f, hitStop = .06f, shake = .065f,
-                arcFrom = 110, arcTo = 455, arcRoll = 6, arcRadius = 2.1f },
-            // 4: low dash: a descending cut on the way in, then a low backhand.
-            new Swing { damage = 18, range = 2.8f, halfAngle = 75, impact = 1.1f, hitStop = .055f, shake = .06f,
+            new Swing { damage = 12, range = 2.6f, halfAngle = 80, impact = .8f, hitStop = .035f, shake = .03f,
+                arcFrom = -157, arcTo = 68, arcRoll = 12, arcRadius = 1.8f },
+            new Swing { damage = 14, range = 2.7f, halfAngle = 80, impact = .95f, hitStop = .04f, shake = .04f,
+                arcFrom = 128, arcTo = -67, arcRoll = -10, arcRadius = 1.9f },
+            // 4: pirouette: one full turn with the blade out.
+            new Swing { damage = 18, range = 2.8f, halfAngle = 180, impact = 1.1f, hitStop = .05f, shake = .06f,
+                arcFrom = -153, arcTo = 190, arcRoll = 6, arcRadius = 2.1f },
+            // 5: low dash through the target: a descending cut on the way in, then a low backhand.
+            new Swing { damage = 15, range = 2.8f, halfAngle = 75, impact = 1.05f, hitStop = .045f, shake = .055f,
                 arcFrom = 33, arcTo = -96, arcRoll = 38, arcRadius = 1.9f, dash = true,
-                secondHitDelay = .255f, secondDamage = 20, secondArcFrom = -97, secondArcTo = 13, secondArcRoll = 20 },
-            // 5: iai draw across the front, then a heavy diagonal cut that launches enemies.
-            new Swing { damage = 28, range = 3.2f, halfAngle = 100, impact = 1.3f, hitStop = .07f, shake = .09f,
+                secondHitDelay = .218f, secondDamage = 17, secondArcFrom = -97, secondArcTo = 13, secondArcRoll = 20 },
+            // 6: iai draw across the front, then a heavy diagonal cut that launches enemies.
+            new Swing { damage = 22, range = 3.2f, halfAngle = 100, impact = 1.3f, hitStop = .07f, shake = .09f,
                 arcFrom = -123, arcTo = 97, arcRoll = -10, arcRadius = 2.6f, finisher = true, dash = true,
-                secondHitDelay = .333f, secondDamage = 44, secondArcFrom = 79, secondArcTo = -66, secondArcRoll = 35 },
+                secondHitDelay = .276f, secondDamage = 38, secondArcFrom = 79, secondArcTo = -66, secondArcRoll = 35 },
         };
         [Tooltip("Targets closer than this are reached with a short dash at the start of a swing.")]
         public float lungeRange = 6f;
         public float lungeStop = 1.4f;
-        public float lungeSpeed = 17f;
+        public float lungeSpeed = 28f;
         [Tooltip("Scale of the motion's own steps (root motion) while attacking.")]
         public float rootMotionScale = 1f;
         [Range(0, 1), Tooltip("How much of the root motion is turned toward the attack direction.")]
@@ -108,7 +108,7 @@ namespace AcRoguelike
                 combat.hitTimes = (float[])HitTimes.Clone();
                 combat.attackMovementMultiplier = .05f;
                 combat.comboQueueWindow = .3f;
-                combat.animationBlend = .09f;
+                combat.animationBlend = .06f;
                 combat.returnBlend = .22f;
             }
             if (!katanaModel) katanaModel = Resources.Load<GameObject>("AstraiaKatana");
@@ -135,8 +135,8 @@ namespace AcRoguelike
                 if (to.magnitude > lungeStop && to.magnitude < lungeRange)
                 {
                     lungeTarget = target.transform.position - to.normalized * lungeStop;
-                    float hit = combat && combat.hitTimes != null && index < combat.hitTimes.Length ? combat.hitTimes[index] : .3f;
-                    lungeUntil = Time.time + hit * .85f;
+                    // A fast dash in; the fast opening cuts may land before it ends, the arc range covers the rest.
+                    lungeUntil = Time.time + Mathf.Min(.3f, (to.magnitude - lungeStop) / Mathf.Max(1, lungeSpeed));
                 }
             }
         }
@@ -298,12 +298,13 @@ namespace AcRoguelike
                 var swing = swings[Mathf.Clamp(swingIndex, 0, swings.Length - 1)];
                 float hit = HitTimes[Mathf.Clamp(swingIndex, 0, HitTimes.Length - 1)];
                 float end = hit + Mathf.Max(.1f, swing.secondHitDelay + .08f);
-                // Afterimages through the dash and the draw.
-                if (swing.dash && swingClock > hit - .28f && swingClock < end && Time.time >= nextGhost)
+                // Afterimages: dense through the dash, the draw and any lunge; a faint trail on every other cut.
+                bool strong = swing.dash || lungeUntil > Time.time;
+                if (swingClock > hit - .2f && swingClock < end && Time.time >= nextGhost)
                 {
-                    nextGhost = Time.time + .035f;
+                    nextGhost = Time.time + (strong ? .03f : .06f);
                     if (skins == null) skins = Body.GetComponentsInChildren<SkinnedMeshRenderer>();
-                    HitFeedback.Afterimage(skins, (swing.finisher ? HitFeedback.Violet : HitFeedback.Sakura) * .55f, .28f);
+                    HitFeedback.Afterimage(skins, (swing.finisher ? HitFeedback.Violet : HitFeedback.Sakura) * (strong ? .55f : .28f), strong ? .28f : .18f);
                 }
             }
             if (lungeUntil > Time.time && body && body.enabled)

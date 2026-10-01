@@ -34,6 +34,11 @@ namespace AcRoguelike
         public InputAction MoveAction => move;
         public InputAction DashAction => dash;
         public InputAction WalkAction => walk;
+        /// <summary>Held by an enemy (a locker tentacle): no input, no movement; the holder moves the transform.</summary>
+        public bool IsHeld { get; private set; }
+        /// <summary>Thrown through the air after a grab: no control until the player lands.</summary>
+        public bool IsLaunched => launched;
+        public event System.Action Landed;
         CharacterController body;
         InputAction move, dash, walk, aimStick;
         PlayerCombat combat;
@@ -45,6 +50,9 @@ namespace AcRoguelike
         bool automatedDash;
         bool automatedWalk;
         bool gamepadAiming, dashMovedThisFrame;
+        Vector3 launchVelocity;
+        float launchTime;
+        bool launched;
         Transform chest, neck;
         Animator cachedAnimator;
         RuntimeAnimatorController cachedController;
@@ -158,9 +166,18 @@ namespace AcRoguelike
                 torsoYaw = 0;
                 if (HasParameter(Dash, AnimatorControllerParameterType.Trigger)) animator.SetTrigger(Dash);
             }
+            if (launched) { wantsDash = false; dashRemaining = 0; desired = Vector3.zero; }
             bool dashThisFrame = dashRemaining > 0;
             Vector3 displacement;
-            if (dashThisFrame)
+            if (launched)
+            {
+                // Ballistic flight after a throw: horizontal speed bleeds off a little, gravity below does the rest.
+                launchTime += dt;
+                displacement = launchVelocity * dt;
+                launchVelocity = Vector3.MoveTowards(launchVelocity, Vector3.zero, 3f * dt);
+                velocity = Vector3.zero;
+            }
+            else if (dashThisFrame)
             {
                 float dashDt = Mathf.Min(dt, dashRemaining);
                 // Integrate the linear ease-out profile over this frame, preserving distance at low FPS.
@@ -182,6 +199,12 @@ namespace AcRoguelike
             }
             if (body.isGrounded && verticalSpeed < 0) verticalSpeed = -2f;
             else verticalSpeed = Mathf.Max(-25f, verticalSpeed - 25f * dt);
+            if (launched && launchTime > .12f && body.isGrounded)
+            {
+                launched = false;
+                launchVelocity = Vector3.zero;
+                Landed?.Invoke();
+            }
             Vector3 before = transform.position;
             CollisionFlags collision = body.Move(displacement + Vector3.up * (verticalSpeed * dt));
             if ((collision & CollisionFlags.Below) != 0) verticalSpeed = -2f;
@@ -272,9 +295,40 @@ namespace AcRoguelike
         public void SetAutomationInput(Vector2 input, Vector3 aim, bool dashPressed = false, bool walkHeld = false)
         { automated = true; automatedMove = input; automatedAim = aim; automatedDash = dashPressed; automatedWalk = walkHeld; }
         public void ReleaseAutomation() { automated = false; automatedDash = false; automatedWalk = false; }
+        /// <summary>
+        /// Starts or ends an enemy grab. While held the CharacterController is off, so the holder can carry the
+        /// transform freely; releasing turns it back on in place.
+        /// </summary>
+        public void SetHeld(bool held)
+        {
+            if (!body) body = GetComponent<CharacterController>();
+            if (held == IsHeld) return;
+            IsHeld = held;
+            velocity = PlanarVelocity = Vector3.zero;
+            dashRemaining = 0; dashMovedThisFrame = false; launched = false;
+            if (combat) combat.CancelAttack();
+            ResetDashAnimation();
+            body.enabled = !held;
+        }
+
+        /// <summary>Throws the player: ballistic flight with no control until the next landing (raises Landed).</summary>
+        public void Launch(Vector3 velocityWorld)
+        {
+            if (IsHeld) SetHeld(false);
+            launchVelocity = Vector3.ProjectOnPlane(velocityWorld, Vector3.up);
+            verticalSpeed = Mathf.Max(0, velocityWorld.y);
+            launched = true;
+            launchTime = 0;
+            dashRemaining = 0;
+            velocity = Vector3.zero;
+            if (combat) combat.CancelAttack();
+        }
+
         public void ResetAt(Vector3 position)
         {
             if (!body) body = GetComponent<CharacterController>();
+            if (IsHeld) { IsHeld = false; body.enabled = true; }
+            launched = false; launchVelocity = Vector3.zero;
             bool wasEnabled = body.enabled;
             body.enabled = false; transform.position = position; body.enabled = wasEnabled;
             velocity = Vector3.zero; verticalSpeed = -2; dashRemaining = 0; cooldownRemaining = 0;
