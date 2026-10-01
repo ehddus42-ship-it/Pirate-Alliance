@@ -127,7 +127,7 @@ namespace AcRoguelike.Liminal
             int guardIndex = 0;
             foreach (float x in new[] { -3.8f, 3.8f, -7.2f, 7.2f })
             {
-                var guard = Official(GuardCharacter, new[] { "idle", "look" }, new Vector3(x, 0, 7.2f + Mathf.Abs(x) * .05f), 180 + (x < 0 ? 8 : -8), 1.82f, "Guard");
+                var guard = Official(GuardCharacter, new[] { "idle", "look", "greet" }, new Vector3(x, 0, 7.2f + Mathf.Abs(x) * .05f), 180 + (x < 0 ? 8 : -8), 1.82f, "Guard");
                 LobbyRoutine.Station(guard, "look", 11 + guardIndex++);
             }
 
@@ -184,11 +184,11 @@ namespace AcRoguelike.Liminal
 
             // Ambient staff: a senior official briefing a junior by the rest corner, and a clerk walking his rounds
             // around the emblem, clear of the lamps and of the spawn point (he stops for the player and takes calls).
-            var officer = Official(OfficerCharacter, new[] { "idle", "chat", "walk" }, new Vector3(8.9f, 0, 6.9f), 60, 1.6f, "Officer");
-            var director = Official(DirectorCharacter, new[] { "idle", "talk" }, new Vector3(10.1f, 0, 7.6f), 240, 1.75f, "Director");
+            var officer = Official(OfficerCharacter, new[] { "idle", "chat", "walk", "greet" }, new Vector3(8.9f, 0, 6.9f), 60, 1.6f, "Officer");
+            var director = Official(DirectorCharacter, new[] { "idle", "talk", "greet" }, new Vector3(10.1f, 0, 7.6f), 240, 1.75f, "Director");
             LobbyRoutine.Chat(officer, director, "chat", false, 21);
             LobbyRoutine.Chat(director, officer, "talk", true, 22);
-            var clerk = Official(ClerkCharacter, new[] { "idle", "walk", "phone" }, new Vector3(-6.5f, 0, -1f), 180, 1.76f, "Clerk");
+            var clerk = Official(ClerkCharacter, new[] { "idle", "walk", "phone", "greet" }, new Vector3(-6.5f, 0, -1f), 180, 1.76f, "Clerk");
             HeldBoard.Attach(clerk, true, new Vector3(.24f, .32f, .02f), Mat(null, new Color(.16f, .22f, .42f), .3f), clipMat, null, owned);
             LobbyRoutine.Patrol(clerk, new[] { new Vector3(-6.5f, 0, -1f), new Vector3(-5.2f, 0, -7f), new Vector3(5.4f, 0, -7f), new Vector3(6.4f, 0, -.5f) }, "phone", 1.15f, 31);
 
@@ -309,7 +309,7 @@ namespace AcRoguelike.Liminal
             bool atAgent = agent && Nearest != null && Nearest.anchor == agent.transform && run.player;
             if (agent) agent.LookAt(atAgent ? run.player.position : (Vector3?)null);
             // The agent greets the hunter with a formal bow the first time they walk up in this visit.
-            if (atAgent && !greeted) { greeted = true; agent.PlayOnce("bow"); }
+            if (atAgent && !greeted) { greeted = true; agent.PlayOnce("bow", null, LobbyRoutine.GreetSeconds); }
             if (interact && Nearest != null) Nearest.use();
         }
 
@@ -394,7 +394,6 @@ namespace AcRoguelike.Liminal
             var font = hud.Font;
             HunterUi.Text("Org", content, font, "KOREA HUNTER ASSOCIATION · 능력 개발부", 12, HunterUi.Gold, new Vector2(30, -22), new Vector2(560, 18), FontStyles.Bold);
             HunterUi.Title(content, font, "한서윤 요원", new Vector2(30, -42), 700, 26);
-            HunterUi.Text("Line", content, font, "어서 오세요, 헌터님. 오늘은 어떤 훈련을 받으시겠어요?", 16, HunterUi.Muted, new Vector2(30, -92), new Vector2(700, 24));
             HunterUi.Text("Wallet", content, font, $"보유 마석  <color=#a99bff>{HunterProgress.Currency:N0}</color>", 17, HunterUi.Cream, new Vector2(470, -24), new Vector2(260, 24), FontStyles.Bold, TextAlignmentOptions.TopRight);
             for (int i = 0; i < HunterProgress.Count; i++)
             {

@@ -79,20 +79,20 @@ OFFICIALS = {
         concept='Use ' + UNIFORM + ', but draw a different person: a Korean man in his late 20s, short neat black hair'
                 ' with a side part, no glasses, friendly serious face, slim build, straight uniform trousers and black'
                 ' leather dress shoes.',
-        actions=[('idle', 249), ('walk', 30), ('phone', 312)]),
+        actions=[('idle', 249), ('walk', 30), ('phone', 312), ('greet', 41)]),
     'association_officer': dict(
         refs=['official.png'], height=1.60,
         concept='Use ' + UNIFORM + ', but draw a different person: a young Korean woman in her early 20s, straight black'
                 ' hair in a shoulder-length bob with a small silver hair clip, no glasses, bright cheerful face, petite'
                 ' build, a knee-length pencil skirt, black tights and black flat shoes.',
-        actions=[('idle', 247), ('chat', 56), ('walk', 1)]),
+        actions=[('idle', 247), ('chat', 56), ('walk', 1), ('greet', 41)]),
     'association_director': dict(
         refs=['official.png'], height=1.75,
         concept='Use ' + UNIFORM + ', but draw a different person: a senior Korean man in his late 40s, short neatly'
                 ' combed salt-and-pepper hair, rectangular black glasses, stern but kind face, broad sturdy build, a'
                 ' gold-trimmed armband with the white wing emblem on the left upper arm, straight uniform trousers and'
                 ' black leather dress shoes.',
-        actions=[('idle', 251), ('talk', 314)]),
+        actions=[('idle', 251), ('talk', 314), ('greet', 290)]),
     'association_guard': dict(
         refs=['guards.png'], height=1.82,
         concept='Turn the back-view guards in the reference into one front-view character: a Korea Hunter Association'
@@ -100,7 +100,7 @@ OFFICIALS = {
                 ' chin strap, a tactical plate vest with pouches and a large white wing emblem patch on the chest,'
                 ' black gloves, a utility belt with pouches and a holstered radio, cargo trousers with knee pads, black'
                 ' combat boots, no weapon, face visible under the helmet, calm alert expression.',
-        actions=[('idle', 251), ('look', 338)]),
+        actions=[('idle', 251), ('look', 338), ('greet', 290)]),
 }
 
 

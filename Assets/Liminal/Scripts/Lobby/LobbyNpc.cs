@@ -24,6 +24,7 @@ namespace AcRoguelike.Liminal
         readonly List<string> labels = new List<string>();
         float[] weights = Array.Empty<float>();
         int loop, once = -1;
+        float onceEnd;
         Action onceDone;
         float restYaw;
         Vector3? lookTarget;
@@ -36,6 +37,7 @@ namespace AcRoguelike.Liminal
         public Animator Animator => animator;
         public string Current => once >= 0 ? labels[once] : loop < labels.Count ? labels[loop] : null;
         public bool Has(string label) => labels.IndexOf(label) >= 0;
+        public bool PlayingOnce => once >= 0;
         public float TurnSpeed { get; set; } = 240;
 
         public static string ModelPath(string character) => $"LiminalLobby/{character}/{character}";
@@ -128,12 +130,18 @@ namespace AcRoguelike.Liminal
             if (once < 0 && index < inputs.Count) Restart(index, keepPhase: true);
         }
 
-        /// <summary>Plays a clip once (a bow, a gesture), then returns to the current loop.</summary>
-        public bool PlayOnce(string label, Action done = null)
+        /// <summary>
+        /// Plays a clip once (a bow, a gesture), then returns to the current loop. `maxSeconds` cuts a clip with a
+        /// long still tail (the library bow stands upright for its last 2.5 s).
+        /// </summary>
+        public bool PlayOnce(string label, Action done = null, float maxSeconds = 0)
         {
             int index = labels.IndexOf(label);
             if (index < 0) { done?.Invoke(); return false; }
             once = index;
+            var clip = inputs[index].GetAnimationClip();
+            float length = clip ? clip.length : 0;
+            onceEnd = maxSeconds > 0 ? Mathf.Min(length, maxSeconds) : length;
             onceDone = done;
             Restart(index, keepPhase: false);
             return true;
@@ -182,8 +190,7 @@ namespace AcRoguelike.Liminal
                 for (int i = 0; i < inputs.Count; i++) mixer.SetInputWeight(i, sum > .001f ? weights[i] / sum : (i == target ? 1 : 0));
                 if (once >= 0)
                 {
-                    var clip = inputs[once].GetAnimationClip();
-                    if (!clip || inputs[once].GetTime() >= clip.length - Fade)
+                    if (inputs[once].GetTime() >= onceEnd - Fade)
                     {
                         once = -1;
                         var done = onceDone; onceDone = null;
@@ -280,12 +287,13 @@ namespace AcRoguelike.Liminal
     }
 
     /// <summary>
-    /// What an ambient official does, without any text:
+    /// What an ambient official does. There is no text anywhere, only motion:
     /// - <see cref="Mode.Station"/>: stands at a post, now and then plays an activity (a guard looks around).
     /// - <see cref="Mode.Chat"/>: faces a partner and alternates talking and listening.
     /// - <see cref="Mode.Patrol"/>: walks a loop of points, pausing at each (and taking a phone call at some).
-    /// Everyone notices the player: an official within a couple of metres turns to look; a walker whose way is
-    /// blocked stops and waits.
+    /// Everyone notices the player. Within <see cref="Notice"/> metres an official turns to look and greets once
+    /// with its "greet" clip (staff bow, guards salute). Greeting again needs the player to step back beyond
+    /// <see cref="Rearm"/> metres and a cooldown. A walker whose way is blocked stops and waits.
     /// </summary>
     public sealed class LobbyRoutine : MonoBehaviour
     {
@@ -299,7 +307,9 @@ namespace AcRoguelike.Liminal
         float clock, pause, speed;
         bool busy, walking;
         System.Random random;
-        const float Notice = 2.3f;
+        bool greetArmed = true;
+        float lastGreet = -100;
+        public const float Notice = 2.3f, Rearm = 3.6f, GreetCooldown = 12f, GreetSeconds = 5.2f;
 
         public Mode Kind => mode;
         public bool Walking => walking;
@@ -348,6 +358,13 @@ namespace AcRoguelike.Liminal
             Vector3 toPlayer = player ? player.position - transform.position : Vector3.positiveInfinity;
             toPlayer.y = 0;
             bool near = player && toPlayer.magnitude < Notice;
+            if (!player || toPlayer.magnitude > Rearm) greetArmed = true;
+            if (near && greetArmed && Time.time - lastGreet > GreetCooldown && npc.Has("greet") && !npc.PlayingOnce)
+            {
+                greetArmed = false;
+                lastGreet = Time.time;
+                npc.PlayOnce("greet", null, GreetSeconds);
+            }
             switch (mode)
             {
                 case Mode.Station:
@@ -379,6 +396,13 @@ namespace AcRoguelike.Liminal
         void UpdatePatrol(float dt, Transform player, Vector3 toPlayer, bool near)
         {
             if (path == null || path.Length < 2) return;
+            // Mid-greeting: stand still and face the player.
+            if (npc.PlayingOnce)
+            {
+                walking = false;
+                if (player) npc.LookAt(player.position);
+                return;
+            }
             if (pause > 0)
             {
                 walking = false;
