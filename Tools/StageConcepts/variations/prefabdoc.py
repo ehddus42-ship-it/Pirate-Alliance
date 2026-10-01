@@ -14,10 +14,18 @@ GLTF_MAIN_OBJECT = 3150474306388093854
 BUILTIN_CUBE = '{fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}'
 
 
+CLASS_NAMES = {1: 'GameObject', 4: 'Transform', 23: 'MeshRenderer', 33: 'MeshFilter', 65: 'BoxCollider',
+               108: 'Light', 114: 'MonoBehaviour', 1001: 'PrefabInstance'}
+
+
 class Doc:
     __slots__ = ('cls', 'fid', 'stripped', 'body')
 
     def __init__(self, cls, fid, body, stripped=False):
+        # Every Unity YAML document starts with its class name line ("GameObject:", "Transform:", ...). Without it
+        # the text is still valid YAML, but Unity rejects the whole prefab, so factory bodies get it here.
+        if not body[:1].isalpha():
+            body = CLASS_NAMES[cls] + ':\n' + body
         self.cls, self.fid, self.body, self.stripped = cls, fid, body, stripped
 
     def text(self):

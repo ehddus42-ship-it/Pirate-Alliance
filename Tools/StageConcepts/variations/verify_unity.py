@@ -42,6 +42,9 @@ def check_prefab(path):
         problems.append(f'{path.name}: duplicate fileIDs')
     local = set(ids)
     for d in prefab.docs:
+        # Unity needs the class-name line ("GameObject:") at the top of every document.
+        if not d.body.split('\n', 1)[0].endswith(':') or d.body[:1] == ' ':
+            problems.append(f'{path.name}: document {d.fid} (class {d.cls}) has no class-name line')
         for m in re.finditer(r'\{fileID: (-?\d+)(, guid: ([0-9a-f]+), type: \d)?\}', d.body):
             fid, guid = int(m.group(1)), m.group(3)
             if guid:
