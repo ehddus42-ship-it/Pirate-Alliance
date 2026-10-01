@@ -193,7 +193,7 @@ def generate(name):
     if fbx:
         fetch(fbx, out / f'{name}.fbx')
     for label, action in spec['actions']:
-        aid = step('anim_' + label, lambda: api('/v1/animations', dict(rig_task_id=rig_id, action_id=action))['result'])
+        aid = anim_step(state, folder, label, action, lambda: api('/v1/animations', dict(rig_task_id=rig_id, action_id=action))['result'])
         anim = wait('/v1/animations', aid, 'anim_' + label, folder)
         url = anim.get('result', {}).get('animation_fbx_url')
         if url:
@@ -232,8 +232,25 @@ def pick(name, index):
     state = load(folder / 'state.json')
     if f'concept_{index}' not in state:
         raise SystemExit(f'{name}: no concept_{index}; run concept first.')
+    if 'pick' in state and state['pick'] != index:
+        # A different concept means a different model: drop the cached 3D, rig and clip tasks so `run` rebuilds them.
+        for k in [k for k in state if k in ('image3d', 'rig') or k.startswith('anim_')]:
+            del state[k]
+        print(name, 'picked a new concept; 3D, rig and clips will be regenerated', flush=True)
     state['pick'] = index
     save(folder / 'state.json', state)
+
+
+def anim_step(state, folder, label, action, create):
+    """Clip task for `label`, reused only while it was made for the same library action."""
+    key = 'anim_' + label
+    if state.get(key + '_action', action) != action:
+        state.pop(key, None)
+    if key not in state:
+        state[key] = create()
+    state[key + '_action'] = action
+    save(folder / 'state.json', state)
+    return state[key]
 
 
 def generate_official(name):
@@ -265,8 +282,7 @@ def generate_official(name):
     if fbx:
         fetch(fbx, out / f'{name}.fbx')
     for label, action in spec['actions']:
-        aid = step('anim_' + label, lambda: api('/v1/animations', dict(rig_task_id=rig_id, action_id=action,
-                                                                    post_process=dict(operation_type='extract_armature')))['result'])
+        aid = anim_step(state, folder, label, action, lambda: api('/v1/animations', dict(rig_task_id=rig_id, action_id=action))['result'])
         anim = wait('/v1/animations', aid, 'anim_' + label, folder)
         # The skinned clip, not the armature-only one: it keeps the model's exact hierarchy (Armature/Hips...) and
         # its bind pose, so Unity builds each clip's Humanoid avatar from the same rest pose as the model. The
