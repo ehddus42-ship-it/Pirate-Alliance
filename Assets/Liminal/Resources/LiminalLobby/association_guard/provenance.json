@@ -1,0 +1,30 @@
+{
+  "provider": "Meshy AI",
+  "model": "meshy-7.1",
+  "concept_model": "nano-banana-pro",
+  "apis": [
+    "image-to-image v1",
+    "image-to-3d v1 (a-pose)",
+    "rigging v1",
+    "animations v1 (extract_armature)"
+  ],
+  "reference": [
+    "guards.png"
+  ],
+  "concept_prompt": "Turn the back-view guards in the reference into one front-view character: a Korea Hunter Association gate security guard, a Korean man in a slate grey tactical uniform, a matte grey combat helmet with a chin strap, a tactical plate vest with pouches and a large white wing emblem patch on the chest, black gloves, a utility belt with pouches and a holstered radio, cargo trousers with knee pads, black combat boots, no weapon, face visible under the helmet, calm alert expression. Draw ONE character only, as a clean 3D-modelling reference sheet: full body from the top of the head to the soles of the shoes, front view facing the camera, standing straight in a relaxed A-pose with both arms held about 30 degrees away from the body, palms facing the thighs, fingers relaxed and separated, empty hands holding nothing, feet slightly apart and flat on the ground. Plain pure white background, no floor shadow, no text, no frame, even soft studio lighting. Keep the clean cel-shaded anime art style and the uniform colours of the reference image.",
+  "height_m": 1.82,
+  "library_actions": {
+    "idle": 251,
+    "look": 338
+  },
+  "tasks": {
+    "concept_0": "01a0f7f7-374b-77a4-be8a-13dcaa51b51d",
+    "concept_1": "01a0f7f8-332d-74f3-af5c-3e02ab9f49da",
+    "pick": 0,
+    "image3d": "01a0f7fa-4bb3-779f-90d5-93596117251f",
+    "rig": "01a0f7fc-a548-7261-87d1-6d8390d65d4c",
+    "anim_look": "01a0f7fd-8331-70ec-9f3e-d8d37618650d",
+    "anim_idle": "01a0f803-2306-7273-8397-8b3301d7ca27"
+  },
+  "created_utc": "2026-10-01T15:09:24.399909+00:00"
+}

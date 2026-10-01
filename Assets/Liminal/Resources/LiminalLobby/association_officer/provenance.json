@@ -1,0 +1,32 @@
+{
+  "provider": "Meshy AI",
+  "model": "meshy-7.1",
+  "concept_model": "gpt-image-2",
+  "apis": [
+    "image-to-image v1",
+    "image-to-3d v1 (a-pose)",
+    "rigging v1",
+    "animations v1 (extract_armature)"
+  ],
+  "reference": [
+    "official.png"
+  ],
+  "concept_prompt": "Use the same Korea Hunter Association uniform design as the woman in the reference: charcoal grey, a fitted single-breasted jacket with a black leather belt and brass buckle at the waist, crisp white shirt, slim black tie, a white ID card on a lanyard clipped to the chest, a small gold wing emblem pin on the lapel, but draw a different person: a young Korean woman in her early 20s, straight black hair in a shoulder-length bob with a small silver hair clip, no glasses, bright cheerful face, petite build, a knee-length pencil skirt, black tights and black flat shoes. Draw ONE character only, as a clean 3D-modelling reference sheet: full body from the top of the head to the soles of the shoes, front view facing the camera, standing straight in a relaxed A-pose with both arms held about 30 degrees away from the body, palms facing the thighs, fingers relaxed and separated, empty hands holding nothing, feet slightly apart and flat on the ground. Plain pure white background, no floor shadow, no text, no frame, even soft studio lighting. Keep the clean cel-shaded anime art style and the uniform colours of the reference image.",
+  "height_m": 1.6,
+  "library_actions": {
+    "idle": 247,
+    "chat": 56,
+    "walk": 1
+  },
+  "tasks": {
+    "concept_0": "01a0f7f7-369b-7424-8656-3d3406930be7",
+    "concept_1": "01a0f7f8-62c5-75fc-9a9d-938a1105e825",
+    "pick": 1,
+    "image3d": "01a0f7fa-4baf-76da-9216-81104f0024c0",
+    "rig": "01a0f7fd-6544-72d8-9d9c-8d4dda21ccb0",
+    "anim_chat": "01a0f7fe-1273-7276-ba5d-c064136d26c5",
+    "anim_walk": "01a0f7fe-7a36-77d6-bdf5-8b5871f2447b",
+    "anim_idle": "01a0f803-21e4-7632-8b44-fe1f6a630d60"
+  },
+  "created_utc": "2026-10-01T15:09:37.292635+00:00"
+}

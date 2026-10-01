@@ -1,6 +1,8 @@
 """Characters of the active lobby (hunter association plaza), made with Meshy and rigged for Humanoid import.
 
   python Tools/LiminalLobby/meshy_lobby.py run [--character player_casual]
+  python Tools/LiminalLobby/meshy_lobby.py concept [--character association_agent]   # 2D candidates only
+  python Tools/LiminalLobby/meshy_lobby.py pick association_agent 1                  # choose a candidate
 
 - player_casual: the playable hunter in everyday clothes (the "gap" between daily life and dungeon outfit
   from the concept deck). Only the rigged model is needed: in Unity it plays the player's own Humanoid
@@ -8,11 +10,15 @@
 - association_staff: the Hunter Association agent NPC who runs permanent upgrades. Rigged, with library
   idle and talking animations baked into FBX files.
 
-Every character is generated in an A-pose (text-to-3D preview + refine), rigged with Meshy rigging, then
-animated with library actions. The API key is read from MESHY_API_KEY only. Task ids are kept in
+Text characters are generated in an A-pose (text-to-3D preview + refine). Association officials follow the
+concept art instead: the reference crops in Tools/LiminalLobby/Reference are redrawn as full-body A-pose
+character sheets (image-to-image, two candidate models), one candidate is picked, then image-to-3D builds it
+in an A-pose. Every character is rigged with Meshy rigging and animated with library actions; officials keep
+only the armature in their clip FBX files (the mesh lives once in <name>.fbx). The API key is read from MESHY_API_KEY only. Task ids are kept in
 Tools/LiminalLobby/Source/<character>/state.json (git-ignored) so a rerun resumes the same paid tasks.
 """
 import argparse
+import base64
 import datetime
 import json
 import os
@@ -23,6 +29,7 @@ import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 CACHE = ROOT / 'Tools/LiminalLobby/Source'
+REFERENCE = ROOT / 'Tools/LiminalLobby/Reference'
 OUT = ROOT / 'Assets/Liminal/Resources/LiminalLobby'
 BASE = 'https://api.meshy.ai/openapi'
 MODEL = 'meshy-7.1'
@@ -44,6 +51,56 @@ CHARACTERS = {
         texture='Dark brown hair, black suit, crisp white shirt, dark navy tie, silver wing badge, light skin,'
                 ' brown eyes, soft anime shading.',
         height=1.66, actions=[('idle', 0), ('talk', 313)]),
+}
+
+
+# ---- association officials: concept art -> image-to-image sheet -> image-to-3D -------------------------------
+CONCEPT_MODELS = ['nano-banana-pro', 'gpt-image-2']
+CONCEPT_STYLE = (' Draw ONE character only, as a clean 3D-modelling reference sheet: full body from the top of the head'
+                 ' to the soles of the shoes, front view facing the camera, standing straight in a relaxed A-pose with'
+                 ' both arms held about 30 degrees away from the body, palms facing the thighs, fingers relaxed and'
+                 ' separated, empty hands holding nothing, feet slightly apart and flat on the ground. Plain pure white'
+                 ' background, no floor shadow, no text, no frame, even soft studio lighting. Keep the clean cel-shaded'
+                 ' anime art style and the uniform colours of the reference image.')
+UNIFORM = ('the same Korea Hunter Association uniform design as the woman in the reference: charcoal grey, a fitted'
+           ' single-breasted jacket with a black leather belt and brass buckle at the waist, crisp white shirt, slim'
+           ' black tie, a white ID card on a lanyard clipped to the chest, a small gold wing emblem pin on the lapel')
+OFFICIALS = {
+    'association_agent': dict(
+        refs=['official.png'], height=1.65,
+        concept='Redraw the woman in the reference image exactly as she is: a Korea Hunter Association agent, a Korean'
+                ' woman in her late 20s, dark brown hair tied in a low loose bun with soft side bangs, thin round silver'
+                ' glasses, lavender-grey eyes, calm gentle smile. ' + UNIFORM[0].upper() + UNIFORM[1:] + ', a'
+                ' knee-length pencil skirt, sheer skin-tone tights and black low-heel pumps.',
+        # Calm library idles (Idle_3/7/9/11): action 0 "Idle" is a wide, turning ready stance.
+        actions=[('idle', 243), ('talk', 313), ('bow', 41)]),
+    'association_clerk': dict(
+        refs=['official.png'], height=1.76,
+        concept='Use ' + UNIFORM + ', but draw a different person: a Korean man in his late 20s, short neat black hair'
+                ' with a side part, no glasses, friendly serious face, slim build, straight uniform trousers and black'
+                ' leather dress shoes.',
+        actions=[('idle', 249), ('walk', 30), ('phone', 312)]),
+    'association_officer': dict(
+        refs=['official.png'], height=1.60,
+        concept='Use ' + UNIFORM + ', but draw a different person: a young Korean woman in her early 20s, straight black'
+                ' hair in a shoulder-length bob with a small silver hair clip, no glasses, bright cheerful face, petite'
+                ' build, a knee-length pencil skirt, black tights and black flat shoes.',
+        actions=[('idle', 247), ('chat', 56), ('walk', 1)]),
+    'association_director': dict(
+        refs=['official.png'], height=1.75,
+        concept='Use ' + UNIFORM + ', but draw a different person: a senior Korean man in his late 40s, short neatly'
+                ' combed salt-and-pepper hair, rectangular black glasses, stern but kind face, broad sturdy build, a'
+                ' gold-trimmed armband with the white wing emblem on the left upper arm, straight uniform trousers and'
+                ' black leather dress shoes.',
+        actions=[('idle', 251), ('talk', 314)]),
+    'association_guard': dict(
+        refs=['guards.png'], height=1.82,
+        concept='Turn the back-view guards in the reference into one front-view character: a Korea Hunter Association'
+                ' gate security guard, a Korean man in a slate grey tactical uniform, a matte grey combat helmet with a'
+                ' chin strap, a tactical plate vest with pouches and a large white wing emblem patch on the chest,'
+                ' black gloves, a utility belt with pouches and a holstered radio, cargo trousers with knee pads, black'
+                ' combat boots, no weapon, face visible under the helmet, calm alert expression.',
+        actions=[('idle', 251), ('look', 338)]),
 }
 
 
@@ -148,10 +205,95 @@ def generate(name):
     print('READY', name, flush=True)
 
 
+def data_uri(path):
+    return 'data:image/png;base64,' + base64.b64encode(path.read_bytes()).decode()
+
+
+def concept(name):
+    """Two full-body A-pose character sheets from the reference crops, one per image model (nothing 3D yet)."""
+    spec = OFFICIALS[name]
+    folder = CACHE / name
+    state = load(folder / 'state.json')
+    refs = [data_uri(REFERENCE / r) for r in spec['refs']]
+    for i, model in enumerate(CONCEPT_MODELS):
+        k = f'concept_{i}'
+        if k not in state:
+            state[k] = api('/v1/image-to-image', dict(ai_model=model, prompt=spec['concept'] + CONCEPT_STYLE,
+                                                     reference_image_urls=refs, aspect_ratio='3:4'))['result']
+            save(folder / 'state.json', state)
+        result = wait('/v1/image-to-image', state[k], k, folder)
+        if not (folder / f'{k}.png').exists():
+            fetch(result['image_urls'][0], folder / f'{k}.png')
+    print('CONCEPTS', name, flush=True)
+
+
+def pick(name, index):
+    folder = CACHE / name
+    state = load(folder / 'state.json')
+    if f'concept_{index}' not in state:
+        raise SystemExit(f'{name}: no concept_{index}; run concept first.')
+    state['pick'] = index
+    save(folder / 'state.json', state)
+
+
+def generate_official(name):
+    spec = OFFICIALS[name]
+    folder = CACHE / name
+    state = load(folder / 'state.json')
+    if 'pick' not in state:
+        raise SystemExit(f'{name}: pick a concept first.')
+    def step(k, fn):
+        if k not in state:
+            state[k] = fn()
+            save(folder / 'state.json', state)
+        return state[k]
+    source = state[f'concept_{state["pick"]}']
+    mid = step('image3d', lambda: api('/v1/image-to-3d', dict(input_task_id=source, ai_model=MODEL, pose_mode='a-pose',
+                                                             should_remesh=True, topology='triangle', target_polycount=20000,
+                                                             should_texture=True, enable_pbr=False,
+                                                             target_formats=['glb', 'fbx']))['result'])
+    model = wait('/v1/image-to-3d', mid, 'image3d', folder)
+    out = OUT / name
+    if model.get('thumbnail_url'):
+        fetch(model['thumbnail_url'], folder / 'thumbnail.png')
+    textures = model.get('texture_urls') or []
+    if textures and textures[0].get('base_color'):
+        fetch(textures[0]['base_color'], out / f'{name}_albedo.png')
+    rig_id = step('rig', lambda: api('/v1/rigging', dict(input_task_id=mid, height_meters=spec['height']))['result'])
+    rig = wait('/v1/rigging', rig_id, 'rig', folder)
+    fbx = rig.get('result', {}).get('rigged_character_fbx_url')
+    if fbx:
+        fetch(fbx, out / f'{name}.fbx')
+    for label, action in spec['actions']:
+        aid = step('anim_' + label, lambda: api('/v1/animations', dict(rig_task_id=rig_id, action_id=action,
+                                                                    post_process=dict(operation_type='extract_armature')))['result'])
+        anim = wait('/v1/animations', aid, 'anim_' + label, folder)
+        url = anim.get('result', {}).get('processed_armature_fbx_url') or anim.get('result', {}).get('animation_fbx_url')
+        if url:
+            fetch(url, out / f'{name}@{label}.fbx')
+    save(out / 'provenance.json', dict(provider='Meshy AI', model=MODEL, concept_model=CONCEPT_MODELS[state['pick']],
+                                       apis=['image-to-image v1', 'image-to-3d v1 (a-pose)', 'rigging v1',
+                                             'animations v1 (extract_armature)'],
+                                       reference=spec['refs'], concept_prompt=spec['concept'] + CONCEPT_STYLE,
+                                       height_m=spec['height'], library_actions={l: a for l, a in spec['actions']},
+                                       tasks=state, created_utc=datetime.datetime.now(datetime.timezone.utc).isoformat()))
+    print('READY', name, flush=True)
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('command', choices=['run'])
-    ap.add_argument('--character', action='append', choices=list(CHARACTERS))
+    ap.add_argument('command', choices=['run', 'concept', 'pick'])
+    ap.add_argument('pick_args', nargs='*', help='pick: <character> <candidate index>')
+    ap.add_argument('--character', action='append', choices=list(CHARACTERS) + list(OFFICIALS))
     args = ap.parse_args()
-    for name in args.character or CHARACTERS:
-        generate(name)
+    if args.command == 'pick':
+        pick(args.pick_args[0], int(args.pick_args[1]))
+    elif args.command == 'concept':
+        for name in args.character or OFFICIALS:
+            if name in OFFICIALS:
+                concept(name)
+    else:
+        for name in args.character or list(CHARACTERS) + list(OFFICIALS):
+            if name in OFFICIALS:
+                generate_official(name)
+            else:
+                generate(name)

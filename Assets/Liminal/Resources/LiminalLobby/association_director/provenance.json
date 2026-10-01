@@ -1,0 +1,30 @@
+{
+  "provider": "Meshy AI",
+  "model": "meshy-7.1",
+  "concept_model": "nano-banana-pro",
+  "apis": [
+    "image-to-image v1",
+    "image-to-3d v1 (a-pose)",
+    "rigging v1",
+    "animations v1 (extract_armature)"
+  ],
+  "reference": [
+    "official.png"
+  ],
+  "concept_prompt": "Use the same Korea Hunter Association uniform design as the woman in the reference: charcoal grey, a fitted single-breasted jacket with a black leather belt and brass buckle at the waist, crisp white shirt, slim black tie, a white ID card on a lanyard clipped to the chest, a small gold wing emblem pin on the lapel, but draw a different person: a senior Korean man in his late 40s, short neatly combed salt-and-pepper hair, rectangular black glasses, stern but kind face, broad sturdy build, a gold-trimmed armband with the white wing emblem on the left upper arm, straight uniform trousers and black leather dress shoes. Draw ONE character only, as a clean 3D-modelling reference sheet: full body from the top of the head to the soles of the shoes, front view facing the camera, standing straight in a relaxed A-pose with both arms held about 30 degrees away from the body, palms facing the thighs, fingers relaxed and separated, empty hands holding nothing, feet slightly apart and flat on the ground. Plain pure white background, no floor shadow, no text, no frame, even soft studio lighting. Keep the clean cel-shaded anime art style and the uniform colours of the reference image.",
+  "height_m": 1.75,
+  "library_actions": {
+    "idle": 251,
+    "talk": 314
+  },
+  "tasks": {
+    "concept_0": "01a0f7f7-36f0-7753-a63c-89049d7648cc",
+    "concept_1": "01a0f7f8-3403-71cb-adaa-159a20934251",
+    "pick": 0,
+    "image3d": "01a0f7fa-4bae-7432-935c-44d9cad57785",
+    "rig": "01a0f7fc-426b-75f3-b747-fb084152c7e0",
+    "anim_talk": "01a0f7fd-508b-7568-bfb1-ad44136b8f00",
+    "anim_idle": "01a0f803-269e-748b-a337-b30cdb93e1eb"
+  },
+  "created_utc": "2026-10-01T15:09:25.133980+00:00"
+}

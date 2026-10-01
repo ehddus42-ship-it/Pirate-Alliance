@@ -10,8 +10,9 @@ namespace AcRoguelike.Liminal
 {
     /// <summary>
     /// Active lobby: the Korea Hunter Association's gate control zone, a plaza in Seoul built at runtime.
-    /// It has barricades, guards, association banners, a blue booth, the skyline with N Seoul Tower, and a huge
-    /// violet gate. The hunter walks it in everyday clothes:
+    /// It has barricades, association banners, a blue booth, the skyline with N Seoul Tower, and a huge violet
+    /// gate. Everyone in it is a Meshy-made association official (<see cref="LobbyNpc"/>): the agent at the booth,
+    /// staff chatting and walking their rounds, and gate guards on watch. The hunter walks it in everyday clothes:
     /// - talk to the association agent to buy permanent upgrades with magic stones;
     /// - walk into the gate to start a run.
     /// There are no menu buttons until the player interacts with something.
@@ -20,14 +21,18 @@ namespace AcRoguelike.Liminal
     {
         public const string PlayerCasualPath = "LiminalLobby/player_casual/player_casual";
         public const string PlayerCasualTexture = "LiminalLobby/player_casual/player_casual_albedo";
-        public const string StaffIdlePath = "LiminalLobby/association_staff/association_staff@idle";
-        public const string StaffTalkPath = "LiminalLobby/association_staff/association_staff@talk";
-        public const string StaffTexture = "LiminalLobby/association_staff/association_staff_albedo";
+        // Association officials (Tools/LiminalLobby/meshy_lobby.py, OFFICIALS).
+        public const string AgentCharacter = "association_agent";
+        public const string ClerkCharacter = "association_clerk";
+        public const string OfficerCharacter = "association_officer";
+        public const string DirectorCharacter = "association_director";
+        public const string GuardCharacter = "association_guard";
 
         public Vector3 SpawnPoint => transform.TransformPoint(new Vector3(0, .05f, -9));
         public bool WindowOpen => window;
         public Interactable Nearest { get; private set; }
         public LobbyNpc Agent => agent;
+        public IReadOnlyList<LobbyNpc> Officials => officials;
 
         public sealed class Interactable
         {
@@ -42,6 +47,8 @@ namespace AcRoguelike.Liminal
         readonly List<Interactable> interactables = new List<Interactable>();
         readonly List<UnityEngine.Object> owned = new List<UnityEngine.Object>();
         LobbyNpc agent;
+        readonly List<LobbyNpc> officials = new List<LobbyNpc>();
+        bool greeted;
         Transform gateCore;
         Transform[] gateRings;
         Light gateLight;
@@ -77,7 +84,6 @@ namespace AcRoguelike.Liminal
             if (navy.HasProperty("_Cull")) navy.SetFloat("_Cull", 0);
             var canopy = Mat(null, new Color(.16f, .36f, .78f), .3f);
             var white = Mat(null, new Color(.93f, .94f, .96f), .35f);
-            var olive = Mat(null, new Color(.2f, .23f, .18f), .25f);
             var dark = Mat(null, new Color(.07f, .08f, .1f), .4f);
             var windows = Mat(LobbyTextures.Windows(), Color.white, .5f, new Vector2(2, 4));
             if (windows.HasProperty("_EmissionColor"))
@@ -118,8 +124,12 @@ namespace AcRoguelike.Liminal
                     Block("BarricadeFoot", new Vector3(x, .06f, z), new Vector3(1.9f, .12f, .6f), dark, false);
                 }
             // Association guards on watch beside the opening, facing the plaza.
+            int guardIndex = 0;
             foreach (float x in new[] { -3.8f, 3.8f, -7.2f, 7.2f })
-                Guard(new Vector3(x, 0, 7.2f + Mathf.Abs(x) * .05f), olive, dark);
+            {
+                var guard = Official(GuardCharacter, new[] { "idle", "look" }, new Vector3(x, 0, 7.2f + Mathf.Abs(x) * .05f), 180 + (x < 0 ? 8 : -8), 1.82f, "Guard");
+                LobbyRoutine.Station(guard, "look", 11 + guardIndex++);
+            }
 
             // Association booth with the agent (left), a rest corner (right).
             BuildBooth(canopy, white, metal);
@@ -164,10 +174,23 @@ namespace AcRoguelike.Liminal
             Cylinder("TowerCap", new Vector3(20, 28.6f, 74), new Vector3(4, 1, 4), Mat(null, new Color(.7f, .2f, .25f), .5f));
             Cylinder("Spire", new Vector3(20, 33, 74), new Vector3(.35f, 5, .35f), towerMat);
 
-            // The agent at the booth.
+            // The agent at the booth, clipboard in hand as in the concept art.
             // She stands in front of the booth, not under its roof, so the overhead camera always sees her.
-            agent = LobbyNpc.Create(transform, StaffIdlePath, StaffTalkPath, StaffTexture, new Vector3(-8.9f, 0, 1.8f), 90, 1.66f, owned);
+            agent = Official(AgentCharacter, new[] { "idle", "talk", "bow" }, new Vector3(-8.9f, 0, 1.8f), 90, 1.65f, "AssociationAgent");
+            var boardMat = Mat(null, new Color(.13f, .15f, .2f), .35f);
+            var clipMat = Mat(null, new Color(.72f, .66f, .5f), .6f, default, .8f);
+            HeldBoard.Attach(agent, true, new Vector3(.23f, .31f, .012f), boardMat, clipMat, Decal(LobbyTextures.Emblem()), owned);
             interactables.Add(new Interactable { label = "대화", anchor = agent.transform, radius = 2.6f, use = OpenUpgrades });
+
+            // Ambient staff: a senior official briefing a junior by the rest corner, and a clerk walking his rounds
+            // between the booth and the entrance (he stops for the player and takes calls at some stops).
+            var officer = Official(OfficerCharacter, new[] { "idle", "chat", "walk" }, new Vector3(8.9f, 0, 6.9f), 60, 1.6f, "Officer");
+            var director = Official(DirectorCharacter, new[] { "idle", "talk" }, new Vector3(10.1f, 0, 7.6f), 240, 1.75f, "Director");
+            LobbyRoutine.Chat(officer, director, "chat", false, 21);
+            LobbyRoutine.Chat(director, officer, "talk", true, 22);
+            var clerk = Official(ClerkCharacter, new[] { "idle", "walk", "phone" }, new Vector3(-6.5f, 0, -1f), 180, 1.76f, "Clerk");
+            HeldBoard.Attach(clerk, true, new Vector3(.24f, .32f, .02f), Mat(null, new Color(.16f, .22f, .42f), .3f), clipMat, null, owned);
+            LobbyRoutine.Patrol(clerk, new[] { new Vector3(-6.5f, 0, -1f), new Vector3(-4.5f, 0, -10f), new Vector3(6f, 0, -9.8f), new Vector3(6.5f, 0, -.5f) }, "phone", 1.15f, 31);
 
             // The gate entry trigger.
             var gateMark = new GameObject("GateEntry").transform;
@@ -237,19 +260,11 @@ namespace AcRoguelike.Liminal
             Block("Laptop", c + new Vector3(.4f, .95f, .5f), new Vector3(.35f, .02f, .5f), Mat(null, new Color(.15f, .15f, .17f), .6f), false);
         }
 
-        void Guard(Vector3 p, Material olive, Material dark)
+        LobbyNpc Official(string character, string[] clips, Vector3 localPosition, float yaw, float height, string objectName)
         {
-            var g = new GameObject("Guard").transform;
-            g.SetParent(transform, false);
-            g.localPosition = p;
-            g.localRotation = Quaternion.Euler(0, 180, 0);
-            Part(g, PrimitiveType.Capsule, new Vector3(0, .9f, 0), new Vector3(.5f, .62f, .38f), olive);
-            Part(g, PrimitiveType.Sphere, new Vector3(0, 1.72f, 0), new Vector3(.34f, .3f, .36f), dark);
-            Part(g, PrimitiveType.Cube, new Vector3(0, 1.2f, .2f), new Vector3(.42f, .3f, .1f), dark);
-            Part(g, PrimitiveType.Cube, new Vector3(.18f, 1.05f, .3f), new Vector3(.06f, .06f, .6f), dark).localRotation = Quaternion.Euler(-30, 0, 0);
-            var body = new GameObject("Body").AddComponent<CapsuleCollider>();
-            body.transform.SetParent(g, false);
-            body.center = Vector3.up * .9f; body.radius = .3f; body.height = 1.8f;
+            var npc = LobbyNpc.Create(transform, character, clips, localPosition, yaw, height, owned, objectName);
+            officials.Add(npc);
+            return npc;
         }
 
         // ---- per frame ---------------------------------------------------------------------------------------
@@ -300,6 +315,7 @@ namespace AcRoguelike.Liminal
         {
             gameObject.SetActive(true);
             entering = false;
+            greeted = false;
             CloseWindow();
             previousAmbient = RenderSettings.ambientLight;
             RenderSettings.ambientLight = new Color(.62f, .66f, .76f);
@@ -369,7 +385,12 @@ namespace AcRoguelike.Liminal
         void OpenUpgrades()
         {
             if (!hud || !hud.Canvas) return;
-            if (agent) agent.Talk(true);
+            if (agent)
+            {
+                agent.Talk(true);
+                // A formal bow the first time the hunter walks up in this visit, then she talks.
+                if (!greeted) { greeted = true; agent.PlayOnce("bow"); }
+            }
             ShowWindow(new Vector2(760, 470));
             var content = window.transform.Find("Window") as RectTransform;
             var font = hud.Font;
@@ -531,17 +552,6 @@ namespace AcRoguelike.Liminal
             return go.transform;
         }
 
-        static Transform Part(Transform parent, PrimitiveType type, Vector3 p, Vector3 s, Material m)
-        {
-            var go = GameObject.CreatePrimitive(type);
-            go.transform.SetParent(parent, false);
-            go.transform.localPosition = p;
-            go.transform.localScale = s;
-            go.GetComponent<Renderer>().sharedMaterial = m;
-            Destroy(go.GetComponent<Collider>());
-            return go.transform;
-        }
-
         void Prop(GameObject prefab, Vector3 localPosition, float yaw)
         {
             if (!prefab) return;
@@ -585,152 +595,6 @@ namespace AcRoguelike.Liminal
         }
 
         void OnDestroy() { foreach (var o in owned) if (o) Destroy(o); }
-    }
-
-    /// <summary>
-    /// Lobby NPC from a rigged Meshy FBX: loops its idle clip with Playables, cross-fades to a talking clip during
-    /// a conversation, and turns toward the player when spoken to.
-    /// </summary>
-    public sealed class LobbyNpc : MonoBehaviour
-    {
-        UnityEngine.Playables.PlayableGraph graph;
-        UnityEngine.Animations.AnimationMixerPlayable mixer;
-        UnityEngine.Animations.AnimationClipPlayable idle, talk;
-        float talkWeight, restYaw;
-        bool talking;
-        Vector3? lookTarget;
-
-        public bool Talking => talking;
-
-        public static LobbyNpc Create(Transform parent, string modelPath, string talkPath, string texturePath, Vector3 localPosition, float yaw, float height, List<UnityEngine.Object> owned)
-        {
-            var root = new GameObject("AssociationAgent");
-            root.transform.SetParent(parent, false);
-            root.transform.localPosition = localPosition;
-            root.transform.localRotation = Quaternion.Euler(0, yaw, 0);
-            var npc = root.AddComponent<LobbyNpc>();
-            npc.restYaw = yaw;
-            var source = Resources.Load<GameObject>(modelPath);
-            GameObject model;
-            if (source)
-            {
-                model = Instantiate(source, root.transform);
-                foreach (var c in model.GetComponentsInChildren<Collider>(true)) Destroy(c);
-                FitHeight(model.transform, height);
-                Skin(model, texturePath, owned);
-            }
-            else
-            {
-                model = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                Destroy(model.GetComponent<Collider>());
-                model.transform.SetParent(root.transform, false);
-                model.transform.localPosition = Vector3.up * height * .5f;
-                model.transform.localScale = new Vector3(.5f, height * .5f, .5f);
-            }
-            model.name = "Model";
-            var body = root.AddComponent<CapsuleCollider>();
-            body.center = Vector3.up * height * .5f; body.radius = .3f; body.height = height;
-            npc.Play(model.GetComponent<Animator>(), FirstClip(modelPath), FirstClip(talkPath));
-            return npc;
-        }
-
-        static AnimationClip FirstClip(string path)
-        {
-            foreach (var clip in Resources.LoadAll<AnimationClip>(path))
-                if (clip && !clip.name.StartsWith("__preview__", StringComparison.Ordinal)) return clip;
-            return null;
-        }
-
-        void Play(Animator animator, AnimationClip idleClip, AnimationClip talkClip)
-        {
-            if (!animator || !idleClip) return;
-            animator.applyRootMotion = false;
-            animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
-            graph = UnityEngine.Playables.PlayableGraph.Create("LobbyNpc");
-            var output = UnityEngine.Animations.AnimationPlayableOutput.Create(graph, "Animation", animator);
-            mixer = UnityEngine.Animations.AnimationMixerPlayable.Create(graph, 2);
-            idle = UnityEngine.Animations.AnimationClipPlayable.Create(graph, idleClip);
-            talk = UnityEngine.Animations.AnimationClipPlayable.Create(graph, talkClip ? talkClip : idleClip);
-            graph.Connect(idle, 0, mixer, 0);
-            graph.Connect(talk, 0, mixer, 1);
-            mixer.SetInputWeight(0, 1);
-            mixer.SetInputWeight(1, 0);
-            output.SetSourcePlayable(mixer);
-            graph.Play();
-        }
-
-        public void Talk(bool on) => talking = on;
-
-        public void LookAt(Vector3? target) => lookTarget = target;
-
-        void Update()
-        {
-            if (graph.IsValid())
-            {
-                // The FBX clips are not authored as loops: wrap them by hand.
-                Wrap(idle);
-                Wrap(talk);
-                talkWeight = Mathf.MoveTowards(talkWeight, talking ? 1 : 0, Time.deltaTime * 4);
-                mixer.SetInputWeight(0, 1 - talkWeight);
-                mixer.SetInputWeight(1, talkWeight);
-            }
-            Quaternion want = (transform.parent ? transform.parent.rotation : Quaternion.identity) * Quaternion.Euler(0, restYaw, 0);
-            if (lookTarget.HasValue || talking)
-            {
-                var player = FindFirstObjectByType<PlayerMotor>();
-                Vector3 target = lookTarget ?? (player ? player.transform.position : transform.position + transform.forward);
-                Vector3 d = target - transform.position; d.y = 0;
-                if (d.sqrMagnitude > .01f) want = Quaternion.LookRotation(d);
-            }
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, want, 240 * Time.deltaTime);
-        }
-
-        static void Wrap(UnityEngine.Animations.AnimationClipPlayable playable)
-        {
-            if (!playable.IsValid()) return;
-            var clip = playable.GetAnimationClip();
-            if (clip && clip.length > .01f && playable.GetTime() >= clip.length) playable.SetTime(playable.GetTime() % clip.length);
-        }
-
-        void OnDestroy() { if (graph.IsValid()) graph.Destroy(); }
-
-        // ---- shared model helpers -------------------------------------------------------------------------
-        public static float Height(Transform model, float fallback)
-        {
-            bool any = false; var b = new Bounds();
-            foreach (var r in model.GetComponentsInChildren<Renderer>())
-            {
-                if (r is ParticleSystemRenderer || r is TrailRenderer || r is LineRenderer) continue;
-                if (!any) { b = r.bounds; any = true; } else b.Encapsulate(r.bounds);
-            }
-            return any && b.size.y > .3f ? b.size.y : fallback;
-        }
-
-        /// <summary>Scales a model so its renderers span `height` metres, feet on the parent's origin.</summary>
-        public static void FitHeight(Transform model, float height)
-        {
-            float h = Height(model, -1);
-            if (h > 0) model.localScale *= height / h;
-            bool any = false; var b = new Bounds();
-            foreach (var r in model.GetComponentsInChildren<Renderer>()) { if (!any) { b = r.bounds; any = true; } else b.Encapsulate(r.bounds); }
-            if (any && model.parent) model.position += Vector3.up * (model.parent.position.y - b.min.y);
-        }
-
-        /// <summary>Gives a Meshy model a URP Lit material with its albedo (the FBX is imported without materials).</summary>
-        public static void Skin(GameObject model, string texturePath, List<UnityEngine.Object> owned)
-        {
-            var texture = Resources.Load<Texture2D>(texturePath);
-            var material = LiminalMonsterKit.Lit(Color.white, .2f);
-            if (texture) { material.mainTexture = texture; if (material.HasProperty("_BaseMap")) material.SetTexture("_BaseMap", texture); }
-            owned?.Add(material);
-            foreach (var r in model.GetComponentsInChildren<Renderer>(true))
-            {
-                var materials = new Material[Mathf.Max(1, r.sharedMaterials.Length)];
-                for (int i = 0; i < materials.Length; i++) materials[i] = material;
-                r.sharedMaterials = materials;
-                if (r is SkinnedMeshRenderer skinned) skinned.updateWhenOffscreen = true;
-            }
-        }
     }
 
     /// <summary>Violet full-screen curtain for walking into a gate: fades in, runs the midpoint action, fades out.</summary>
