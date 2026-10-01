@@ -1,19 +1,35 @@
 {
   "provider": "Meshy AI",
   "model": "meshy-7.1",
+  "concept_model": "gpt-image-2",
   "apis": [
-    "text-to-3d v2 (a-pose)",
+    "image-to-image v1",
+    "image-to-3d v1 (a-pose)",
     "rigging v1",
-    "animations v1"
+    "animations v1 (skinned clip FBX)"
   ],
-  "prompt": "A young woman hunter in her everyday clothes: very long straight silver-white hair, an oversized soft light grey hoodie with the hood down, black shorts, black tights, white sneakers, a small ID lanyard around the neck, relaxed sleepy look. Anime-style stylized game character, clean toon-like proportions, full body, standing straight in an A-pose with arms angled down away from the body, legs slightly apart, facing forward, symmetrical, separated fingers, no props in hands, no base, no background.",
-  "texture_prompt": "Silver-white hair, light heather grey hoodie, black shorts and tights, white sneakers, light skin, violet eyes, soft anime shading.",
+  "reference": [
+    "player_casual_v1.png"
+  ],
+  "concept_prompt": "Redraw the young woman in the reference image exactly, keeping her outfit and look: silver-white hair in two low short twin tails, round glasses with a pair of sunglasses pushed up on her head, violet eyes, a plain white T-shirt with a grey crossbody strap and a small grey backpack, a black belt with a pouch, black cargo shorts with side pockets, black tights and white lace-up boots. A casual off-duty hunter, relaxed friendly face. Draw ONE character only, as a clean 3D-modelling reference sheet: full body from the top of the head to the soles of the shoes, front view facing the camera, standing straight in a relaxed A-pose with both arms held about 30 degrees away from the body, palms facing the thighs, fingers relaxed and separated, empty hands holding nothing, feet slightly apart and flat on the ground. Plain pure white background, no floor shadow, no text, no frame, even soft studio lighting. Keep the clean cel-shaded anime art style and the uniform colours of the reference image.",
   "height_m": 1.62,
-  "library_actions": {},
-  "tasks": {
-    "preview": "01a0f7c8-d8d8-76ca-9d71-60c12ff06a65",
-    "refine": "01a0f7ca-0c1c-76eb-a8f3-dd616206ab27",
-    "rig": "01a0f7ca-b1bf-7753-ae57-24217c9bb83b"
+  "library_actions": {
+    "idle": 244,
+    "walk": 1,
+    "run": 14
   },
-  "created_utc": "2026-10-01T14:08:13.334258+00:00"
+  "tasks": {
+    "concept_0": "01a0f9d2-7ab4-715b-a997-5b4b11bbe6a6",
+    "concept_1": "01a0f9d2-e295-7143-bd3c-61df689b447a",
+    "pick": 1,
+    "image3d": "01a0f9d3-b95e-7451-b6ea-d97123a23888",
+    "rig": "01a0f9d5-7c10-7553-8e68-e6459dc741e2",
+    "anim_idle": "01a0f9d5-bd45-7766-9829-3d469ee0cb7a",
+    "anim_idle_action": 244,
+    "anim_walk": "01a0f9d5-f354-7395-a24c-a5407482825b",
+    "anim_walk_action": 1,
+    "anim_run": "01a0f9d6-296e-74c5-8550-c7efad914e82",
+    "anim_run_action": 14
+  },
+  "created_utc": "2026-10-01T23:39:30.874166+00:00"
 }

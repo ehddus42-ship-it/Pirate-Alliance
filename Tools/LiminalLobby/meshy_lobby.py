@@ -37,13 +37,6 @@ STYLE = (' Anime-style stylized game character, clean toon-like proportions, ful
          ' A-pose with arms angled down away from the body, legs slightly apart, facing forward, symmetrical,'
          ' separated fingers, no props in hands, no base, no background.')
 CHARACTERS = {
-    'player_casual': dict(
-        prompt='A young woman hunter in her everyday clothes: very long straight silver-white hair, an oversized soft'
-               ' light grey hoodie with the hood down, black shorts, black tights, white sneakers, a small ID lanyard'
-               ' around the neck, relaxed sleepy look.',
-        texture='Silver-white hair, light heather grey hoodie, black shorts and tights, white sneakers, light skin,'
-                ' violet eyes, soft anime shading.',
-        height=1.62, actions=[]),
     'association_staff': dict(
         prompt='A Hunter Association agent woman: brown hair tied in a neat low bun, thin glasses, a fitted black'
                ' business suit jacket and pencil skirt, white shirt with a dark tie, black low heels, a silver wing'
@@ -66,6 +59,16 @@ UNIFORM = ('the same Korea Hunter Association uniform design as the woman in the
            ' single-breasted jacket with a black leather belt and brass buckle at the waist, crisp white shirt, slim'
            ' black tie, a white ID card on a lanyard clipped to the chest, a small gold wing emblem pin on the lapel')
 OFFICIALS = {
+    # The playable hunter in everyday clothes. The first text-to-3D version came out in a shrugging pose with
+    # raised forearms, so its rig bent every clip's arms upward; it is rebuilt from its own render in a true A-pose.
+    'player_casual': dict(
+        refs=['player_casual_v1.png'], height=1.62,
+        concept='Redraw the young woman in the reference image exactly, keeping her outfit and look: silver-white'
+                ' hair in two low short twin tails, round glasses with a pair of sunglasses pushed up on her head,'
+                ' violet eyes, a plain white T-shirt with a grey crossbody strap and a small grey backpack, a black'
+                ' belt with a pouch, black cargo shorts with side pockets, black tights and white lace-up boots.'
+                ' A casual off-duty hunter, relaxed friendly face.',
+        actions=[('idle', 244), ('walk', 1), ('run', 14)]),
     'association_agent': dict(
         refs=['official.png'], height=1.65,
         concept='Redraw the woman in the reference image exactly as she is: a Korea Hunter Association agent, a Korean'

@@ -591,3 +591,111 @@ namespace AcRoguelike.Liminal
         }
     }
 }
+
+namespace AcRoguelike.Liminal
+{
+    /// <summary>
+    /// The casual outfit's own locomotion in the lobby (Meshy clips on the player_casual rig: calm idle, a woman's
+    /// walk, a light run), instead of the combat katana controller. Clips blend by the motor's planar speed, and
+    /// walk and run play at the rate that matches their stride (walk ~1.43 m/s, run ~4.0 m/s), with run kept in
+    /// phase with walk so the feet do not cross while blending. Feet are grounded like the officials' (not while
+    /// running, whose flight phase lifts both feet).
+    /// </summary>
+    public sealed class CasualLocomotion : MonoBehaviour
+    {
+        const float WalkStride = 1.43f, RunStride = 3.97f;
+
+        PlayableGraph graph;
+        AnimationMixerPlayable mixer;
+        AnimationClipPlayable idle, walk, run;
+        PlayerMotor motor;
+        Transform leftToe, rightToe;
+        Vector3 basePosition;
+        float restToe, ground, walkWeight, runWeight;
+
+        public static CasualLocomotion Attach(GameObject model, PlayerMotor motor, string character)
+        {
+            var idleClip = Clip(character, "idle");
+            var walkClip = Clip(character, "walk");
+            var runClip = Clip(character, "run") ?? walkClip;
+            var animator = model.GetComponent<Animator>();
+            if (!animator || !idleClip || !walkClip) return null;
+            var c = model.AddComponent<CasualLocomotion>();
+            c.motor = motor;
+            animator.runtimeAnimatorController = null;
+            animator.applyRootMotion = false;
+            animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            c.graph = PlayableGraph.Create("CasualLocomotion");
+            c.graph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
+            var output = AnimationPlayableOutput.Create(c.graph, "Animation", animator);
+            c.mixer = AnimationMixerPlayable.Create(c.graph, 3);
+            c.idle = AnimationClipPlayable.Create(c.graph, idleClip);
+            c.walk = AnimationClipPlayable.Create(c.graph, walkClip);
+            c.run = AnimationClipPlayable.Create(c.graph, runClip);
+            c.graph.Connect(c.idle, 0, c.mixer, 0);
+            c.graph.Connect(c.walk, 0, c.mixer, 1);
+            c.graph.Connect(c.run, 0, c.mixer, 2);
+            c.mixer.SetInputWeight(0, 1);
+            output.SetSourcePlayable(c.mixer);
+            c.graph.Play();
+            c.leftToe = Toe(animator, HumanBodyBones.LeftToes, "LeftToeBase");
+            c.rightToe = Toe(animator, HumanBodyBones.RightToes, "RightToeBase");
+            c.basePosition = model.transform.localPosition;
+            var root = model.transform.parent ? model.transform.parent : model.transform;
+            if (c.leftToe && c.rightToe) c.restToe = Mathf.Min(c.leftToe.position.y, c.rightToe.position.y) - root.position.y;
+            return c;
+        }
+
+        static AnimationClip Clip(string character, string label)
+        {
+            foreach (var clip in Resources.LoadAll<AnimationClip>(LobbyNpc.ClipPath(character, label)))
+                if (clip && !clip.name.StartsWith("__preview__", StringComparison.Ordinal)) return clip;
+            return null;
+        }
+
+        static Transform Toe(Animator animator, HumanBodyBones bone, string name)
+        {
+            if (animator.isHuman) { var t = animator.GetBoneTransform(bone); if (t) return t; }
+            foreach (var t in animator.GetComponentsInChildren<Transform>(true)) if (t.name == name) return t;
+            return null;
+        }
+
+        void Update()
+        {
+            if (!graph.IsValid()) return;
+            float dt = Time.deltaTime;
+            float speed = motor ? motor.PlanarVelocity.magnitude : 0;
+            walkWeight = Mathf.MoveTowards(walkWeight, Mathf.Clamp01(speed / .6f), dt * 6);
+            runWeight = Mathf.MoveTowards(runWeight, Mathf.InverseLerp(2.6f, 3.6f, speed), dt * 4);
+            mixer.SetInputWeight(0, 1 - walkWeight);
+            mixer.SetInputWeight(1, walkWeight * (1 - runWeight));
+            mixer.SetInputWeight(2, walkWeight * runWeight);
+            // Stride-matched rates; the run follows the walk's phase so both legs agree while blending.
+            float rate = Mathf.Lerp(speed / WalkStride, speed / RunStride, runWeight);
+            walk.SetSpeed(speed > .1f ? Mathf.Clamp(rate, .6f, 1.5f) : 1);
+            Loop(idle);
+            Loop(walk);
+            var walkClip = walk.GetAnimationClip();
+            var runClip = run.GetAnimationClip();
+            if (walkClip && runClip && walkClip.length > .01f)
+                run.SetTime(walk.GetTime() / walkClip.length * runClip.length);
+        }
+
+        static void Loop(AnimationClipPlayable p)
+        {
+            var clip = p.GetAnimationClip();
+            if (clip && clip.length > .01f && p.GetTime() >= clip.length) p.SetTime(p.GetTime() % clip.length);
+        }
+
+        void LateUpdate()
+        {
+            if (!leftToe || !rightToe || !transform.parent || runWeight > .3f) return;
+            float toe = Mathf.Min(leftToe.position.y, rightToe.position.y) - transform.parent.position.y - ground;
+            float want = Mathf.Clamp(restToe - toe, -.2f, .1f);
+            ground = Mathf.Lerp(ground, want, 1 - Mathf.Exp(-Time.deltaTime * 12));
+            transform.localPosition = basePosition + transform.parent.InverseTransformVector(Vector3.up * ground);
+        }
+
+        void OnDestroy() { if (graph.IsValid()) graph.Destroy(); }
+    }
+}

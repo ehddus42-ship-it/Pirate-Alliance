@@ -21,6 +21,8 @@ namespace AcRoguelike.Liminal
     {
         public const string PlayerCasualPath = "LiminalLobby/player_casual/player_casual";
         public const string PlayerCasualTexture = "LiminalLobby/player_casual/player_casual_albedo";
+        public const string PlayerCasualCharacter = "player_casual";
+        public const float CasualHeight = 1.62f;
         // Association officials (Tools/LiminalLobby/meshy_lobby.py, OFFICIALS).
         public const string AgentCharacter = "association_agent";
         public const string ClerkCharacter = "association_clerk";
@@ -383,7 +385,9 @@ namespace AcRoguelike.Liminal
                 }
                 else combatModel.SetActive(!casual);
                 casualModel.SetActive(casual);
-                m.animator = casual ? casualModel.GetComponent<Animator>() : combatAnimator;
+                // With its own locomotion the casual model is driven by CasualLocomotion, so the motor gets no
+                // Animator (it would write combat parameters and torso twist into it).
+                m.animator = casual ? (casualModel.GetComponent<CasualLocomotion>() ? null : casualModel.GetComponent<Animator>()) : combatAnimator;
             }
         }
 
@@ -391,20 +395,23 @@ namespace AcRoguelike.Liminal
         {
             var source = Resources.Load<GameObject>(PlayerCasualPath);
             if (!source || !m.visual || !combatModel) return null;
-            // Measure the combat model before the casual one is parented under the same visual root.
-            float target = LobbyNpc.Height(combatModel.transform, 1.62f);
+            // The casual outfit is the 1.62 m the character was made at, the same scale as the association
+            // officials (1.6-1.82 m); matching the taller combat model made her tower over them.
+            const float target = CasualHeight;
             var go = Instantiate(source, m.visual);
             go.name = "CasualOutfit";
             go.transform.localPosition = Vector3.zero;
             go.transform.localRotation = Quaternion.identity;
             foreach (var c in go.GetComponentsInChildren<Collider>(true)) Destroy(c);
-            // Match the combat model's height so the camera and interactions feel the same.
             LobbyNpc.FitHeight(go.transform, target);
             LobbyNpc.Skin(go, PlayerCasualTexture, owned);
             var animator = go.GetComponent<Animator>() ?? go.AddComponent<Animator>();
-            animator.runtimeAnimatorController = combatAnimator ? combatAnimator.runtimeAnimatorController : null;
             animator.applyRootMotion = false;
             animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            // Its own idle/walk/run (the combat controller's katana locomotion looked wrong in casual clothes).
+            // Fallback when the clips are missing: the combat controller, as before.
+            if (!CasualLocomotion.Attach(go, m, PlayerCasualCharacter))
+                animator.runtimeAnimatorController = combatAnimator ? combatAnimator.runtimeAnimatorController : null;
             go.SetActive(false);
             return go;
         }
