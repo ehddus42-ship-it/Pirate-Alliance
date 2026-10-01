@@ -4,10 +4,11 @@ using UnityEngine;
 namespace AcRoguelike
 {
     /// <summary>
-    /// Katana basic attack modelled on Yae Sakura (Honkai Impact 3rd, A-rank): a four-hit combo of a descending
-    /// cut, a rising follow-up, a spinning cut and an iai draw finisher that cuts twice. PlayerCombat owns input,
-    /// combo timing and the Animator; this component holds the sword, dashes toward the target, tests the hit arc,
-    /// deals damage and plays the hit feedback. Motions are retargetable Humanoid clips (see
+    /// Katana basic attack modelled on Yae Sakura (Honkai Impact 3rd, A-rank): a five-hit, full-body combo of a
+    /// stepping sweep, a rising backhand and return cut, a pirouette cut, a low dash cutting twice and an iai draw
+    /// finisher that cuts twice. PlayerCombat owns input, combo timing and the Animator; this component holds the
+    /// sword, carries the player by the motion's own steps (root motion) and a short dash toward the target, tests
+    /// the hit arc, deals damage and plays the hit feedback. Motions are retargetable Humanoid clips (see
     /// Documentation/PlayerMelee), and the sword grip is derived from humanoid hand and finger bones, so nothing here
     /// depends on the current character model. Every hit with a target is registered on TalismanCaster as a cast,
     /// so cast-based systems (validation, the support skill) keep working.
@@ -27,32 +28,49 @@ namespace AcRoguelike
             public float secondHitDelay;
             public int secondDamage;
             public float secondArcFrom, secondArcTo, secondArcRoll;
+            [Tooltip("Dash hit: afterimages and a dust burst.")]
+            public bool dash;
         }
 
         // Clip timing measured from the motion capture (sword-tip speed peaks), at the baked playback speed.
-        public static readonly float[] Durations = { .615f, .70f, .58f, 1.33f };
-        public static readonly float[] HitTimes = { .37f, .33f, .37f, .50f };
+        public static readonly float[] Durations = { .435f, .683f, .548f, .703f, 1.333f };
+        public static readonly float[] HitTimes = { .278f, .217f, .374f, .359f, .50f };
 
+        // Arcs follow the measured sword-tip path around the hips during each cut (0 = toward the target, + = right;
+        // roll lifts the right end).
         public Swing[] swings =
         {
-            // 1: descending diagonal cut, right to left.
-            new Swing { damage = 18, range = 2.6f, halfAngle = 75, impact = 1f, hitStop = .05f, shake = .045f,
-                arcFrom = 125, arcTo = -85, arcRoll = 22, arcRadius = 1.9f },
-            // 2: flatter follow-up cut, right to left.
-            new Swing { damage = 20, range = 2.6f, halfAngle = 75, impact = 1.05f, hitStop = .055f, shake = .05f,
-                arcFrom = 50, arcTo = -100, arcRoll = -8, arcRadius = 2.0f },
-            // 3: spinning cut around the whole body.
-            new Swing { damage = 24, range = 2.8f, halfAngle = 180, impact = 1.2f, hitStop = .06f, shake = .07f,
-                arcFrom = -180, arcTo = 180, arcRoll = 5, arcRadius = 2.2f },
-            // 4: iai draw-cut, then a heavy descending cut that launches enemies.
-            new Swing { damage = 26, range = 3.2f, halfAngle = 100, impact = 1.3f, hitStop = .07f, shake = .09f,
-                arcFrom = -100, arcTo = 110, arcRoll = 4, arcRadius = 2.6f, finisher = true,
-                secondHitDelay = .33f, secondDamage = 42, secondArcFrom = 160, secondArcTo = -30, secondArcRoll = 38 },
+            // 1: stepping low sweep, right to left.
+            new Swing { damage = 16, range = 2.6f, halfAngle = 80, impact = .9f, hitStop = .045f, shake = .04f,
+                arcFrom = 84, arcTo = -88, arcRoll = -8, arcRadius = 1.8f },
+            // 2: rising backhand left to right, then a cut back across.
+            new Swing { damage = 12, range = 2.6f, halfAngle = 80, impact = .8f, hitStop = .04f, shake = .035f,
+                arcFrom = -127, arcTo = 98, arcRoll = 12, arcRadius = 1.8f,
+                secondHitDelay = .30f, secondDamage = 15, secondArcFrom = 97, secondArcTo = -98, secondArcRoll = -10 },
+            // 3: pirouette: one full turn with the blade out.
+            new Swing { damage = 22, range = 2.8f, halfAngle = 180, impact = 1.15f, hitStop = .06f, shake = .065f,
+                arcFrom = 110, arcTo = 455, arcRoll = 6, arcRadius = 2.1f },
+            // 4: low dash: a descending cut on the way in, then a low backhand.
+            new Swing { damage = 18, range = 2.8f, halfAngle = 75, impact = 1.1f, hitStop = .055f, shake = .06f,
+                arcFrom = 33, arcTo = -96, arcRoll = 38, arcRadius = 1.9f, dash = true,
+                secondHitDelay = .255f, secondDamage = 20, secondArcFrom = -97, secondArcTo = 13, secondArcRoll = 20 },
+            // 5: iai draw across the front, then a heavy diagonal cut that launches enemies.
+            new Swing { damage = 28, range = 3.2f, halfAngle = 100, impact = 1.3f, hitStop = .07f, shake = .09f,
+                arcFrom = -123, arcTo = 97, arcRoll = -10, arcRadius = 2.6f, finisher = true, dash = true,
+                secondHitDelay = .333f, secondDamage = 44, secondArcFrom = 79, secondArcTo = -66, secondArcRoll = 35 },
         };
         [Tooltip("Targets closer than this are reached with a short dash at the start of a swing.")]
         public float lungeRange = 6f;
         public float lungeStop = 1.4f;
         public float lungeSpeed = 17f;
+        [Tooltip("Scale of the motion's own steps (root motion) while attacking.")]
+        public float rootMotionScale = 1f;
+        [Range(0, 1), Tooltip("How much of the root motion is turned toward the attack direction.")]
+        public float rootMotionSteer = .75f;
+        [Tooltip("Root motion never carries the player closer than this to the target.")]
+        public float minTargetGap = .95f;
+        [Tooltip("Sword-tip speed (m/s) that switches the swing trail on, and the lower speed that switches it off.")]
+        public float trailOnSpeed = 12f, trailOffSpeed = 7f;
         public float katanaLength = 1.05f;
         [Range(0, 1)] public float gripCurl = 1f;
         public GameObject katanaModel;
@@ -69,9 +87,12 @@ namespace AcRoguelike
         Transform[][] fingers;
         Transform indexRoot, littleRoot, thumbRoot;
         TrailRenderer trail;
-        Vector3 lungeTarget;
-        float lungeUntil, sheatheAt;
-        bool drawn;
+        SkinnedMeshRenderer[] skins;
+        Vector3 lungeTarget, lastTip;
+        float lungeUntil, sheatheAt, swingClock, nextGhost;
+        int swingIndex = -1;
+        bool drawn, tipValid;
+        TrainingEnemy swingTarget;
         Coroutine secondHit;
 
         void Awake()
@@ -87,6 +108,8 @@ namespace AcRoguelike
                 combat.hitTimes = (float[])HitTimes.Clone();
                 combat.attackMovementMultiplier = .05f;
                 combat.comboQueueWindow = .3f;
+                combat.animationBlend = .09f;
+                combat.returnBlend = .22f;
             }
             if (!katanaModel) katanaModel = Resources.Load<GameObject>("AstraiaKatana");
         }
@@ -99,8 +122,13 @@ namespace AcRoguelike
             EnsureKatana();
             CancelSecondHit();
             Draw(true);
-            if (trail) { trail.Clear(); trail.emitting = true; }
+            swingIndex = index;
+            swingTarget = target;
+            swingClock = 0;
+            nextGhost = 0;
             lungeUntil = 0;
+            var swing = swings[Mathf.Clamp(index, 0, swings.Length - 1)];
+            if (swing.dash) HitFeedback.Dust(transform.position, .7f);
             if (target && target.IsAlive)
             {
                 Vector3 to = Vector3.ProjectOnPlane(target.transform.position - transform.position, Vector3.up);
@@ -140,10 +168,11 @@ namespace AcRoguelike
             secondHit = null;
         }
 
-        bool Cut(Swing swing, int baseDamage, float from, float to, float roll, TrainingEnemy preferred, Vector3 direction, bool launch)
+        bool Cut(Swing swing, int baseDamage, float from, float to, float roll, TrainingEnemy preferred, Vector3 direction, bool second)
         {
             Vector3 chest = transform.position + Vector3.up * 1.05f;
-            bool heavy = swing.finisher && (launch || swing.secondHitDelay <= 0);
+            bool heavy = swing.finisher && (second || swing.secondHitDelay <= 0);
+            bool launch = swing.finisher && second;
             // The arc plays even on a miss, so every swing reads as a cut.
             HitFeedback.SlashArc(chest, direction, from, to, swing.arcRadius, roll, heavy ? .95f : .62f,
                 heavy ? HitFeedback.Sakura * 2.6f : HitFeedback.Sakura * 1.9f,
@@ -154,7 +183,8 @@ namespace AcRoguelike
             {
                 HitFeedback.SlashArc(transform.position + Vector3.up * .08f, direction, -180, 180, swing.range, 0, .5f,
                     HitFeedback.Crimson * 1.6f, HitFeedback.Violet, .12f, .38f);
-                HitFeedback.Petals(chest, 18);
+                HitFeedback.Petals(chest, 30);
+                HitFeedback.ScreenFlash(new Color(1f, .62f, .82f, .32f), .2f);
             }
 
             bool hitAny = false;
@@ -175,6 +205,9 @@ namespace AcRoguelike
                 bool lethal = damage >= enemy.Health;
                 enemy.TakeDamage(damage);
                 HitFeedback.Hit(enemy, point, push, damage, heavy || lethal);
+                // The cut itself, drawn across the target along the swing's screen tilt.
+                if (heavy) HitFeedback.CrossSlash(point, 1.1f);
+                else HitFeedback.SlashLine(point, ScreenAngle(direction, from, to, roll), 2.1f, .1f, HitFeedback.Sakura * 2.2f, .18f);
                 hitAny = true;
                 if (!first || enemy == preferred) first = enemy;
             }
@@ -185,8 +218,8 @@ namespace AcRoguelike
                 HitFeedback.HitStop(heavy ? swing.hitStop * 1.6f : swing.hitStop, heavy ? .04f : .08f);
                 HitFeedback.Shake(heavy ? swing.shake * 1.8f : swing.shake, heavy ? .24f : .12f);
             }
-            // The iai's second cut belongs to the same swing, so only the first cut counts as a cast.
-            if (caster && first && !launch) caster.RegisterMeleeHit(first);
+            // A swing's second cut belongs to the same swing, so only the first cut counts as a cast.
+            if (caster && first && !second) caster.RegisterMeleeHit(first);
             return hitAny;
         }
 
@@ -194,8 +227,51 @@ namespace AcRoguelike
         public void EndSwing()
         {
             lungeUntil = 0;
+            swingIndex = -1;
+            swingTarget = null;
             if (trail) trail.emitting = false;
             sheatheAt = Time.time + 1.6f;
+        }
+
+        /// <summary>
+        /// The combo clips keep the motion's horizontal travel as root motion (MeleeRootMotion forwards it here), so
+        /// the steps and the dash move the CharacterController and the feet stay planted. Travel stops short of the
+        /// target and is skipped while the lunge or a dodge moves the player.
+        /// </summary>
+        internal void ApplyRootMotion(Vector3 delta)
+        {
+            if (swingIndex < 0 || !(combat && combat.IsAttacking) || !body || !body.enabled) return;
+            if ((motor && motor.IsDashing) || lungeUntil > Time.time) return;
+            delta = Vector3.ProjectOnPlane(delta, Vector3.up) * rootMotionScale;
+            if (delta.sqrMagnitude < 1e-8f) return;
+            // The captured steps wander with the body turn; steer most of them toward the attack so a dash closes in.
+            Vector3 attack = combat.AttackDirection.sqrMagnitude > .01f ? combat.AttackDirection.normalized : Body.forward;
+            delta = Vector3.Lerp(delta.normalized, attack, rootMotionSteer).normalized * delta.magnitude;
+            if (swingTarget && swingTarget.IsAlive)
+            {
+                Vector3 to = Vector3.ProjectOnPlane(swingTarget.transform.position - transform.position, Vector3.up);
+                float gap = minTargetGap + EnemyRadius(swingTarget);
+                if (to.sqrMagnitude > .0001f)
+                {
+                    Vector3 toward = to.normalized;
+                    float approach = Vector3.Dot(delta, toward);
+                    float room = Mathf.Max(0, to.magnitude - gap);
+                    if (approach > room) delta -= toward * (approach - room);
+                }
+            }
+            body.Move(delta);
+        }
+
+        /// <summary>Screen tilt of a cut: level for a flat sweep, steep for a diagonal one, mirrored by the sweep side.</summary>
+        float ScreenAngle(Vector3 direction, float from, float to, float roll)
+        {
+            var camera = Camera.main;
+            float sweep = Mathf.Sign(to - from);
+            float tilt = Mathf.Clamp(roll, -50, 50) + 8 * sweep;
+            if (!camera) return tilt;
+            // Seen from the side the cut runs across the screen; seen along its direction it reads as a diagonal.
+            float side = Vector3.Dot(camera.transform.right, direction);
+            return tilt * (side >= 0 ? 1 : -1);
         }
 
         // PlayerMotor turns the visual child, not the root.
@@ -216,6 +292,20 @@ namespace AcRoguelike
         void Update()
         {
             if (motor && motor.IsDashing) { lungeUntil = 0; CancelSecondHit(); }
+            if (swingIndex >= 0)
+            {
+                swingClock += Time.deltaTime * (combat ? combat.AnimationSpeed : 1);
+                var swing = swings[Mathf.Clamp(swingIndex, 0, swings.Length - 1)];
+                float hit = HitTimes[Mathf.Clamp(swingIndex, 0, HitTimes.Length - 1)];
+                float end = hit + Mathf.Max(.1f, swing.secondHitDelay + .08f);
+                // Afterimages through the dash and the draw.
+                if (swing.dash && swingClock > hit - .28f && swingClock < end && Time.time >= nextGhost)
+                {
+                    nextGhost = Time.time + .035f;
+                    if (skins == null) skins = Body.GetComponentsInChildren<SkinnedMeshRenderer>();
+                    HitFeedback.Afterimage(skins, (swing.finisher ? HitFeedback.Violet : HitFeedback.Sakura) * .55f, .28f);
+                }
+            }
             if (lungeUntil > Time.time && body && body.enabled)
             {
                 Vector3 delta = Vector3.ProjectOnPlane(lungeTarget - transform.position, Vector3.up);
@@ -247,15 +337,32 @@ namespace AcRoguelike
                 Vector3 blade = (radial * .8f + along * .2f).normalized;
                 Vector3 grip = hand.position + fingerDir * .055f + palm * .02f;
                 katana.SetPositionAndRotation(grip, Quaternion.LookRotation(blade, fingerDir));
+                UpdateTrail();
             }
             else if (hip)
             {
+                tipValid = false;
                 // Sheathed at the left hip: edge up, tip pointing back and slightly down.
                 Vector3 back = -Body.forward, side = -Body.right;
                 Vector3 dir = (back * .85f + Vector3.down * .3f + side * .1f).normalized;
                 katana.SetPositionAndRotation(hip.position + side * .22f + Body.forward * .3f + Vector3.up * .02f,
                     Quaternion.LookRotation(dir, Vector3.up));
             }
+        }
+
+        /// <summary>The trail shows only while the blade actually cuts (fast tip), never as a constant glow on the tip.</summary>
+        void UpdateTrail()
+        {
+            if (!trail || !tip) return;
+            Vector3 position = tip.position;
+            float dt = Time.deltaTime;
+            float speed = tipValid && dt > 1e-5f ? Vector3.Distance(position, lastTip) / dt : 0;
+            lastTip = position;
+            tipValid = true;
+            bool swinging = swingIndex >= 0 && combat && combat.IsAttacking;
+            if (!swinging) { trail.emitting = false; return; }
+            if (trail.emitting) { if (speed < trailOffSpeed) trail.emitting = false; }
+            else if (speed > trailOnSpeed) trail.emitting = true;
         }
 
         /// <summary>Closes the right hand around the grip after the animation pose, for any humanoid with finger bones.</summary>
@@ -296,6 +403,7 @@ namespace AcRoguelike
                     Chain(HumanBodyBones.RightLittleProximal, HumanBodyBones.RightLittleIntermediate, HumanBodyBones.RightLittleDistal),
                 };
             }
+            if (animator && !animator.GetComponent<MeleeRootMotion>()) animator.gameObject.AddComponent<MeleeRootMotion>().owner = this;
             if (!hand) hand = transform;
             if (!hip) hip = transform;
             katana = new GameObject("Katana").transform;
@@ -327,9 +435,9 @@ namespace AcRoguelike
             tip.SetParent(katana, false);
             tip.localPosition = new Vector3(0, 0, katanaLength * .92f);
             trail = tip.gameObject.AddComponent<TrailRenderer>();
-            trail.time = .13f;
-            trail.minVertexDistance = .03f;
-            trail.widthCurve = new AnimationCurve(new Keyframe(0, .3f), new Keyframe(1, 0));
+            trail.time = .09f;
+            trail.minVertexDistance = .02f;
+            trail.widthCurve = new AnimationCurve(new Keyframe(0, .42f), new Keyframe(.4f, .22f), new Keyframe(1, 0));
             trail.colorGradient = new Gradient
             {
                 colorKeys = new[] { new GradientColorKey(Color.white, 0), new GradientColorKey(HitFeedback.Sakura, .35f), new GradientColorKey(HitFeedback.Crimson, 1) },
@@ -345,6 +453,21 @@ namespace AcRoguelike
             var chain = new Transform[bones.Length];
             for (int i = 0; i < bones.Length; i++) chain[i] = animator.GetBoneTransform(bones[i]);
             return chain;
+        }
+    }
+
+    /// <summary>Forwards the Animator's root motion to MeleeSlash (lives next to the Animator).</summary>
+    [DisallowMultipleComponent]
+    sealed class MeleeRootMotion : MonoBehaviour
+    {
+        public MeleeSlash owner;
+        Animator animator;
+
+        void Awake() => animator = GetComponent<Animator>();
+
+        void OnAnimatorMove()
+        {
+            if (owner && animator) owner.ApplyRootMotion(animator.deltaPosition);
         }
     }
 }

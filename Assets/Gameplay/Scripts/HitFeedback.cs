@@ -191,6 +191,49 @@ namespace AcRoguelike
             go.AddComponent<FloatingNumber>().Play(heavy);
         }
 
+        // ---- anime cut accents -----------------------------------------------------------------------------
+        /// <summary>
+        /// Razor-thin cut streak through `point`, facing the camera: snaps open along the cut, then thins away.
+        /// `angle` turns it around the view axis (0 = level on screen, positive = counter-clockwise).
+        /// </summary>
+        public static void SlashLine(Vector3 point, float angle, float length, float width, Color color, float life = .2f, float delay = 0)
+        {
+            var go = new GameObject("Slash Line");
+            go.transform.position = point;
+            go.AddComponent<LineFlash>().Play(angle, length, width, color, life, delay);
+        }
+
+        /// <summary>Two crossing streaks over a target, the second a moment later: the finisher's X cut.</summary>
+        public static void CrossSlash(Vector3 point, float size)
+        {
+            SlashLine(point, 38, 2.6f * size, .16f * size, Sakura * 2.4f, .26f);
+            SlashLine(point, -42, 2.6f * size, .16f * size, Color.white * 2.2f, .26f, .06f);
+            SlashLine(point, 38, 3.4f * size, .05f * size, Violet * 2f, .34f);
+        }
+
+        /// <summary>Full-screen additive flash (a camera-facing quad just in front of the near plane).</summary>
+        public static void ScreenFlash(Color color, float life)
+        {
+            var camera = Camera.main;
+            if (!camera) return;
+            var go = new GameObject("Screen Flash");
+            go.transform.SetParent(camera.transform, false);
+            go.AddComponent<ScreenFlashEffect>().Play(camera, color, life);
+        }
+
+        /// <summary>Glowing snapshot of the character's current pose that fades in place (dash and draw afterimages).</summary>
+        public static void Afterimage(SkinnedMeshRenderer[] skins, Color color, float life)
+        {
+            if (skins == null) return;
+            foreach (var skin in skins)
+            {
+                if (!skin || !skin.enabled || !skin.gameObject.activeInHierarchy || !skin.sharedMesh) continue;
+                var go = new GameObject("Afterimage");
+                go.transform.SetPositionAndRotation(skin.transform.position, skin.transform.rotation);
+                go.AddComponent<AfterimageEffect>().Play(skin, color, life);
+            }
+        }
+
         // ---- mesh helpers ---------------------------------------------------------------------------------
         internal static Mesh Quad()
         {
@@ -451,6 +494,115 @@ namespace AcRoguelike
             transform.position = start + Vector3.up * (.9f * (1 - (1 - Mathf.Min(t, 1)) * (1 - Mathf.Min(t, 1))));
             text.color = new Color(color.r, color.g, color.b, Mathf.Clamp01(1.6f - t * 1.6f));
             if (t >= 1) Destroy(gameObject);
+        }
+    }
+
+    /// <summary>Camera-facing streak quad: opens along its length, then its width collapses.</summary>
+    sealed class LineFlash : MonoBehaviour
+    {
+        Transform quad;
+        MeshRenderer quadRenderer;
+        MaterialPropertyBlock block;
+        float angle, length, width, life, delay, age;
+        Color color;
+
+        public void Play(float a, float l, float w, Color c, float lifeTime, float wait)
+        {
+            angle = a; length = l; width = w; color = c; life = lifeTime; delay = wait;
+            var go = new GameObject("Quad");
+            go.transform.SetParent(transform, false);
+            go.AddComponent<MeshFilter>().sharedMesh = HitFeedback.SharedQuad;
+            quadRenderer = go.AddComponent<MeshRenderer>();
+            quadRenderer.sharedMaterial = HitFeedback.Additive;
+            quadRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            quad = go.transform;
+            block = new MaterialPropertyBlock();
+            Update();
+        }
+
+        void Update()
+        {
+            age += Time.unscaledDeltaTime;
+            float t = (age - delay) / life;
+            quadRenderer.enabled = t >= 0;
+            if (t < 0) return;
+            if (t >= 1) { Destroy(gameObject); return; }
+            var camera = Camera.main;
+            if (camera) transform.rotation = camera.transform.rotation * Quaternion.Euler(0, 0, angle);
+            float open = Mathf.Clamp01(t / .18f);
+            float thin = t < .18f ? 1 : 1 - (t - .18f) / .82f;
+            quad.localScale = new Vector3(length * (1 - (1 - open) * (1 - open)) * (1 + .15f * t), width * thin * thin, 1);
+            block.SetColor("_BaseColor", color * Mathf.Lerp(1.4f, .6f, t));
+            quadRenderer.SetPropertyBlock(block);
+        }
+    }
+
+    /// <summary>Additive quad covering the view, fading out quickly.</summary>
+    sealed class ScreenFlashEffect : MonoBehaviour
+    {
+        MeshRenderer quadRenderer;
+        MaterialPropertyBlock block;
+        Color color;
+        float life, age;
+
+        public void Play(Camera camera, Color c, float lifeTime)
+        {
+            color = c; life = lifeTime;
+            float distance = camera.nearClipPlane + .05f;
+            transform.localPosition = Vector3.forward * distance;
+            transform.localRotation = Quaternion.identity;
+            float h = camera.orthographic ? camera.orthographicSize * 2 : 2 * distance * Mathf.Tan(camera.fieldOfView * .5f * Mathf.Deg2Rad);
+            transform.localScale = new Vector3(h * camera.aspect * 1.2f, h * 1.2f, 1);
+            gameObject.AddComponent<MeshFilter>().sharedMesh = HitFeedback.SharedQuad;
+            quadRenderer = gameObject.AddComponent<MeshRenderer>();
+            quadRenderer.sharedMaterial = HitFeedback.Additive;
+            quadRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            block = new MaterialPropertyBlock();
+            Update();
+        }
+
+        void Update()
+        {
+            age += Time.unscaledDeltaTime;
+            float t = age / life;
+            if (t >= 1) { Destroy(gameObject); return; }
+            block.SetColor("_BaseColor", new Color(color.r, color.g, color.b, color.a * (1 - t) * (1 - t)));
+            quadRenderer.SetPropertyBlock(block);
+        }
+    }
+
+    /// <summary>Baked copy of a skinned mesh in its current pose, glowing and fading.</summary>
+    sealed class AfterimageEffect : MonoBehaviour
+    {
+        Mesh mesh;
+        MeshRenderer meshRenderer;
+        MaterialPropertyBlock block;
+        Color color;
+        float life, age;
+
+        public void Play(SkinnedMeshRenderer skin, Color c, float lifeTime)
+        {
+            color = c; life = lifeTime;
+            mesh = new Mesh { name = "Afterimage" };
+            skin.BakeMesh(mesh, true);
+            gameObject.AddComponent<MeshFilter>().sharedMesh = mesh;
+            meshRenderer = gameObject.AddComponent<MeshRenderer>();
+            var materials = new Material[Mathf.Max(1, mesh.subMeshCount)];
+            for (int i = 0; i < materials.Length; i++) materials[i] = HitFeedback.Additive;
+            meshRenderer.sharedMaterials = materials;
+            meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            block = new MaterialPropertyBlock();
+            Update();
+        }
+
+        void Update()
+        {
+            age += Time.unscaledDeltaTime;
+            float t = age / life;
+            if (t >= 1) { Destroy(mesh); Destroy(gameObject); return; }
+            block.SetColor("_BaseColor", color * ((1 - t) * (1 - t)));
+            meshRenderer.SetPropertyBlock(block);
+            transform.localScale = Vector3.one * (1 + .04f * t);
         }
     }
 }

@@ -64,7 +64,7 @@ namespace AcRoguelike.Liminal
             SetCorner(objectiveLabel.rectTransform, new Vector2(1, 1), new Vector2(1, 1));
             objectiveLabel.alignment = TextAlignmentOptions.TopRight;
             var controls = Text("Controls", canvasObject.transform,
-                "WASD 이동 · CTRL 걷기 · 좌클릭/J 카타나 4연격 · SPACE/SHIFT 대시 · Q 지원 스킬 · E 출구 · ESC 일시정지", 16,
+                "WASD 이동 · CTRL 걷기 · 좌클릭/J 카타나 5연격 · SPACE/SHIFT 대시 · Q 지원 스킬 · E 출구 · ESC 일시정지", 16,
                 Paper, new Vector2(0, 20), new Vector2(1200, 32));
             SetCorner(controls.rectTransform, new Vector2(.5f, 0), new Vector2(.5f, 0));
             controls.alignment = TextAlignmentOptions.Center;

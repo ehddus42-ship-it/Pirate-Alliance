@@ -21,9 +21,9 @@ namespace AcRoguelike.EditorTools
             {
                 if (EditorApplication.isPlayingOrWillChangePlaymode) return;
                 if (!File.Exists(AstraiaAnimationBuilder.ControllerPath)) return;
-                if (File.Exists(AstraiaAnimationBuilder.Folder + "/Astraia_Katana_04.anim")) return;
+                if (File.Exists(AstraiaAnimationBuilder.Folder + "/" + AstraiaAnimationBuilder.ComboVersion + ".anim")) return;
                 if (!File.Exists(AstraiaAnimationBuilder.KatanaFolder + "/Katana_IaiDraw.fbx")) return;
-                Debug.Log("[Astraia] Building katana combo motions (Attack1-4) for the melee basic attack.");
+                Debug.Log("[Astraia] Building the katana combo motions (Attack1-5) for the melee basic attack.");
                 AstraiaAnimationBuilder.Build();
             };
         }
@@ -32,7 +32,25 @@ namespace AcRoguelike.EditorTools
         static void Rebuild() { AstraiaAnimationBuilder.Build(); Debug.Log("[Astraia] Katana motions rebuilt."); }
     }
 
-    /// <summary>Rebuildable Humanoid motion set. No root translation competes with the collision motor.</summary>
+    /// <summary>
+    /// On a fresh clone the katana FBX files may finish importing (as Humanoid) after the first delayCall; build the
+    /// combo as soon as they are in, instead of keeping the procedural fallback until the next restart.
+    /// </summary>
+    sealed class AstraiaKatanaImportWatcher : AssetPostprocessor
+    {
+        static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] moved, string[] movedFrom)
+        {
+            if (!imported.Any(p => p.StartsWith(AstraiaAnimationBuilder.KatanaFolder + "/", StringComparison.Ordinal) && p.EndsWith(".fbx", StringComparison.OrdinalIgnoreCase))) return;
+            EditorApplication.delayCall += () =>
+            {
+                if (EditorApplication.isPlayingOrWillChangePlaymode || !File.Exists(AstraiaAnimationBuilder.ControllerPath)) return;
+                if (File.Exists(AstraiaAnimationBuilder.Folder + "/" + AstraiaAnimationBuilder.ComboVersion + ".anim")) return;
+                AstraiaAnimationBuilder.Build();
+            };
+        }
+    }
+
+    /// <summary>Rebuildable Humanoid motion set. Combo root travel is applied by MeleeSlash, not the Animator.</summary>
     public static class AstraiaAnimationBuilder
     {
         public const string Folder = "Assets/Characters/Astraia/Animations";
@@ -46,7 +64,7 @@ namespace AcRoguelike.EditorTools
             var walk = FindClip("HumanF@Walk01_Forward");
             var run = FindClip("HumanF@Run01_Forward");
             var sprint = FindClip("HumanF@Sprint01_Forward");
-            // Katana basic attack (MeleeSlash): four motion-captured cuts in the style of Yae Sakura.
+            // Katana basic attack (MeleeSlash): five full-body motion-captured hits in the style of Yae Sakura.
             var attacks = MakeKatanaCombo() ?? new[] { MakeSlash(idle, 0), MakeSlash(idle, 1), MakeSlash(idle, 2) };
             var dash = MakeDash(sprint);
             var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(ControllerPath);
@@ -173,25 +191,32 @@ namespace AcRoguelike.EditorTools
         public const string KatanaFolder = Folder + "/Katana";
 
         /// <summary>
-        /// Source motions (Meshy rig + library / text-to-motion, imported as Humanoid) and the part of each used for one
-        /// combo hit: start and end in seconds, and the playback speed baked into the clip. The segment bounds sit at
-        /// the slowest sword-tip moments around each cut, so consecutive hits chain without a pose jump.
-        /// Timing must match MeleeSlash.Durations / HitTimes.
+        /// One combo hit cut from a source motion (Meshy rig + text-to-motion, imported as Humanoid): start and end in
+        /// seconds, the playback speed baked into the clip, and the aim. The whole body moves as captured (hips, waist,
+        /// legs and the body turn), but the body turn is corrected so the cut lands toward the target: at `aimTime` the
+        /// sword tip, measured `aimRel` degrees to the right of the body, points straight forward. The correction
+        /// ramps in during the wind-up and starts from the previous hit's final facing, so hits chain without a turn
+        /// pop. Segment bounds sit at slow sword-tip moments. Timing must match MeleeSlash.Durations / HitTimes.
         /// </summary>
-        static readonly (string file, float start, float end, float speed)[] KatanaSegments =
+        static readonly (string file, float start, float end, float speed, float aimTime, float aimRel)[] KatanaSegments =
         {
-            ("Katana_QuickCombo", 0f, .83f, 1.35f),   // descending cut, hit at 0.50 s
-            ("Katana_QuickCombo", .83f, 1.77f, 1.35f), // follow-up cut, hit at 1.28 s
-            ("Katana_SpinSlash", .15f, .90f, 1.3f),   // spinning cut, hit at 0.63 s
-            ("Katana_IaiDraw", .10f, 1.70f, 1.2f),    // iai draw at 0.70 s and second cut at 1.10 s, then zanshin
+            ("Katana_Flurry", .36f, .86f, 1.15f, .68f, 54f),      // stepping low sweep, right to left
+            ("Katana_Flurry", .86f, 1.68f, 1.2f, 1.12f, 21f),     // rising backhand, then a cut back across (2 hits)
+            ("Katana_Pirouette", 1.42f, 2.05f, 1.15f, 1.85f, -24f), // full-turn pirouette cut (aim kept loose so the turn stays whole)
+            ("Katana_DashSlash", .28f, 1.30f, 1.45f, .80f, 13f),  // low dash, descending cut and a low backhand (2 hits)
+            ("Katana_IaiDraw", .10f, 1.70f, 1.2f, .70f, 63f),     // iai draw and a heavy second cut, then zanshin
         };
+
+        /// <summary>Bumped when the combo changes, so the installer rebuilds clips made by an older version.</summary>
+        public const string ComboVersion = "Astraia_Katana_05";
 
         static AnimationClip[] MakeKatanaCombo()
         {
             var clips = new AnimationClip[KatanaSegments.Length];
+            float facing = float.NaN; // body yaw at the end of the previous hit, in the attack frame
             for (int i = 0; i < clips.Length; i++)
             {
-                var (file, start, end, speed) = KatanaSegments[i];
+                var (file, start, end, speed, aimTime, aimRel) = KatanaSegments[i];
                 string path = KatanaFolder + "/" + file + ".fbx";
                 var source = AssetDatabase.LoadAllAssetsAtPath(path).OfType<AnimationClip>()
                     .Where(c => !c.name.StartsWith("__preview__", StringComparison.Ordinal)).OrderByDescending(c => c.length).FirstOrDefault();
@@ -200,22 +225,85 @@ namespace AcRoguelike.EditorTools
                     Debug.LogWarning("[Astraia] Humanoid katana motion missing (" + path + "); using the procedural slashes. Run git lfs pull.");
                     return null;
                 }
-                clips[i] = Segment(source, "Astraia_Katana_0" + (i + 1), start, Mathf.Min(end, source.length), speed);
+                end = Mathf.Min(end, source.length);
+                clips[i] = Segment(source, "Astraia_Katana_0" + (i + 1), start, end, speed, aimTime, aimRel, i == clips.Length - 1, ref facing);
             }
             return clips;
         }
 
-        static AnimationClip Segment(AnimationClip source, string name, float start, float end, float speed)
+        static readonly string[] RootQ = { "RootQ.x", "RootQ.y", "RootQ.z", "RootQ.w" };
+        static readonly string[] RootT = { "RootT.x", "RootT.y", "RootT.z" };
+
+        static AnimationClip Segment(AnimationClip source, string name, float start, float end, float speed,
+            float aimTime, float aimRel, bool last, ref float facing)
         {
             var clip = new AnimationClip { name = name, frameRate = 60 };
             const float step = 1f / 60f;
-            foreach (var binding in AnimationUtility.GetCurveBindings(source))
+            var bindings = AnimationUtility.GetCurveBindings(source).Where(b => b.type == typeof(Animator)).ToArray();
+            AnimationCurve Curve(string property)
             {
-                if (binding.type != typeof(Animator)) continue;
-                var curve = AnimationUtility.GetEditorCurve(source, binding);
-                var keys = new List<Keyframe>();
-                for (float t = start; t <= end + 1e-4f; t += step) keys.Add(new Keyframe((t - start) / speed, curve.Evaluate(t)));
-                var segment = new AnimationCurve(keys.ToArray());
+                var b = bindings.FirstOrDefault(x => x.propertyName == property);
+                return b.propertyName == property ? AnimationUtility.GetEditorCurve(source, b) : null;
+            }
+            var q = RootQ.Select(Curve).ToArray();
+            var p = RootT.Select(Curve).ToArray();
+            bool hasRoot = q.All(c => c != null) && p.All(c => c != null);
+            Quaternion Q(float t) => hasRoot ? new Quaternion(q[0].Evaluate(t), q[1].Evaluate(t), q[2].Evaluate(t), q[3].Evaluate(t)).normalized : Quaternion.identity;
+            Vector3 P(float t) => hasRoot ? new Vector3(p[0].Evaluate(t), p[1].Evaluate(t), p[2].Evaluate(t)) : Vector3.zero;
+            float Yaw(float t) { Vector3 f = Q(t) * Vector3.forward; return Mathf.Atan2(f.x, f.z) * Mathf.Rad2Deg; }
+
+            var times = new List<float>();
+            for (float t = start; t <= end + 1e-4f; t += step) times.Add(Mathf.Min(t, end));
+            // Yaw correction: from the previous hit's final facing (or straight ahead for the opener) to the aim, eased
+            // in over the wind-up; the last hit also settles back toward straight ahead during its hold.
+            float aimCorrection = -(Yaw(aimTime) + aimRel);
+            float startCorrection = float.IsNaN(facing) ? -Yaw(start) : facing - Yaw(start);
+            startCorrection = aimCorrection + Mathf.DeltaAngle(aimCorrection, startCorrection);
+            float rampEnd = Mathf.Max(start + step, aimTime - .05f);
+            float settleFrom = Mathf.Min(end, aimTime + (end - aimTime) * .45f);
+            float Correction(float t)
+            {
+                float c = Mathf.Lerp(startCorrection, aimCorrection, Mathf.SmoothStep(0, 1, Mathf.InverseLerp(start, rampEnd, t)));
+                if (last && t > settleFrom)
+                {
+                    float settled = aimCorrection + Mathf.DeltaAngle(aimCorrection + Yaw(end), 0);
+                    c = Mathf.Lerp(aimCorrection, settled, Mathf.SmoothStep(0, 1, Mathf.InverseLerp(settleFrom, end, t)));
+                }
+                return c;
+            }
+
+            var rootQ = new List<Keyframe>[4];
+            var rootT = new List<Keyframe>[3];
+            for (int k = 0; k < 4; k++) rootQ[k] = new List<Keyframe>();
+            for (int k = 0; k < 3; k++) rootT[k] = new List<Keyframe>();
+            Quaternion previous = Quaternion.identity;
+            Vector3 travel = P(start);
+            for (int i = 0; i < times.Count; i++)
+            {
+                float t = times[i], time = (t - start) / speed;
+                var turn = Quaternion.AngleAxis(Correction(t), Vector3.up);
+                Quaternion rotation = turn * Q(t);
+                if (i > 0 && Quaternion.Dot(rotation, previous) < 0) rotation = new Quaternion(-rotation.x, -rotation.y, -rotation.z, -rotation.w);
+                previous = rotation;
+                // Horizontal travel turns with the body, so steps still go where the body faces.
+                if (i > 0) travel += turn * Vector3.ProjectOnPlane(P(t) - P(times[i - 1]), Vector3.up);
+                Vector3 position = new Vector3(travel.x, P(t).y, travel.z);
+                for (int k = 0; k < 4; k++) rootQ[k].Add(new Keyframe(time, rotation[k]));
+                for (int k = 0; k < 3; k++) rootT[k].Add(new Keyframe(time, position[k]));
+            }
+            facing = Mathf.DeltaAngle(0, Yaw(end) + Correction(end));
+
+            foreach (var binding in bindings)
+            {
+                AnimationCurve segment;
+                int qi = Array.IndexOf(RootQ, binding.propertyName), ti = Array.IndexOf(RootT, binding.propertyName);
+                if (hasRoot && qi >= 0) segment = new AnimationCurve(rootQ[qi].ToArray());
+                else if (hasRoot && ti >= 0) segment = new AnimationCurve(rootT[ti].ToArray());
+                else
+                {
+                    var curve = AnimationUtility.GetEditorCurve(source, binding);
+                    segment = new AnimationCurve(times.Select(t => new Keyframe((t - start) / speed, curve.Evaluate(t))).ToArray());
+                }
                 for (int k = 0; k < segment.length; k++)
                 {
                     AnimationUtility.SetKeyLeftTangentMode(segment, k, AnimationUtility.TangentMode.Linear);
@@ -225,8 +313,8 @@ namespace AcRoguelike.EditorTools
             }
             var settings = AnimationUtility.GetAnimationClipSettings(clip);
             settings.loopTime = false;
-            // Body rotation (the spin) and height stay in the pose; horizontal root travel is dropped, because the
-            // CharacterController and MeleeSlash's lunge move the player.
+            // Body turn and height stay in the pose. Horizontal travel is root motion: MeleeSlash moves the
+            // CharacterController by it, so the steps and the dash really carry the player and the feet do not slide.
             settings.loopBlendOrientation = true;
             settings.loopBlendPositionY = true;
             settings.loopBlendPositionXZ = false;

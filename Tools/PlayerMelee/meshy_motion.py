@@ -39,6 +39,20 @@ MOTIONS = {
                           'light quick steps, then returns to a ready stance.', 3.0),
     'spin_slash': ('Female swordswoman with a katana in her right hand spins once on the spot with a full 360 degree '
                    'horizontal slash at waist height, a light hop forward, and lands back in a ready stance.', 2.5),
+    # Second pass: flashier, more acrobatic anime-action candidates (the combo is assembled from the best parts).
+    'dash_slash': ('Anime action game swordswoman holding a katana in her right hand: she leans low and darts forward in a '
+                   'lightning-fast dash, cutting horizontally as she passes, sliding to a stop in a sharp low pose.', 2.5),
+    'pirouette_slash': ('Agile swordswoman with a katana in her right hand: graceful but very fast spinning double slash, '
+                        'she pirouettes twice on one foot with the blade extended, elegant cherry blossom dance style.', 3.0),
+    'aerial_spin_slash': ('Swordswoman with a katana in her right hand: leaps up, spins horizontally in the air slashing '
+                          'around her, and lands in a low crouch with the blade out to the side.', 3.0),
+    'rising_launcher': ('Swordswoman with a katana in her right hand: powerful rising uppercut slash that lifts her off the '
+                        'ground in a small jump, then a fast diagonal downward slash as she lands.', 2.5),
+    'flurry': ('Anime swordswoman with a katana in her right hand performs a flurry of five extremely fast alternating '
+               'diagonal slashes while stepping forward, ending with a wide horizontal cut.', 3.0),
+    'iai_dash_finisher': ('Samurai woman iaido finisher: hand on the sheathed katana at her left hip, deep crouch, explosive '
+                          'dash forward with a horizontal draw cut, slides past and stops with her back turned, then slowly '
+                          'and dramatically sheathes the sword.', 3.5),
     'katana_ready_idle': ('Female swordswoman standing in a relaxed ready stance holding a katana low in her right hand, '
                           'slight breathing and weight shift, calm and alert.', 3.0),
 }

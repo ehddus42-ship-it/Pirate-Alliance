@@ -23,9 +23,11 @@ namespace AcRoguelike
         [Tooltip("The original caster cooldown. Cooldown upgrades speed up both the attack motion and its hit timing.")]
         public float referenceCooldown = .7f;
         public float animationBlend = .07f;
+        [Tooltip("Cross-fade from the last attack pose back to locomotion.")]
+        public float returnBlend = .1f;
 
         public bool IsAttacking => AttackIndex >= 0;
-        /// <summary>Zero-based attack index, or -1 when idle. Maps to Animator states Attack1 to Attack4.</summary>
+        /// <summary>Zero-based attack index, or -1 when idle. Maps to Animator states Attack1 to Attack5.</summary>
         public int AttackIndex { get; private set; } = -1;
         public Vector3 AttackDirection { get; private set; }
         public float AnimationSpeed => 1f / attackTimeScale;
@@ -58,7 +60,8 @@ namespace AcRoguelike
             Animator.StringToHash("Base Layer.Attack1"),
             Animator.StringToHash("Base Layer.Attack2"),
             Animator.StringToHash("Base Layer.Attack3"),
-            Animator.StringToHash("Base Layer.Attack4")
+            Animator.StringToHash("Base Layer.Attack4"),
+            Animator.StringToHash("Base Layer.Attack5")
         };
 
         void Awake()
@@ -204,7 +207,7 @@ namespace AcRoguelike
             if (Has(AttackIndexParameter, AnimatorControllerParameterType.Int)) cachedAnimator.SetInteger(AttackIndexParameter, -1);
             if (Has(AttackTrigger, AnimatorControllerParameterType.Trigger)) cachedAnimator.ResetTrigger(AttackTrigger);
             if (returnToLocomotion && CanAnimate && cachedAnimator.HasState(0, Locomotion))
-                cachedAnimator.CrossFadeInFixedTime(Locomotion, .10f, 0);
+                cachedAnimator.CrossFadeInFixedTime(Locomotion, Mathf.Max(0, returnBlend), 0);
         }
 
         public void CancelAttack(bool returnToLocomotion = true)
