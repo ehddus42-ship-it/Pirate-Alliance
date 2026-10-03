@@ -17,6 +17,8 @@ namespace AcRoguelike
         public float dashSpeed = 13f;
         public float dashDuration = .19f;
         public float dashCooldown = .85f;
+        [Tooltip("Dash speed over the dash: time 0..1 is dash progress, value is a speed multiplier. The distance stays dashSpeed x dashDuration; the curve only decides how it is spread. Default: an instant burst that eases out into run speed (tuned in Tools/CombatLab).")]
+        public AnimationCurve dashSpeedCurve = DefaultDashSpeedCurve();
         public float turnSpeed = 540f;
         public float attackTurnSpeed = 1440f;
         public float aimDeadRadius = .65f;
@@ -27,24 +29,58 @@ namespace AcRoguelike
         [Tooltip("Face the movement direction while exploring, then face the aim point during attacks.")]
         public bool faceMovementDirection;
         public bool IsDashing => dashRemaining > 0 || dashMovedThisFrame;
+        /// <summary>Burst at the start, most of the distance by 60%, and an end speed that matches the run (4.2 m/s at 12.5 m/s).</summary>
+        public static AnimationCurve DefaultDashSpeedCurve() => new AnimationCurve(
+            new Keyframe(0f, 1.4f, -.0894f, -.0894f),
+            new Keyframe(.3f, 1.35f, -.4919f, -.4919f),
+            new Keyframe(.75f, .6f, -1.3733f, -1.3733f),
+            new Keyframe(1f, .33f, -1.08f, -1.08f));
+        /// <summary>Speed the dash hands over at its end (m/s): what the curve's last key works out to.</summary>
+        public float DashExitSpeed
+        {
+            get
+            {
+                float area = DashCurveArea();
+                return area > 1e-5f ? dashSpeed * DashCurveValue(1f) / area : dashSpeed;
+            }
+        }
         public float CooldownRemaining => Mathf.Max(0, cooldownRemaining);
         public Vector3 AimPoint { get; private set; }
         public Vector3 PlanarVelocity { get; private set; }
         public int DashCount { get; private set; }
+        /// <summary>Time.time when the latest dash started (for just-dodge timing).</summary>
+        public float LastDashStart { get; private set; } = -10;
+        /// <summary>A successful just dodge refunds the dash.</summary>
+        public void ResetDashCooldown() => cooldownRemaining = 0;
         public InputAction MoveAction => move;
         public InputAction DashAction => dash;
         public InputAction WalkAction => walk;
+        /// <summary>Held by an enemy (a locker tentacle): no input, no movement; the holder moves the transform.</summary>
+        public bool IsHeld { get; private set; }
+        /// <summary>Thrown through the air after a grab: no control until the player lands.</summary>
+        public bool IsLaunched => launched;
+        public event System.Action Landed;
         CharacterController body;
         InputAction move, dash, walk, aimStick;
         PlayerCombat combat;
         Vector3 velocity, dashDirection;
         float verticalSpeed, dashRemaining, cooldownRemaining;
+        const int DashCurveSamples = 64;
+        // Cumulative area under dashSpeedCurve, so a frame's share of the dash distance is exact at any frame rate.
+        float[] dashCurveArea;
         bool automated;
         Vector2 automatedMove;
         Vector3 automatedAim;
         bool automatedDash;
         bool automatedWalk;
         bool gamepadAiming, dashMovedThisFrame;
+        Vector3 launchVelocity;
+        float launchTime;
+        bool launched;
+        // Grounded as measured by this motor's own gravity move. CharacterController.isGrounded only reflects the
+        // latest Move call, and the melee lunge and root motion move the body horizontally after it, which would
+        // read as airborne and silently swallow a dash pressed mid-attack.
+        bool grounded = true;
         Transform chest, neck;
         Animator cachedAnimator;
         RuntimeAnimatorController cachedController;
@@ -56,6 +92,7 @@ namespace AcRoguelike
         static readonly int Speed = Animator.StringToHash("Speed");
         static readonly int Grounded = Animator.StringToHash("Grounded");
         static readonly int Dash = Animator.StringToHash("Dash");
+        static readonly int DashState = Animator.StringToHash("Base Layer.Dash");
 
         void Awake()
         {
@@ -149,29 +186,45 @@ namespace AcRoguelike
             if (combat && combat.IsAttacking) targetSpeed *= combat.MovementMultiplier;
             Vector3 aim = Vector3.ProjectOnPlane(AimPoint - transform.position, Vector3.up);
             cooldownRemaining = Mathf.Max(0, cooldownRemaining - dt);
-            if (wantsDash && cooldownRemaining <= 0 && body.isGrounded)
+            // Dash always wins over an attack: it cancels the swing (and any hit stop) the moment it is pressed.
+            if (wantsDash && cooldownRemaining <= 0 && (grounded || body.isGrounded))
             {
                 dashDirection = desired.sqrMagnitude > .01f ? desired.normalized : visual.forward;
                 dashDirection = Vector3.ProjectOnPlane(dashDirection, Vector3.up).normalized;
                 dashRemaining = Mathf.Max(.01f, dashDuration); cooldownRemaining = dashCooldown; DashCount++;
+                LastDashStart = Time.time;
                 if (combat) combat.CancelAttack(false);
+                HitFeedback.CancelHitStop();
                 torsoYaw = 0;
                 if (HasParameter(Dash, AnimatorControllerParameterType.Trigger)) animator.SetTrigger(Dash);
+                // Cut straight into the dash pose instead of waiting for the attack clip's transition.
+                if (animator && animator.isActiveAndEnabled && animator.HasState(0, DashState)) animator.CrossFadeInFixedTime(DashState, .03f, 0);
             }
+            if (launched) { wantsDash = false; dashRemaining = 0; desired = Vector3.zero; }
             bool dashThisFrame = dashRemaining > 0;
             Vector3 displacement;
-            if (dashThisFrame)
+            if (launched)
+            {
+                // Ballistic flight after a throw: horizontal speed bleeds off a little, gravity below does the rest.
+                launchTime += dt;
+                displacement = launchVelocity * dt;
+                launchVelocity = Vector3.MoveTowards(launchVelocity, Vector3.zero, 3f * dt);
+                velocity = Vector3.zero;
+            }
+            else if (dashThisFrame)
             {
                 float dashDt = Mathf.Min(dt, dashRemaining);
-                // Integrate the linear ease-out profile over this frame, preserving distance at low FPS.
+                // Integrate the dash speed curve over this frame, preserving distance at low FPS.
                 float duration = Mathf.Max(.01f, dashDuration);
                 float phase = 1f - dashRemaining / duration;
                 float endPhase = Mathf.Clamp01(phase + dashDt / duration);
-                float dashFactor = Mathf.Lerp(1.2f, .8f, (phase + endPhase) * .5f);
-                displacement = dashDirection * dashSpeed * dashFactor * dashDt;
+                displacement = dashDirection * (dashSpeed * duration * (DashProgress(endPhase) - DashProgress(phase)));
                 displacement += desired * targetSpeed * Mathf.Max(0, dt - dashDt);
                 dashRemaining = Mathf.Max(0, dashRemaining - dt);
-                velocity = desired * targetSpeed;
+                // Hand over without a hitch: a held stick runs on, a released one decelerates from the dash's exit speed.
+                velocity = dashRemaining > 0 || desired.sqrMagnitude > .01f
+                    ? desired * targetSpeed
+                    : dashDirection * Mathf.Min(DashExitSpeed, moveSpeed);
             }
             else
             {
@@ -180,10 +233,17 @@ namespace AcRoguelike
                 velocity = Vector3.MoveTowards(velocity, target, Mathf.Max(.01f, rate) * dt);
                 displacement = velocity * dt;
             }
-            if (body.isGrounded && verticalSpeed < 0) verticalSpeed = -2f;
+            if (grounded && verticalSpeed < 0) verticalSpeed = -2f;
             else verticalSpeed = Mathf.Max(-25f, verticalSpeed - 25f * dt);
+            if (launched && launchTime > .12f && grounded)
+            {
+                launched = false;
+                launchVelocity = Vector3.zero;
+                Landed?.Invoke();
+            }
             Vector3 before = transform.position;
             CollisionFlags collision = body.Move(displacement + Vector3.up * (verticalSpeed * dt));
+            grounded = (collision & CollisionFlags.Below) != 0 || body.isGrounded;
             if ((collision & CollisionFlags.Below) != 0) verticalSpeed = -2f;
             dashMovedThisFrame = dashThisFrame;
             if (dashThisFrame && (collision & CollisionFlags.Sides) != 0)
@@ -239,7 +299,7 @@ namespace AcRoguelike
                 if (HasParameter(MoveX, AnimatorControllerParameterType.Float)) animator.SetFloat(MoveX, Mathf.Clamp(local.x, -1, 1), .08f, dt);
                 if (HasParameter(MoveY, AnimatorControllerParameterType.Float)) animator.SetFloat(MoveY, Mathf.Clamp(local.z, -1, 1), .08f, dt);
                 if (HasParameter(Speed, AnimatorControllerParameterType.Float)) animator.SetFloat(Speed, Mathf.Clamp01(PlanarVelocity.magnitude / safeSpeed), .08f, dt);
-                if (HasParameter(Grounded, AnimatorControllerParameterType.Bool)) animator.SetBool(Grounded, body.isGrounded);
+                if (HasParameter(Grounded, AnimatorControllerParameterType.Bool)) animator.SetBool(Grounded, grounded);
                 if (HasParameter(Dashing, AnimatorControllerParameterType.Bool)) animator.SetBool(Dashing, IsDashing);
             }
             if (aimMarker) aimMarker.position = new Vector3(AimPoint.x, transform.position.y + .025f, AimPoint.z);
@@ -269,12 +329,74 @@ namespace AcRoguelike
             if (neck) neck.rotation = Quaternion.AngleAxis(torsoYaw * .28f, Vector3.up) * neck.rotation;
         }
 
+        void OnValidate() => dashCurveArea = null;
+
+        float DashCurveValue(float t)
+            => dashSpeedCurve != null && dashSpeedCurve.length > 0 ? Mathf.Max(0, dashSpeedCurve.Evaluate(t)) : 1f;
+
+        float DashCurveArea()
+        {
+            if (dashCurveArea == null)
+            {
+                dashCurveArea = new float[DashCurveSamples + 1];
+                float previous = DashCurveValue(0);
+                for (int i = 1; i <= DashCurveSamples; i++)
+                {
+                    float value = DashCurveValue(i / (float)DashCurveSamples);
+                    dashCurveArea[i] = dashCurveArea[i - 1] + (previous + value) * .5f / DashCurveSamples;
+                    previous = value;
+                }
+            }
+            return dashCurveArea[DashCurveSamples];
+        }
+
+        /// <summary>Share of the dash distance covered at dash progress t (0..1).</summary>
+        float DashProgress(float t)
+        {
+            float area = DashCurveArea();
+            if (area <= 1e-5f) return Mathf.Clamp01(t);
+            float f = Mathf.Clamp01(t) * DashCurveSamples;
+            int i = Mathf.Min((int)f, DashCurveSamples - 1);
+            return Mathf.Lerp(dashCurveArea[i], dashCurveArea[i + 1], f - i) / area;
+        }
+
         public void SetAutomationInput(Vector2 input, Vector3 aim, bool dashPressed = false, bool walkHeld = false)
         { automated = true; automatedMove = input; automatedAim = aim; automatedDash = dashPressed; automatedWalk = walkHeld; }
         public void ReleaseAutomation() { automated = false; automatedDash = false; automatedWalk = false; }
+        /// <summary>
+        /// Starts or ends an enemy grab. While held the CharacterController is off, so the holder can carry the
+        /// transform freely; releasing turns it back on in place.
+        /// </summary>
+        public void SetHeld(bool held)
+        {
+            if (!body) body = GetComponent<CharacterController>();
+            if (held == IsHeld) return;
+            IsHeld = held;
+            velocity = PlanarVelocity = Vector3.zero;
+            dashRemaining = 0; dashMovedThisFrame = false; launched = false;
+            if (combat) combat.CancelAttack();
+            ResetDashAnimation();
+            body.enabled = !held;
+        }
+
+        /// <summary>Throws the player: ballistic flight with no control until the next landing (raises Landed).</summary>
+        public void Launch(Vector3 velocityWorld)
+        {
+            if (IsHeld) SetHeld(false);
+            launchVelocity = Vector3.ProjectOnPlane(velocityWorld, Vector3.up);
+            verticalSpeed = Mathf.Max(0, velocityWorld.y);
+            launched = true;
+            launchTime = 0;
+            dashRemaining = 0;
+            velocity = Vector3.zero;
+            if (combat) combat.CancelAttack();
+        }
+
         public void ResetAt(Vector3 position)
         {
             if (!body) body = GetComponent<CharacterController>();
+            if (IsHeld) { IsHeld = false; body.enabled = true; }
+            launched = false; launchVelocity = Vector3.zero; grounded = true;
             bool wasEnabled = body.enabled;
             body.enabled = false; transform.position = position; body.enabled = wasEnabled;
             velocity = Vector3.zero; verticalSpeed = -2; dashRemaining = 0; cooldownRemaining = 0;

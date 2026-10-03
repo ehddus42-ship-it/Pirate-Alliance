@@ -29,10 +29,12 @@ namespace AcRoguelike.Liminal.Editor
             EditorGUILayout.LabelField("프리팹을 열어 수정하면 새로 생성되는 스테이지에도 반영돼.",EditorStyles.wordWrappedLabel);
             using(new EditorGUILayout.HorizontalScope())
             {
-                if(GUILayout.Button("20개 방 갤러리",GUILayout.Height(29)))OpenScene(LiminalMapBuilder.GalleryPath);
+                if(GUILayout.Button("전체 맵 갤러리",GUILayout.Height(29)))OpenScene(LiminalMapBuilder.GalleryPath);
                 if(GUILayout.Button("27개 기물 갤러리",GUILayout.Height(29)))OpenScene(LiminalMapBuilder.PropGalleryPath);
                 if(GUILayout.Button("게임 맵 열기",GUILayout.Height(29)))OpenScene(LiminalMapBuilder.RunPath);
             }
+            if(GUILayout.Button("같은 갤러리의 숲 · 프로그램 · 폐허 · 동굴 구역 보기",GUILayout.Height(25)))
+                AcRoguelike.StageConcepts.Editor.StageConceptGallery.OpenGallery();
             EditorGUILayout.Space(8);
             filter=EditorGUILayout.TextField("방 찾기",filter);
             scroll=EditorGUILayout.BeginScrollView(scroll,GUILayout.MinHeight(140));
@@ -80,8 +82,9 @@ namespace AcRoguelike.Liminal.Editor
 
         static LiminalRoom[] Rooms()
         {
-            if(!AssetDatabase.IsValidFolder(LiminalMapBuilder.RoomFolder))return Array.Empty<LiminalRoom>();
-            return AssetDatabase.FindAssets("t:Prefab",new[]{LiminalMapBuilder.RoomFolder}).Select(g=>AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(g))).Where(g=>g).Select(g=>g.GetComponent<LiminalRoom>()).Where(r=>r).OrderBy(r=>r.name).ToArray();
+            var folders=new[]{LiminalMapBuilder.RoomFolder,AcRoguelike.StageConcepts.Editor.StageConceptGallery.RoomFolder}.Where(AssetDatabase.IsValidFolder).ToArray();
+            if(folders.Length==0)return Array.Empty<LiminalRoom>();
+            return AssetDatabase.FindAssets("t:Prefab",folders).Select(g=>AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(g))).Where(g=>g).Select(g=>g.GetComponent<LiminalRoom>()).Where(r=>r).OrderBy(r=>r.name).ToArray();
         }
 
         static void OpenScene(string path)

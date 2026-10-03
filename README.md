@@ -25,7 +25,7 @@ Hierarchy의 각 방은 `Architecture / Props / Lighting / Gameplay / Sockets`�
 
 ### 조작
 
-WASD 이동 · 마우스 좌클릭 부적 · SPACE 회피 · Q 지원 스킬 · E 출구 · ESC 일시정지. 전투방을 정리하고 출구에서 증강 하나를 선택한 뒤, 다음 스테이지로 이동해. 세 번째 탐방 스테이지 다음은 보스 방이야.
+WASD 이동 · 마우스 좌클릭 카타나 4연격([근접 공격 문서](Documentation/PlayerMelee/README.md)) · SPACE 회피 · Q 지원 스킬 · E 출구 · ESC 일시정지. 전투방을 정리하고 출구에서 증강 하나를 선택한 뒤, 다음 스테이지로 이동해. 세 번째 탐방 스테이지 다음은 보스 방이야.
 
 한 세션의 방 수는 기존과 같은 `5+5+5+2=17개`야. 크기 변경으로 직선 보행만 계산하면 약 35초 늘어나지만, 전투·회피·탐색을 포함한 실제 시간은 별도야. 목표인 약 10분(8~12분)의 사람 플레이 시간은 아직 측정하지 않았어.
 
@@ -34,6 +34,10 @@ WASD 이동 · 마우스 좌클릭 부적 · SPACE 회피 · Q 지원 스킬 · 
 - `AC Roguelike > Liminal > Backrooms > Validate Dimensions and Gallery`: 크기, 루트 스케일, 소켓·바닥·환경음 범위, Meshy 슬롯 누락, 아치 개구부, 갤러리 중첩을 검사해. 결과는 `Documentation/Liminal/backrooms-validation.json`에 저장해.
 - `AC Roguelike > Liminal > Backrooms > Capture Room Catalog`: 격리된 PreviewScene에서 20개 방 전체 PNG, 4×5 카탈로그와 4개 입구 시점 이미지를 `Documentation/Liminal/Previews/Backrooms/`에 생성해. 촬영 중에는 셰이더를 동기 컴파일하고 예열 프레임을 한 번 렌더링해.
 - 실제 이동 연결과 전투 진행 검사는 별도의 `LiminalPlayValidation.ValidateTraversal()` / `ValidateStructure()` / `Start()`를 사용해. 실행 조건과 결과 경로는 [설계 문서](Documentation/LiminalDesign.md)에 정리했어.
+
+### 테마 던전 실험실
+
+스테이지 1을 기준으로 한 숲·프로그램 감옥·멸망한 지구·동굴 네 테마 던전이야. 테마마다 동선과 랜드마크가 다른 방 7종이 있어. 한 판은 도착방 → 전투방 3개(다섯 후보에서 시드로 선택) → 출구방이야. 2차 Meshy 모델 28종(모델당 1.3만~3.1만 삼각형)과 1차 12종을 배치했어. 실행·편집 방법은 [스테이지 컨셉 문서](Documentation/StageConcepts/README.md), 방별 설계·카메라 분석·검증은 [바리에이션 계획](Documentation/StageConcepts/VariationPlan.md)에 있어.
 
 ### 지원 캐릭터 · 유니
 

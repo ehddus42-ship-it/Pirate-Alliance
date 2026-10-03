@@ -52,10 +52,11 @@ namespace AcRoguelike.Liminal
         Image cooldownShade, slotBorder, buffFill;
         TextMeshProUGUI cooldownLabel, buffLabel, stateLabel;
         float hudSearchUntil;
-        static readonly Color Panel = new Color(.045f, .075f, .075f, .92f);
-        static readonly Color Paper = new Color(.89f, .91f, .82f);
-        static readonly Color Accent = new Color(.72f, .86f, .55f);
-        static readonly Color Fluorescent = new Color(.97f, .92f, .62f);
+        // Hunter Association system-window palette (see HunterUi).
+        static readonly Color Panel = HunterUi.Navy;
+        static readonly Color Paper = HunterUi.Cream;
+        static readonly Color Accent = HunterUi.Gold;
+        static readonly Color Fluorescent = new Color(1f, .93f, .72f);
         static readonly Color Wallpaper = new Color(.78f, .71f, .43f);
         static Sprite white;
 
@@ -138,9 +139,16 @@ namespace AcRoguelike.Liminal
                 if (d < bestDistance) { bestDistance = d; best = enemy; }
             }
             if (best) return new Vector3(best.transform.position.x, player.position.y, best.transform.position.z);
-            Vector3 forward = Vector3.ProjectOnPlane(player.forward, Vector3.up);
+            Vector3 forward = Vector3.ProjectOnPlane(Facing(player), Vector3.up);
             if (forward.sqrMagnitude < .01f) forward = Vector3.forward;
             return player.position + forward.normalized * 5f;
+        }
+
+        // PlayerMotor turns its visual child; the root keeps its spawn rotation.
+        static Vector3 Facing(Transform player)
+        {
+            var motor = player.GetComponent<PlayerMotor>();
+            return motor && motor.visual ? motor.visual.forward : player.forward;
         }
 
         void FireChomper()
@@ -148,9 +156,10 @@ namespace AcRoguelike.Liminal
             Transform player = run.player;
             Vector3 origin = caster && caster.castOrigin ? caster.castOrigin.position : player.position + Vector3.up * 1.1f;
             TrainingEnemy target = caster && caster.LastTarget && caster.LastTarget.IsAlive ? caster.LastTarget : null;
-            Vector3 side = Vector3.Cross(Vector3.up, player.forward).normalized;
+            Vector3 facing = Facing(player);
+            Vector3 side = Vector3.Cross(Vector3.up, facing).normalized;
             var chomper = new GameObject("Support Skill / Voxel Chomper").AddComponent<SupportChomper>();
-            chomper.Launch(origin + side * (ChompersFired % 2 == 0 ? .45f : -.45f), player.forward, target, chomperDamage, chomperModel);
+            chomper.Launch(origin + side * (ChompersFired % 2 == 0 ? .45f : -.45f), facing, target, chomperDamage, chomperModel);
             ChompersFired++;
         }
 
@@ -203,7 +212,7 @@ namespace AcRoguelike.Liminal
             var edge = Node("PortraitEdge", portraitFrame, Vector2.zero, new Vector2(142, 4), Vector2.zero);
             Img(edge, Accent);
             var nameplate = Node("Nameplate", portraitFrame, new Vector2(0, 4), new Vector2(142, 24), Vector2.zero);
-            Img(nameplate, new Color(.03f, .05f, .05f, .82f));
+            Img(nameplate, HunterUi.NavyDeep);
             Label(nameplate, "SUPPORT", 12, Accent, new Vector2(8, 0), new Vector2(70, 24), TextAlignmentOptions.MidlineLeft);
             Label(nameplate, characterName, 15, Paper, new Vector2(62, 0), new Vector2(74, 24), TextAlignmentOptions.MidlineRight);
 
@@ -214,7 +223,7 @@ namespace AcRoguelike.Liminal
             var slot = Node("SkillSlot", panel, new Vector2(160, 16), new Vector2(72, 72), Vector2.zero);
             slotBorder = Img(slot, Accent);
             var inner = Node("Inner", slot, new Vector2(3, 3), new Vector2(66, 66), Vector2.zero);
-            Img(inner, new Color(.02f, .03f, .035f, 1));
+            Img(inner, new Color(.05f, .07f, .14f, 1));
             var icon = Node("Icon", inner, new Vector2(13, 5), new Vector2(40, 40), Vector2.zero);
             var iconImage = icon.gameObject.AddComponent<RawImage>();
             iconImage.texture = IconTexture();
@@ -232,9 +241,9 @@ namespace AcRoguelike.Liminal
 
             stateLabel = Label(panel, "", 13, Paper, new Vector2(242, 60), new Vector2(92, 26), TextAlignmentOptions.MidlineLeft);
             var track = Node("OneUpTrack", panel, new Vector2(242, 26), new Vector2(88, 8), Vector2.zero);
-            Img(track, new Color(.22f, .26f, .23f));
+            Img(track, new Color(.05f, .07f, .14f, 1));
             var fill = Node("OneUpFill", track, Vector2.zero, new Vector2(88, 8), Vector2.zero);
-            buffFill = Img(fill, new Color(.55f, 1f, .45f));
+            buffFill = Img(fill, HunterUi.Gate);
             buffFill.type = Image.Type.Filled;
             buffFill.fillMethod = Image.FillMethod.Horizontal;
             buffLabel = Label(panel, "", 12, Paper, new Vector2(242, 36), new Vector2(92, 20), TextAlignmentOptions.MidlineLeft);
@@ -248,12 +257,12 @@ namespace AcRoguelike.Liminal
             cooldownLabel.text = remaining > 0 ? (remaining >= 1 ? Mathf.CeilToInt(remaining).ToString() : remaining.ToString("0.0")) : "";
             bool ready = remaining <= 0;
             float pulse = ready ? .75f + .25f * Mathf.Sin(Time.unscaledTime * 5f) : .35f;
-            slotBorder.color = ready ? Color.Lerp(Accent, Fluorescent, pulse - .5f) : new Color(.3f, .36f, .32f);
+            slotBorder.color = ready ? Color.Lerp(Accent, Fluorescent, pulse - .5f) : new Color(.3f, .34f, .48f);
             float left = OneUpRemaining;
             buffFill.fillAmount = oneUpDuration > 0 ? left / oneUpDuration : 0;
             buffLabel.text = left > 0 ? $"1UP {left:0.0}s" : "";
             stateLabel.text = left > 0 ? "추가 투사체" : ready ? "준비 완료" : "재충전";
-            stateLabel.color = left > 0 ? new Color(.55f, 1f, .45f) : ready ? Accent : Paper;
+            stateLabel.color = left > 0 ? HunterUi.Gate : ready ? Accent : Paper;
             portraitPulse = Mathf.MoveTowards(portraitPulse, 0, Time.unscaledDeltaTime * 2.5f);
             portraitFrame.localScale = Vector3.one * (1 + .06f * Mathf.Sin(portraitPulse * Mathf.PI));
         }

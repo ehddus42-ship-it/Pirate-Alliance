@@ -1,0 +1,52 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "forest",
+  "prompt": "Ancient elven stone archway portal, two rough megalithic upright pillars joined by a pointed rounded stone arch, wide empty walk-through opening, trailing thick vines, moss and carved simple spiral runes. Symmetric vertical silhouette, visible open central void. Fantasy forest shrine. Single isolated complete game environment prop, full object visible, no background scene, no ground plane, no pedestal, no characters. Strong readable silhouette, efficient low polygon game mesh, large clean forms, fine detail in PBR normal textures, realistic stylized fantasy game quality.",
+  "texture_prompt": "Weathered pale grey limestone, emerald moss, muted green vines, cyan glowing carved ancient runes. Detailed normal map stone carving and surface erosion.",
+  "preview_task_id": "01a0f170-709e-7469-a765-1c0a28d55b47",
+  "refine_task_id": "01a0f171-a4a5-73db-8704-438277b179ff",
+  "created_utc": "2026-09-30T08:33:28.368693+00:00",
+  "requested_triangles": 4500,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 4498,
+    "vertices": 8286,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "bytes": 1879172
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 8087484
+}

@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "forest",
+  "role": "prop",
+  "prompt": "Abandoned wooden woodcutter hand cart with two large spoked wheels, loaded with a neat pile of cut logs, a wood axe stuck in the top log, long pull handles resting on the ground. Long low grounded prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Weathered pale brown planks, rusty iron wheel rims, fresh light log ends with rings and dark bark, steel axe head, patches of moss on the cart bed.",
+  "preview_task_id": "01a102b0-e626-7318-9b5e-7ba7158c5d9b",
+  "refine_task_id": "01a102b2-329f-77fe-82e8-51a9aee41bfc",
+  "attempt": 1,
+  "created_utc": "2026-10-03T16:58:01.771156+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    3.4,
+    1.8,
+    1.8
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 14855,
+    "vertices": 21103,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3675565,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1986134,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2634401,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9505109190940857,
+      -0.5876299738883972,
+      -0.4800199270248413
+    ],
+    "unity_bounds_max": [
+      0.9516170620918274,
+      0.5856350064277649,
+      0.4755150079727173
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 9151988
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

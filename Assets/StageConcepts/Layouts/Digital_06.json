@@ -1,0 +1,600 @@
+{
+ "roomId": "Digital_06",
+ "displayName": "중앙 연산실",
+ "kind": "Combat",
+ "notes": "Central processor: the core hangs over a raised hex dais in the middle; thick cables radiate to the walls and the route rings it.",
+ "playerSpawn": {
+  "x": 0.0,
+  "y": 0.05,
+  "z": 4.0
+ },
+ "enemySpawns": [
+  {
+   "x": -6.4,
+   "y": 0.08,
+   "z": 17.0
+  },
+  {
+   "x": 6.4,
+   "y": 0.08,
+   "z": 22.5
+  },
+  {
+   "x": 0.0,
+   "y": 0.08,
+   "z": 29.2
+  }
+ ],
+ "decor": [
+  {
+   "material": "Program_Cyan",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_06_Program_Cyan.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Floor",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_06_Program_Floor.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_FloorDark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_06_Program_FloorDark.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Frame",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_06_Program_Frame.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Grid",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_06_Program_Grid.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Hazard",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_06_Program_Hazard.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Magenta",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_06_Program_Magenta.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Panels",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_06_Program_Panels.asset",
+   "castShadows": true
+  }
+ ],
+ "models": [
+  {
+   "key": "processor_core",
+   "position": {
+    "x": 0.0,
+    "y": 0.36,
+    "z": 19.5
+   },
+   "yaw": 30,
+   "targetSize": {
+    "x": 5.0,
+    "y": 6.2,
+    "z": 5.0
+   },
+   "modelYaw": 0.0,
+   "scale": 3.2604536,
+   "offset": {
+    "x": -0.00167,
+    "y": 3.10024,
+    "z": 0.00126
+   }
+  },
+  {
+   "key": "holo_terminal",
+   "position": {
+    "x": 6.755,
+    "y": 0.0,
+    "z": 23.4
+   },
+   "yaw": 240,
+   "targetSize": {
+    "x": 2.2,
+    "y": 2.3,
+    "z": 1.3
+   },
+   "modelYaw": 0.0,
+   "scale": 1.1564996,
+   "offset": {
+    "x": -0.00057,
+    "y": 0.68167,
+    "z": -0.01037
+   }
+  },
+  {
+   "key": "holo_terminal",
+   "position": {
+    "x": 3.9,
+    "y": 0.0,
+    "z": 12.745
+   },
+   "yaw": 330,
+   "targetSize": {
+    "x": 2.2,
+    "y": 2.3,
+    "z": 1.3
+   },
+   "modelYaw": 0.0,
+   "scale": 1.1564996,
+   "offset": {
+    "x": -0.00057,
+    "y": 0.68167,
+    "z": -0.01037
+   }
+  },
+  {
+   "key": "holo_terminal",
+   "position": {
+    "x": -6.755,
+    "y": 0.0,
+    "z": 15.6
+   },
+   "yaw": 420,
+   "targetSize": {
+    "x": 2.2,
+    "y": 2.3,
+    "z": 1.3
+   },
+   "modelYaw": 0.0,
+   "scale": 1.1564996,
+   "offset": {
+    "x": -0.00057,
+    "y": 0.68167,
+    "z": -0.01037
+   }
+  },
+  {
+   "key": "holo_terminal",
+   "position": {
+    "x": -3.9,
+    "y": 0.0,
+    "z": 26.255
+   },
+   "yaw": 510,
+   "targetSize": {
+    "x": 2.2,
+    "y": 2.3,
+    "z": 1.3
+   },
+   "modelYaw": 0.0,
+   "scale": 1.1564996,
+   "offset": {
+    "x": -0.00057,
+    "y": 0.68167,
+    "z": -0.01037
+   }
+  },
+  {
+   "key": "coolant_pipes",
+   "position": {
+    "x": 9.2,
+    "y": 0.0,
+    "z": 7.0
+   },
+   "yaw": 270,
+   "targetSize": {
+    "x": 4.2,
+    "y": 3.2,
+    "z": 2.2
+   },
+   "modelYaw": 0.0,
+   "scale": 2.2082066,
+   "offset": {
+    "x": -2e-05,
+    "y": 1.00364,
+    "z": 0.00254
+   }
+  },
+  {
+   "key": "coolant_pipes",
+   "position": {
+    "x": -9.0,
+    "y": 0.0,
+    "z": 31.5
+   },
+   "yaw": 90,
+   "targetSize": {
+    "x": 4.0,
+    "y": 3.0,
+    "z": 2.1
+   },
+   "modelYaw": 0.0,
+   "scale": 2.1030539,
+   "offset": {
+    "x": -2e-05,
+    "y": 0.95584,
+    "z": 0.00242
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 9.6,
+    "y": 0.0,
+    "z": 30.5
+   },
+   "yaw": 90,
+   "targetSize": {
+    "x": 2.6,
+    "y": 5.0,
+    "z": 2.6
+   },
+   "modelYaw": 0.0,
+   "scale": 2.0845644,
+   "offset": {
+    "x": -0.00416,
+    "y": 1.98196,
+    "z": -0.00822
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 16.95472,
+    "y": 0.0,
+    "z": 8.0
+   },
+   "yaw": 87.18297238277967,
+   "targetSize": {
+    "x": 5.2,
+    "y": 14.40255,
+    "z": 5.2
+   },
+   "modelYaw": 0.0,
+   "scale": 4.1691289,
+   "offset": {
+    "x": -0.00832,
+    "y": 3.96391,
+    "z": -0.01645
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 19.22269,
+    "y": 0.0,
+    "z": 21.0
+   },
+   "yaw": 99.67537365234573,
+   "targetSize": {
+    "x": 5.2,
+    "y": 11.85356,
+    "z": 5.2
+   },
+   "modelYaw": 0.0,
+   "scale": 4.1691289,
+   "offset": {
+    "x": -0.00832,
+    "y": 3.96391,
+    "z": -0.01645
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 17.12794,
+    "y": 0.0,
+    "z": 33.0
+   },
+   "yaw": 96.15617374848708,
+   "targetSize": {
+    "x": 5.2,
+    "y": 11.09045,
+    "z": 5.2
+   },
+   "modelYaw": 0.0,
+   "scale": 4.1691289,
+   "offset": {
+    "x": -0.00832,
+    "y": 3.96391,
+    "z": -0.01645
+   }
+  },
+  {
+   "key": "quarantine_crates",
+   "position": {
+    "x": -6.56779,
+    "y": 0.0,
+    "z": 4.50079
+   },
+   "yaw": 100.97278765339328,
+   "targetSize": {
+    "x": 2.53317,
+    "y": 1.79433,
+    "z": 1.89987
+   },
+   "modelYaw": 90.0,
+   "scale": 0.9432086,
+   "offset": {
+    "x": -0.00033,
+    "y": 0.89764,
+    "z": 0.0004
+   }
+  },
+  {
+   "key": "drone_dock",
+   "position": {
+    "x": 10.169,
+    "y": 0.0,
+    "z": 26.61032
+   },
+   "yaw": 114.4226438718492,
+   "targetSize": {
+    "x": 2.05737,
+    "y": 1.73252,
+    "z": 2.05737
+   },
+   "modelYaw": 0.0,
+   "scale": 1.2242684,
+   "offset": {
+    "x": 0.0006,
+    "y": 0.86866,
+    "z": 0.00044
+   }
+  },
+  {
+   "key": "glitch_cube_pile",
+   "position": {
+    "x": -4.48408,
+    "y": 0.0,
+    "z": 5.96355
+   },
+   "yaw": 39.721523775566425,
+   "targetSize": {
+    "x": 2.65463,
+    "y": 1.53152,
+    "z": 2.45043
+   },
+   "modelYaw": 0.0,
+   "scale": 1.4522336,
+   "offset": {
+    "x": -0.06526,
+    "y": 0.76198,
+    "z": -0.05428
+   }
+  }
+ ],
+ "colliders": [
+  {
+   "name": "Core dais",
+   "center": {
+    "x": 0.0,
+    "y": 1.5,
+    "z": 19.5
+   },
+   "size": {
+    "x": 5.8,
+    "y": 3.0,
+    "z": 5.8
+   },
+   "yaw": 30.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Rack line east",
+   "center": {
+    "x": 12.3,
+    "y": 1.2,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.4,
+    "z": 33.4
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Rack line west",
+   "center": {
+    "x": -12.4,
+    "y": 1.2,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.4,
+    "z": 33.4
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__holo_terminal",
+   "center": {
+    "x": 6.755,
+    "y": 0.67967,
+    "z": 23.4
+   },
+   "size": {
+    "x": 1.452,
+    "y": 1.35933,
+    "z": 0.70337
+   },
+   "yaw": 240.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__holo_terminal",
+   "center": {
+    "x": 3.9,
+    "y": 0.67967,
+    "z": 12.745
+   },
+   "size": {
+    "x": 1.452,
+    "y": 1.35933,
+    "z": 0.70337
+   },
+   "yaw": 330.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__holo_terminal",
+   "center": {
+    "x": -6.755,
+    "y": 0.67967,
+    "z": 15.6
+   },
+   "size": {
+    "x": 1.452,
+    "y": 1.35933,
+    "z": 0.70337
+   },
+   "yaw": 420.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__holo_terminal",
+   "center": {
+    "x": -3.9,
+    "y": 0.67967,
+    "z": 26.255
+   },
+   "size": {
+    "x": 1.452,
+    "y": 1.35933,
+    "z": 0.70337
+   },
+   "yaw": 510.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__coolant_pipes",
+   "center": {
+    "x": 9.2,
+    "y": 0.99829,
+    "z": 7.0
+   },
+   "size": {
+    "x": 2.772,
+    "y": 1.99658,
+    "z": 0.64729
+   },
+   "yaw": 270.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__coolant_pipes",
+   "center": {
+    "x": -9.0,
+    "y": 0.95075,
+    "z": 31.5
+   },
+   "size": {
+    "x": 2.64,
+    "y": 1.9015,
+    "z": 0.61646
+   },
+   "yaw": 90.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__server_monolith",
+   "center": {
+    "x": 9.6,
+    "y": 1.5,
+    "z": 30.5
+   },
+   "size": {
+    "x": 2.0,
+    "y": 3.0,
+    "z": 2.0
+   },
+   "yaw": 90.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__quarantine_crates",
+   "center": {
+    "x": -6.56779,
+    "y": 0.89716,
+    "z": 4.50079
+   },
+   "size": {
+    "x": 1.06271,
+    "y": 1.79433,
+    "z": 0.75323
+   },
+   "yaw": 100.9728,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__drone_dock",
+   "center": {
+    "x": 10.169,
+    "y": 0.86626,
+    "z": 26.61032
+   },
+   "size": {
+    "x": 1.33989,
+    "y": 1.73252,
+    "z": 1.31852
+   },
+   "yaw": 114.4226,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__glitch_cube_pile",
+   "center": {
+    "x": -4.48408,
+    "y": 0.7516,
+    "z": 5.96355
+   },
+   "size": {
+    "x": 1.73814,
+    "y": 1.50321,
+    "z": 1.61728
+   },
+   "yaw": 39.7215,
+   "pitch": 0.0,
+   "walkable": false
+  }
+ ],
+ "lights": [
+  {
+   "name": "Core",
+   "position": {
+    "x": 0.0,
+    "y": 4.4,
+    "z": 19.5
+   },
+   "color": "#36d6ff",
+   "intensity": 3.0,
+   "range": 12.0
+  },
+  {
+   "name": "Core underglow",
+   "position": {
+    "x": 0.0,
+    "y": 0.9,
+    "z": 19.5
+   },
+   "color": "#d542cd",
+   "intensity": 1.6,
+   "range": 7.0
+  }
+ ]
+}

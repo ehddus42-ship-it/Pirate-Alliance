@@ -1,0 +1,753 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<title>Liminal Combat Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: playfield left, tuning console right (stacks under the field on narrow screens). Hunter Association palette, one committed dark look. */
+:root{
+  --bg:#0b1020; --panel:#121a33; --panel2:#18224233; --line:#2a3762; --gold:#dbc27d; --gold-dim:#dbc27d73;
+  --cream:#f7f2e8; --muted:#a9b0c9; --gate:#9980ff; --danger:#ff544d; --ok:#6fd3a0;
+  --f-ui:"IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--cream);font-family:var(--f-ui);font-size:14px;margin:0;padding-inline:16px;padding-block:12px;box-sizing:border-box}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start;max-width:1500px;margin:0 auto}
+@media (max-width:980px){.wrap{grid-template-columns:minmax(0,1fr)}}
+header{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;margin-bottom:10px;max-width:1500px;margin-inline:auto}
+h1{font-size:18px;margin:0;letter-spacing:.02em;text-wrap:balance}
+h1 small{color:var(--gold);font-size:11px;letter-spacing:.14em;font-weight:600;margin-right:10px}
+.keys{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:6px 12px}
+kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--gold-dim);border-bottom-width:2px;border-radius:3px;padding:0 5px;color:var(--cream);background:#0e1530}
+.stage{position:relative;min-width:0}
+canvas{display:block;width:100%;height:auto;border:1px solid var(--line);background:#0d1326;cursor:crosshair;touch-action:none}
+.bar{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+button{font-family:var(--f-ui);font-size:12px;font-weight:600;color:var(--cream);background:#1a2550;border:1px solid var(--gold-dim);padding:6px 10px;cursor:pointer}
+button:hover{border-color:var(--gold)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gate);outline-offset:1px}
+button.on{background:var(--gold);color:#0b1020;border-color:var(--gold)}
+.console{background:var(--panel);border:1px solid var(--line);max-height:calc(100vh - 80px);overflow:auto;min-width:0}
+@media (max-width:980px){.console{max-height:none}}
+details{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;padding:9px 12px;font-weight:700;font-size:12px;letter-spacing:.08em;color:var(--gold);list-style:none;display:flex;justify-content:space-between}
+summary::after{content:"+";color:var(--muted)} details[open] summary::after{content:"−"}
+.rows{padding:2px 12px 10px;display:grid;gap:6px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:4px 8px;align-items:center}
+.row label{font-size:12px;color:var(--muted);min-width:0}
+.row label b{color:var(--cream);font-weight:600}
+.row input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--gold);margin:0}
+.row input[type=number]{width:64px;box-sizing:border-box;background:#0d1326;color:var(--cream);border:1px solid var(--line);font-family:var(--f-mono);font-size:12px;padding:2px 4px;font-variant-numeric:tabular-nums}
+.row.changed label b::after{content:" •";color:var(--gate)}
+.tools{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.note{font-size:11px;color:var(--muted);padding:8px 12px 12px;line-height:1.5}
+.log{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-top:8px;min-height:1.5em;font-variant-numeric:tabular-nums}
+/* Curve editor + live telemetry */
+.cv-box{padding:4px 12px 12px;display:grid;gap:8px}
+.cv-head{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.cv-head select{flex:1 1 150px;min-width:0;background:#0d1326;color:var(--cream);border:1px solid var(--line);font-family:var(--f-ui);font-size:12px;padding:5px 6px}
+.seg{display:flex}.seg button{padding:5px 8px}.seg button+button{border-left:none}
+.cv-desc{margin:0;font-size:11px;color:var(--muted);line-height:1.5}
+.cv-desc b{color:var(--cream);font-weight:600}
+.graph{display:block;width:100%;height:auto;border:1px solid var(--line);background:#0d1326;cursor:crosshair;touch-action:none}
+.cv-read{font-family:var(--f-mono);font-size:11px;color:var(--cream);min-height:1.4em;font-variant-numeric:tabular-nums;line-height:1.5}
+.cv-read span{color:var(--muted)}
+.cv-presets,.cv-tools{display:flex;flex-wrap:wrap;gap:5px}
+.cv-presets button{font-size:11px;padding:4px 7px;background:#141d3d}
+.cv-hint{margin:0;font-size:11px;color:var(--muted);line-height:1.5}
+.tele-title{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;margin-top:2px}
+.tele-title b{color:var(--cream);font-weight:600;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.tele{display:block;width:100%;height:auto;border:1px solid var(--line);background:#0d1326}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+
+<header>
+  <h1><small>KOREA HUNTER ASSOCIATION · GATE SIM</small>리미널 전투 랩</h1>
+  <div class="keys">
+    <span><kbd>WASD</kbd> 이동</span><span><kbd>마우스</kbd> 조준</span><span><kbd>좌클릭</kbd>/<kbd>J</kbd> 공격(누르고 있으면 6타)</span>
+    <span><kbd>Space</kbd>/<kbd>Shift</kbd> 대시</span><span><kbd>R</kbd> 방 리셋</span><span><kbd>H</kbd> 판정 보기</span><span><kbd>P</kbd> 일시정지</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="stage">
+    <canvas id="game" width="1280" height="760" aria-label="2D combat prototype playfield"></canvas>
+    <div class="bar">
+      <button id="b-copier">+ 복사기</button><button id="b-locker">+ 로커</button><button id="b-monitor">+ 모니터</button><button id="b-dummy">+ 허수아비</button>
+      <button id="b-reset">방 리셋 (R)</button><button id="b-hit">판정 보기 (H)</button><button id="b-ai">적 AI 정지</button><button id="b-god">무적</button>
+    </div>
+    <div class="log" id="log"></div>
+  </div>
+  <aside class="console" id="console">
+    <div class="tools">
+      <button id="t-copy">값 JSON 복사</button><button id="t-paste">JSON 붙여넣기</button><button id="t-reset">Unity 기본값</button>
+    </div>
+    <details open id="curves"><summary>보간 곡선 · 그래프</summary>
+      <div class="cv-box">
+        <div class="cv-head"><label for="c-pick" class="sr" hidden>곡선</label><select id="c-pick" aria-label="편집할 곡선"></select>
+          <div class="seg" role="group" aria-label="보간 방식"><button id="c-smooth">부드럽게</button><button id="c-linear">직선</button></div></div>
+        <p class="cv-desc" id="c-desc"></p>
+        <canvas id="c-graph" class="graph" width="632" height="400" aria-label="보간 곡선 편집 그래프"></canvas>
+        <div class="cv-read" id="c-read"></div>
+        <div class="cv-presets" id="c-presets"></div>
+        <div class="cv-tools"><button id="c-reset">이 곡선 초기화</button><button id="c-cs">Unity C# 복사</button></div>
+        <p class="cv-hint">빈 곳 클릭: 점 추가 · 드래그: 이동 (Shift: 0.05 스냅) · 더블클릭/우클릭: 점 삭제 · 보라 선: 지금 게임이 읽고 있는 위치</p>
+        <div class="tele-title">플레이어 속도 · 체감 m/s · 최근 3초<b id="t-speed-v"></b></div>
+        <canvas id="t-speed" class="tele" width="632" height="150" aria-label="플레이어 속도 그래프"></canvas>
+        <div class="tele-title">시간 배율 · 히트 스톱 / 슬로<b id="t-time-v"></b></div>
+        <canvas id="t-time" class="tele" width="632" height="110" aria-label="시간 배율 그래프"></canvas>
+      </div>
+    </details>
+    <div id="groups"></div>
+    <p class="note">플레이어 이동·대시 기본값은 실제 플레이어 프리팹(<b>AstraiaPlayer</b>, <b>LiminalExplorer</b>) 값이고, 나머지 기본값은 Unity 코드(<b>PlayerMotor</b>, <b>MeleeSlash</b>, <b>JustDodgeFeedback</b>, <b>CopierMonster</b>, <b>LockerMonster</b>, <b>MonitorTurret</b>)의 현재 값이다요. 바꾼 값은 이 브라우저에 저장되고, 점(•)이 붙은 항목이 기본값과 다른 것이다요. 단위는 미터·초다요.</p>
+  </aside>
+</div>
+
+<script>
+"use strict";
+// ---------------------------------------------------------------------------------------------- tuning
+const DEF = [
+ ["플레이어", [
+  ["moveSpeed","이동 속도 (m/s)",4.2,1,10,.1],["accel","가속 (m/s²)",24,5,80,1],["decel","감속 (m/s²)",38,5,80,1],
+  ["dashSpeed","대시 속도 (m/s)",12.5,5,30,.5],["dashDuration","대시 시간 (s)",.24,.05,.5,.01],["dashCooldown","대시 재사용 (s)",.72,.1,2,.02],
+  ["attackMove","공격 중 이동 배율",.05,0,1,.01],["playerHP","최대 체력",100,20,400,5]]],
+ ["콤보 (카타나 6타)", [
+  ["attackSpeed","공격 속도 배율",1,.4,2,.05],["damageMul","피해 배율",1,.2,3,.05],["queueWindow","선입력 창 (s)",.3,0,.6,.01],
+  ["comboRecovery","6타 후 경직 (s)",.14,0,.6,.01],["lungeRange","돌진 사거리 (m)",6,0,10,.25],["lungeSpeed","돌진 속도 (m/s)",28,5,50,1],
+  ["lungeStop","돌진 정지 거리 (m)",1.4,.5,3,.05],["rangeMul","사거리 배율",1,.5,2,.05]]],
+ ["타격감", [
+  ["hitStopMul","히트 스톱 배율",1,0,4,.1],["hitStopScale","히트 스톱 속도",.08,0,.5,.01],["heavyStopScale","강타 스톱 속도",.04,0,.5,.01],
+  ["shakeMul","화면 흔들림 배율",1,0,4,.1],["knockMul","넉백 배율",1,0,4,.1],["staggerMul","경직 배율",1,0,4,.1]]],
+ ["저스트 회피 · 반격", [
+  ["dodgeGrace","판정 유예 (대시 후 s)",.1,0,.4,.01],["slowSeconds","슬로 시간 (실제 s)",.5,0,2,.05],["slowScale","슬로 속도",.22,.02,1,.01],
+  ["counterSeconds","반격 창 (s)",1.3,0,4,.05],["counterMul","반격 피해 배율",1.6,1,4,.05]]],
+ ["복사기", [
+  ["cHP","체력",70,10,400,5],["cHop","점프 거리 (m)",1.35,.2,4,.05],["cAir","체공 (s)",.34,.1,1,.01],["cKeep","유지 거리 (m)",6,2,12,.25],
+  ["cCooldown","공격 간격 (s)",2.2,.3,6,.1],["cFanWindup","부채꼴 예고 (s)",.75,.1,2,.05],["cFanSheets","부채꼴 장수",15,1,40,1],
+  ["cFanAngle","부채꼴 반각 (°)",42,5,90,1],["cFanSpeed","부채꼴 종이 속도",10.5,2,25,.5],["cFanDmg","부채꼴 피해",9,0,50,1],
+  ["cSnipe","저격 장수",5,1,12,1],["cSnipeInt","저격 간격 (s)",.42,.15,1.5,.01],["cSnipeSpeed","저격 속도",13,3,30,.5],["cSnipeDmg","저격 피해",11,0,50,1],
+  ["cRecoil","반동 밀림 배율",1,0,3,.1]]],
+ ["로커", [
+  ["lHP","체력",110,10,500,5],["lWalk","걷기 (m/s)",1.15,.2,4,.05],["lCooldown","공격 간격 (s)",2,.3,6,.1],["lGrabRange","잡기 사거리 (m)",5.2,1,9,.1],
+  ["lGrabWindup","잡기 예고 (s)",.7,.1,2,.05],["lThrowDmg","던지기 피해",18,0,60,1],["lThrowSpeed","던져지는 속도",11,2,25,.5],
+  ["lTumbleWindup","회전 돌진 예고 (s)",.75,.1,2,.05],["lTumbleSpeed","회전 돌진 속도",7,1,20,.25],["lTumbleDist","회전 돌진 거리 (m)",9,2,16,.5],["lSlamDmg","돌진 피해",16,0,60,1]]],
+ ["모니터 포탑", [
+  ["mHP","체력",36,5,200,1],["mInterval","발사 간격 (s)",2.8,.4,8,.1],["mTele","조준 예고 (s)",.6,.1,2,.05],["mSpeed","2진수 탄 속도",9.5,2,25,.5],["mRange","사거리 (m)",16,4,30,.5],["mDmg","피해",10,0,50,1]]],
+ ["전체", [["gameSpeed","게임 속도",1,.25,2,.05],["camZoom","화면 배율 (px/m)",42,20,80,1]]],
+];
+const T={}, DEFAULTS={};
+for(const [,rows] of DEF) for(const [k,,v] of rows){T[k]=v;DEFAULTS[k]=v;}
+const STORE="liminal-combat-lab-v2";
+try{const saved=JSON.parse(localStorage.getItem(STORE)||"null"); if(saved) for(const k in saved) if(k in T) T[k]=+saved[k];}catch(e){}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(T));}catch(e){}}
+
+const groupsEl=document.getElementById("groups"); const inputs={};
+DEF.forEach(([title,rows],gi)=>{
+  const d=document.createElement("details"); if(gi<4) d.open=true;
+  d.innerHTML=`<summary>${title}</summary><div class="rows"></div>`;
+  const box=d.querySelector(".rows");
+  for(const [k,label,,min,max,step] of rows){
+    const row=document.createElement("div"); row.className="row";
+    row.innerHTML=`<label for="r-${k}"><b>${label}</b></label><input id="n-${k}" type="number" step="${step}" min="${min}" max="${max}"><input id="r-${k}" type="range" min="${min}" max="${max}" step="${step}">`;
+    const r=row.querySelector("[type=range]"), n=row.querySelector("[type=number]");
+    const set=v=>{v=Math.round(+v/step)*step; v=+v.toFixed(4); T[k]=v; r.value=v; n.value=v; row.classList.toggle("changed",Math.abs(v-DEFAULTS[k])>1e-9); save();};
+    r.addEventListener("input",()=>set(r.value)); n.addEventListener("change",()=>set(n.value));
+    inputs[k]=set; set(T[k]); box.appendChild(row);
+  }
+  groupsEl.appendChild(d);
+});
+const logEl=document.getElementById("log"); let logT=0;
+function log(s){logEl.textContent=s; logT=3;}
+document.getElementById("t-reset").onclick=()=>{for(const k in DEFAULTS) inputs[k](DEFAULTS[k]); if(typeof resetAllCurves==="function") resetAllCurves(); log("수치와 곡선을 Unity 기본값으로 되돌렸다요.");};
+document.getElementById("t-copy").onclick=async()=>{
+  const changed={}; for(const k in T) if(Math.abs(T[k]-DEFAULTS[k])>1e-9) changed[k]=T[k];
+  const curves={}, changedCurves=[]; for(const id in C){ curves[id]=curveData(C[id]); if(curveChanged(id)) changedCurves.push(id); }
+  const text=JSON.stringify({changed,changedCurves,all:T,curves},null,1);
+  try{await navigator.clipboard.writeText(text); log(`복사했다요. 바뀐 값 ${Object.keys(changed).length}개 · 바뀐 곡선 ${changedCurves.length}개.`);}
+  catch(e){const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();log("클립보드 접근이 막혀서 텍스트를 선택해 뒀다요. Ctrl+C로 복사하면 된다요.");setTimeout(()=>ta.remove(),8000);}
+};
+document.getElementById("t-paste").onclick=()=>{
+  log("이 창에 JSON을 붙여넣으면(Ctrl+V) 적용된다요.");
+  const h=e=>{try{const o=JSON.parse(e.clipboardData.getData("text")); const src=o.all||o.changed||o; let n=0; for(const k in src) if(k in T){inputs[k](src[k]);n++;} const nc=o.curves?applyCurveData(o.curves):0; if(nc){ saveCurves(); selectCurve(ed.id); } log(`${n}개 값과 곡선 ${nc}개를 적용했다요.`);}catch(err){log("JSON 형식이 아니라서 적용하지 못했다요.");} document.removeEventListener("paste",h);};
+  document.addEventListener("paste",h);
+};
+
+// ---------------------------------------------------------------------------------------------- math
+const V=(x=0,y=0)=>({x,y}); const add=(a,b)=>V(a.x+b.x,a.y+b.y), sub=(a,b)=>V(a.x-b.x,a.y-b.y), mul=(a,k)=>V(a.x*k,a.y*k);
+const len=a=>Math.hypot(a.x,a.y), norm=a=>{const l=len(a);return l>1e-6?V(a.x/l,a.y/l):V(0,0)}, dot=(a,b)=>a.x*b.x+a.y*b.y;
+const rot=(a,deg)=>{const r=deg*Math.PI/180,c=Math.cos(r),s=Math.sin(r);return V(a.x*c-a.y*s,a.x*s+a.y*c)};
+const angleBetween=(a,b)=>Math.acos(Math.max(-1,Math.min(1,dot(norm(a),norm(b)))))*180/Math.PI;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), towards=(v,t,d)=>v<t?Math.min(t,v+d):Math.max(t,v-d), rnd=(a,b)=>a+Math.random()*(b-a);
+
+// ---------------------------------------------------------------------------------------------- curves
+// Editable interpolation curves. Keys are cubic Hermite (Unity AnimationCurve semantics): "smooth" uses monotone
+// (Fritsch-Carlson) tangents, "linear" uses the segment slopes, so the exported Keyframes evaluate identically in Unity.
+const CURVE_DEF=[
+ {id:"accel",name:"이동 가속",field:"moveAccelCurve",x:"가속 진행 (0 → 최고 속도 도달 시간 = 이동 속도 ÷ 가속)",y:"속도 ÷ 이동 속도",yMax:1.3,mode:"linear",keys:[[0,0],[1,1]],presets:"rise"},
+ {id:"decel",name:"이동 감속",field:"moveDecelCurve",x:"멈춤 진행 (손 뗀 순간 → 정지, 길이 = 속도 ÷ 감속)",y:"속도 ÷ 손 뗄 때 속도",yMax:1.3,mode:"linear",keys:[[0,1],[1,0]],presets:"fall"},
+ {id:"dash",name:"대시 속도 프로필",field:"dashSpeedCurve",x:"대시 진행 (0 → 대시 시간)",y:"속도 배율 · 총 거리(속도×시간)는 그대로",yMax:2.6,mode:"smooth",keys:[[0,1.4],[.3,1.35],[.75,.6],[1,.33]],presets:"dash",area:true},
+ {id:"lunge",name:"돌진 속도 프로필",field:"lungeSpeedCurve",x:"돌진 진행 (0 → 목표 앞 도착)",y:"속도 배율 · 도착 지점은 그대로",yMax:2.6,mode:"linear",keys:[[0,1],[1,1]],presets:"profile",area:true},
+ {id:"hitstop",name:"히트 스톱 복귀",field:"hitStopRecoveryCurve",x:"히트 스톱 진행 (0 → 스톱 시간)",y:"0 = 스톱 속도 · 1 = 정상 속도",yMax:1.3,mode:"linear",keys:[[0,0],[.65,0],[1,1]],presets:"rise"},
+ {id:"slow",name:"저스트 회피 슬로 복귀",field:"justDodgeSlowCurve",x:"슬로 진행 (0 → 슬로 시간)",y:"0 = 슬로 속도 · 1 = 정상 속도",yMax:1.3,mode:"linear",keys:[[0,0],[.65,0],[1,1]],presets:"rise"},
+ {id:"knock",name:"적 넉백 감속",field:"knockbackDecayCurve",x:"넉백 진행 (맞은 순간 → 멈춤)",y:"속도 ÷ 맞은 순간 속도",yMax:1.6,mode:"linear",keys:[[0,1],[1,0]],presets:"fall"},
+ {id:"shake",name:"화면 흔들림 감쇠",field:"shakeDecayCurve",x:"흔들림 진행",y:"진폭 배율",yMax:1.6,mode:"linear",keys:[[0,1],[1,1]],presets:"shake"},
+];
+const SHAPES={ // normalised 0→1 shapes, mapped onto each curve's start/end values
+ rise:[["선형","linear",[[0,0],[1,1]]],["Ease In","smooth",[[0,0],[.55,.2],[1,1]]],["Ease Out","smooth",[[0,0],[.4,.78],[1,1]]],["S 커브","smooth",[[0,0],[.3,.1],[.7,.9],[1,1]]],["오버슈트","smooth",[[0,0],[.55,1.15],[.8,.97],[1,1]]],["버티다 복귀","linear",[[0,0],[.65,0],[1,1]]],["즉시","linear",[[0,0],[.02,1],[1,1]]]],
+ fall:[["선형","linear",[[0,0],[1,1]]],["Ease In","smooth",[[0,0],[.55,.2],[1,1]]],["Ease Out","smooth",[[0,0],[.4,.78],[1,1]]],["S 커브","smooth",[[0,0],[.3,.1],[.7,.9],[1,1]]],["버티다 정지","linear",[[0,0],[.6,0],[1,1]]],["즉시","linear",[[0,0],[.02,1],[1,1]]]],
+ profile:[["일정","linear",[[0,1],[1,1]]],["초반 폭발","smooth",[[0,2.1],[.35,1],[1,.25]]],["점점 빠르게","smooth",[[0,.45],[1,1.55]]],["중간 피크","smooth",[[0,.35],[.5,1.7],[1,.35]]],["끝 급정지","linear",[[0,1.25],[.8,1.25],[1,0]]],["Ease Out","smooth",[[0,1.8],[.5,.9],[1,0]]]],
+ dash:[["추천 · 유저 친화","smooth",[[0,1.4],[.3,1.35],[.75,.6],[1,.33]]],["이전 Unity (1.2→0.8)","linear",[[0,1.2],[1,.8]]],["일정","linear",[[0,1],[1,1]]],["초반 폭발","smooth",[[0,2.1],[.35,1],[1,.25]]],["중간 피크","smooth",[[0,.35],[.5,1.7],[1,.35]]],["끝 급정지","linear",[[0,1.25],[.8,1.25],[1,0]]]],
+ shake:[["일정","linear",[[0,1],[1,1]]],["선형 감쇠","linear",[[0,1],[1,0]]],["빠른 감쇠","smooth",[[0,1],[.25,.35],[1,0]]],["펀치","smooth",[[0,1.5],[.15,1],[1,0]]],["늦은 감쇠","smooth",[[0,1],[.6,.85],[1,0]]]],
+};
+const CURVE_STORE="liminal-combat-lab-curves-v3";
+const C={}, CDEF={};
+function curveFrom(def,keys,mode){ return {mode:mode||def.mode,keys:keys.map(([x,y])=>({x:+x,y:+y}))}; }
+for(const d of CURVE_DEF){ CDEF[d.id]=d; C[d.id]=curveFrom(d,d.keys,d.mode); }
+function applyCurveData(src){ let n=0; for(const id in src) if(C[id]&&Array.isArray(src[id].keys)&&src[id].keys.length>=2){
+  const k=src[id].keys.map(p=>Array.isArray(p)?p:[p.x,p.y]).map(([x,y])=>[clamp(+x||0,0,1),clamp(+y||0,0,CDEF[id].yMax)]).sort((a,b)=>a[0]-b[0]);
+  k[0][0]=0; k[k.length-1][0]=1; C[id]=curveFrom(CDEF[id],k,src[id].mode==="smooth"?"smooth":"linear"); prepCurve(C[id]); n++; } return n; }
+function curveData(c){ return {mode:c.mode,keys:c.keys.map(k=>[+k.x.toFixed(4),+k.y.toFixed(4)])}; }
+function curveChanged(id){ return JSON.stringify(curveData(C[id]))!==JSON.stringify(curveData(curveFrom(CDEF[id],CDEF[id].keys,CDEF[id].mode))); }
+function saveCurves(){ try{ const o={}; for(const id in C) o[id]=curveData(C[id]); localStorage.setItem(CURVE_STORE,JSON.stringify(o)); }catch(e){} }
+function prepCurve(c){
+  const k=c.keys, n=k.length, d=[];
+  for(let i=0;i<n-1;i++) d[i]=(k[i+1].y-k[i].y)/Math.max(1e-6,k[i+1].x-k[i].x);
+  if(c.mode==="linear"){ for(let i=0;i<n;i++){ k[i].in=i>0?d[i-1]:d[0]; k[i].out=i<n-1?d[i]:d[n-2]; } }
+  else{
+    const m=new Array(n); m[0]=d[0]; m[n-1]=d[n-2];
+    for(let i=1;i<n-1;i++) m[i]=d[i-1]*d[i]<=0?0:(d[i-1]+d[i])/2;
+    for(let i=0;i<n-1;i++){ if(Math.abs(d[i])<1e-9){ m[i]=0; m[i+1]=0; continue; } const a=m[i]/d[i], b=m[i+1]/d[i], q=a*a+b*b; if(q>9){ const t=3/Math.sqrt(q); m[i]=t*a*d[i]; m[i+1]=t*b*d[i]; } }
+    for(let i=0;i<n;i++){ k[i].in=m[i]; k[i].out=m[i]; }
+  }
+  // Lookup tables: value, cumulative area (distance-preserving profiles), mean.
+  const N=256; c.lut=new Float32Array(N+1); c.cdf=new Float32Array(N+1);
+  for(let i=0;i<=N;i++) c.lut[i]=evalRaw(c,i/N);
+  for(let i=1;i<=N;i++) c.cdf[i]=c.cdf[i-1]+(Math.max(0,c.lut[i-1])+Math.max(0,c.lut[i]))/2/N;
+  c.area=c.cdf[N]; c.max=Math.max(...c.lut);
+}
+function evalRaw(c,u){
+  const k=c.keys; u=clamp(u,0,1); let i=0; while(i<k.length-2&&u>k[i+1].x) i++;
+  const a=k[i], b=k[i+1], h=b.x-a.x; if(h<1e-6) return b.y;
+  const t=(u-a.x)/h, t2=t*t, t3=t2*t;
+  return (2*t3-3*t2+1)*a.y+(t3-2*t2+t)*h*a.out+(-2*t3+3*t2)*b.y+(t3-t2)*h*b.in;
+}
+const curve=(id,u)=>evalRaw(C[id],u);
+// Fraction of the curve's total area covered by u (falls back to linear progress when the curve has no area).
+function curveCDF(id,u){ const c=C[id]; if(c.area<1e-5) return clamp(u,0,1); const f=clamp(u,0,1)*256, i=Math.floor(f), j=Math.min(256,i+1); return (c.cdf[i]+(c.cdf[j]-c.cdf[i])*(f-i))/c.area; }
+// First u where the curve reaches value v (used to resume acceleration from the current speed).
+function curveInverse(id,v){ const l=C[id].lut; if(v<=l[0]) return 0; for(let i=1;i<l.length;i++) if(l[i]>=v){ const a=l[i-1], b=l[i]; return (i-1+(b>a?(v-a)/(b-a):0))/256; } return 1; }
+const live={}; function mark(id,u){ live[id]={u:clamp(u,0,1),at:performance.now()}; }
+try{ const saved=JSON.parse(localStorage.getItem(CURVE_STORE)||"null"); if(saved) applyCurveData(saved); }catch(e){}
+for(const id in C) prepCurve(C[id]);
+
+// ------------------------------------------------------------------------------- curve editor UI
+const ed={id:"dash",drag:-1,hover:-1,mouse:null};
+const pick=document.getElementById("c-pick"), gcv=document.getElementById("c-graph"), gg=gcv.getContext("2d");
+const readEl=document.getElementById("c-read"), descEl=document.getElementById("c-desc"), presetEl=document.getElementById("c-presets");
+function fillPick(){ pick.innerHTML=CURVE_DEF.map(d=>`<option value="${d.id}">${d.name}${curveChanged(d.id)?" •":""}</option>`).join(""); pick.value=ed.id; }
+function selectCurve(id){
+  ed.id=id; ed.drag=-1; ed.hover=-1; const d=CDEF[id]; fillPick();
+  descEl.innerHTML=`<b>가로</b> ${d.x}<br><b>세로</b> ${d.y}`;
+  const a=d.keys[0][1], b=d.keys[d.keys.length-1][1], flat=d.presets==="profile"||d.presets==="shake"||d.presets==="dash";
+  presetEl.innerHTML=""; for(const [name,mode,keys] of SHAPES[d.presets]){
+    const btn=document.createElement("button"); btn.textContent=name;
+    btn.onclick=()=>{ const k=flat?keys.map(([x,y])=>[x,y]):keys.map(([x,y])=>[x,a+(b-a)*y]); applyCurveData({[id]:{mode,keys:k}}); curveEdited(); };
+    presetEl.appendChild(btn);
+  }
+  modeButtons();
+}
+function modeButtons(){ document.getElementById("c-smooth").classList.toggle("on",C[ed.id].mode==="smooth"); document.getElementById("c-linear").classList.toggle("on",C[ed.id].mode==="linear"); }
+function curveEdited(){ prepCurve(C[ed.id]); saveCurves(); fillPick(); modeButtons(); }
+pick.onchange=()=>selectCurve(pick.value);
+document.getElementById("c-smooth").onclick=()=>{ C[ed.id].mode="smooth"; curveEdited(); };
+document.getElementById("c-linear").onclick=()=>{ C[ed.id].mode="linear"; curveEdited(); };
+document.getElementById("c-reset").onclick=()=>{ const d=CDEF[ed.id]; C[ed.id]=curveFrom(d,d.keys,d.mode); curveEdited(); log(`${d.name} 곡선을 기본값으로 되돌렸다요.`); };
+function resetAllCurves(){ for(const d of CURVE_DEF){ C[d.id]=curveFrom(d,d.keys,d.mode); prepCurve(C[d.id]); } saveCurves(); selectCurve(ed.id); }
+const fx3=v=>{ const s=(+v).toFixed(3).replace(/0+$/,"").replace(/\.$/,""); return (s==="-0"?"0":s)+"f"; };
+function curvesCSharp(){
+  const out=["// Liminal Combat Lab — AnimationCurve export (time 0..1 = normalised progress)"];
+  for(const d of CURVE_DEF){ const c=C[d.id]; out.push(`// ${d.name}${curveChanged(d.id)?" (changed)":""} — x: ${d.x} / y: ${d.y}`);
+    out.push(`public AnimationCurve ${d.field} = new AnimationCurve(`); out.push(c.keys.map(k=>`    new Keyframe(${fx3(k.x)}, ${fx3(k.y)}, ${fx3(k.in)}, ${fx3(k.out)})`).join(",\n")+");"); }
+  return out.join("\n");
+}
+async function copyText(text,okMsg){ try{ await navigator.clipboard.writeText(text); log(okMsg); }catch(e){ const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta); ta.select(); log("클립보드 접근이 막혀서 텍스트를 선택해 뒀다요. Ctrl+C로 복사하면 된다요."); setTimeout(()=>ta.remove(),8000); } }
+document.getElementById("c-cs").onclick=()=>copyText(curvesCSharp(),"Unity AnimationCurve C# 코드를 복사했다요.");
+
+// Graph geometry (CSS px inside the canvas).
+const GP={l:34,r:10,t:10,b:22};
+function sizeCanvas(c){ const dpr=Math.min(2,window.devicePixelRatio||1), w=Math.max(120,Math.round(c.clientWidth)); const h=Math.round(w*(+c.dataset.ratio)); if(c.width!==Math.round(w*dpr)||c.height!==Math.round(h*dpr)){ c.width=Math.round(w*dpr); c.height=Math.round(h*dpr); } return {w,h,dpr}; }
+for(const [el,r] of [[gcv,.62],[document.getElementById("t-speed"),.32],[document.getElementById("t-time"),.18]]) el.dataset.ratio=r;
+function graphBox(){ const w=gcv.clientWidth, h=w*.62; return {w,h,x0:GP.l,x1:w-GP.r,y0:GP.t,y1:h-GP.b}; }
+function toG(u,v){ const b=graphBox(), yMax=CDEF[ed.id].yMax; return V(b.x0+u*(b.x1-b.x0), b.y1-v/yMax*(b.y1-b.y0)); }
+function fromG(px,py){ const b=graphBox(), yMax=CDEF[ed.id].yMax; return V(clamp((px-b.x0)/(b.x1-b.x0),0,1), clamp((b.y1-py)/(b.y1-b.y0)*yMax,0,yMax)); }
+function gPointer(e){ const r=gcv.getBoundingClientRect(); return V(e.clientX-r.left,e.clientY-r.top); }
+function keyAt(p){ const k=C[ed.id].keys; let best=-1,bd=11; k.forEach((q,i)=>{ const s=toG(q.x,q.y), d=Math.hypot(s.x-p.x,s.y-p.y); if(d<bd){bd=d;best=i;} }); return best; }
+function moveKey(i,p,snap){
+  const k=C[ed.id].keys; let v=fromG(p.x,p.y); if(snap){ v.x=Math.round(v.x*20)/20; v.y=Math.round(v.y*20)/20; }
+  k[i].y=+v.y.toFixed(4);
+  if(i>0&&i<k.length-1) k[i].x=+clamp(v.x,k[i-1].x+.01,k[i+1].x-.01).toFixed(4);
+  prepCurve(C[ed.id]);
+}
+gcv.addEventListener("pointerdown",e=>{
+  if(e.button!==0) return; const p=gPointer(e); let i=keyAt(p);
+  if(i<0){ const v=fromG(p.x,p.y), k=C[ed.id].keys; if(v.x<=.01||v.x>=.99) return; let at=k.findIndex(q=>q.x>v.x); if(at<0) at=k.length-1; k.splice(at,0,{x:v.x,y:v.y}); i=at; }
+  ed.drag=i; moveKey(i,p,e.shiftKey); gcv.setPointerCapture(e.pointerId); e.preventDefault();
+});
+gcv.addEventListener("pointermove",e=>{ const p=gPointer(e); ed.mouse=p; if(ed.drag>=0) moveKey(ed.drag,p,e.shiftKey); else ed.hover=keyAt(p); });
+gcv.addEventListener("pointerleave",()=>{ ed.mouse=null; ed.hover=-1; });
+gcv.addEventListener("pointerup",()=>{ if(ed.drag>=0){ ed.drag=-1; curveEdited(); } });
+function deleteKeyAt(e){ const i=keyAt(gPointer(e)), k=C[ed.id].keys; if(i>0&&i<k.length-1){ k.splice(i,1); ed.hover=-1; curveEdited(); } }
+gcv.addEventListener("dblclick",deleteKeyAt);
+gcv.addEventListener("contextmenu",e=>{ e.preventDefault(); deleteKeyAt(e); });
+
+function curveStats(){
+  const c=C[ed.id], mean=Math.max(1e-4,c.area);
+  switch(ed.id){
+    case "accel": return `0→최고 속도 <span>${(T.moveSpeed/T.accel).toFixed(2)}s</span> · 순간 최고 <span>${(T.moveSpeed*c.max).toFixed(2)} m/s</span>`;
+    case "decel": return `정지까지 <span>${(T.moveSpeed/T.decel).toFixed(2)}s</span> · 미끄러짐 <span>${(T.moveSpeed*T.moveSpeed/T.decel*c.area).toFixed(2)} m</span>`;
+    case "dash": return `거리 <span>${(T.dashSpeed*T.dashDuration).toFixed(2)} m</span> · 시작 <span>${(T.dashSpeed*c.lut[0]/mean).toFixed(1)}</span> → 끝 <span>${(T.dashSpeed*c.lut[256]/mean).toFixed(1)} m/s</span> (이동 ${T.moveSpeed})`;
+    case "lunge": return `순간 최고 <span>${(T.lungeSpeed*c.max/mean).toFixed(1)} m/s</span> · 평균 <span>${T.lungeSpeed.toFixed(1)} m/s</span>`;
+    case "hitstop": { const m=T.hitStopScale+(1-T.hitStopScale)*c.area; return `스톱 중 평균 시간 배율 <span>×${m.toFixed(2)}</span> (스톱 속도 ${T.hitStopScale})`; }
+    case "slow": { const m=T.slowScale+(1-T.slowScale)*c.area; return `슬로 ${T.slowSeconds}s 동안 게임 시간 <span>${(T.slowSeconds*m).toFixed(2)}s</span> 흐름`; }
+    case "knock": return `넉백 거리 <span>×${(c.area/.5).toFixed(2)}</span> (선형 기준)`;
+    case "shake": return `평균 진폭 <span>×${c.area.toFixed(2)}</span>`;
+  }
+  return "";
+}
+function drawGraph(){
+  const {w,h,dpr}=sizeCanvas(gcv); gg.setTransform(dpr,0,0,dpr,0,0); gg.clearRect(0,0,w,h);
+  const d=CDEF[ed.id], c=C[ed.id], b=graphBox(), yMax=d.yMax, step=yMax>2?.5:.25;
+  gg.font='10px "JetBrains Mono", monospace'; gg.textBaseline="middle";
+  for(let v=0;v<=yMax+1e-6;v+=step){ const y=toG(0,v).y; gg.strokeStyle=Math.abs(v-1)<1e-6?"rgba(219,194,125,.32)":"rgba(169,176,201,.12)"; gg.lineWidth=1; gg.beginPath(); gg.moveTo(b.x0,y); gg.lineTo(b.x1,y); gg.stroke(); gg.fillStyle="#a9b0c9"; gg.textAlign="right"; gg.fillText(+v.toFixed(2),b.x0-5,y); }
+  for(let u=0;u<=1.0001;u+=.25){ const x=toG(u,0).x; gg.strokeStyle="rgba(169,176,201,.12)"; gg.beginPath(); gg.moveTo(x,b.y0); gg.lineTo(x,b.y1); gg.stroke(); gg.fillStyle="#a9b0c9"; gg.textAlign="center"; gg.fillText(u.toFixed(2).replace(/^0/,"").replace(/^1\.00$/,"1").replace(/^\.00$/,"0"),x,b.y1+11); }
+  // Default curve (dashed reference).
+  const ref=curveFrom(d,d.keys,d.mode); prepCurve(ref);
+  gg.setLineDash([4,4]); gg.strokeStyle="rgba(169,176,201,.45)"; gg.lineWidth=1.25; gg.beginPath();
+  for(let i=0;i<=120;i++){ const p=toG(i/120,evalRaw(ref,i/120)); i?gg.lineTo(p.x,p.y):gg.moveTo(p.x,p.y); } gg.stroke(); gg.setLineDash([]);
+  // Area fill for distance-preserving profiles.
+  if(d.area){ gg.fillStyle="rgba(219,194,125,.10)"; gg.beginPath(); gg.moveTo(b.x0,b.y1); for(let i=0;i<=160;i++){ const p=toG(i/160,Math.max(0,c.lut[Math.round(i/160*256)])); gg.lineTo(p.x,p.y); } gg.lineTo(b.x1,b.y1); gg.closePath(); gg.fill(); }
+  gg.strokeStyle="#dbc27d"; gg.lineWidth=2; gg.lineJoin="round"; gg.beginPath();
+  for(let i=0;i<=200;i++){ const u=i/200, p=toG(u,clamp(evalRaw(c,u),0,yMax)); i?gg.lineTo(p.x,p.y):gg.moveTo(p.x,p.y); } gg.stroke();
+  // Live playhead: where the running game is reading this curve right now.
+  const L=live[ed.id], age=L?performance.now()-L.at:1e9;
+  if(age<350){ const a=1-age/350, p=toG(L.u,clamp(evalRaw(c,L.u),0,yMax)); gg.globalAlpha=a; gg.strokeStyle="#9980ff"; gg.lineWidth=1.5; gg.beginPath(); gg.moveTo(p.x,b.y0); gg.lineTo(p.x,b.y1); gg.stroke(); gg.fillStyle="#9980ff"; gg.beginPath(); gg.arc(p.x,p.y,4.5,0,7); gg.fill(); gg.globalAlpha=1; }
+  // Keys: 8px markers with a surface ring.
+  c.keys.forEach((k,i)=>{ const p=toG(k.x,clamp(k.y,0,yMax)), big=i===ed.drag||i===ed.hover; gg.fillStyle="#0d1326"; gg.beginPath(); gg.arc(p.x,p.y,big?7:6,0,7); gg.fill(); gg.fillStyle=i===0||i===c.keys.length-1?"#f7f2e8":"#dbc27d"; gg.beginPath(); gg.arc(p.x,p.y,big?5:4,0,7); gg.fill(); });
+  // Readout: dragged/hovered key, else the cursor's position on the curve, plus derived numbers.
+  let r="";
+  const ki=ed.drag>=0?ed.drag:ed.hover;
+  if(ki>=0){ const k=c.keys[ki]; r=`점 ${ki+1}  x <span>${k.x.toFixed(2)}</span>  y <span>${k.y.toFixed(2)}</span>`; }
+  else if(ed.mouse){ const v=fromG(ed.mouse.x,ed.mouse.y); r=`x <span>${v.x.toFixed(2)}</span> → 곡선 <span>${evalRaw(c,v.x).toFixed(2)}</span>`; }
+  else if(age<350) r=`게임 진행 x <span>${L.u.toFixed(2)}</span> → <span>${evalRaw(c,L.u).toFixed(2)}</span>`;
+  else r=`점 ${c.keys.length}개 · ${c.mode==="smooth"?"부드럽게":"직선"}`;
+  readEl.innerHTML=r+"<br>"+curveStats();
+}
+
+// ------------------------------------------------------------------------------- live telemetry (3 s, real time)
+const TEL=[], TEL_SPAN=3; let telPrev=null;
+function recordTelemetry(raw){
+  const now=performance.now()/1000, p=player.p; let spd=0;
+  if(telPrev&&raw>0){ spd=len(sub(p,telPrev))/raw; if(spd>80) spd=0; }
+  telPrev=V(p.x,p.y); TEL.push({t:now,s:spd,k:timeScale*T.gameSpeed});
+  while(TEL.length&&TEL[0].t<now-TEL_SPAN) TEL.shift();
+}
+function drawStrip(id,key,maxV,color,fmt,refs){
+  const el=document.getElementById(id), {w,h,dpr}=sizeCanvas(el), c=el.getContext("2d"); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h);
+  const l=30,r=6,t=6,bt=h-6, now=performance.now()/1000, X=tt=>l+(1-(now-tt)/TEL_SPAN)*(w-l-r), Y=v=>bt-clamp(v/maxV,0,1)*(bt-t);
+  c.font='10px "JetBrains Mono", monospace'; c.textBaseline="middle"; c.textAlign="right";
+  for(const [v,lab,strong] of refs){ c.strokeStyle=strong?"rgba(219,194,125,.32)":"rgba(169,176,201,.12)"; c.lineWidth=1; c.beginPath(); c.moveTo(l,Y(v)); c.lineTo(w-r,Y(v)); c.stroke(); if(lab){ c.fillStyle="#a9b0c9"; c.fillText(lab,l-4,Y(v)); } }
+  if(TEL.length>1){ c.strokeStyle=color; c.lineWidth=2; c.lineJoin="round"; c.beginPath(); TEL.forEach((q,i)=>{ const x=X(q.t), y=Y(q[key]); i?c.lineTo(x,y):c.moveTo(x,y); }); c.stroke(); }
+  const last=TEL[TEL.length-1]; document.getElementById(id+"-v").textContent=last?fmt(last[key]):"";
+}
+function drawPanels(){
+  drawGraph();
+  const top=Math.max(T.dashSpeed,T.lungeSpeed*1.2,T.moveSpeed*1.5)*1.1;
+  drawStrip("t-speed","s",top,"#dbc27d",v=>`${v.toFixed(1)} m/s`,[[0,"",false],[T.moveSpeed,T.moveSpeed.toFixed(1),true],[T.dashSpeed,T.dashSpeed.toFixed(0),false]]);
+  drawStrip("t-time","k",Math.max(1.2,T.gameSpeed*1.1),"#9980ff",v=>`×${v.toFixed(2)}`,[[0,"0",false],[1,"1",true]]);
+}
+selectCurve(ed.id);
+
+// ---------------------------------------------------------------------------------------------- data from MeleeSlash.cs
+const SWINGS=[
+ {dmg:12,range:2.6,half:80,impact:.8,stop:.035,shake:.03,dur:.225,hit:.125},
+ {dmg:12,range:2.6,half:80,impact:.8,stop:.035,shake:.03,dur:.213,hit:.138},
+ {dmg:14,range:2.7,half:80,impact:.95,stop:.04,shake:.04,dur:.258,hit:.142},
+ {dmg:18,range:2.8,half:180,impact:1.1,stop:.05,shake:.06,dur:.345,hit:.207},
+ {dmg:15,range:2.8,half:75,impact:1.05,stop:.045,shake:.055,dur:.506,hit:.235,second:.218,dmg2:17},
+ {dmg:22,range:3.2,half:100,impact:1.3,stop:.07,shake:.09,dur:.655,hit:.172,second:.276,dmg2:38,finisher:true},
+];
+const ROOM={w:26,h:15};
+
+// ---------------------------------------------------------------------------------------------- state
+let player, enemies, shots, fx, numbers, timeScale=1, stopLeft=0, stopTotal=0, stopScale=1, slowMo=false, shake=0, shakeT=0, shakeTotal=0, stopKind="hitstop", paused=false, showHit=false, aiOff=false, god=false, stampT=99, flash={c:null,t:0,d:1};
+const keys=new Set(); let mouse=V(0,0), mouseDown=false, attackHeld=false;
+function reset(){
+  player={p:V(ROOM.w/2,ROOM.h*.7),v:V(),face:V(0,-1),hp:T.playerHP,dash:0,dashDir:V(),cool:0,lastDash:-9,dashId:0,dodgedId:-1,counter:0,
+          atk:-1,atkT:0,queued:false,recovery:0,hitDone:[false,false],lunge:0,lungeDir:V(),lungeT:0,lungeDur:0,lungeDist:0,held:0,launched:null,hurtT:0,
+          dashT:0,dashDur:0,mode:null,accT:0,decT:0,relV:V()};
+  enemies=[]; shots=[]; fx=[]; numbers=[];
+  spawn("copier",V(6,4)); spawn("locker",V(20,4.5)); spawn("monitor",V(13,1.6)); spawn("monitor",V(2,10));
+}
+function spawn(type,p){
+  p=p||V(rnd(3,ROOM.w-3),rnd(2.5,ROOM.h*.45));
+  const hp={copier:T.cHP,locker:T.lHP,monitor:T.mHP,dummy:9999}[type];
+  const e={type,p,v:V(),hp,max:hp,face:V(0,1),state:"idle",t:0,next:performanceNow()+rnd(1.2,2),kv0:V(),kt:0,kdur:0,stagger:0,tilt:0,flashT:0,
+           radius:{copier:.55,locker:.6,monitor:.38,dummy:.45}[type],hop:0,hopDir:V(),fired:0,pattern:0,recoil:0,tumble:0,tdir:V(),traveled:0,
+           grab:0,aim:V(0,1),servo:0,pose:0,dead:false,deathT:0};
+  enemies.push(e); return e;
+}
+let simClock=0; const performanceNow=()=>simClock;
+
+// ---------------------------------------------------------------------------------------------- feedback
+function hitStop(sec,scale){ if(slowMo||sec<=0) return; stopLeft=stopTotal=sec; stopScale=scale; stopKind="hitstop"; }
+function slowMotion(sec,scale){ slowMo=true; stopLeft=stopTotal=sec; stopScale=scale; stopKind="slow"; }
+function addShake(a,d){ shake=Math.max(shake,a*T.shakeMul); if(d>=shakeT){ shakeT=d; shakeTotal=d; } }
+function number(p,text,color,big){ numbers.push({p:V(p.x,p.y),t:0,text,color,big}); }
+function burst(p,color,n,spd){ for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=rnd(.3,1)*spd; fx.push({kind:"spark",p:V(p.x,p.y),v:V(Math.cos(a)*s,Math.sin(a)*s),t:0,life:rnd(.18,.4),color});} }
+function ring(p,r,color,life){ fx.push({kind:"ring",p:V(p.x,p.y),r,t:0,life,color}); }
+function arc(p,dir,range,half,color,life){ fx.push({kind:"arc",p:V(p.x,p.y),dir:V(dir.x,dir.y),range,half,t:0,life,color}); }
+function screenFlash(c,d){ flash={c,t:0,d}; }
+let actx=null;
+function tone(f0,f1,dur,type,vol){ if(!actx) return; const o=actx.createOscillator(),g=actx.createGain(); o.type=type; o.frequency.setValueAtTime(f0,actx.currentTime); o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),actx.currentTime+dur); g.gain.setValueAtTime(vol,actx.currentTime); g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+dur); o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime+dur); }
+function noise(dur,vol,hp){ if(!actx) return; const b=actx.createBuffer(1,actx.sampleRate*dur,actx.sampleRate),d=b.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length); const s=actx.createBufferSource(),f=actx.createBiquadFilter(),g=actx.createGain(); f.type="highpass"; f.frequency.value=hp; g.gain.value=vol; s.buffer=b; s.connect(f).connect(g).connect(actx.destination); s.start(); }
+const SFX={swing:()=>noise(.09,.12,2500),hit:()=>{noise(.08,.25,900);tone(220,90,.08,"square",.06)},heavy:()=>{noise(.14,.35,400);tone(140,45,.18,"sawtooth",.1)},dodge:()=>{tone(600,1800,.25,"sine",.12)},hurt:()=>{tone(300,90,.2,"square",.1)},thud:()=>tone(90,40,.15,"sine",.15)};
+
+// ---------------------------------------------------------------------------------------------- player
+function dodging(){ return player.dash>0 || simClock-player.lastDash < T.dashDuration+T.dodgeGrace; }
+function damagePlayer(amount,from,src){
+  if(player.hp<=0) return false;
+  if(dodging()){ justDodge(); return false; }
+  if(player.hurtT>0) return false;
+  if(!god) player.hp=Math.max(0,player.hp-amount);
+  player.hurtT=.25; number(player.p,`-${amount}`,"#ff6b5f"); hitStop(.075,.07); addShake(.1,.2); screenFlash("rgba(255,40,30,.28)",.28); SFX.hurt();
+  return true;
+}
+function justDodge(){
+  if(player.dodgedId===player.dashId) return; player.dodgedId=player.dashId;
+  slowMotion(T.slowSeconds,T.slowScale); screenFlash("rgba(140,110,255,.32)",.35); addShake(.04,.12);
+  player.cool=0; player.counter=T.counterSeconds; stampT=0; SFX.dodge(); burst(player.p,"#b9a8ff",14,5); ring(player.p,1.2,"#9980ff",.4);
+}
+function nearestEnemy(range){ let best=null,bd=range; for(const e of enemies){ if(e.dead) continue; const d=len(sub(e.p,player.p)); if(d<bd){bd=d;best=e;} } return best; }
+function beginSwing(i){
+  const pl=player; pl.atk=i; pl.atkT=0; pl.queued=false; pl.hitDone=[false,false];
+  const aim=norm(sub(mouse,pl.p)); pl.face=len(aim)>0?aim:pl.face;
+  const target=nearestEnemy(T.lungeRange);
+  if(target && T.lungeRange>0){ const d=len(sub(target.p,pl.p)); if(d>T.lungeStop+target.radius){ pl.lungeDist=d-T.lungeStop-target.radius; pl.lungeDur=pl.lungeDist/T.lungeSpeed; pl.lungeT=0; pl.lunge=pl.lungeDur; pl.lungeDir=norm(sub(target.p,pl.p)); pl.face=pl.lungeDir; } }
+  SFX.swing();
+}
+function cut(second){
+  const pl=player, s=SWINGS[pl.atk];
+  const counter=pl.counter>0, heavy=counter||(s.finisher&&(second||!s.second));
+  let dmg=(second?s.dmg2:s.dmg)*T.damageMul; if(counter) dmg*=T.counterMul; dmg=Math.round(dmg);
+  const impact=(s.finisher&&second?s.impact*1.5:s.impact), range=s.range*T.rangeMul;
+  arc(pl.p,pl.face,range,s.half,heavy?"#c9b6ff":"#ffb6d9",heavy?.22:.14);
+  if(heavy){ ring(pl.p,range,"#ff7aa8",.3); screenFlash("rgba(255,160,210,.18)",.2); }
+  let any=false;
+  for(const e of enemies){
+    if(e.dead) continue; const off=sub(e.p,pl.p), d=len(off);
+    if(d>range+e.radius) continue; if(d>.6 && angleBetween(pl.face,off)>s.half) continue;
+    const dir=d>.01?norm(off):pl.face, amt=dmg+Math.round(rnd(-2,2));
+    hurtEnemy(e,amt,dir,impact,heavy); any=true;
+  }
+  if(any){ hitStop((heavy?s.stop*1.6:s.stop)*T.hitStopMul, heavy?T.heavyStopScale:T.hitStopScale); addShake(heavy?s.shake*1.8:s.shake,heavy?.24:.12); (heavy?SFX.heavy:SFX.hit)(); }
+}
+function updatePlayer(dt){
+  const pl=player; if(pl.hp<=0) return;
+  pl.hurtT=Math.max(0,pl.hurtT-dt); pl.counter=Math.max(0,pl.counter-dt); pl.cool=Math.max(0,pl.cool-dt); pl.recovery=Math.max(0,pl.recovery-dt);
+  // Held by the locker / thrown.
+  if(pl.held>0){ pl.held-=dt; pl.mode=null; pl.v=V(); return; }
+  if(pl.launched){ pl.mode=null; pl.v=V(); pl.p=add(pl.p,mul(pl.launched,dt)); pl.launched=mul(pl.launched,Math.max(0,1-dt*3.2)); if(len(pl.launched)<1.2) pl.launched=null; confine(pl.p,.35); return; }
+  let input=V((keys.has("d")?1:0)-(keys.has("a")?1:0),(keys.has("s")?1:0)-(keys.has("w")?1:0)); input=norm(input);
+  // Dash: always wins over an attack.
+  if(wantDash && pl.cool<=0 && pl.dash<=0){
+    pl.dash=T.dashDuration; pl.dashDur=T.dashDuration; pl.dashT=0; pl.mode=null; pl.cool=T.dashCooldown; pl.lastDash=simClock; pl.dashId++;
+    pl.dashDir=len(input)>0?input:pl.face; pl.atk=-1; pl.lunge=0; stopLeft=slowMo?stopLeft:0;
+    fx.push({kind:"ghost",p:V(pl.p.x,pl.p.y),t:0,life:.25});
+  }
+  wantDash=false;
+  if(pl.dash>0){ pl.dash-=dt; // dash curve: speed profile over the dash, total distance kept at speed × time
+    const dd=Math.max(1e-4,pl.dashDur), u0=pl.dashT/dd; pl.dashT=Math.min(dd,pl.dashT+dt); const u1=pl.dashT/dd;
+    pl.p=add(pl.p,mul(pl.dashDir,T.dashSpeed*dd*(curveCDF("dash",u1)-curveCDF("dash",u0)))); mark("dash",u1); if(Math.random()<.6) fx.push({kind:"ghost",p:V(pl.p.x,pl.p.y),t:0,life:.18}); pl.v=mul(pl.dashDir,Math.min(T.moveSpeed,C.dash.area>1e-5?T.dashSpeed*Math.max(0,C.dash.lut[256])/C.dash.area:T.dashSpeed)); confine(pl.p,.35); return; }
+  // Attack chain.
+  const pressed=attackPressed; attackPressed=false;
+  if(pl.atk<0){ if(pl.recovery<=0 && (pressed||attackHeld)) beginSwing(0); }
+  else{
+    const s=SWINGS[pl.atk], dur=s.dur/T.attackSpeed;
+    pl.atkT+=dt;
+    if((pressed||attackHeld) && pl.atk<5 && pl.atkT>=dur-T.queueWindow) pl.queued=true;
+    if(pl.lunge>0){ const ld=Math.max(1e-4,pl.lungeDur), u0=pl.lungeT/ld; pl.lungeT=Math.min(ld,pl.lungeT+dt); const u1=pl.lungeT/ld;
+      pl.p=add(pl.p,mul(pl.lungeDir,pl.lungeDist*(curveCDF("lunge",u1)-curveCDF("lunge",u0)))); pl.lunge=ld-pl.lungeT; mark("lunge",u1); }
+    if(!pl.hitDone[0] && pl.atkT>=s.hit/T.attackSpeed){ pl.hitDone[0]=true; cut(false); }
+    if(s.second && !pl.hitDone[1] && pl.atkT>=(s.hit+s.second)/T.attackSpeed){ pl.hitDone[1]=true; cut(true); }
+    if(pl.atkT>=dur){ const finished=pl.atk===5; if(pl.queued && !finished) beginSwing(pl.atk+1); else { pl.atk=-1; if(finished) pl.recovery=T.comboRecovery; } }
+  }
+  // Movement curves: speed = move speed × accel curve over (move speed ÷ accel) seconds; on release the speed at
+  // release follows the decel curve over (that speed ÷ decel) seconds. Reversing restarts the ramp.
+  const atkMul=pl.atk>=0?T.attackMove:1;
+  if(len(input)>0){
+    const tAcc=Math.max(1e-3,T.moveSpeed/T.accel);
+    if(pl.mode!=="acc"){ pl.mode="acc"; pl.accT=tAcc*curveInverse("accel",len(pl.v)/Math.max(1e-3,T.moveSpeed*atkMul)); }
+    if(len(pl.v)>.5 && dot(norm(pl.v),input)<-.2) pl.accT=0;
+    pl.accT=Math.min(tAcc,pl.accT+dt); const u=pl.accT/tAcc;
+    pl.v=mul(input,T.moveSpeed*atkMul*Math.max(0,curve("accel",u))); if(u<1) mark("accel",u);
+  } else {
+    if(pl.mode!=="dec"){ pl.mode="dec"; pl.relV=V(pl.v.x,pl.v.y); pl.decT=0; }
+    const s0=len(pl.relV), tDec=s0/Math.max(1e-3,T.decel);
+    if(s0<1e-3||pl.decT>=tDec) pl.v=V();
+    else { pl.decT=Math.min(tDec,pl.decT+dt); const u=pl.decT/tDec; pl.v=mul(norm(pl.relV),s0*Math.max(0,curve("decel",u))); mark("decel",u); }
+  }
+  pl.p=add(pl.p,mul(pl.v,dt)); confine(pl.p,.35);
+  if(pl.atk<0){ const aim=sub(mouse,pl.p); if(len(aim)>.3) pl.face=norm(aim); }
+}
+function confine(p,r){ p.x=clamp(p.x,r,ROOM.w-r); p.y=clamp(p.y,r,ROOM.h-r); }
+
+// ---------------------------------------------------------------------------------------------- enemies
+function hurtEnemy(e,amount,dir,impact,heavy){
+  if(e.dead) return; e.hp-=amount; e.flashT=.1; number(add(e.p,V(0,-.8)),amount,heavy?"#ffd27a":"#f7f2e8",heavy);
+  burst(add(e.p,mul(dir,-.3)),heavy?"#ffd27a":"#ffb6d9",heavy?18:10,6);
+  const w=e.type==="locker"?(e.state==="tumble"?.1:e.state==="grabHold"?.4:.8):e.type==="copier"?(e.state==="fan"?.6:1):e.type==="monitor"?.3:1;
+  { const nv=add(knockVel(e),mul(dir,3.2*clamp(impact,.3,2)*w*T.knockMul)); e.kv0=nv; e.kt=0; e.kdur=len(nv)/KNOCK_DECEL; } e.tilt=Math.min(1,e.tilt+.6*impact);
+  if(w>=.99) e.stagger=Math.max(e.stagger,.18*Math.min(impact,1.6)*T.staggerMul);
+  if(e.type==="dummy") e.hp=e.max;
+  if(e.hp<=0){ e.dead=true; e.deathT=0; e.deathV=mul(dir,6*impact); addShake(.14,.22); SFX.thud(); ring(e.p,1.4,"#e0d8c0",.4); if(e.type==="locker"&&e.state==="grabHold"){player.held=0;} }
+}
+// Knockback velocity: hit velocity × knock curve over (hit speed ÷ 20 m/s²), the Unity linear decay by default.
+const KNOCK_DECEL=20;
+function knockVel(e){ return e.kdur>0&&e.kt<e.kdur?mul(e.kv0,Math.max(0,curve("knock",e.kt/e.kdur))):V(); }
+function telegraph(e,shape){ e.tele=shape; }
+function fire(kind,p,dir,speed,range,dmg,owner){ shots.push({kind,p:V(p.x,p.y),dir:norm(dir),speed,range,traveled:0,dmg,owner,t:0,wob:Math.random()*6}); }
+function enemyUpdate(e,dt){
+  e.flashT=Math.max(0,e.flashT-dt); e.tilt=Math.max(0,e.tilt-dt*4); e.stagger=Math.max(0,e.stagger-dt);
+  if(e.dead){ e.deathT+=dt; if(e.deathT<.5){ e.p=add(e.p,mul(e.deathV,dt)); e.deathV=mul(e.deathV,1-dt*4); confine(e.p,e.radius);} return; }
+  if(e.kdur>0&&e.kt<e.kdur){ e.kt=Math.min(e.kdur,e.kt+dt); const kv=knockVel(e); if(!(e.type==="locker"&&e.state==="tumble")){ e.p=add(e.p,mul(kv,dt)); confine(e.p,e.radius);} mark("knock",e.kt/e.kdur); }
+  e.tele=null; if(aiOff||player.hp<=0||e.type==="dummy") return;
+  const to=sub(player.p,e.p), dist=len(to); e.t+=dt;
+  if(e.type==="copier") copier(e,dt,to,dist);
+  else if(e.type==="locker") locker(e,dt,to,dist);
+  else if(e.type==="monitor") monitor(e,dt,to,dist);
+}
+function turnTo(e,dir,degPerSec,dt){ const a=Math.atan2(e.face.y,e.face.x), b=Math.atan2(dir.y,dir.x); let d=b-a; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI; const m=degPerSec*Math.PI/180*dt; const na=a+clamp(d,-m,m); e.face=V(Math.cos(na),Math.sin(na)); }
+function copier(e,dt,to,dist){
+  if(e.recoil>0){ e.p=add(e.p,mul(e.face,-e.recoil*dt*T.cRecoil)); confine(e.p,e.radius); e.recoil=towards(e.recoil,0,dt*7); }
+  if(e.state==="idle"||e.state==="hop"){
+    if(e.stagger<=0 && simClock>=e.next && e.hop===0 && dist<13){ e.aim=norm(to); e.state=e.pattern++%2===0?"fan":"snipe"; e.t=0; e.fired=0; return; }
+    e.hop+=dt; const C=.24,S=.3;
+    if(e.phase===undefined) e.phase=0;
+    if(e.phase===0){ turnTo(e,to,120,dt); e.pose=Math.sin(Math.min(1,e.hop/C)*Math.PI/2)*-.1; if(e.hop>=C&&e.stagger<=0){ const want=dist>T.cKeep+1?to:dist<T.cKeep-2?mul(to,-1):rot(to,Math.random()<.5?80:-80); e.hopDir=norm(want); e.phase=1; e.hop=0; } }
+    else if(e.phase===1){ const a=Math.min(1,e.hop/T.cAir); e.pose=.38*4*a*(1-a); e.p=add(e.p,mul(e.hopDir,T.cHop/T.cAir*dt)); confine(e.p,e.radius); if(e.hop>=T.cAir){ e.phase=2; e.hop=0; e.pose=0; addShake(.05*Math.max(0,1-dist/16),.14); ring(e.p,1.1,"rgba(224,216,192,.8)",.35); SFX.thud(); } }
+    else { if(e.hop>=S){ e.phase=0; e.hop=0; } }
+    return;
+  }
+  if(e.state==="fan"){
+    turnTo(e,e.aim,200,dt);
+    if(e.t<T.cFanWindup){ const p=e.t/T.cFanWindup; telegraph(e,{type:"fan",o:add(e.p,mul(e.aim,.5)),dir:e.aim,r:9*(.5+.5*p),half:T.cFanAngle,p}); return; }
+    const t=(e.t-T.cFanWindup)/.55, due=Math.min(T.cFanSheets,Math.floor(t*T.cFanSheets)+1);
+    if(!e.sweep) e.sweep=Math.random()<.5?-1:1;
+    while(e.fired<due){ const u=T.cFanSheets<=1?.5:e.fired/(T.cFanSheets-1); const ang=-T.cFanAngle+2*T.cFanAngle*(e.sweep>0?u:1-u)+rnd(-4,4); fire("paper",add(e.p,mul(e.face,.5)),rot(e.aim,ang),T.cFanSpeed,9,T.cFanDmg,e); e.fired++; e.recoil=Math.max(e.recoil,1.3); }
+    if(t>=1.15){ e.state="recover"; e.t=0; e.sweep=0; }
+    return;
+  }
+  if(e.state==="snipe"){
+    turnTo(e,to,260,dt); const cyc=e.t-.2, shot=Math.floor(cyc/T.cSnipeInt), within=cyc-shot*T.cSnipeInt;
+    if(cyc>=0&&shot<T.cSnipe){
+      if(within<T.cSnipeInt*.6) telegraph(e,{type:"line",o:add(e.p,mul(e.face,.5)),dir:e.face,l:12*.6,hw:.12,p:within/(T.cSnipeInt*.6)});
+      if(e.fired<=shot && within>=T.cSnipeInt*.6){ const lead=sub(add(player.p,mul(player.v,.25)),e.p); fire("paper",add(e.p,mul(e.face,.5)),lead,T.cSnipeSpeed,12,T.cSnipeDmg,e); e.fired=shot+1; e.recoil=Math.max(e.recoil,2.4); }
+    }
+    if(shot>=T.cSnipe){ e.state="recover"; e.t=0; }
+    return;
+  }
+  if(e.state==="recover" && e.t>=.55){ e.state="hop"; e.next=simClock+T.cCooldown; e.phase=0; e.hop=0; }
+}
+function locker(e,dt,to,dist){
+  if(e.state==="idle"||e.state==="walk"){
+    e.state="walk"; turnTo(e,to,140,dt);
+    if(e.stagger<=0 && simClock>=e.next){
+      if(dist<=T.lGrabRange && e.pattern%2===0){ e.pattern++; e.state="grabWindup"; e.t=0; e.aim=norm(to); return; }
+      if(dist>3 && dist<13){ e.pattern++; e.state="tumbleWindup"; e.t=0; e.aim=norm(to); return; }
+    }
+    if(dist>1.6 && e.stagger<=0){ e.p=add(e.p,mul(e.face,T.lWalk*dt)); confine(e.p,e.radius); }
+    return;
+  }
+  if(e.state==="grabWindup"){ turnTo(e,to,90,dt); e.aim=e.face; telegraph(e,{type:"line",o:add(e.p,mul(e.face,.4)),dir:e.face,l:T.lGrabRange,hw:.45,p:e.t/T.lGrabWindup}); if(e.t>=T.lGrabWindup){ e.state="grabReach"; e.t=0; e.grab=0; } return; }
+  if(e.state==="grabReach"){
+    e.grab=Math.min(T.lGrabRange,e.grab+dt*22); const tip=add(e.p,mul(e.aim,e.grab));
+    const near=len(sub(player.p,tip))<.7 || (dot(sub(player.p,e.p),e.aim)>0 && dot(sub(player.p,e.p),e.aim)<e.grab && Math.abs((sub(player.p,e.p).x*e.aim.y-sub(player.p,e.p).y*e.aim.x))<.55);
+    if(near && player.held<=0){ if(dodging()){ justDodge(); } else { e.state="grabHold"; e.t=0; player.held=.75; SFX.thud(); return; } }
+    if(e.grab>=T.lGrabRange){ e.state="grabRetract"; e.t=0; }
+    return;
+  }
+  if(e.state==="grabHold"){ e.grab=towards(e.grab,1.1,dt*8); player.p=add(e.p,mul(e.aim,e.grab)); if(e.t>=.7){ const away=rot(e.aim,Math.random()<.5?110:-110); player.held=0; player.launched=mul(away,T.lThrowSpeed); if(!god) damagePlayerForced(T.lThrowDmg); e.state="grabRetract"; e.t=0; } return; }
+  if(e.state==="grabRetract"){ e.grab=towards(e.grab,0,dt*14); if(e.grab<=0){ e.state="recover"; e.t=0; } return; }
+  if(e.state==="tumbleWindup"){ turnTo(e,to,80,dt); e.aim=e.face; telegraph(e,{type:"line",o:e.p,dir:e.face,l:T.lTumbleDist,hw:.75,p:e.t/T.lTumbleWindup}); if(e.t>=T.lTumbleWindup){ e.state="tumble"; e.t=0; e.traveled=0; e.hitThis=false; } return; }
+  if(e.state==="tumble"){
+    const step=T.lTumbleSpeed*dt; e.p=add(e.p,mul(e.aim,step)); e.traveled+=step; confine(e.p,e.radius);
+    const flips=Math.floor(e.traveled/(T.lTumbleDist/8)); if(flips!==e.flips){ e.flips=flips; addShake(.07*Math.max(0,1-dist/16),.12); ring(e.p,.9,"rgba(224,216,192,.7)",.25); SFX.thud(); }
+    if(!e.hitThis && len(sub(player.p,e.p))<e.radius+.55){ e.hitThis=true; if(damagePlayer(T.lSlamDmg)) player.launched=mul(norm(sub(player.p,e.p)),7); }
+    if(e.traveled>=T.lTumbleDist){ e.state="recover"; e.t=0; addShake(.09,.2); }
+    return;
+  }
+  if(e.state==="recover" && e.t>=.6){ e.state="walk"; e.next=simClock+T.lCooldown; }
+}
+function damagePlayerForced(amount){ player.hp=Math.max(0,player.hp-amount); number(player.p,`-${amount}`,"#ff6b5f"); hitStop(.075,.07); addShake(.12,.22); screenFlash("rgba(255,40,30,.28)",.28); SFX.hurt(); }
+function monitor(e,dt,to,dist){
+  if(e.state==="idle"){ e.state="watch"; e.next=simClock+rnd(.5,T.mInterval); }
+  turnTo(e,to,90,dt);
+  if(e.state==="watch" && simClock>=e.next && dist<T.mRange){ e.state="aim"; e.t=0; }
+  if(e.state==="aim"){ const p=e.t/T.mTele; telegraph(e,{type:"line",o:e.p,dir:e.face,l:Math.min(T.mRange,dist+2),hw:.14,p}); if(e.t>=T.mTele){ fire("binary",add(e.p,mul(e.face,.4)),e.face,T.mSpeed,T.mRange,T.mDmg,e); e.state="watch"; e.next=simClock+T.mInterval; } }
+}
+function updateShots(dt){
+  for(const s of shots){
+    s.t+=dt; const step=s.speed*dt; s.p=add(s.p,mul(s.dir,step)); s.traveled+=step;
+    if(s.kind==="paper"){ s.dir=rot(s.dir,Math.sin(s.t*9+s.wob)*20*dt); }
+    if(player.hp>0 && player.held<=0 && len(sub(s.p,player.p))<.42){ if(damagePlayer(s.dmg)) s.dead=true; else if(!dodging()) s.dead=true; }
+    if(s.traveled>=s.range||s.p.x<0||s.p.y<0||s.p.x>ROOM.w||s.p.y>ROOM.h) s.dead=true;
+  }
+  shots=shots.filter(s=>!s.dead);
+}
+
+// ---------------------------------------------------------------------------------------------- loop
+const cv=document.getElementById("game"), g=cv.getContext("2d");
+let wantDash=false, attackPressed=false, last=performance.now(), fps=60;
+function frame(now){
+  const raw=Math.min(.05,(now-last)/1000); last=now; fps=fps*.95+(1/Math.max(raw,1e-4))*.05;
+  if(!paused){
+    // Hit stop and slow motion run on real time; the rest of the sim uses the scaled clock.
+    if(stopLeft>0){ stopLeft-=raw; const left=stopLeft/Math.max(1e-4,stopTotal); const u=1-left; timeScale=Math.max(0,stopScale+(1-stopScale)*curve(stopKind,u)); mark(stopKind,u); if(stopLeft<=0){ timeScale=1; slowMo=false; } } else timeScale=1;
+    const dt=raw*timeScale*T.gameSpeed; simClock+=dt;
+    updatePlayer(dt); for(const e of enemies) enemyUpdate(e,dt); updateShots(dt); recordTelemetry(raw);
+    enemies=enemies.filter(e=>!e.dead||e.deathT<1.6);
+    for(const f of fx){ f.t+=raw; if(f.v){ f.p=add(f.p,mul(f.v,raw)); f.v=mul(f.v,1-raw*5);} } fx=fx.filter(f=>f.t<f.life);
+    for(const n of numbers) n.t+=raw; numbers=numbers.filter(n=>n.t<.8);
+    shakeT=Math.max(0,shakeT-raw); if(shakeT<=0) shake=0; flash.t+=raw; stampT+=raw; if(logT>0){logT-=raw; if(logT<=0) logEl.textContent="";}
+  }
+  draw(); drawPanels(); requestAnimationFrame(frame);
+}
+
+// ---------------------------------------------------------------------------------------------- draw
+let PX=42, ox=0, oy=0;
+const W2S=p=>V(ox+p.x*PX, oy+p.y*PX);
+function draw(){
+  PX=T.camZoom; const W=cv.width,H=cv.height;
+  ox=(W-ROOM.w*PX)/2; oy=(H-ROOM.h*PX)/2+12;
+  if(shake>0&&shakeTotal>0){ const u=1-shakeT/shakeTotal, amp=shake*Math.max(0,curve("shake",u)); mark("shake",u); ox+=rnd(-1,1)*amp*PX; oy+=rnd(-1,1)*amp*PX; }
+  g.fillStyle="#0d1326"; g.fillRect(0,0,W,H);
+  // Carpet tiles of the yellow room.
+  g.fillStyle="#3b3520"; g.fillRect(ox,oy,ROOM.w*PX,ROOM.h*PX);
+  g.strokeStyle="rgba(255,236,170,.06)"; g.lineWidth=1;
+  for(let x=0;x<=ROOM.w;x++){ g.beginPath(); g.moveTo(ox+x*PX,oy); g.lineTo(ox+x*PX,oy+ROOM.h*PX); g.stroke(); }
+  for(let y=0;y<=ROOM.h;y++){ g.beginPath(); g.moveTo(ox,oy+y*PX); g.lineTo(ox+ROOM.w*PX,oy+y*PX); g.stroke(); }
+  g.strokeStyle="#c9b87a"; g.lineWidth=3; g.strokeRect(ox,oy,ROOM.w*PX,ROOM.h*PX);
+  // Telegraphs (fill grows with progress, white flash near the strike).
+  for(const e of enemies) if(e.tele) drawTele(e.tele);
+  // Enemies.
+  for(const e of enemies) drawEnemy(e);
+  // Shots.
+  for(const s of shots){ const p=W2S(s.p); g.save(); g.translate(p.x,p.y); g.rotate(Math.atan2(s.dir.y,s.dir.x));
+    if(s.kind==="paper"){ g.rotate(Math.sin(s.t*14+s.wob)*.6); g.fillStyle="#f2efe6"; g.fillRect(-.22*PX,-.16*PX,.44*PX,.32*PX); g.fillStyle="#9a9a9a"; for(let i=0;i<3;i++) g.fillRect(-.16*PX,(-.08+i*.07)*PX,.3*PX,1.5); }
+    else { g.fillStyle="#7dffb0"; g.font=`600 ${Math.round(.3*PX)}px ${getComputedStyle(document.documentElement).getPropertyValue("--f-mono")}`; g.textAlign="center"; g.textBaseline="middle"; g.fillText("1010110",0,0); }
+    g.restore(); }
+  // FX.
+  for(const f of fx){ const p=W2S(f.p), k=1-f.t/f.life;
+    if(f.kind==="spark"){ g.fillStyle=f.color; g.globalAlpha=k; g.fillRect(p.x-2,p.y-2,4,4); g.globalAlpha=1; }
+    else if(f.kind==="ring"){ g.strokeStyle=f.color; g.globalAlpha=k; g.lineWidth=3; g.beginPath(); g.arc(p.x,p.y,f.r*PX*(.4+.6*(1-k)),0,7); g.stroke(); g.globalAlpha=1; }
+    else if(f.kind==="arc"){ g.globalAlpha=k*.85; g.fillStyle=f.color; const a=Math.atan2(f.dir.y,f.dir.x), h=f.half*Math.PI/180; g.beginPath(); g.moveTo(p.x,p.y); g.arc(p.x,p.y,f.range*PX,a-h,a+h); g.closePath(); g.globalAlpha=k*.28; g.fill(); g.globalAlpha=k; g.strokeStyle="#fff"; g.lineWidth=2; g.beginPath(); g.arc(p.x,p.y,f.range*PX*.92,a-h,a+h); g.stroke(); g.globalAlpha=1; }
+    else if(f.kind==="ghost"){ g.globalAlpha=k*.35; g.fillStyle="#b9a8ff"; g.beginPath(); g.arc(p.x,p.y,.35*PX,0,7); g.fill(); g.globalAlpha=1; } }
+  drawPlayer();
+  if(showHit) drawHitboxes();
+  // Numbers.
+  for(const n of numbers){ const p=W2S(add(n.p,V(0,-n.t*1.2))); g.globalAlpha=1-n.t/.8; g.fillStyle=n.color; g.font=`700 ${n.big?22:16}px var(--f-ui), sans-serif`; g.font=`700 ${n.big?22:16}px "IBM Plex Sans KR", sans-serif`; g.textAlign="center"; g.fillText(n.text,p.x,p.y); g.globalAlpha=1; }
+  if(flash.c && flash.t<flash.d){ g.globalAlpha=1-flash.t/flash.d; g.fillStyle=flash.c; g.fillRect(0,0,W,H); g.globalAlpha=1; }
+  drawHud(W,H);
+}
+function drawTele(t){
+  const o=W2S(t.o), p=clamp(t.p,0,1), hot=p>.88;
+  g.save();
+  if(t.type==="fan"){ const a=Math.atan2(t.dir.y,t.dir.x), h=t.half*Math.PI/180, R=t.r*PX;
+    g.fillStyle="rgba(158,5,15,.22)"; g.beginPath(); g.moveTo(o.x,o.y); g.arc(o.x,o.y,R,a-h,a+h); g.closePath(); g.fill();
+    g.fillStyle=hot?"rgba(255,200,180,.5)":"rgba(245,30,20,.42)"; g.beginPath(); g.moveTo(o.x,o.y); g.arc(o.x,o.y,R*p,a-h,a+h); g.closePath(); g.fill();
+    g.strokeStyle="rgba(56,0,5,.6)"; g.lineWidth=5; g.beginPath(); g.arc(o.x,o.y,R+2,a-h,a+h); g.stroke();
+    g.strokeStyle=hot?"#fff":"#ff4d29"; g.lineWidth=3; g.beginPath(); g.moveTo(o.x,o.y); g.arc(o.x,o.y,R,a-h,a+h); g.closePath(); g.stroke();
+    g.strokeStyle="#ffdc80"; g.lineWidth=2; g.beginPath(); g.arc(o.x,o.y,R*p,a-h,a+h); g.stroke(); }
+  else { g.translate(o.x,o.y); g.rotate(Math.atan2(t.dir.y,t.dir.x)); const L=t.l*PX, Hw=t.hw*PX;
+    g.fillStyle="rgba(158,5,15,.22)"; g.fillRect(0,-Hw,L,Hw*2); g.fillStyle=hot?"rgba(255,200,180,.5)":"rgba(245,30,20,.42)"; g.fillRect(0,-Hw,L*p,Hw*2);
+    g.strokeStyle="rgba(56,0,5,.6)"; g.lineWidth=5; g.strokeRect(-1,-Hw-2,L+2,Hw*2+4); g.strokeStyle=hot?"#fff":"#ff4d29"; g.lineWidth=2.5; g.strokeRect(0,-Hw,L,Hw*2);
+    g.strokeStyle="#ffdc80"; g.lineWidth=2; g.beginPath(); g.moveTo(L*p,-Hw); g.lineTo(L*p,Hw); g.stroke(); }
+  g.restore();
+}
+function drawEnemy(e){
+  const p=W2S(e.p); g.save(); g.translate(p.x,p.y);
+  const alpha=e.dead?Math.max(0,1-(e.deathT-.6)):1; g.globalAlpha=alpha;
+  const lift=(e.pose||0)*PX; g.fillStyle="rgba(0,0,0,.35)"; g.beginPath(); g.ellipse(0,0,e.radius*PX*1.1,e.radius*PX*.55,0,0,7); g.fill();
+  g.translate(0,-lift); g.rotate(Math.atan2(e.face.y,e.face.x)+Math.PI/2);
+  const r=e.radius*PX, wob=e.tilt*.25*Math.sin(simClock*40); g.rotate(wob);
+  const hitWhite=e.flashT>0;
+  if(e.type==="copier"){ g.fillStyle=hitWhite?"#fff":"#d9d6cc"; g.fillRect(-r,-r*.8,r*2,r*1.6); g.fillStyle="#6a6a6a"; g.fillRect(-r*.8,-r*.75,r*1.6,r*.4); g.fillStyle="#f2efe6"; g.fillRect(-r*.5,-r*1.05,r,r*.3); }
+  else if(e.type==="locker"){ const tumbling=e.state==="tumble"; const sq=tumbling?Math.abs(Math.cos(e.traveled/(T.lTumbleDist/8)*Math.PI)):1; g.fillStyle=hitWhite?"#fff":"#9fb3a8"; g.fillRect(-r*1.1,-r*.45*Math.max(.25,sq),r*2.2,r*.9*Math.max(.25,sq)); g.strokeStyle="#4b5c54"; g.lineWidth=2; for(let i=-1;i<=1;i++){g.beginPath();g.moveTo(i*r*.7,-r*.4);g.lineTo(i*r*.7,r*.4);g.stroke();}
+    if(e.grab>0){ g.strokeStyle="#5a1630"; g.lineWidth=7; g.beginPath(); g.moveTo(0,-r*.4); g.lineTo(0,-r*.4-e.grab*PX); g.stroke(); g.strokeStyle="#c9406e"; g.lineWidth=3; g.stroke(); } }
+  else if(e.type==="monitor"){ g.fillStyle=hitWhite?"#fff":"#bdb6a2"; g.fillRect(-r,-r,r*2,r*1.6); g.fillStyle=e.state==="aim"?"#1aff8c":"#0d3b24"; g.fillRect(-r*.75,-r*.8,r*1.5,r*1.1); }
+  else { g.fillStyle=hitWhite?"#fff":"#6d5a3c"; g.beginPath(); g.arc(0,0,r,0,7); g.fill(); g.strokeStyle="#c9b87a"; g.stroke(); }
+  g.restore();
+  if(!e.dead && e.type!=="dummy"){ const w=e.radius*PX*2.4; g.fillStyle="rgba(5,7,14,.85)"; g.fillRect(p.x-w/2,p.y-e.radius*PX-18,w,5); g.fillStyle=e.stagger>0?"#ffd27a":"#ff544d"; g.fillRect(p.x-w/2,p.y-e.radius*PX-18,w*Math.max(0,e.hp/e.max),5); }
+}
+function drawPlayer(){
+  const pl=player, p=W2S(pl.p); g.save(); g.translate(p.x,p.y);
+  g.fillStyle="rgba(0,0,0,.35)"; g.beginPath(); g.ellipse(0,0,.42*PX,.22*PX,0,0,7); g.fill();
+  const inv=dodging();
+  g.fillStyle=pl.hurtT>0?"#ff9a90":inv?"#cbbcff":"#f2d6e2"; g.beginPath(); g.arc(0,0,.35*PX,0,7); g.fill();
+  if(pl.counter>0){ g.strokeStyle="#9980ff"; g.lineWidth=3; g.beginPath(); g.arc(0,0,.5*PX,0,7*(pl.counter/T.counterSeconds)); g.stroke(); }
+  const a=Math.atan2(pl.face.y,pl.face.x); g.rotate(a); g.strokeStyle="#e8ecf4"; g.lineWidth=3; g.beginPath(); g.moveTo(.2*PX,0); g.lineTo(.95*PX,0); g.stroke();
+  g.restore();
+  // Aim reticle.
+  const m=W2S(mouse); g.strokeStyle="rgba(219,194,125,.6)"; g.lineWidth=1.5; g.beginPath(); g.arc(m.x,m.y,7,0,7); g.stroke();
+}
+function drawHitboxes(){
+  const pl=player; if(pl.atk>=0){ const s=SWINGS[pl.atk], p=W2S(pl.p), a=Math.atan2(pl.face.y,pl.face.x), h=s.half*Math.PI/180; g.strokeStyle="#7dffb0"; g.setLineDash([5,4]); g.beginPath(); g.moveTo(p.x,p.y); g.arc(p.x,p.y,s.range*T.rangeMul*PX,a-h,a+h); g.closePath(); g.stroke(); g.setLineDash([]); }
+  for(const e of enemies){ const p=W2S(e.p); g.strokeStyle="#7dffb0"; g.beginPath(); g.arc(p.x,p.y,e.radius*PX,0,7); g.stroke(); }
+  const p=W2S(pl.p); g.strokeStyle="#7dffb0"; g.beginPath(); g.arc(p.x,p.y,.42*PX,0,7); g.stroke();
+}
+function win(x,y,w,h){ g.fillStyle="rgba(30,42,85,.94)"; g.fillRect(x,y,w,h); g.strokeStyle="rgba(219,194,125,.45)"; g.lineWidth=1.2; g.strokeRect(x+.5,y+.5,w-1,h-1); g.fillStyle="#dbc27d"; for(const [cx,cy] of [[x,y],[x+w-16,y],[x,y+h-2.4],[x+w-16,y+h-2.4]]) g.fillRect(cx,cy,16,2.4); for(const [cx,cy] of [[x,y],[x+w-2.4,y],[x,y+h-16],[x+w-2.4,y+h-16]]) g.fillRect(cx,cy,2.4,16); }
+function drawHud(W,H){
+  const pl=player; g.font='600 11px "JetBrains Mono", monospace'; g.textAlign="left"; g.textBaseline="alphabetic";
+  win(16,12,300,74); g.fillStyle="#dbc27d"; g.fillText("HUNTER",30,30); g.fillStyle="#f7f2e8"; g.font='700 17px "IBM Plex Sans KR", sans-serif'; g.fillText("아스트라이아",30,52);
+  g.fillStyle="#0d1224"; g.fillRect(30,60,200,9); g.fillStyle=pl.hp/T.playerHP<.3?"#ff544d":"#dbc27d"; g.fillRect(30,60,200*pl.hp/T.playerHP,9);
+  g.font='600 13px "JetBrains Mono", monospace'; g.fillStyle="#f7f2e8"; g.textAlign="right"; g.fillText(`${pl.hp}`,300,69);
+  g.textAlign="left"; g.font='600 10px "JetBrains Mono", monospace'; g.fillStyle="#a9b0c9"; g.fillText("DASH",30,82); g.fillStyle="#0d1224"; g.fillRect(64,76,90,4); g.fillStyle="#9980ff"; g.fillRect(64,76,90*(1-pl.cool/Math.max(.01,T.dashCooldown)),4);
+  if(pl.counter>0){ g.fillStyle="#9980ff"; g.font='700 12px "JetBrains Mono", monospace'; g.fillText("COUNTER",230,30); }
+  win(W-236,12,220,74); g.font='600 11px "JetBrains Mono", monospace'; g.fillStyle="#dbc27d"; g.fillText("SIM",W-222,30);
+  g.fillStyle="#a9b0c9"; g.font='500 11px "JetBrains Mono", monospace';
+  const lines=[`fps ${fps.toFixed(0)}  time×${(timeScale*T.gameSpeed).toFixed(2)}`,`combo ${pl.atk>=0?pl.atk+1:"-"}/6  ${slowMo?"SLOW":stopLeft>0?"HITSTOP":""}`,`hostile ${enemies.filter(e=>!e.dead&&e.type!=="dummy").length}`];
+  lines.forEach((s,i)=>g.fillText(s,W-222,48+i*14));
+  if(stampT>=0&&stampT<.9){ const s=stampT<.08?1.6-7.5*stampT:1, a=stampT<.6?1:1-(stampT-.6)/.3; g.save(); g.globalAlpha=a; g.translate(W/2,H*.28); g.scale(s,s); g.fillStyle="rgba(18,26,54,.72)"; g.fillRect(-280,-48,560,96); g.fillStyle="rgba(219,194,125,.45)"; g.fillRect(-280,-48,560,1.2); g.fillRect(-280,47,560,1.2);
+    g.rotate(-.14); g.fillStyle="#9980ff"; g.fillRect(-230,-1.5,460,3); g.rotate(.14); g.fillStyle="#f7f2e8"; g.font='italic 700 44px "IBM Plex Sans KR", sans-serif'; g.textAlign="center"; g.fillText("JUST DODGE",0,10); g.fillStyle="#dbc27d"; g.font='700 13px "JetBrains Mono", monospace'; g.fillText("COUNTER READY",0,36); g.restore(); }
+  if(pl.hp<=0){ g.fillStyle="rgba(5,7,14,.7)"; g.fillRect(0,0,W,H); g.fillStyle="#f7f2e8"; g.font='700 28px "IBM Plex Sans KR", sans-serif'; g.textAlign="center"; g.fillText("헌터 후송 — R로 다시 시작",W/2,H/2); }
+  if(paused){ g.fillStyle="rgba(5,7,14,.5)"; g.fillRect(0,0,W,H); g.fillStyle="#dbc27d"; g.font='700 22px "IBM Plex Sans KR", sans-serif'; g.textAlign="center"; g.fillText("일시 정지 (P)",W/2,H/2); }
+}
+
+// ---------------------------------------------------------------------------------------------- input
+function toWorld(ev){ const r=cv.getBoundingClientRect(); const x=(ev.clientX-r.left)*cv.width/r.width, y=(ev.clientY-r.top)*cv.height/r.height; return V((x-ox)/PX,(y-oy)/PX); }
+function unlockAudio(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
+cv.addEventListener("pointermove",e=>{mouse=toWorld(e);});
+cv.addEventListener("pointerdown",e=>{unlockAudio(); mouse=toWorld(e); if(e.button===0){attackPressed=true; attackHeld=true;} if(e.button===2) wantDash=true; cv.focus();});
+window.addEventListener("pointerup",e=>{if(e.button===0) attackHeld=false;});
+cv.addEventListener("contextmenu",e=>e.preventDefault());
+window.addEventListener("keydown",e=>{
+  if(e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement) return;
+  const k=e.key.toLowerCase(); unlockAudio();
+  if([" ","shift"].includes(k)){ wantDash=true; e.preventDefault(); }
+  if(k==="j"){ if(!keys.has("j")) attackPressed=true; attackHeld=true; }
+  if(k==="r") reset(); if(k==="h") toggle("b-hit"); if(k==="p") paused=!paused;
+  if(["w","a","s","d","arrowup","arrowdown","arrowleft","arrowright"].includes(k)) e.preventDefault();
+  keys.add({arrowup:"w",arrowdown:"s",arrowleft:"a",arrowright:"d"}[k]||k);
+});
+window.addEventListener("keyup",e=>{ const k=e.key.toLowerCase(); keys.delete({arrowup:"w",arrowdown:"s",arrowleft:"a",arrowright:"d"}[k]||k); if(k==="j") attackHeld=false; });
+window.addEventListener("blur",()=>{keys.clear(); attackHeld=false;});
+function toggle(id){ const b=document.getElementById(id); b.classList.toggle("on"); if(id==="b-hit") showHit=b.classList.contains("on"); if(id==="b-ai") aiOff=b.classList.contains("on"); if(id==="b-god") god=b.classList.contains("on"); }
+document.getElementById("b-copier").onclick=()=>spawn("copier"); document.getElementById("b-locker").onclick=()=>spawn("locker");
+document.getElementById("b-monitor").onclick=()=>spawn("monitor"); document.getElementById("b-dummy").onclick=()=>spawn("dummy",V(ROOM.w/2,ROOM.h*.4));
+document.getElementById("b-reset").onclick=reset; for(const id of ["b-hit","b-ai","b-god"]) document.getElementById(id).onclick=()=>toggle(id);
+
+// Buttons drop focus after a click so Space/R stay game keys instead of re-pressing the button.
+document.addEventListener("click",e=>{ const b=e.target.closest&&e.target.closest("button"); if(b) b.blur(); });
+reset(); requestAnimationFrame(frame);
+</script>
+</body></html>

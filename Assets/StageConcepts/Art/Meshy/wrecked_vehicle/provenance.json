@@ -1,0 +1,52 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "ruins",
+  "prompt": "Abandoned wrecked small city bus, long rectangular recognizable bus body, roof partly caved in, shattered window openings, missing front bumper, crooked rusted wheels, fully grounded complete vehicle, post apocalyptic Earth urban ruin. No people, no letters or text. Single isolated complete game environment prop, full object visible, no background scene, no ground plane, no pedestal, no characters. Strong readable silhouette, efficient low polygon game mesh, large clean forms, fine detail in PBR normal textures, realistic stylized fantasy game quality.",
+  "texture_prompt": "Heavily rusted faded yellow bus paint, dark shattered windows, brown rust, dusty grey metal, chipped paint and dents in normal texture, weathered abandoned city vehicle.",
+  "preview_task_id": "01a0f174-88ac-7669-8b9f-9080c3e1a1b7",
+  "refine_task_id": "01a0f175-bf82-72f7-9949-f8f309eff56d",
+  "created_utc": "2026-09-30T08:37:56.630756+00:00",
+  "requested_triangles": 4000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 3786,
+    "vertices": 6727,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "bytes": 2031312
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 8408528
+}

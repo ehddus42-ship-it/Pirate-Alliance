@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "cave",
+  "role": "prop",
+  "prompt": "Clump of bioluminescent tube coral growing from a dark rock base, many thick hollow tubes of different heights with flared glowing openings, a few round glowing bulbs between them. Compact solid underground organism prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Dark wet basalt base, pale violet and teal tube walls, bright cyan glowing tube rims and bulbs, slick organic surface, fine organic normal detail.",
+  "preview_task_id": "01a102b9-f0a6-7473-a4c5-76eed202b9b6",
+  "refine_task_id": "01a102bc-cd8b-76bb-9f3d-1074d92106d9",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:09:18.810346+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.0,
+    1.9,
+    2.0
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 15581,
+    "vertices": 25031,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3693513,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2078419,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2593265,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9259010553359985,
+      -0.7613740563392639,
+      -0.8912770748138428
+    ],
+    "unity_bounds_max": [
+      0.9522209763526917,
+      0.7402220368385315,
+      0.9057810306549072
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 9355492
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

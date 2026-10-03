@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "forest",
+  "role": "landmark",
+  "prompt": "Ruined circular elven shrine pavilion, round stepped stone platform with six slender carved pillars in a ring, a partly collapsed domed roof with the front half broken open, fallen roof fragments on the platform edge, ivy climbing two pillars, a small round empty altar stone in the center. Graceful ancient fantasy architecture, open interior visible from above. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Weathered pale moonstone limestone with a soft blue grey tint, green moss in the joints, carved leaf motifs, dark green ivy, faint cyan glowing rune inlays on the altar. Detailed stone erosion normal map.",
+  "preview_task_id": "01a0f2bf-fe3d-7488-a5f7-1d41e665245c",
+  "refine_task_id": "01a0f2c1-9c0f-744e-9ff3-a7bce37de6b2",
+  "attempt": 1,
+  "created_utc": "2026-09-30T14:40:34.867084+00:00",
+  "requested_triangles": 30000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    7.5,
+    6.0,
+    7.5
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 30210,
+    "vertices": 46660,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3183210,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1931871,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2299034,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9504280090332031,
+      -0.6088560819625854,
+      -0.9518669247627258
+    ],
+    "unity_bounds_max": [
+      0.9516299962997437,
+      0.6214020252227783,
+      0.950666069984436
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 9272072
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

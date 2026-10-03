@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "digital",
+  "role": "prop",
+  "prompt": "Tall slim sci-fi laser fence emitter pylon, square tapered tower about four times taller than wide, three stacked glowing emitter rings along its height, an armored base with anchor bolts, a short antenna tip on top, one side cable. Security firewall barrier post, upright and standalone. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Black graphite armor, bright magenta and cyan emitter rings, silver edges, small amber warning lights, fine technical seams in the normal map.",
+  "preview_task_id": "01a0f2db-f71c-72af-b391-bad506841ebe",
+  "refine_task_id": "01a0f2dc-ed04-751d-9594-cd5b1f2e9003",
+  "attempt": 2,
+  "created_utc": "2026-09-30T15:11:25.559548+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    1.0,
+    4.2,
+    1.0
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 14459,
+    "vertices": 18539,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 2803658,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1823994,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2176091,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.1852240115404129,
+      -0.9518000483512878,
+      -0.20229893922805786
+    ],
+    "unity_bounds_max": [
+      0.18461401760578156,
+      0.950031042098999,
+      0.20025406777858734
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 7572780
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

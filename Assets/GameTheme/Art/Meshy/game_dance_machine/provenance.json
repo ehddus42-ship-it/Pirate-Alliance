@@ -1,0 +1,101 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "game-theme original arcade hardware",
+  "theme": "game",
+  "role": "landmark",
+  "prompt": "Original rhythm dance arcade machine, a tall rear screen cabinet with two speaker towers, a wide square floor platform in front with a grid of large glowing arrow step pads and a safety bar, chunky bevelled block forms. No lettering, brands or characters. Single isolated complete environment prop, full object visible, no scene or floor plane, no characters. Clear silhouette from an elevated three-quarter game camera, precise bevelled hard surfaces, large clean forms, no tiny floating pieces, rich PBR normal detail, premium stylized game asset.",
+  "texture_prompt": "Midnight navy and ivory panels, glowing cyan, amber and raspberry arrow pads, chrome safety bar, black speaker grilles with cyan rings, light wear, rich PBR detail.",
+  "preview_task_id": "01a102b0-e502-7469-bd8c-c4db3b182a11",
+  "refine_task_id": "01a102b1-e333-7274-9236-c38c74c9ae9e",
+  "attempt": 1,
+  "created_utc": "2026-10-03T16:57:41.233373+00:00",
+  "texture_attempt": 1,
+  "rejected_geometry": [],
+  "rejected_textures": [],
+  "requested_triangles": 12000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.4,
+    2.6,
+    2.4
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 10504,
+    "vertices": 13606,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 332213,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 173728,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/png",
+        "bytes": 943668,
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9278020262718201,
+      -0.9518091082572937,
+      -0.9319260120391846
+    ],
+    "unity_bounds_max": [
+      0.9286760091781616,
+      0.9508860111236572,
+      0.9305910468101501
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 2013260
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 7172004
+}

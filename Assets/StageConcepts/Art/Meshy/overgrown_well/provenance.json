@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "forest",
+  "role": "prop",
+  "prompt": "Old round stone well with a small pitched wooden shingle roof on two posts, a wooden crank and hanging bucket on a rope, ivy covering half the stone ring and climbing one post. Compact readable village well prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Mossy grey fieldstone, dark weathered wooden shingles and posts, rusty iron crank, hemp rope, glossy dark green ivy, a faint cyan glow from deep inside the well.",
+  "preview_task_id": "01a102b0-e635-75c8-902c-c6337de71388",
+  "refine_task_id": "01a102b3-2587-75ea-8c85-d5347c58d240",
+  "attempt": 1,
+  "created_utc": "2026-10-03T16:59:03.373827+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.2,
+    2.7,
+    2.2
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 13262,
+    "vertices": 26630,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3651023,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2304941,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2428918,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.6877070665359497,
+      -0.9535989761352539,
+      -0.6393541097640991
+    ],
+    "unity_bounds_max": [
+      0.6610960364341736,
+      0.9496261477470398,
+      0.6480421423912048
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 9398484
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

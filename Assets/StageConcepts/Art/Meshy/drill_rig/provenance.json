@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "cave",
+  "role": "prop",
+  "prompt": "Old rusty mining drill machine on a small tracked base, a long drill bit angled down into the rock, a boxy engine with exhaust pipe, levers and a cracked pressure gauge, hoses coiled on the side. Compact heavy machinery prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Rusty yellow and black painted steel, worn dark iron drill bit, black rubber hoses, brass gauge, oil stains, cave dust, detailed machinery normal map.",
+  "preview_task_id": "01a102bb-3c7e-754d-94a1-0d705247101a",
+  "refine_task_id": "01a102bd-7912-709f-9d93-81caf873beb8",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:10:00.021191+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.6,
+    2.6,
+    2.0
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 14841,
+    "vertices": 25581,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3758542,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2416118,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2548090,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9110139608383179,
+      -0.8022959232330322,
+      -0.49438998103141785
+    ],
+    "unity_bounds_max": [
+      0.9503329396247864,
+      0.7937780022621155,
+      0.4936850070953369
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 9721688
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

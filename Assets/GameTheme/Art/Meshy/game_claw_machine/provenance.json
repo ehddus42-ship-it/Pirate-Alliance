@@ -1,0 +1,107 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "game-theme original arcade hardware",
+  "theme": "game",
+  "role": "prop",
+  "prompt": "Original arcade claw crane machine, tall square glass display box on a sturdy cabinet base, a metal claw hanging from a gantry inside, a heap of round plush toy balls and capsules on the floor of the box, one joystick and one big button on the front ledge, prize chute door below. No lettering, brands or characters. Single isolated complete environment prop, full object visible, no scene or floor plane, no characters. Clear silhouette from an elevated three-quarter game camera, precise bevelled hard surfaces, large clean forms, no tiny floating pieces, rich PBR normal detail, premium stylized game asset.",
+  "texture_prompt": "Deep midnight navy cabinet, warm ivory trim, plain blank glowing cyan marquee panel with no letters or words at all, clear glass with cyan reflections, raspberry and amber prize balls, chrome claw, cyan rim lights, light edge wear, rich PBR detail. Absolutely no text, letters, numbers or logos anywhere.",
+  "preview_task_id": "01a102b0-e501-74a5-af72-6511300ca2e3",
+  "refine_task_id": "01a102be-dc2e-702c-abbc-68d613704774",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:11:52.226008+00:00",
+  "texture_attempt": 2,
+  "rejected_geometry": [],
+  "rejected_textures": [
+    {
+      "refine_id": "01a102b2-30dd-730a-adbd-e8be68cbe3b7",
+      "reason": "SAW lettering on the marquee",
+      "rejected_utc": "2026-10-03T17:10:23.742511+00:00"
+    }
+  ],
+  "requested_triangles": 9000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "target_size_m": [
+    1.4,
+    2.3,
+    1.4
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 8931,
+    "vertices": 15874,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 291557,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 156782,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/png",
+        "bytes": 776080,
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.34376099705696106,
+      -0.9516029357910156,
+      -0.34603604674339294
+    ],
+    "unity_bounds_max": [
+      0.3483630120754242,
+      0.94970703125,
+      0.3511790335178375
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 1841864
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 6528052
+}

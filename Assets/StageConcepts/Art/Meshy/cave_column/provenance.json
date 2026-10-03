@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "cave",
+  "role": "landmark",
+  "prompt": "Massive natural cave column where a stalactite and a stalagmite have fused, a thick hourglass shaped limestone pillar with flowing rippled flowstone drapery on its sides, small stalagmites around its wide base, knobbly calcite surface, tall vertical silhouette about three times taller than wide. Underground cavern formation, no crystals, no man made parts, no ceiling. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Wet tan and grey limestone with cream flowstone bands, darker brown mineral streaks, damp glossy surfaces, fine calcite nodules in the normal map.",
+  "preview_task_id": "01a0f2cf-9bab-70f7-ba78-851ec3e70111",
+  "refine_task_id": "01a0f2d1-375d-716a-83b6-e218f3ccb439",
+  "attempt": 1,
+  "created_utc": "2026-09-30T14:58:38.672782+00:00",
+  "requested_triangles": 24000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    3.2,
+    8.0,
+    3.2
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 24826,
+    "vertices": 25909,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 4326172,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2073675,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 3304721,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.41942599415779114,
+      -0.9520651698112488,
+      -0.4331449568271637
+    ],
+    "unity_bounds_max": [
+      0.41932302713394165,
+      0.951092004776001,
+      0.41151705384254456
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 10833868
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "ruins",
+  "role": "landmark",
+  "prompt": "Military checkpoint fortification, a curved waist-high wall of stacked sandbags forming a half circle, a small wooden watch post with a corrugated metal roof behind it, stacked supply crates, a tattered canvas tarp, a rusty oil drum. Abandoned survivor outpost, grounded compact complex. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Olive and tan burlap sandbags with dirt stains, weathered grey wood, rusty corrugated metal, faded olive canvas, dark oil drum, fine fabric and wood normal detail.",
+  "preview_task_id": "01a0f2ca-7764-70e4-9d48-9049aea4cff0",
+  "refine_task_id": "01a0f2cc-10af-7112-9648-71fcbaa3264a",
+  "attempt": 1,
+  "created_utc": "2026-09-30T14:53:01.019026+00:00",
+  "requested_triangles": 24000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    6.5,
+    3.6,
+    5.0
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 24116,
+    "vertices": 35899,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 2955607,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2096675,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2003020,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9489730000495911,
+      -0.5576000213623047,
+      -0.8973219394683838
+    ],
+    "unity_bounds_max": [
+      0.9500529766082764,
+      0.5395839214324951,
+      0.8938550353050232
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 8495760
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}
