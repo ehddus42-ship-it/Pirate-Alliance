@@ -185,7 +185,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), towards=(v,t,d)=>v<t?Math.min(t,
 const CURVE_DEF=[
  {id:"accel",name:"이동 가속",field:"moveAccelCurve",x:"가속 진행 (0 → 최고 속도 도달 시간 = 이동 속도 ÷ 가속)",y:"속도 ÷ 이동 속도",yMax:1.3,mode:"linear",keys:[[0,0],[1,1]],presets:"rise"},
  {id:"decel",name:"이동 감속",field:"moveDecelCurve",x:"멈춤 진행 (손 뗀 순간 → 정지, 길이 = 속도 ÷ 감속)",y:"속도 ÷ 손 뗄 때 속도",yMax:1.3,mode:"linear",keys:[[0,1],[1,0]],presets:"fall"},
- {id:"dash",name:"대시 속도 프로필",field:"dashSpeedCurve",x:"대시 진행 (0 → 대시 시간)",y:"속도 배율 · 총 거리(속도×시간)는 그대로",yMax:2.6,mode:"linear",keys:[[0,1],[1,1]],presets:"profile",area:true},
+ {id:"dash",name:"대시 속도 프로필",field:"dashSpeedCurve",x:"대시 진행 (0 → 대시 시간)",y:"속도 배율 · 총 거리(속도×시간)는 그대로",yMax:2.6,mode:"smooth",keys:[[0,1.4],[.3,1.35],[.75,.6],[1,.315]],presets:"dash",area:true},
  {id:"lunge",name:"돌진 속도 프로필",field:"lungeSpeedCurve",x:"돌진 진행 (0 → 목표 앞 도착)",y:"속도 배율 · 도착 지점은 그대로",yMax:2.6,mode:"linear",keys:[[0,1],[1,1]],presets:"profile",area:true},
  {id:"hitstop",name:"히트 스톱 복귀",field:"hitStopRecoveryCurve",x:"히트 스톱 진행 (0 → 스톱 시간)",y:"0 = 스톱 속도 · 1 = 정상 속도",yMax:1.3,mode:"linear",keys:[[0,0],[.65,0],[1,1]],presets:"rise"},
  {id:"slow",name:"저스트 회피 슬로 복귀",field:"justDodgeSlowCurve",x:"슬로 진행 (0 → 슬로 시간)",y:"0 = 슬로 속도 · 1 = 정상 속도",yMax:1.3,mode:"linear",keys:[[0,0],[.65,0],[1,1]],presets:"rise"},
@@ -196,9 +196,10 @@ const SHAPES={ // normalised 0→1 shapes, mapped onto each curve's start/end va
  rise:[["선형","linear",[[0,0],[1,1]]],["Ease In","smooth",[[0,0],[.55,.2],[1,1]]],["Ease Out","smooth",[[0,0],[.4,.78],[1,1]]],["S 커브","smooth",[[0,0],[.3,.1],[.7,.9],[1,1]]],["오버슈트","smooth",[[0,0],[.55,1.15],[.8,.97],[1,1]]],["버티다 복귀","linear",[[0,0],[.65,0],[1,1]]],["즉시","linear",[[0,0],[.02,1],[1,1]]]],
  fall:[["선형","linear",[[0,0],[1,1]]],["Ease In","smooth",[[0,0],[.55,.2],[1,1]]],["Ease Out","smooth",[[0,0],[.4,.78],[1,1]]],["S 커브","smooth",[[0,0],[.3,.1],[.7,.9],[1,1]]],["버티다 정지","linear",[[0,0],[.6,0],[1,1]]],["즉시","linear",[[0,0],[.02,1],[1,1]]]],
  profile:[["일정","linear",[[0,1],[1,1]]],["초반 폭발","smooth",[[0,2.1],[.35,1],[1,.25]]],["점점 빠르게","smooth",[[0,.45],[1,1.55]]],["중간 피크","smooth",[[0,.35],[.5,1.7],[1,.35]]],["끝 급정지","linear",[[0,1.25],[.8,1.25],[1,0]]],["Ease Out","smooth",[[0,1.8],[.5,.9],[1,0]]]],
+ dash:[["추천 · 유저 친화","smooth",[[0,1.4],[.3,1.35],[.75,.6],[1,.315]]],["Unity 원본 (일정)","linear",[[0,1],[1,1]]],["초반 폭발","smooth",[[0,2.1],[.35,1],[1,.25]]],["중간 피크","smooth",[[0,.35],[.5,1.7],[1,.35]]],["끝 급정지","linear",[[0,1.25],[.8,1.25],[1,0]]]],
  shake:[["일정","linear",[[0,1],[1,1]]],["선형 감쇠","linear",[[0,1],[1,0]]],["빠른 감쇠","smooth",[[0,1],[.25,.35],[1,0]]],["펀치","smooth",[[0,1.5],[.15,1],[1,0]]],["늦은 감쇠","smooth",[[0,1],[.6,.85],[1,0]]]],
 };
-const CURVE_STORE="liminal-combat-lab-curves-v1";
+const CURVE_STORE="liminal-combat-lab-curves-v2";
 const C={}, CDEF={};
 function curveFrom(def,keys,mode){ return {mode:mode||def.mode,keys:keys.map(([x,y])=>({x:+x,y:+y}))}; }
 for(const d of CURVE_DEF){ CDEF[d.id]=d; C[d.id]=curveFrom(d,d.keys,d.mode); }
@@ -247,7 +248,7 @@ function fillPick(){ pick.innerHTML=CURVE_DEF.map(d=>`<option value="${d.id}">${
 function selectCurve(id){
   ed.id=id; ed.drag=-1; ed.hover=-1; const d=CDEF[id]; fillPick();
   descEl.innerHTML=`<b>가로</b> ${d.x}<br><b>세로</b> ${d.y}`;
-  const a=d.keys[0][1], b=d.keys[d.keys.length-1][1], flat=d.presets==="profile"||d.presets==="shake";
+  const a=d.keys[0][1], b=d.keys[d.keys.length-1][1], flat=d.presets==="profile"||d.presets==="shake"||d.presets==="dash";
   presetEl.innerHTML=""; for(const [name,mode,keys] of SHAPES[d.presets]){
     const btn=document.createElement("button"); btn.textContent=name;
     btn.onclick=()=>{ const k=flat?keys.map(([x,y])=>[x,y]):keys.map(([x,y])=>[x,a+(b-a)*y]); applyCurveData({[id]:{mode,keys:k}}); curveEdited(); };
@@ -304,7 +305,7 @@ function curveStats(){
   switch(ed.id){
     case "accel": return `0→최고 속도 <span>${(T.moveSpeed/T.accel).toFixed(2)}s</span> · 순간 최고 <span>${(T.moveSpeed*c.max).toFixed(2)} m/s</span>`;
     case "decel": return `정지까지 <span>${(T.moveSpeed/T.decel).toFixed(2)}s</span> · 미끄러짐 <span>${(T.moveSpeed*T.moveSpeed/T.decel*c.area).toFixed(2)} m</span>`;
-    case "dash": return `거리 <span>${(T.dashSpeed*T.dashDuration).toFixed(2)} m</span> · 순간 최고 <span>${(T.dashSpeed*c.max/mean).toFixed(1)} m/s</span>`;
+    case "dash": return `거리 <span>${(T.dashSpeed*T.dashDuration).toFixed(2)} m</span> · 시작 <span>${(T.dashSpeed*c.lut[0]/mean).toFixed(1)}</span> → 끝 <span>${(T.dashSpeed*c.lut[256]/mean).toFixed(1)} m/s</span> (이동 ${T.moveSpeed})`;
     case "lunge": return `순간 최고 <span>${(T.lungeSpeed*c.max/mean).toFixed(1)} m/s</span> · 평균 <span>${T.lungeSpeed.toFixed(1)} m/s</span>`;
     case "hitstop": { const m=T.hitStopScale+(1-T.hitStopScale)*c.area; return `스톱 중 평균 시간 배율 <span>×${m.toFixed(2)}</span> (스톱 속도 ${T.hitStopScale})`; }
     case "slow": { const m=T.slowScale+(1-T.slowScale)*c.area; return `슬로 ${T.slowSeconds}s 동안 게임 시간 <span>${(T.slowSeconds*m).toFixed(2)}s</span> 흐름`; }
