@@ -156,8 +156,9 @@ ASSETS.update({
         'Original arcade claw crane machine, tall square glass display box on a sturdy cabinet base, a metal claw hanging'
         ' from a gantry inside, a heap of round plush toy balls and capsules on the floor of the box, one joystick and one'
         ' big button on the front ledge, prize chute door below. No lettering, brands or characters.',
-        'Deep midnight navy cabinet, warm ivory trim, clear glass with cyan reflections, raspberry and amber prize balls,'
-        ' chrome claw, cyan rim lights, light edge wear, rich PBR detail.'),
+        'Deep midnight navy cabinet, warm ivory trim, plain blank glowing cyan marquee panel with no letters or words at'
+        ' all, clear glass with cyan reflections, raspberry and amber prize balls, chrome claw, cyan rim lights, light'
+        ' edge wear, rich PBR detail. Absolutely no text, letters, numbers or logos anywhere.'),
     'game_crt_stack': ('game', 'prop', 9000, (2.0, 2.2, 1.4), 'x',
         'Stack of five chunky retro CRT television sets of different sizes piled in a stepped pyramid, thick boxy bodies,'
         ' rounded screens showing simple abstract pixel patterns, short antennas on two of them, tangled cables at the'

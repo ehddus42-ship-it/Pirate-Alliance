@@ -1,0 +1,101 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "game-theme original arcade hardware",
+  "theme": "game",
+  "role": "prop",
+  "prompt": "Stack of retro arcade speaker cabinets and a big boxy boombox on top, round speaker cones of different sizes, equalizer light bars, chunky knobs, a coiled cable at the base. Solid vertical stacked prop, no logos. Single isolated complete environment prop, full object visible, no scene or floor plane, no characters. Clear silhouette from an elevated three-quarter game camera, precise bevelled hard surfaces, large clean forms, no tiny floating pieces, rich PBR normal detail, premium stylized game asset.",
+  "texture_prompt": "Midnight navy and ivory casings, black speaker cones with cyan glowing rings, amber and raspberry equalizer lights, chrome knobs, light scuffs, rich PBR detail.",
+  "preview_task_id": "01a102b3-8793-7771-b900-b0bfb3dd107b",
+  "refine_task_id": "01a102b4-8467-7694-b673-988f4afd90d3",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:00:31.679805+00:00",
+  "texture_attempt": 1,
+  "rejected_geometry": [],
+  "rejected_textures": [],
+  "requested_triangles": 8000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "target_size_m": [
+    1.4,
+    2.0,
+    1.0
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 7279,
+    "vertices": 11217,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 313901,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 210852,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/png",
+        "bytes": 941245,
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.44056302309036255,
+      -0.9506180286407471,
+      -0.33461201190948486
+    ],
+    "unity_bounds_max": [
+      0.4410500228404999,
+      0.9501660466194153,
+      0.3232410252094269
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 1914600
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 7328012
+}

@@ -290,12 +290,13 @@ ASSETS.update({
         'Matte black cube shells with glowing magenta and cyan cores, pixel noise patterns on the faces, bright edge'
         ' highlights, subtle scanline texture, crisp bevel normal detail.'),
     # Ruins
-    'toppled_streetlight': ('ruins', 'prop', 15000, (5.2, 1.2, 1.3), 'x',
-        'Toppled bent city street lamp post lying on its side on a chunk of broken concrete pavement, the lamp head'
-        ' cracked, a tangle of wires at the snapped base, a small traffic sign plate still attached, weeds around it.'
-        ' Long low wreckage prop.',
-        'Rusty dark green painted steel, cracked grey concrete, shattered amber lamp glass, faded blank sign plate, dry'
-        ' weeds and dust, peeling paint normal detail.'),
+    # toppled_streetlight was dropped after two attempts (Meshy kept producing a thin pole with loose fragments).
+    'overturned_dumpster': ('ruins', 'prop', 15000, (2.8, 1.5, 1.8), 'x',
+        'Large metal city dumpster knocked over on its side, heavy lid hanging open, spilled trash bags, crushed boxes'
+        ' and scattered debris pouring out onto the ground in front of it, one small wheel bent. Solid chunky grounded'
+        ' urban debris prop.',
+        'Dented dark green painted steel with heavy rust streaks and scratches, black and grey trash bags, soggy brown'
+        ' cardboard, dust and grime, no text or logos, detailed metal normal map.'),
     'newsstand_ruin': ('ruins', 'prop', 15000, (2.4, 2.6, 1.8), 'x',
         'Abandoned city newspaper kiosk booth, small boxy stall with a dented roof awning, broken window, empty sagging'
         ' magazine racks, scattered blank papers at the base, one side panel bent open. Compact urban ruin prop.',
@@ -338,10 +339,11 @@ ASSETS.update({
         'Rusty yellow and black painted steel, worn dark iron drill bit, black rubber hoses, brass gauge, oil stains,'
         ' cave dust, detailed machinery normal map.'),
     'fossil_ribcage': ('cave', 'landmark', 15000, (4.6, 2.8, 2.4), 'x',
-        'Giant fossilized creature ribcage emerging from a long rock mound, a row of large curved rib bones arching over,'
-        ' part of the spine visible along the top, small crystals growing between the ribs. Long ancient landmark prop.',
-        'Pale ivory and tan fossil bone with darker stained cracks, dark grey cave rock, glowing violet and cyan crystal'
-        ' clusters, fine bone and rock normal detail.'),
+        'Long low fossil skeleton of a huge ancient serpent creature lying half buried along a long rock mound, a row'
+        ' of eight large curved rib bones arching up from the mound in a line like a tunnel frame, a long spine along'
+        ' the top of the mound, no skull. The whole prop is about twice as long as it is tall, horizontal.',
+        'Pale ivory and tan fossil bone with darker stained cracks, dark grey cave rock mound, small glowing violet and'
+        ' cyan crystal clusters between the ribs, fine bone and rock normal detail.'),
 })
 
 _ledger_lock = threading.Lock()

@@ -28,7 +28,7 @@ DECOR = {
     'Digital': [('cable_junction', (4.0, 0.9, 1.8), 'x'), ('holo_pedestal', (1.4, 1.9, 1.4), None),
                 ('quarantine_crates', (2.4, 1.7, 1.8), 'x'), ('drone_dock', (1.9, 1.6, 1.9), None),
                 ('glitch_cube_pile', (2.6, 1.5, 2.4), 'x')],
-    'Ruins': [('toppled_streetlight', (5.2, 1.2, 1.3), 'x'), ('newsstand_ruin', (2.4, 2.6, 1.8), 'x'),
+    'Ruins': [('overturned_dumpster', (2.8, 1.5, 1.8), 'x'), ('newsstand_ruin', (2.4, 2.6, 1.8), 'x'),
               ('shopping_cart_pile', (2.4, 1.3, 1.7), 'x'), ('fallen_water_tank', (3.8, 2.8, 3.0), 'x'),
               ('tire_barricade', (3.0, 1.4, 1.6), 'x')],
     'Cave': [('glow_coral', (2.0, 1.9, 2.0), None), ('ore_vein_boulder', (2.4, 1.6, 2.0), 'x'),
@@ -44,15 +44,21 @@ def _radius(w, d):
     return 0.5 * math.hypot(w, d)
 
 
-def _footprints(r):
-    """(x, z, radius) discs for what is already in the room: Meshy models and every box (solid or walkable)."""
-    discs = []
-    for m in r.models:
-        w, _, d = m.actual
-        discs.append((m.position[0], m.position[2], 0.42 * max(w, d)))
+def _model_discs(r):
+    """(x, z, radius) discs for the Meshy models already in the room."""
+    return [(m.position[0], m.position[2], 0.42 * max(m.actual[0], m.actual[2])) for m in r.models]
+
+
+def _hits_box(r, x, z, pad):
+    """True when (x, z) padded by `pad` overlaps any authored box (solid, water blocker or walkable deck)."""
     for b in r.boxes:
-        discs.append((b.center[0], b.center[2], 0.5 * math.hypot(b.size[0], b.size[2])))
-    return discs
+        a = math.radians(b.yaw)
+        c, s = math.cos(a), math.sin(a)
+        lx = (x - b.center[0]) * c - (z - b.center[2]) * s
+        lz = (x - b.center[0]) * s + (z - b.center[2]) * c
+        if abs(lx) <= b.size[0] / 2 + pad and abs(lz) <= b.size[2] / 2 + pad:
+            return True
+    return False
 
 
 def _ok_reach(result, before):
@@ -90,9 +96,11 @@ def dress(theme, r):
             rad = _radius(target[0], target[2])
             if abs(x) + rad > 12.6:
                 continue
-            if not r.is_clear(x, z, rad * 0.75):
+            if not r.is_clear(x, z, rad * 0.5):
                 continue
-            if any((x - px) ** 2 + (z - pz) ** 2 < (rad * 0.8 + pr) ** 2 for px, pz, pr in _footprints(r)):
+            if any((x - px) ** 2 + (z - pz) ** 2 < (rad * 0.8 + pr) ** 2 for px, pz, pr in _model_discs(r)):
+                continue
+            if _hits_box(r, x, z, rad * 0.6):
                 continue
             spawn = r.player_spawn
             if (x - spawn[0]) ** 2 + (z - spawn[2]) ** 2 < (rad + 2.5) ** 2:

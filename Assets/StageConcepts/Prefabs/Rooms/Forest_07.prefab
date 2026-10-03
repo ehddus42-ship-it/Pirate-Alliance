@@ -2164,9 +2164,8 @@ Transform:
   - {fileID: 4405879136409373948}
   - {fileID: 7029839390016084823}
   - {fileID: 406311233079549298}
-  - {fileID: 1602876553302389392}
-  - {fileID: 4209332231051043023}
-  - {fileID: 7326764370266245193}
+  - {fileID: 755706590005602437}
+  - {fileID: 6776679439247505980}
   - {fileID: 3153991784053518856}
   - {fileID: 2024910209969828595}
   - {fileID: 8988845410937035440}
@@ -2178,6 +2177,13 @@ Transform:
   - {fileID: 6431382434847629896}
   - {fileID: 5434250509117897030}
   - {fileID: 228905555890326345}
+  - {fileID: 2401349307830388092}
+  - {fileID: 2072691557254039514}
+  - {fileID: 4260798814296581779}
+  - {fileID: 1906613924451903144}
+  - {fileID: 4644789278555180950}
+  - {fileID: 4462519102511641198}
+  - {fileID: 979086542081928328}
   m_Father: {fileID: 4976676133403842282}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4950672213830021859
@@ -2209,8 +2215,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2401349307830388092}
-  - {fileID: 2072691557254039514}
+  - {fileID: 7755666803630232603}
+  - {fileID: 5402299991080467515}
   m_Father: {fileID: 4976676133403842282}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3372016186910436645
@@ -4510,9 +4516,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 406311233079549298}
-  - component: {fileID: 5009205883296397271}
   m_Layer: 0
-  m_Name: Standing stone 0
+  m_Name: MeshySlot__woodcutter_cart
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4526,35 +4531,89 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5222883332535622744}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.7933533, z: 0, w: 0.6087614}
-  m_LocalPosition: {x: 1.9846629, y: 1.5, z: 28.386518}
+  m_LocalRotation: {x: 0, y: 0.8854298, z: 0, w: 0.46477318}
+  m_LocalPosition: {x: 0.9778049, y: 0, z: 23.719225}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 6781214503312576220}
   m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 105, z: 0}
---- !u!65 &5009205883296397271
-BoxCollider:
+  m_LocalEulerAnglesHint: {x: 0, y: 124.60892, z: 0}
+--- !u!1001 &5009205883296397271
+PrefabInstance:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 406311233079549298}
+    m_Modifications:
+    - target: {fileID: -8098169881513260187, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+      propertyPath: m_Name
+      value: Meshy__woodcutter_cart
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.4421365
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.4421365
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.4421365
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.0007976046
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.8474426
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.0032483542
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 3150474306388093854, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+--- !u!4 &6781214503312576220 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3447742079981357586, guid: 77b8f635318e54738e760e856c7a5fa0, type: 3}
+  m_PrefabInstance: {fileID: 5009205883296397271}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5222883332535622744}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1.1, y: 3, z: 0.9}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &6781214503312576220
+--- !u!1 &1602876553302389392
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4562,52 +4621,105 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1602876553302389392}
   - component: {fileID: 755706590005602437}
   m_Layer: 0
-  m_Name: Standing stone 1
+  m_Name: MeshySlot__hollow_stump
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1602876553302389392
+--- !u!4 &755706590005602437
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6781214503312576220}
+  m_GameObject: {fileID: 1602876553302389392}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.9659258, z: 0, w: 0.25881904}
-  m_LocalPosition: {x: 7.8138437, y: 1.5, z: 24.1}
+  m_LocalRotation: {x: 0, y: 0.82044566, z: 0, w: 0.57172453}
+  m_LocalPosition: {x: 3.603456, y: 0, z: 19.060549}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 4209332231051043023}
   m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 150, z: 0}
---- !u!65 &755706590005602437
-BoxCollider:
+  m_LocalEulerAnglesHint: {x: 0, y: 110.25886, z: 0}
+--- !u!1001 &351353357073086101
+PrefabInstance:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 755706590005602437}
+    m_Modifications:
+    - target: {fileID: -8098169881513260187, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+      propertyPath: m_Name
+      value: Meshy__hollow_stump
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.2565486
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.2565486
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.2565486
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.0063694296
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.67084235
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.007862784
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 3150474306388093854, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+--- !u!4 &4209332231051043023 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3447742079981357586, guid: 3768be537f415f1483f1c6c6f478ac39, type: 3}
+  m_PrefabInstance: {fileID: 351353357073086101}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6781214503312576220}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1.1, y: 3, z: 0.9}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &351353357073086101
+--- !u!1 &5331156620262822345
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4615,104 +4727,104 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4209332231051043023}
-  - component: {fileID: 5331156620262822345}
+  - component: {fileID: 6776679439247505980}
   m_Layer: 0
-  m_Name: Standing stone 2
+  m_Name: MeshySlot__fairy_ring_stones
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4209332231051043023
+--- !u!4 &6776679439247505980
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 351353357073086101}
+  m_GameObject: {fileID: 5331156620262822345}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.9961947, z: 0, w: -0.087155744}
-  m_LocalPosition: {x: 8.954154, y: 1.5, z: 17.902437}
+  m_LocalRotation: {x: 0, y: 0.887868, z: 0, w: 0.46009833}
+  m_LocalPosition: {x: -3.1760435, y: 0, z: 15.117474}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 7710879064694493357}
   m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 190, z: 0}
---- !u!65 &5331156620262822345
-BoxCollider:
+  m_LocalEulerAnglesHint: {x: 0, y: 125.2131, z: 0}
+--- !u!1001 &7326764370266245193
+PrefabInstance:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 351353357073086101}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1.1, y: 3, z: 0.9}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &6776679439247505980
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7326764370266245193}
-  - component: {fileID: 7710879064694493357}
-  m_Layer: 0
-  m_Name: Standing stone 3
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7326764370266245193
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 6776679439247505980}
+    m_Modifications:
+    - target: {fileID: -8098169881513260187, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+      propertyPath: m_Name
+      value: Meshy__fairy_ring_stones
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.5462921
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.5462921
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.5462921
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.00185784
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.62063056
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.0028135113
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3447742079981357586, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 3150474306388093854, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+--- !u!4 &7710879064694493357 stripped
 Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 3447742079981357586, guid: f4a00359e15559c68ac1f82cbf1543d8, type: 3}
+  m_PrefabInstance: {fileID: 7326764370266245193}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6776679439247505980}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.8660254, z: 0, w: -0.5}
-  m_LocalPosition: {x: 4.3, y: 1.5, z: 11.532566}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 240, z: 0}
---- !u!65 &7710879064694493357
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6776679439247505980}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1.1, y: 3, z: 0.9}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4796177962940164177
 GameObject:
   m_ObjectHideFlags: 0
@@ -4724,7 +4836,7 @@ GameObject:
   - component: {fileID: 3153991784053518856}
   - component: {fileID: 2812956735170677486}
   m_Layer: 0
-  m_Name: Standing stone 4
+  m_Name: Standing stone 0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4738,13 +4850,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4796177962940164177}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.53729963, z: 0, w: -0.8433914}
-  m_LocalPosition: {x: -4.557135, y: 1.5, z: 11.161968}
+  m_LocalRotation: {x: 0, y: 0.7933533, z: 0, w: 0.6087614}
+  m_LocalPosition: {x: 1.9846629, y: 1.5, z: 28.386518}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 295, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 105, z: 0}
 --- !u!65 &2812956735170677486
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4777,7 +4889,7 @@ GameObject:
   - component: {fileID: 2024910209969828595}
   - component: {fileID: 8942579949609267227}
   m_Layer: 0
-  m_Name: Standing stone 5
+  m_Name: Standing stone 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4791,13 +4903,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6166382422110648533}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.17364818, z: 0, w: -0.9848077}
-  m_LocalPosition: {x: -9.5210495, y: 1.5, z: 16.353415}
+  m_LocalRotation: {x: 0, y: 0.9659258, z: 0, w: 0.25881904}
+  m_LocalPosition: {x: 7.8138437, y: 1.5, z: 24.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 340, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 150, z: 0}
 --- !u!65 &8942579949609267227
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4830,7 +4942,7 @@ GameObject:
   - component: {fileID: 8988845410937035440}
   - component: {fileID: 4210613687666978862}
   m_Layer: 0
-  m_Name: Standing stone 6
+  m_Name: Standing stone 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4844,13 +4956,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6649334300803787296}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0.25881904, z: 0, w: -0.9659258}
-  m_LocalPosition: {x: -8.813844, y: 1.5, z: 24.1}
+  m_LocalRotation: {x: 0, y: 0.9961947, z: 0, w: -0.087155744}
+  m_LocalPosition: {x: 8.954154, y: 1.5, z: 17.902437}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 390, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 190, z: 0}
 --- !u!65 &4210613687666978862
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4883,7 +4995,7 @@ GameObject:
   - component: {fileID: 606087222002059931}
   - component: {fileID: 8154743536070869209}
   m_Layer: 0
-  m_Name: Standing stone 7
+  m_Name: Standing stone 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4897,13 +5009,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3045547356532090776}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0.57357645, z: 0, w: -0.81915206}
-  m_LocalPosition: {x: -3.7833934, y: 1.5, z: 28.145172}
+  m_LocalRotation: {x: 0, y: 0.8660254, z: 0, w: -0.5}
+  m_LocalPosition: {x: 4.3, y: 1.5, z: 11.532566}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 430, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 240, z: 0}
 --- !u!65 &8154743536070869209
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4936,7 +5048,7 @@ GameObject:
   - component: {fileID: 2631867480485844523}
   - component: {fileID: 156249018417738733}
   m_Layer: 0
-  m_Name: Undergrowth east
+  m_Name: Standing stone 4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4950,13 +5062,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2576658408147855208}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 12.35, y: 1, z: 18.2}
+  m_LocalRotation: {x: 0, y: 0.53729963, z: 0, w: -0.8433914}
+  m_LocalPosition: {x: -4.557135, y: 1.5, z: 11.161968}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 295, z: 0}
 --- !u!65 &156249018417738733
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4976,7 +5088,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.8, y: 2, z: 34}
+  m_Size: {x: 1.1, y: 3, z: 0.9}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2802482993487448885
 GameObject:
@@ -4989,7 +5101,7 @@ GameObject:
   - component: {fileID: 7165255442014179374}
   - component: {fileID: 7560952601318186382}
   m_Layer: 0
-  m_Name: Undergrowth west
+  m_Name: Standing stone 5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5003,13 +5115,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2802482993487448885}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.45, y: 1, z: 18.2}
+  m_LocalRotation: {x: 0, y: 0.17364818, z: 0, w: -0.9848077}
+  m_LocalPosition: {x: -9.5210495, y: 1.5, z: 16.353415}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 340, z: 0}
 --- !u!65 &7560952601318186382
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5029,7 +5141,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.6, y: 2, z: 34}
+  m_Size: {x: 1.1, y: 3, z: 0.9}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7703578786035492527
 GameObject:
@@ -5042,7 +5154,7 @@ GameObject:
   - component: {fileID: 2151694915078695367}
   - component: {fileID: 3426728658285820556}
   m_Layer: 0
-  m_Name: Landmark footprint__rune_arch
+  m_Name: Standing stone 6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5056,13 +5168,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7703578786035492527}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.70710677, z: 0, w: 0.70710677}
-  m_LocalPosition: {x: -10.4, y: 1.5, z: 20.5}
+  m_LocalRotation: {x: 0, y: -0.25881904, z: 0, w: -0.9659258}
+  m_LocalPosition: {x: -8.813844, y: 1.5, z: 24.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 390, z: 0}
 --- !u!65 &3426728658285820556
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5082,7 +5194,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.2, y: 3, z: 5.4}
+  m_Size: {x: 1.1, y: 3, z: 0.9}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6416449545686959537
 GameObject:
@@ -5095,7 +5207,7 @@ GameObject:
   - component: {fileID: 7354152971437004791}
   - component: {fileID: 7271545128779068715}
   m_Layer: 0
-  m_Name: Landmark footprint__mossy_boulders
+  m_Name: Standing stone 7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5109,13 +5221,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6416449545686959537}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.34202015, z: 0, w: 0.9396926}
-  m_LocalPosition: {x: 8.8, y: 1.1, z: 8.5}
+  m_LocalRotation: {x: 0, y: -0.57357645, z: 0, w: -0.81915206}
+  m_LocalPosition: {x: -3.7833934, y: 1.5, z: 28.145172}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 40, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 430, z: 0}
 --- !u!65 &7271545128779068715
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5135,7 +5247,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.6121769, y: 2.2, z: 1.7576702}
+  m_Size: {x: 1.1, y: 3, z: 0.9}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5304172978997789374
 GameObject:
@@ -5148,7 +5260,7 @@ GameObject:
   - component: {fileID: 6431382434847629896}
   - component: {fileID: 6327599060594662010}
   m_Layer: 0
-  m_Name: Landmark footprint__mossy_boulders
+  m_Name: Undergrowth east
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5162,13 +5274,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5304172978997789374}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.9396926, z: 0, w: -0.34202015}
-  m_LocalPosition: {x: 8, y: 0.9, z: 31}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 12.35, y: 1, z: 18.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 220, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &6327599060594662010
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5188,7 +5300,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.3190539, y: 1.8, z: 1.4380938}
+  m_Size: {x: 1.8, y: 2, z: 34}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2406249619858169118
 GameObject:
@@ -5201,7 +5313,7 @@ GameObject:
   - component: {fileID: 5434250509117897030}
   - component: {fileID: 4488160327434917981}
   m_Layer: 0
-  m_Name: Landmark footprint__guardian_statue
+  m_Name: Undergrowth west
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5215,13 +5327,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2406249619858169118}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.70710677, z: 0, w: -0.70710677}
-  m_LocalPosition: {x: 10.8, y: 1.5, z: 20}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -12.45, y: 1, z: 18.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 270, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &4488160327434917981
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5241,7 +5353,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.5, y: 3, z: 1.5}
+  m_Size: {x: 1.6, y: 2, z: 34}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4963947552771924711
 GameObject:
@@ -5254,7 +5366,7 @@ GameObject:
   - component: {fileID: 228905555890326345}
   - component: {fileID: 6962442701086373258}
   m_Layer: 0
-  m_Name: Landmark footprint__ancient_tree
+  m_Name: Landmark footprint__rune_arch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5268,13 +5380,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4963947552771924711}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.087155744, z: 0, w: 0.9961947}
-  m_LocalPosition: {x: -9.8, y: 1.5, z: 4.2}
+  m_LocalRotation: {x: 0, y: 0.70710677, z: 0, w: 0.70710677}
+  m_LocalPosition: {x: -10.4, y: 1.5, z: 20.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8438944382179009058}
-  m_LocalEulerAnglesHint: {x: 0, y: 10, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!65 &6962442701086373258
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5294,7 +5406,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.8, y: 3, z: 1.8}
+  m_Size: {x: 1.2, y: 3, z: 5.4}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1576327816976985185
 GameObject:
@@ -5307,7 +5419,7 @@ GameObject:
   - component: {fileID: 2401349307830388092}
   - component: {fileID: 3995757727970769046}
   m_Layer: 0
-  m_Name: Fairy ring
+  m_Name: Landmark footprint__mossy_boulders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5321,6 +5433,377 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1576327816976985185}
   serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0.34202015, z: 0, w: 0.9396926}
+  m_LocalPosition: {x: 8.8, y: 1.1, z: 8.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8438944382179009058}
+  m_LocalEulerAnglesHint: {x: 0, y: 40, z: 0}
+--- !u!65 &3995757727970769046
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1576327816976985185}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.6121769, y: 2.2, z: 1.7576702}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &8790056707534963597
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2072691557254039514}
+  - component: {fileID: 906227019074916346}
+  m_Layer: 0
+  m_Name: Landmark footprint__mossy_boulders
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2072691557254039514
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8790056707534963597}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0.9396926, z: 0, w: -0.34202015}
+  m_LocalPosition: {x: 8, y: 0.9, z: 31}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8438944382179009058}
+  m_LocalEulerAnglesHint: {x: 0, y: 220, z: 0}
+--- !u!65 &906227019074916346
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8790056707534963597}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.3190539, y: 1.8, z: 1.4380938}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &6468473310755479687
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4260798814296581779}
+  - component: {fileID: 406265019064956128}
+  m_Layer: 0
+  m_Name: Landmark footprint__guardian_statue
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4260798814296581779
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6468473310755479687}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0.70710677, z: 0, w: -0.70710677}
+  m_LocalPosition: {x: 10.8, y: 1.5, z: 20}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8438944382179009058}
+  m_LocalEulerAnglesHint: {x: 0, y: 270, z: 0}
+--- !u!65 &406265019064956128
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6468473310755479687}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.5, y: 3, z: 1.5}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &5791709434888049226
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1906613924451903144}
+  - component: {fileID: 905303204663181988}
+  m_Layer: 0
+  m_Name: Landmark footprint__ancient_tree
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1906613924451903144
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5791709434888049226}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0.087155744, z: 0, w: 0.9961947}
+  m_LocalPosition: {x: -9.8, y: 1.5, z: 4.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8438944382179009058}
+  m_LocalEulerAnglesHint: {x: 0, y: 10, z: 0}
+--- !u!65 &905303204663181988
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5791709434888049226}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.8, y: 3, z: 1.8}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &1959565493290171887
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4644789278555180950}
+  - component: {fileID: 7495600528209942916}
+  m_Layer: 0
+  m_Name: Landmark footprint__woodcutter_cart
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4644789278555180950
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1959565493290171887}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0.8854298, z: 0, w: 0.46477318}
+  m_LocalPosition: {x: 0.9778049, y: 0.8460041, z: 23.719225}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8438944382179009058}
+  m_LocalEulerAnglesHint: {x: 0, y: 124.60892, z: 0}
+--- !u!65 &7495600528209942916
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1959565493290171887}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.8104646, y: 1.6920083, z: 0.9094878}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &5305253773363854349
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4462519102511641198}
+  - component: {fileID: 4863092492056918165}
+  m_Layer: 0
+  m_Name: Landmark footprint__hollow_stump
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4462519102511641198
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5305253773363854349}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0.82044566, z: 0, w: 0.57172453}
+  m_LocalPosition: {x: 3.603456, y: 0.6817894, z: 19.060549}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8438944382179009058}
+  m_LocalEulerAnglesHint: {x: 0, y: 110.25886, z: 0}
+--- !u!65 &4863092492056918165
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5305253773363854349}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.5537534, y: 1.3635788, z: 1.5670382}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &9144916244138021923
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 979086542081928328}
+  - component: {fileID: 9022560055645792042}
+  m_Layer: 0
+  m_Name: Landmark footprint__fairy_ring_stones
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &979086542081928328
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9144916244138021923}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0.887868, z: 0, w: 0.46009833}
+  m_LocalPosition: {x: -3.1760435, y: 0.61581224, z: 15.117474}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8438944382179009058}
+  m_LocalEulerAnglesHint: {x: 0, y: 125.2131, z: 0}
+--- !u!65 &9022560055645792042
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9144916244138021923}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.9393635, y: 1.2316245, z: 1.8755422}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &1662181994773632887
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7755666803630232603}
+  - component: {fileID: 3611705002487637756}
+  m_Layer: 0
+  m_Name: Fairy ring
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7755666803630232603
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1662181994773632887}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.5, y: 1.4, z: 19.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -5328,13 +5811,13 @@ Transform:
   m_Children: []
   m_Father: {fileID: 123158997632842730}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!108 &3995757727970769046
+--- !u!108 &3611705002487637756
 Light:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1576327816976985185}
+  m_GameObject: {fileID: 1662181994773632887}
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 2
@@ -5393,7 +5876,7 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
---- !u!1 &8790056707534963597
+--- !u!1 &8324364041826003491
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5401,8 +5884,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2072691557254039514}
-  - component: {fileID: 906227019074916346}
+  - component: {fileID: 5402299991080467515}
+  - component: {fileID: 7389983656282375944}
   m_Layer: 0
   m_Name: Arch rune
   m_TagString: Untagged
@@ -5410,13 +5893,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2072691557254039514
+--- !u!4 &5402299991080467515
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8790056707534963597}
+  m_GameObject: {fileID: 8324364041826003491}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -9, y: 2.6, z: 20.5}
@@ -5425,13 +5908,13 @@ Transform:
   m_Children: []
   m_Father: {fileID: 123158997632842730}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!108 &906227019074916346
+--- !u!108 &7389983656282375944
 Light:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8790056707534963597}
+  m_GameObject: {fileID: 8324364041826003491}
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 2
