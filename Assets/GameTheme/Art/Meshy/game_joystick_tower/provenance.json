@@ -1,0 +1,102 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "game-theme original arcade hardware",
+  "theme": "game",
+  "role": "prop",
+  "prompt": "Original oversized arcade joystick control tower, tall stout square navy control pedestal, broad slanted beveled console deck with four large round buttons, thick central upright joystick shaft topped with a large faceted spherical ball, squared protruding corner housings and recessed base vents. Strong playful block-built architectural silhouette, complete standalone monument. No text or logos. Single isolated complete environment prop, full object visible, no scene or floor plane, no characters. Clear silhouette from an elevated three-quarter game camera, precise bevelled hard surfaces, large clean forms, no tiny floating pieces, rich PBR normal detail, premium stylized game asset.",
+  "texture_prompt": "Midnight navy painted metal pedestal, warm ivory beveled deck edges, raspberry faceted joystick ball, cyan and amber oversized action buttons, brushed aluminium shaft and corner protectors, subtle molded seams, normal-map vent grooves, tasteful scuffed edges.",
+  "preview_task_id": "01a100ae-47d3-7549-abab-f91769431789",
+  "refine_task_id": "01a100af-8eb6-72f8-ab75-bf881f1195f6",
+  "attempt": 1,
+  "created_utc": "2026-10-03T07:35:12.052135+00:00",
+  "requested_triangles": 7000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.7,
+    4.8,
+    2.7
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 5770,
+    "vertices": 6794,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 309384,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 168335,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/png",
+        "bytes": 869988,
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.287992000579834,
+      -0.9519809484481812,
+      -0.37037789821624756
+    ],
+    "unity_bounds_max": [
+      0.2891339957714081,
+      0.9510319828987122,
+      0.36966097354888916
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 1636624
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "review": "Meshy geometry and PBR thumbnails visually inspected; accepted for Unity in-room placement review.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 6424916,
+  "review_notes": "Tall slender joystick pedestal with raspberry ball and amber button; accepted. Preserve narrow proportions instead of stretching to its draft target envelope.",
+  "sha256": "554cf0d4bad8700421988aa7ad636ae847e97b88ca8f3291f52c0143d6282d7a",
+  "unity_front_axis": "+Z",
+  "orientation_review": "Compared coarse GLB projections from Unity axis views; glTF X mirrored for glTFast. Final camera visibility is checked in Unity."
+}

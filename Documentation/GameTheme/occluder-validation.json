@@ -1,0 +1,17 @@
+{
+    "status": "passed",
+    "utc": "2026-10-03T08:28:29.4440848Z",
+    "checks": [
+        "A renderer between camera and player is cut away.",
+        "Side and behind-player renderers remain visible.",
+        "A renderer outside the decorated prop remains untouched.",
+        "An already-disabled renderer keeps its original state.",
+        "An already-hidden renderer stays hidden while occluded.",
+        "A renderer restores visibility when it clears the player ray.",
+        "Clearing the ray restores the pre-existing hidden state.",
+        "A missing player target releases the temporary override.",
+        "Disabling the component restores visibility.",
+        "Each new override records the current renderer state rather than a stale initial value."
+    ],
+    "errors": []
+}

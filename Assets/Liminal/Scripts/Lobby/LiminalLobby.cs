@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 using UnityEngine.Playables;
 using UnityEngine.UI;
 
@@ -63,6 +64,29 @@ namespace AcRoguelike.Liminal
         GameObject combatModel, casualModel;
         readonly List<GameObject> hiddenCombatParts = new List<GameObject>();
         Color previousAmbient;
+        bool missionBoardOpen;
+        string selectedMissionId;
+        readonly List<UpgradeRow> upgradeRows = new List<UpgradeRow>();
+        readonly List<MissionCard> missionCards = new List<MissionCard>();
+        TextMeshProUGUI upgradeWallet, missionCode, missionDestination, missionBriefing, missionObjective,
+            missionDifficulty, missionRoute, missionGimmick, missionGimmickDescription, missionDeparture;
+        UnityEngine.UI.Button missionEnter, missionCancel;
+
+        sealed class UpgradeRow
+        {
+            public HunterProgress.Upgrade upgrade;
+            public TextMeshProUGUI price;
+            public UnityEngine.UI.Button button;
+            public UnityEngine.UI.Image[] pips;
+        }
+
+        sealed class MissionCard
+        {
+            public string id;
+            public RectTransform root;
+            public UnityEngine.UI.Image accent;
+            public UnityEngine.UI.Button button;
+        }
 
         // ---- construction ----------------------------------------------------------------------------------
         public static LiminalLobby Build(LiminalRunDirector director, Vector3 origin, LiminalHud hud)
@@ -296,7 +320,9 @@ namespace AcRoguelike.Liminal
             bool back = (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) || (pad != null && pad.buttonEast.wasPressedThisFrame);
             if (window)
             {
-                if (back || interact) CloseWindow();
+                FitWindow();
+                // Submit belongs to the focused button; gamepad A must not also close the dialog.
+                if (back || (!missionBoardOpen && keyboard != null && keyboard.eKey.wasPressedThisFrame)) CloseWindow();
                 return;
             }
             Nearest = null;
@@ -421,58 +447,141 @@ namespace AcRoguelike.Liminal
         {
             if (!hud || !hud.Canvas) return;
             if (agent) agent.Talk(true);
-            ShowWindow(new Vector2(760, 470));
+            ShowWindow(new Vector2(820, 564));
             var content = window.transform.Find("Window") as RectTransform;
             var font = hud.Font;
-            HunterUi.Text("Org", content, font, "KOREA HUNTER ASSOCIATION · 능력 개발부", 12, HunterUi.Gold, new Vector2(30, -22), new Vector2(560, 18), FontStyles.Bold);
-            HunterUi.Title(content, font, "한서윤 요원", new Vector2(30, -42), 700, 26);
-            HunterUi.Text("Wallet", content, font, $"보유 마석  <color=#a99bff>{HunterProgress.Currency:N0}</color>", 17, HunterUi.Cream, new Vector2(470, -24), new Vector2(260, 24), FontStyles.Bold, TextAlignmentOptions.TopRight);
+            HunterUi.Text("Org", content, font, "헌터 협회 · 능력 개발부", 13, HunterUi.Gold, new Vector2(30, -20), new Vector2(430, 26), FontStyles.Bold);
+            HunterUi.Title(content, font, "한서윤 요원 · 영구 강화", new Vector2(30, -51), 760, 26);
+            upgradeWallet = HunterUi.Text("Wallet", content, font, "", 17, HunterUi.Cream, new Vector2(490, -20), new Vector2(300, 32), FontStyles.Bold, TextAlignmentOptions.TopRight);
             for (int i = 0; i < HunterProgress.Count; i++)
             {
                 var upgrade = (HunterProgress.Upgrade)i;
                 var info = HunterProgress.Describe(upgrade);
-                int level = HunterProgress.Level(upgrade), cost = HunterProgress.Cost(upgrade);
-                float y = -132 - i * 72;
-                var row = HunterUi.Fill("Row" + i, content, new Vector2(0, 1), new Vector2(0, 1), new Vector2(30, y), new Vector2(700, 62), new Color(.09f, .13f, .27f, 1)).rectTransform;
+                float y = -124 - i * 88;
+                var row = HunterUi.Fill("Row" + i, content, new Vector2(0, 1), new Vector2(0, 1), new Vector2(30, y), new Vector2(760, 78), new Color(.09f, .13f, .27f, 1)).rectTransform;
                 HunterUi.Frame(row, HunterUi.GoldDim, 1);
-                HunterUi.Text("Name", row, font, info.name, 19, HunterUi.Cream, new Vector2(16, -8), new Vector2(200, 26), FontStyles.Bold);
-                HunterUi.Text("Effect", row, font, info.effect, 14, HunterUi.Muted, new Vector2(16, -36), new Vector2(420, 20));
+                HunterUi.Text("Name", row, font, info.name, 19, HunterUi.Cream, new Vector2(16, -9), new Vector2(214, 32), FontStyles.Bold);
+                HunterUi.Text("Effect", row, font, info.effect, 14, HunterUi.Muted, new Vector2(16, -42), new Vector2(520, 28));
+                var view = new UpgradeRow { upgrade = upgrade, pips = new UnityEngine.UI.Image[info.maxLevel] };
                 for (int k = 0; k < info.maxLevel; k++)
-                    HunterUi.Fill("Pip", row, new Vector2(0, 1), new Vector2(0, 1), new Vector2(230 + k * 18, -16), new Vector2(12, 12), k < level ? HunterUi.Gold : new Color(.25f, .3f, .45f, 1));
-                string label = cost < 0 ? "MAX" : $"강화   {cost:N0}";
-                var button = HunterUi.Button("Buy" + i, row, font, label, new Vector2(530, -11), new Vector2(156, 40), () =>
+                    view.pips[k] = HunterUi.Fill("Pip", row, new Vector2(0, 1), new Vector2(0, 1), new Vector2(252 + k * 20, -19), new Vector2(12, 12), HunterUi.GoldDim);
+                var button = HunterUi.Button("Buy" + i, row, font, "강화", new Vector2(558, -17), new Vector2(186, 44), () =>
                 {
                     if (HunterProgress.TryBuy(upgrade))
                     {
                         HitFeedback.Play(HitFeedback.Sfx.JustDodge, .5f, 1.4f);
                         HitFeedback.ScreenFlash(new Color(HunterUi.Gold.r, HunterUi.Gold.g, HunterUi.Gold.b, .18f), .25f);
-                        OpenUpgrades();
+                        RefreshUpgrades();
                     }
                     else HitFeedback.Play(HitFeedback.Sfx.Thud, .5f, 1.3f);
                 }, 16);
-                if (cost < 0 || HunterProgress.Currency < cost) button.GetComponent<Image>().color = new Color(.2f, .22f, .3f, 1);
+                view.button = button.GetComponent<UnityEngine.UI.Button>();
+                view.price = button.Find("Label").GetComponent<TextMeshProUGUI>();
+                upgradeRows.Add(view);
             }
-            HunterUi.Text("Close", content, font, "E · ESC  닫기", 13, HunterUi.Muted, new Vector2(30, -440), new Vector2(700, 20), FontStyles.Bold, TextAlignmentOptions.TopRight);
+            HunterUi.Text("Hint", content, font, "강화 효과는 다음 게이트 진입부터 적용돼.", 14, HunterUi.Muted, new Vector2(30, -500), new Vector2(490, 30));
+            HunterUi.Button("Close", content, font, "닫기  [ESC]", new Vector2(590, -491), new Vector2(200, 44), CloseWindow, 16);
+            RefreshUpgrades();
+        }
+
+        void RefreshUpgrades()
+        {
+            if (upgradeWallet) upgradeWallet.text = $"보유 마석  <color=#a99bff>{HunterProgress.Currency:N0}</color>";
+            foreach (var row in upgradeRows)
+            {
+                int level = HunterProgress.Level(row.upgrade), cost = HunterProgress.Cost(row.upgrade);
+                row.price.text = cost < 0 ? "강화 완료" : $"강화   {cost:N0}";
+                row.button.interactable = cost >= 0 && HunterProgress.Currency >= cost;
+                for (int k = 0; k < row.pips.Length; k++) row.pips[k].color = k < level ? HunterUi.Gold : new Color(.25f, .3f, .45f, 1);
+            }
         }
 
         void OpenGate()
         {
             if (!hud || !hud.Canvas) return;
-            ShowWindow(new Vector2(560, 360));
+            ShowWindow(new Vector2(1080, 644));
+            missionBoardOpen = true;
             var content = window.transform.Find("Window") as RectTransform;
             var font = hud.Font;
-            HunterUi.Text("Org", content, font, "GATE CONTROL · 서울 용산 03", 12, HunterUi.Gold, new Vector2(30, -22), new Vector2(500, 18), FontStyles.Bold);
-            HunterUi.Title(content, font, "게이트 진입", new Vector2(30, -42), 500, 26);
-            var stage = run && run.stages != null && run.stages.Length > 0 ? run.stages[0] : null;
-            string[] rows = { "등급", "B", "유형", "리미널 스페이스", "구성", $"일반 {Mathf.Max(1, (run && run.stages != null ? run.stages.Length : 4) - 1)} · 보스 1", "첫 구역", stage ? stage.title : "-" };
-            for (int i = 0; i < rows.Length; i += 2)
+            HunterUi.Text("Org", content, font, "헌터 협회 · 게이트 관제", 13, HunterUi.Gold, new Vector2(28, -18), new Vector2(620, 26), FontStyles.Bold);
+            HunterUi.Title(content, font, "출동 미션 선택", new Vector2(28, -47), 1024, 28);
+            HunterUi.Text("DiscoveryHint", content, font, "미탐사 목적지는 ???로 표시돼. 직접 진입하면 정보가 기록돼.", 14, HunterUi.Muted, new Vector2(28, -107), new Vector2(1024, 28));
+            var missions = run.AvailableMissions;
+            bool compactCards = missions.Count > 5;
+            float cardHeight = compactCards ? 62 : 76;
+            float cardStride = compactCards ? 70 : 84;
+            for (int i = 0; i < missions.Count; i++)
             {
-                float y = -100 - i / 2 * 36;
-                HunterUi.Text("Key", content, font, rows[i], 15, HunterUi.Muted, new Vector2(40, y), new Vector2(120, 24), FontStyles.Bold);
-                HunterUi.Text("Value", content, font, rows[i + 1], 18, HunterUi.Cream, new Vector2(170, y - 2), new Vector2(340, 26), FontStyles.Bold);
+                var mission = missions[i];
+                string id = mission.id;
+                var card = HunterUi.Button("Mission_" + id, content, font, "", new Vector2(28, -139 - i * cardStride), new Vector2(308, cardHeight), () => SelectMission(id));
+                var view = new MissionCard { id = id, root = card, button = card.GetComponent<UnityEngine.UI.Button>() };
+                view.accent = HunterUi.Fill("Selection", card, new Vector2(0, 1), new Vector2(0, 1), Vector2.zero, new Vector2(4, cardHeight), HunterUi.Gold);
+                HunterUi.Text("Code", card, font, mission.code + "  /  " + mission.title, 11, HunterUi.Gold, new Vector2(16, -5), new Vector2(276, 20), FontStyles.Bold);
+                HunterUi.Text("Destination", card, font, mission.DisplayDestination, compactCards ? 18 : 20, HunterUi.Cream, new Vector2(16, compactCards ? -20 : -22), new Vector2(276, compactCards ? 26 : 32), FontStyles.Bold);
+                HunterUi.Text("Intel", card, font, $"{mission.difficultyName}  ·  {mission.gimmickName}", compactCards ? 11 : 12, HunterUi.Muted, new Vector2(16, compactCards ? -42 : -53), new Vector2(276, compactCards ? 19 : 22));
+                card.gameObject.AddComponent<GateMissionCardFocus>().Selected = () => SelectMission(id);
+                missionCards.Add(view);
             }
-            HunterUi.Button("Enter", content, font, "진입", new Vector2(40, -270), new Vector2(230, 56), BeginGateEntry);
-            HunterUi.Button("Cancel", content, font, "취소", new Vector2(290, -270), new Vector2(230, 56), CloseWindow);
+            var detail = HunterUi.Window("MissionDetails", content, new Vector2(0, 1), new Vector2(0, 1), new Vector2(356, -139), new Vector2(696, 412), font);
+            missionCode = HunterUi.Text("Code", detail, font, "", 13, HunterUi.Gold, new Vector2(24, -14), new Vector2(648, 26), FontStyles.Bold);
+            missionDestination = HunterUi.Text("Destination", detail, font, "", 30, HunterUi.Cream, new Vector2(24, -44), new Vector2(648, 48), FontStyles.Bold);
+            missionBriefing = HunterUi.Text("Briefing", detail, font, "", 15, HunterUi.Muted, new Vector2(24, -100), new Vector2(648, 54));
+            HunterUi.Fill("Rule", detail, new Vector2(0, 1), new Vector2(0, 1), new Vector2(24, -162), new Vector2(648, 1), HunterUi.GoldDim);
+            missionDifficulty = HunterUi.Text("Difficulty", detail, font, "", 17, HunterUi.Gold, new Vector2(24, -178), new Vector2(320, 32), FontStyles.Bold);
+            missionRoute = HunterUi.Text("Route", detail, font, "", 16, HunterUi.Cream, new Vector2(358, -178), new Vector2(314, 32), FontStyles.Normal, TextAlignmentOptions.TopRight);
+            missionObjective = HunterUi.Text("Objective", detail, font, "", 15, HunterUi.Cream, new Vector2(24, -223), new Vector2(648, 52));
+            missionGimmick = HunterUi.Text("Gimmick", detail, font, "", 17, HunterUi.Gate, new Vector2(24, -292), new Vector2(648, 32), FontStyles.Bold);
+            missionGimmickDescription = HunterUi.Text("GimmickDescription", detail, font, "", 15, HunterUi.Cream, new Vector2(24, -336), new Vector2(648, 60));
+            missionDeparture = HunterUi.Text("Departure", content, font, "", 14, HunterUi.Muted, new Vector2(28, -575), new Vector2(308, 48));
+            missionEnter = HunterUi.Button("Enter", content, font, "선택한 미션으로 진입", new Vector2(356, -575), new Vector2(446, 48), BeginGateEntry, 18).GetComponent<UnityEngine.UI.Button>();
+            missionCancel = HunterUi.Button("Cancel", content, font, "닫기  [ESC]", new Vector2(824, -575), new Vector2(228, 48), CloseWindow, 16).GetComponent<UnityEngine.UI.Button>();
+            if (missions.Count == 0)
+            {
+                missionDestination.text = "진입 가능한 미션이 없어";
+                missionBriefing.text = "게이트 정보를 확인할 수 없어. 잠시 후 다시 확인해 줘.";
+                missionEnter.interactable = false;
+                return;
+            }
+            if (!missionCards.Exists(c => c.id == selectedMissionId)) selectedMissionId = missions[0].id;
+            SelectMission(selectedMissionId);
+            for (int i = 0; i < missionCards.Count; i++)
+                missionCards[i].button.navigation = new Navigation { mode = Navigation.Mode.Explicit,
+                    selectOnUp = missionCards[Mathf.Max(0, i - 1)].button,
+                    selectOnDown = i + 1 < missionCards.Count ? missionCards[i + 1].button : missionEnter,
+                    selectOnRight = missionEnter };
+            missionCancel.navigation = new Navigation { mode = Navigation.Mode.Explicit, selectOnLeft = missionEnter, selectOnUp = missionEnter };
+            var selected = missionCards.Find(c => c.id == selectedMissionId);
+            if (EventSystem.current && selected != null) EventSystem.current.SetSelectedGameObject(selected.root.gameObject);
+        }
+
+        void SelectMission(string id)
+        {
+            if (!missionBoardOpen) return;
+            GateMissionDefinition selected = null;
+            foreach (var mission in run.AvailableMissions) if (mission.id == id) { selected = mission; break; }
+            if (selected == null) return;
+            selectedMissionId = id;
+            foreach (var card in missionCards)
+            {
+                bool active = card.id == id;
+                card.accent.color = active ? HunterUi.Gold : Color.clear;
+                card.root.GetComponent<UnityEngine.UI.Image>().color = active ? new Color(.22f, .27f, .46f, 1) : new Color(.10f, .14f, .28f, 1);
+            }
+            missionCode.text = selected.code + "  /  " + selected.title + (selected.IsDiscovered ? "  /  탐사 기록 있음" : "  /  미탐사");
+            missionDestination.text = selected.DisplayDestination;
+            missionBriefing.color = HunterUi.Muted;
+            missionBriefing.text = selected.IsDiscovered ? selected.briefing : "아직 탐사 기록이 없는 목적지야. 아래의 위험 정보를 확인하고 출동해 줘.";
+            missionDifficulty.text = $"난이도  {selected.difficultyName}  {selected.difficulty}/3";
+            missionRoute.text = $"{selected.StageCount}개 구역  ·  총 {selected.RoomCount}개 방";
+            missionObjective.text = $"임무  {selected.objective}\n적 체력 {selected.healthMultiplier:0.##}배";
+            missionGimmick.text = "적 특수 기믹  /  " + selected.gimmickName;
+            missionGimmickDescription.text = selected.gimmickDescription;
+            missionDeparture.text = $"선택한 목적지\n{selected.code}  ·  {selected.DisplayDestination}";
+            missionEnter.interactable = selected.IsAvailable;
+            var currentCard = missionCards.Find(c => c.id == id);
+            missionEnter.navigation = new Navigation { mode = Navigation.Mode.Explicit, selectOnLeft = currentCard?.button,
+                selectOnUp = currentCard?.button, selectOnDown = missionCancel, selectOnRight = missionCancel };
         }
 
         void ShowWindow(Vector2 size)
@@ -486,27 +595,56 @@ namespace AcRoguelike.Liminal
             var r = window.GetComponent<RectTransform>();
             r.anchorMin = Vector2.zero; r.anchorMax = Vector2.one; r.offsetMin = r.offsetMax = Vector2.zero;
             HunterUi.Window("Window", window.transform, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, size, hud.Font, null, true);
+            FitWindow();
             if (fade) fade.transform.SetAsLastSibling();
+        }
+
+        void FitWindow()
+        {
+            if (!window) return;
+            var available = window.GetComponent<RectTransform>().rect.size;
+            var panel = window.transform.Find("Window") as RectTransform;
+            if (!panel || available.x <= 0 || available.y <= 0) return;
+            float scale = Mathf.Min(1, (available.x - 32) / panel.sizeDelta.x, (available.y - 32) / panel.sizeDelta.y);
+            panel.localScale = Vector3.one * Mathf.Max(.1f, scale);
         }
 
         void CloseWindow() => CloseWindow(false);
 
         void CloseWindow(bool keepTalking)
         {
-            if (window) Destroy(window);
+            if (window) { window.SetActive(false); Destroy(window); }
             window = null;
+            missionBoardOpen = false;
+            upgradeRows.Clear();
+            missionCards.Clear();
             if (!keepTalking && agent) agent.Talk(false);
             if (motor && run && run.Phase == LiminalRunPhase.Lobby && !entering) motor.enabled = true;
         }
 
         void BeginGateEntry()
         {
+            if (entering || !missionBoardOpen || string.IsNullOrEmpty(selectedMissionId)) return;
+            string missionId = selectedMissionId;
             CloseWindow();
             entering = true;
             if (motor) motor.enabled = false;
             HitFeedback.Play(HitFeedback.Sfx.JustDodge, .9f, .6f);
             // Into the rift: violet in, the run starts behind the curtain, violet out.
-            void Go() { entering = false; run.EnterDungeon(); }
+            void Go()
+            {
+                entering = false;
+                if (!run.EnterMission(missionId) && run.Phase == LiminalRunPhase.Lobby)
+                {
+                    if (motor) motor.enabled = true;
+                    OpenGate();
+                    if (missionBriefing)
+                    {
+                        missionBriefing.text = run.LastMissionError ?? "미션에 진입할 수 없어. 다른 미션을 선택해 줘.";
+                        missionBriefing.color = HunterUi.Danger;
+                    }
+                }
+            }
             if (fade) fade.Play(Go); else Go();
         }
 
@@ -627,6 +765,12 @@ namespace AcRoguelike.Liminal
     }
 
     /// <summary>Violet full-screen curtain for walking into a gate: fades in, runs the midpoint action, fades out.</summary>
+    public sealed class GateMissionCardFocus : MonoBehaviour, ISelectHandler
+    {
+        public Action Selected;
+        public void OnSelect(BaseEventData eventData) => Selected?.Invoke();
+    }
+
     public sealed class GateFade : MonoBehaviour
     {
         Image image;

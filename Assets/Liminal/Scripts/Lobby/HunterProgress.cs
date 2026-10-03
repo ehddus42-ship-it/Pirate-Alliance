@@ -26,6 +26,32 @@ namespace AcRoguelike.Liminal
         };
 
         const string CurrencyKey = "Hunter.MagicStones";
+        const string DiscoveryKey = "Hunter.Destination.";
+        const string StageKey = "Hunter.VisitedStage.";
+
+        public static string DestinationDiscoveryKey(string destinationId) => DiscoveryKey + destinationId;
+        public static string StageDiscoveryKey(string stageId) => StageKey + stageId;
+
+        public static bool IsDestinationDiscovered(string destinationId)
+            => !string.IsNullOrWhiteSpace(destinationId) && PlayerPrefs.GetInt(DestinationDiscoveryKey(destinationId), 0) == 1;
+
+        public static bool IsStageDiscovered(string stageId)
+            => !string.IsNullOrWhiteSpace(stageId) && PlayerPrefs.GetInt(StageDiscoveryKey(stageId), 0) == 1;
+
+        public static void DiscoverStage(string stageId)
+        {
+            if (string.IsNullOrWhiteSpace(stageId) || IsStageDiscovered(stageId)) return;
+            PlayerPrefs.SetInt(StageDiscoveryKey(stageId), 1);
+            PlayerPrefs.Save();
+        }
+
+        /// <summary>Called only once a mission's first playable stage has actually loaded.</summary>
+        public static void DiscoverDestination(string destinationId)
+        {
+            if (string.IsNullOrWhiteSpace(destinationId) || IsDestinationDiscovered(destinationId)) return;
+            PlayerPrefs.SetInt(DestinationDiscoveryKey(destinationId), 1);
+            PlayerPrefs.Save();
+        }
 
         public static Info Describe(Upgrade upgrade) => Infos[(int)upgrade];
         public static int Count => Infos.Length;

@@ -27,6 +27,7 @@ namespace AcRoguelike
         public Vector3 AimPoint => aimAnchor ? aimAnchor.position : transform.position + Vector3.up;
 
         Collider[] colliders;
+        float incomingDamageMultiplier = 1;
 
         void Awake()
         {
@@ -39,6 +40,7 @@ namespace AcRoguelike
         public void TakeDamage(int damage)
         {
             if (!IsAlive || damage <= 0) return;
+            damage = Mathf.Max(1, Mathf.RoundToInt(damage * incomingDamageMultiplier));
             HitCount++;
             Health = Mathf.Max(0, Health - damage);
             Damaged?.Invoke(this, damage);
@@ -68,10 +70,20 @@ namespace AcRoguelike
             Health = maxHealth;
             HitCount = 0;
             respawnOnDeath = shouldRespawn;
+            incomingDamageMultiplier = 1;
             colliders = GetComponentsInChildren<Collider>();
             visibleRenderers = GetComponentsInChildren<Renderer>();
             foreach (var renderer in visibleRenderers) if (renderer) renderer.enabled = true;
             foreach (var collider in colliders) if (collider) collider.enabled = true;
+        }
+
+        /// <summary>Scales an initialized enemy without resetting its targeting, colliders, or owner death hooks.</summary>
+        public void ApplyMissionStats(float healthMultiplier, float damageReceivedMultiplier)
+        {
+            float fraction = maxHealth > 0 ? Health / (float)maxHealth : 1;
+            maxHealth = Mathf.Max(1, Mathf.RoundToInt(maxHealth * Mathf.Max(1, healthMultiplier)));
+            Health = IsAlive ? Mathf.Max(1, Mathf.RoundToInt(maxHealth * fraction)) : 0;
+            incomingDamageMultiplier = Mathf.Clamp(damageReceivedMultiplier, .01f, 1);
         }
 
         IEnumerator Respawn()

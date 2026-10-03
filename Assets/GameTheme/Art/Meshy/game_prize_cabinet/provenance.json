@@ -1,0 +1,102 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "game-theme original arcade hardware",
+  "theme": "game",
+  "role": "prop",
+  "prompt": "Original arcade claw prize machine, stout square glass-front cabinet with thick blocky corner posts, suspended three-prong metal claw visible inside above several colorful voxel cube prizes, broad lower cabinet with sloping two-button control deck and square prize hatch. Oversized stepped marquee with blank inset panel. Beveled hard-surface toy architecture, no text or logos. Single isolated complete environment prop, full object visible, no scene or floor plane, no characters. Clear silhouette from an elevated three-quarter game camera, precise bevelled hard surfaces, large clean forms, no tiny floating pieces, rich PBR normal detail, premium stylized game asset.",
+  "texture_prompt": "Midnight navy metal frame, warm ivory corner posts, raspberry marquee trim, cyan glowing edge strips, amber control buttons, clear glass panels revealing colorful geometric cube prizes and silver claw, fine seams and lightly worn PBR finish.",
+  "preview_task_id": "01a100ae-4d5d-76fb-bf65-981981b5a5e0",
+  "refine_task_id": "01a100af-94a2-7511-bce1-d6789a970274",
+  "attempt": 1,
+  "created_utc": "2026-10-03T07:35:33.623369+00:00",
+  "requested_triangles": 9000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.3,
+    3.6,
+    2.2
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 7247,
+    "vertices": 12232,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 376423,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 220329,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/png",
+        "bytes": 998315,
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.5727279782295227,
+      -0.9516990780830383,
+      -0.6733929514884949
+    ],
+    "unity_bounds_max": [
+      0.5744640231132507,
+      0.9510319232940674,
+      0.6773930788040161
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 2075732
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "review": "Meshy geometry and PBR thumbnails visually inspected; accepted for Unity in-room placement review.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 7878912,
+  "review_notes": "Claw and geometric prizes visible inside open front; accepted as arcade perimeter prop.",
+  "sha256": "3bfb313cd68361f06bb4e7cb9e86196feabb0a76fbd1c8c2545764d3b9179990",
+  "unity_front_axis": "+Z",
+  "orientation_review": "Compared coarse GLB projections from Unity axis views; glTF X mirrored for glTFast. Final camera visibility is checked in Unity."
+}

@@ -11,6 +11,8 @@ namespace AcRoguelike.Liminal
     public sealed class LiminalRunDirector : MonoBehaviour
     {
         public LiminalStageDefinition[] stages = new LiminalStageDefinition[0];
+        [Tooltip("Optional override. Otherwise loads the catalog at Resources/GateMissions.")]
+        public GateMissionCatalog missionCatalog;
         public Transform player;
         public Font hudFont;
         public int seed = 73029;
@@ -19,6 +21,16 @@ namespace AcRoguelike.Liminal
         /// <summary>Magic stones earned in the current run, paid out on returning to the lobby.</summary>
         public int PendingReward { get; private set; }
         public LiminalLobby Lobby => lobby;
+        public GateMissionDefinition ActiveMission { get; private set; }
+        public string LastMissionError { get; private set; }
+        public IReadOnlyList<GateMissionDefinition> AvailableMissions
+        {
+            get
+            {
+                if (!missionCatalog) missionCatalog = Resources.Load<GateMissionCatalog>("GateMissions");
+                return missionCatalog ? missionCatalog.Missions : Array.Empty<GateMissionDefinition>();
+            }
+        }
         public int StageIndex { get; private set; }
         public int ActiveRoomIndex { get; private set; }
         public int LivingEnemyCount => living.Count;
@@ -49,9 +61,12 @@ namespace AcRoguelike.Liminal
         float originalMoveSpeed, originalWalkSpeed, originalCooldown;
         int originalFlames;
         bool initialized;
+        LiminalStageDefinition[] originalStages;
 
         void Start()
         {
+            // Preserve this scene's authored route. Directly played theme/test scenes keep their own stages.
+            originalStages = stages == null ? Array.Empty<LiminalStageDefinition>() : (LiminalStageDefinition[])stages.Clone();
             if (!player)
             {
                 var found = FindFirstObjectByType<PlayerMotor>();
@@ -111,12 +126,10 @@ namespace AcRoguelike.Liminal
         {
             try
             {
-                if (!player || !motor || !caster || stages == null || index >= stages.Length || !stages[index])
+                if (!player || !motor || !caster || stages == null || index < 0 || index >= stages.Length || !stages[index])
                     throw new InvalidOperationException("플레이어와 스테이지 설정을 확인해 줘.");
                 StageIndex = index;
-                foreach (var projectile in FindObjectsByType<TalismanProjectile>(FindObjectsSortMode.None)) Destroy(projectile.gameObject);
-                foreach (var flame in FindObjectsByType<SpiritFlame>(FindObjectsSortMode.None)) Destroy(flame.gameObject);
-                foreach (var can in FindObjectsByType<VendingCanProjectile>(FindObjectsSortMode.None)) Destroy(can.gameObject);
+                ClearProjectiles();
                 BuildRoute(index, false);
                 RenderSettings.ambientLight = CurrentStage.ambientColor;
                 SetPhase(LiminalRunPhase.Exploring);
@@ -124,6 +137,9 @@ namespace AcRoguelike.Liminal
                 ActivateRoom(0);
                 StageChanged?.Invoke();
                 hud.Notify(CurrentStage.title + "\n" + CurrentStage.subtitle, 6);
+                // Never reveal a destination from selection alone or from a failed route build.
+                HunterProgress.DiscoverStage(CurrentStage.stageId);
+                if (ActiveMission != null) HunterProgress.DiscoverDestination(ActiveMission.destinationId);
             }
             catch (Exception ex)
             {
@@ -154,6 +170,7 @@ namespace AcRoguelike.Liminal
             if (generated)
             {
                 generated.gameObject.SetActive(false);
+                generated.name = "RetiredRoute";
                 if (Application.isPlaying) Destroy(generated.gameObject); else DestroyImmediate(generated.gameObject);
             }
             generated = new GameObject("GeneratedRoute").transform;
@@ -219,21 +236,16 @@ namespace AcRoguelike.Liminal
             foreach (var ambush in room.GetComponentsInChildren<VendingMonster>(true))
             {
                 ambush.enabled = true;
-                if (combat && ambush.Health.IsAlive)
-                {
-                    ambush.Health.Defeated += EnemyDefeated;
-                    living.Add(ambush.Health);
-                }
+                Register(ambush.Health, combat);
             }
             // A room that authors its own boss replaces the generic silhouette boss.
             bool authoredBoss = false;
             foreach (var signal in room.GetComponentsInChildren<TrafficLightBoss>(true))
             {
                 signal.enabled = true;
+                Register(signal.Health, combat);
                 if (combat && signal.Health.IsAlive)
                 {
-                    signal.Health.Defeated += EnemyDefeated;
-                    living.Add(signal.Health);
                     authoredBoss = true;
                 }
             }
@@ -241,8 +253,14 @@ namespace AcRoguelike.Liminal
             {
                 room.SetGates(true, true);
                 bool boss = room.kind == LiminalRoomKind.Boss;
-                if (!authoredBoss) SpawnOfficeMonsters(room, index, boss);
-                hud.Notify(boss ? "교차로의 신호등이 깨어나고 있어.\n바닥의 예고선을 보고 회피해."
+                var gameTheme = room.GetComponent<AcRoguelike.GameTheme.GameThemeRoom>();
+                if (!authoredBoss)
+                {
+                    if (gameTheme) SpawnGameMonsters(room, gameTheme, boss);
+                    else SpawnOfficeMonsters(room, index, boss);
+                }
+                hud.Notify(gameTheme ? room.displayName + "\n복셀 몬스터가 나타났어. 예고선을 피하고 빈틈을 노려."
+                    : boss ? "교차로의 신호등이 깨어나고 있어.\n바닥의 예고선을 보고 회피해."
                     : room.displayName + "\n사무용품들이 깨어났어. 모두 정리하면 문이 열려.", 4);
             }
             else MarkRoomCleared(index);
@@ -299,10 +317,34 @@ namespace AcRoguelike.Liminal
             }
         }
 
-        void Register(TrainingEnemy enemy)
+        void SpawnGameMonsters(LiminalRoom room, AcRoguelike.GameTheme.GameThemeRoom theme, bool boss)
         {
+            int count = Mathf.Max(1, room.enemySpawns == null ? 0 : room.enemySpawns.Length);
+            for (int i = 0; i < count; i++)
+            {
+                Transform marker = room.enemySpawns != null && i < room.enemySpawns.Length ? room.enemySpawns[i] : null;
+                Vector3 position = marker ? marker.position : room.transform.TransformPoint(room.localBounds.center + Vector3.forward * (i * 2));
+                position.y = room.transform.position.y + .05f;
+                Vector3 look = (room.entry ? room.entry.position : room.transform.position) - position;
+                look.y = 0;
+                Quaternion facing = Quaternion.LookRotation(look.sqrMagnitude > .01f ? look : room.transform.forward);
+                var monster = AcRoguelike.GameTheme.GameVoxelMonster.Create(theme.RoleAt(i, boss), position, facing, room.transform, boss && i == 0);
+                if (!monster) continue;
+                monster.Setup(health, room, StageIndex);
+                Register(monster.Health);
+            }
+        }
+
+        void Register(TrainingEnemy enemy, bool countsForRoomClear = true)
+        {
+            if (!enemy || !enemy.IsAlive) return;
+            if (ActiveMission != null)
+            {
+                var modifier = enemy.GetComponent<GateMissionEnemyModifier>() ?? enemy.gameObject.AddComponent<GateMissionEnemyModifier>();
+                modifier.Apply(enemy, ActiveMission, health, this);
+            }
+            if (!countsForRoomClear || !living.Add(enemy)) return;
             enemy.Defeated += EnemyDefeated;
-            living.Add(enemy);
         }
 
         struct MonitorPlacement { public Vector3 position; public Quaternion tilt; }
@@ -443,6 +485,8 @@ namespace AcRoguelike.Liminal
             if (PendingReward > 0) HunterProgress.Earn(PendingReward);
             PendingReward = 0;
             ClearRoute();
+            ActiveMission = null;
+            stages = originalStages == null ? Array.Empty<LiminalStageDefinition>() : (LiminalStageDefinition[])originalStages.Clone();
             if (health) health.ResetHealth();
             if (!lobby) lobby = LiminalLobby.Build(this, transform.position + LobbyOffset, hud);
             SetPhase(LiminalRunPhase.Lobby);
@@ -456,6 +500,52 @@ namespace AcRoguelike.Liminal
         public void EnterDungeon()
         {
             if (!initialized || Phase != LiminalRunPhase.Lobby) return;
+            // Legacy callers still enter the scene's original route even if the mission catalog is absent.
+            ActiveMission = null;
+            BeginDungeonRun();
+        }
+
+        /// <summary>Starts the selected contract using the same room generator as the original campaign.</summary>
+        public bool EnterMission(string missionId)
+        {
+            LastMissionError = null;
+            if (!initialized || Phase != LiminalRunPhase.Lobby) return false;
+            GateMissionDefinition selected = null;
+            foreach (var mission in AvailableMissions)
+                if (mission != null && mission.id == missionId) { selected = mission; break; }
+            if (selected == null || !selected.IsAvailable)
+            {
+                LastMissionError = "미션의 이동 경로를 불러올 수 없어.";
+                return false;
+            }
+            // Validate every stage before leaving the lobby. A missing room must not consume discovery.
+            try
+            {
+                for (int i = 0; i < selected.stages.Length; i++) selected.stages[i].ChooseRoute(seed, i);
+            }
+            catch (Exception ex)
+            {
+                LastMissionError = "미션 경로 설정을 확인해 줘. " + ex.Message;
+                Debug.LogWarning(LastMissionError, this);
+                return false;
+            }
+            ActiveMission = selected;
+            stages = (LiminalStageDefinition[])selected.stages.Clone();
+            BeginDungeonRun();
+            return Phase == LiminalRunPhase.Exploring;
+        }
+
+        /// <summary>Retries the active contract instead of silently reverting to the original campaign.</summary>
+        public void RetryMission()
+        {
+            string missionId = ActiveMission?.id;
+            EnterLobby();
+            if (string.IsNullOrEmpty(missionId)) EnterDungeon();
+            else EnterMission(missionId);
+        }
+
+        void BeginDungeonRun()
+        {
             if (lobby) lobby.Leave(player);
             if (player) HunterProgress.Apply(player.gameObject);
             int runSeed = runsStarted++ == 0 ? seed : unchecked(seed + 104729 * runsStarted);
@@ -471,11 +561,25 @@ namespace AcRoguelike.Liminal
             cleared = new bool[0];
             ActiveRoomIndex = -1;
             ClearedRoomCount = 0;
+            ClearProjectiles();
+            var route = generated ? generated : transform.Find("GeneratedRoute");
+            if (route)
+            {
+                route.gameObject.SetActive(false);
+                route.name = "RetiredRoute";
+                Destroy(route.gameObject);
+            }
+            generated = null;
+        }
+
+        void ClearProjectiles()
+        {
             foreach (var p in FindObjectsByType<PaperProjectile>(FindObjectsSortMode.None)) Destroy(p.gameObject);
             foreach (var p in FindObjectsByType<BinaryProjectile>(FindObjectsSortMode.None)) Destroy(p.gameObject);
             foreach (var p in FindObjectsByType<VendingCanProjectile>(FindObjectsSortMode.None)) Destroy(p.gameObject);
-            var route = transform.Find("GeneratedRoute");
-            if (route) { route.gameObject.SetActive(false); Destroy(route.gameObject); }
+            foreach (var p in FindObjectsByType<TrafficLightCarProjectile>(FindObjectsSortMode.None)) Destroy(p.gameObject);
+            foreach (var p in FindObjectsByType<TalismanProjectile>(FindObjectsSortMode.None)) Destroy(p.gameObject);
+            foreach (var p in FindObjectsByType<SpiritFlame>(FindObjectsSortMode.None)) Destroy(p.gameObject);
         }
 
         void OnDestroy()

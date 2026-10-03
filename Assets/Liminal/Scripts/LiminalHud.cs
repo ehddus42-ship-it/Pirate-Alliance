@@ -152,13 +152,15 @@ namespace AcRoguelike.Liminal
             Bind();
             bool lobby = run.Phase == LiminalRunPhase.Lobby;
             if (combatGroup) combatGroup.SetActive(!lobby && run.CurrentStage);
-            if (lobbyGroup) lobbyGroup.SetActive(lobby);
+            if (lobbyGroup) lobbyGroup.SetActive(lobby && !(run.Lobby && run.Lobby.WindowOpen));
             if (currencyLabel) currencyLabel.text = HunterProgress.Currency.ToString("N0");
             UpdateStamp();
             if (lobby || !run.CurrentStage) return;
             if (run.ExitAvailable) ShowPrompt("E", "다음 구역");
             else if (promptLabel && promptLabel.text == "다음 구역") ShowPrompt("E", null);
-            gateLabel.text = $"GATE  {run.StageIndex + 1:00}";
+            gateLabel.text = run.ActiveMission != null
+                ? $"{run.ActiveMission.code}  ·  {run.ActiveMission.difficultyName}"
+                : $"GATE  {run.StageIndex + 1:00}";
             roomLabel.text = $"{run.CurrentStage.title}   {Mathf.Max(0, run.ActiveRoomIndex + 1):00} / {run.Rooms.Count:00}";
             enemyLabel.text = run.LivingEnemyCount.ToString();
             if (run.PlayerHealth)
@@ -240,7 +242,8 @@ namespace AcRoguelike.Liminal
             {
                 var next = run.stages[run.StageIndex + 1];
                 Heading("다음 게이트", next.isBossStage ? "BOSS" : $"GATE {run.StageIndex + 2:00}");
-                HunterUi.Text("Route", modalContent, font, $"{run.CurrentStage.title}   →   {next.title}", 26, HunterUi.Cream, new Vector2(0, -190), new Vector2(960, 40), FontStyles.Bold, TextAlignmentOptions.Center);
+                string destination = HunterProgress.IsStageDiscovered(next.stageId) ? next.title : "???";
+                HunterUi.Text("Route", modalContent, font, $"{run.CurrentStage.title}   →   {destination}", 26, HunterUi.Cream, new Vector2(0, -190), new Vector2(960, 48), FontStyles.Bold, TextAlignmentOptions.Center);
                 HunterUi.Button("Continue", modalContent, font, next.isBossStage ? "보스 게이트 진입" : "다음 게이트 진입", new Vector2(300, -330), new Vector2(360, 60), run.ContinueToNextStage);
             }
             else if (run.Phase == LiminalRunPhase.Paused)
@@ -257,12 +260,13 @@ namespace AcRoguelike.Liminal
                 HunterUi.Text("Reward", modalContent, font, $"획득 마석   <color=#a99bff>+{run.PendingReward:N0}</color>", 26, HunterUi.Cream, new Vector2(0, -150), new Vector2(960, 40), FontStyles.Bold, TextAlignmentOptions.Center);
                 HunterUi.Text("Result", modalContent, font, run.AugmentHistory, 17, HunterUi.Muted, new Vector2(70, -205), new Vector2(820, 100), FontStyles.Normal, TextAlignmentOptions.Top);
                 HunterUi.Button("Return", modalContent, font, "로비로 귀환", new Vector2(150, -350), new Vector2(300, 64), run.ReturnToLobby);
-                HunterUi.Button("Retry", modalContent, font, "바로 재도전", new Vector2(510, -350), new Vector2(300, 64), () => { run.ReturnToLobby(); run.EnterDungeon(); });
+                HunterUi.Button("Retry", modalContent, font, "같은 미션 재도전", new Vector2(510, -350), new Vector2(300, 64), run.RetryMission);
             }
             else
             {
                 Heading("설정 오류", "CONFIGURATION");
-                HunterUi.Text("Error", modalContent, font, configurationError ?? "", 18, HunterUi.Cream, new Vector2(50, -160), new Vector2(860, 220));
+                HunterUi.Text("Error", modalContent, font, configurationError ?? "", 18, HunterUi.Cream, new Vector2(50, -150), new Vector2(860, 180));
+                HunterUi.Button("Return", modalContent, font, "로비로 귀환", new Vector2(300, -365), new Vector2(360, 56), run.ReturnToLobby);
             }
         }
 
@@ -283,16 +287,7 @@ namespace AcRoguelike.Liminal
         void OnDestroy()
         {
             if (subscribed) subscribed.JustDodged -= OnJustDodged;
-            if (ownedSourceFont)
-            {
-                if (font)
-                {
-                    foreach (var atlas in font.atlasTextures) if (atlas) Destroy(atlas);
-                    if (font.material) Destroy(font.material);
-                    Destroy(font);
-                }
-                Destroy(ownedSourceFont);
-            }
+            HunterUi.ReleaseFont(font, ownedSourceFont);
         }
     }
 }

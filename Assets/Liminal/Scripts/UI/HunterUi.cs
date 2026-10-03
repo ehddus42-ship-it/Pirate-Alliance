@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,6 +13,7 @@ namespace AcRoguelike.Liminal
     /// </summary>
     public static class HunterUi
     {
+        static readonly HashSet<TMP_FontAsset> ownedFonts = new HashSet<TMP_FontAsset>();
         public static readonly Color Navy = new Color(.118f, .165f, .333f, .94f);
         public static readonly Color NavyDeep = new Color(.07f, .1f, .21f, .96f);
         public static readonly Color Gold = new Color(.86f, .76f, .49f);
@@ -59,8 +61,9 @@ namespace AcRoguelike.Liminal
         public static TextMeshProUGUI Title(RectTransform parent, TMP_FontAsset font, string title, Vector2 pos, float width, int size = 20)
         {
             var t = Text("Title", parent, font, title, size, Cream, pos, new Vector2(width, size + 10), FontStyles.Bold);
-            Fill("TitleBar", parent, new Vector2(0, 1), new Vector2(0, 1), pos + new Vector2(0, -(size + 12)), new Vector2(46, 3.5f), Gold);
-            Fill("TitleRule", parent, new Vector2(0, 1), new Vector2(0, 1), pos + new Vector2(52, -(size + 13)), new Vector2(Mathf.Max(10, width - 52), 1.2f), GoldDim);
+            float baseline = t.rectTransform.sizeDelta.y + 6;
+            Fill("TitleBar", parent, new Vector2(0, 1), new Vector2(0, 1), pos + new Vector2(0, -baseline), new Vector2(46, 3.5f), Gold);
+            Fill("TitleRule", parent, new Vector2(0, 1), new Vector2(0, 1), pos + new Vector2(52, -(baseline + 1)), new Vector2(Mathf.Max(10, width - 52), 1.2f), GoldDim);
             return t;
         }
 
@@ -81,9 +84,16 @@ namespace AcRoguelike.Liminal
         public static TextMeshProUGUI Text(string name, Transform parent, TMP_FontAsset font, string value, int size, Color color,
             Vector2 pos, Vector2 dimensions, FontStyles style = FontStyles.Normal, TextAlignmentOptions alignment = TextAlignmentOptions.TopLeft)
         {
+            // Noto Sans KR needs about 1.45 em per line. A Latin-sized box can make TMP ellipsize
+            // the entire label, including short titles and the currency counter.
+            float lineHeight = font ? size * font.faceInfo.lineHeight / Mathf.Max(1, font.faceInfo.pointSize) : size * 1.5f;
+            dimensions.y = Mathf.Max(dimensions.y, Mathf.Ceil(lineHeight + 2));
             var r = Rect(name, parent, new Vector2(0, 1), new Vector2(0, 1), pos, dimensions);
             var text = r.gameObject.AddComponent<TextMeshProUGUI>();
-            text.font = font; text.fontSize = size; text.text = value; text.color = color; text.fontStyle = style;
+            text.font = font;
+            if (font) text.fontSharedMaterial = font.material;
+            text.fontSize = size; text.text = value; text.color = color; text.fontStyle = style;
+            text.enableAutoSizing = false;
             text.alignment = alignment;
             text.raycastTarget = false; text.textWrappingMode = TextWrappingModes.Normal;
             text.overflowMode = TextOverflowModes.Ellipsis;
@@ -127,13 +137,50 @@ namespace AcRoguelike.Liminal
         public static TMP_FontAsset CreateFont(Font sourceFont, out Font ownedSource)
         {
             ownedSource = null;
+            // This reference keeps the existing bundled Noto font in player builds without duplicating it
+            // or depending on whatever fonts happen to be installed on the player's computer.
+            var settings = Resources.Load<HunterUiFontSource>(HunterUiFontSource.ResourcePath);
+            if ((!sourceFont || !sourceFont.HasCharacter('가')) && settings) sourceFont = settings.sourceFont;
             if (!sourceFont)
             {
-                ownedSource = Font.CreateDynamicFontFromOSFont(new[] { "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans CJK KR", "Arial" }, 30);
-                sourceFont = ownedSource;
+                Debug.LogError("Hunter UI requires the bundled Korean font resource.");
+                return TMP_Settings.defaultFontAsset;
             }
-            if (!sourceFont) return TMP_Settings.defaultFontAsset;
-            return TMP_FontAsset.CreateFontAsset(sourceFont, 40, 5, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 2048, 2048, AtlasPopulationMode.Dynamic, true);
+
+            var primary = NewFont(sourceFont, 2048, "Hunter UI - Static");
+            if (!primary) return TMP_Settings.defaultFontAsset;
+            var glyphs = settings && settings.commonCharacters ? settings.commonCharacters.text : "";
+            primary.TryAddCharacters(" ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,:;!?+-/%()[]·…???" + glyphs);
+            // Freeze common UI glyphs before creating any labels. Opening an upgrade/mission dialog
+            // then cannot change the atlas used by text that is already on screen.
+            primary.atlasPopulationMode = AtlasPopulationMode.Static;
+            var fallback = NewFont(settings && settings.sourceFont ? settings.sourceFont : sourceFont, 1024, "Hunter UI - Dynamic Fallback");
+            if (fallback) primary.fallbackFontAssetTable = new List<TMP_FontAsset> { fallback };
+            return primary;
+        }
+
+        static TMP_FontAsset NewFont(Font source, int atlasSize, string name)
+        {
+            var font = TMP_FontAsset.CreateFontAsset(source, 40, 5, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA,
+                atlasSize, atlasSize, AtlasPopulationMode.Dynamic, true);
+            if (!font) return null;
+            font.name = name;
+            font.hideFlags = HideFlags.DontSave;
+            // Runtime-only assets are never serialized into a player build.
+            ownedFonts.Add(font);
+            return font;
+        }
+
+        public static void ReleaseFont(TMP_FontAsset font, Font ownedSource)
+        {
+            if (font && ownedFonts.Remove(font))
+            {
+                if (font.fallbackFontAssetTable != null)
+                    foreach (var fallback in font.fallbackFontAssetTable) ReleaseFont(fallback, null);
+                // TMP owns its atlas textures and material and disposes them in OnDestroy.
+                UnityEngine.Object.Destroy(font);
+            }
+            if (ownedSource) UnityEngine.Object.Destroy(ownedSource);
         }
     }
 }
