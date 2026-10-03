@@ -231,6 +231,119 @@ ASSETS = {
         ' lantern glass, dust, fine wood normal detail.'),
 }
 
+# ---- Decor batch (2026-10): smaller dressing props so neighbouring rooms stop sharing the same set dressing. ----
+ASSETS.update({
+    # Forest
+    'hollow_stump': ('forest', 'prop', 15000, (2.6, 2.0, 2.6), None,
+        'Wide hollow ancient tree stump, broken jagged rim, thick buttress roots spreading over the ground, open hollow'
+        ' centre visible from above, a cluster of glowing mushrooms growing inside and on one root, soft moss patches.'
+        ' Squat solid forest floor prop.',
+        'Dark aged oak bark with deep cracks, pale dry heartwood inside the hollow, emerald moss, luminous cyan and lavender'
+        ' mushroom caps, fine bark normal detail.'),
+    'fairy_ring_stones': ('forest', 'prop', 15000, (3.4, 1.2, 3.4), None,
+        'Ring of seven small weathered standing stones arranged in a circle on a low round mossy mound, each stone a'
+        ' different height and gently leaning, carved spiral marks, little white mushrooms between the stones. Low wide'
+        ' ritual prop, open centre.',
+        'Grey blue weathered granite, faint cyan glowing spiral carvings, thick green moss, ivory mushrooms, dark earth'
+        ' mound, eroded stone normal detail.'),
+    'druid_totem': ('forest', 'prop', 15000, (1.1, 3.2, 1.1), None,
+        'Tall carved wooden druid totem post, stacked carved owl and stag faces, a pair of real antlers mounted on top,'
+        ' hanging small charms and bundles of dried herbs tied with cord, a low ring of stones around its base. Single'
+        ' standing vertical prop.',
+        'Weathered silver brown wood with deep carving, bone white antlers, faded red and ochre paint, hemp cord, green'
+        ' moss at the base, faint turquoise glowing eyes on the carved faces.'),
+    'overgrown_well': ('forest', 'prop', 15000, (2.2, 2.7, 2.2), None,
+        'Old round stone well with a small pitched wooden shingle roof on two posts, a wooden crank and hanging bucket on'
+        ' a rope, ivy covering half the stone ring and climbing one post. Compact readable village well prop.',
+        'Mossy grey fieldstone, dark weathered wooden shingles and posts, rusty iron crank, hemp rope, glossy dark green'
+        ' ivy, a faint cyan glow from deep inside the well.'),
+    'woodcutter_cart': ('forest', 'prop', 15000, (3.4, 1.8, 1.8), 'x',
+        'Abandoned wooden woodcutter hand cart with two large spoked wheels, loaded with a neat pile of cut logs, a wood'
+        ' axe stuck in the top log, long pull handles resting on the ground. Long low grounded prop.',
+        'Weathered pale brown planks, rusty iron wheel rims, fresh light log ends with rings and dark bark, steel axe head,'
+        ' patches of moss on the cart bed.'),
+    # Digital
+    'cable_junction': ('digital', 'prop', 15000, (4.0, 0.9, 1.8), 'x',
+        'Thick bundle of heavy data cables snaking along the floor into a chunky rectangular junction box with glowing'
+        ' status lights, cable clamps and connector plugs, a few cables lifting in a low arch. Long low floor prop.',
+        'Matte black and gunmetal cable sheaths, glowing cyan and violet data lines along the cables, dark grey metal'
+        ' junction box with green status LEDs, yellow and black warning stripes, fine panel normal detail.'),
+    'holo_pedestal': ('digital', 'prop', 15000, (1.4, 1.9, 1.4), None,
+        'Hexagonal metal projector pedestal with a glowing emitter ring on top, a solid floating translucent wireframe'
+        ' cube hologram hovering just above it, cooling vents and small panels on the sides. Compact sci-fi prop.',
+        'Dark graphite metal with bevelled edges, electric cyan emitter ring and hologram, thin magenta trim lights,'
+        ' small grey vents, precise hard surface normal detail.'),
+    'quarantine_crates': ('digital', 'prop', 15000, (2.4, 1.7, 1.8), 'x',
+        'Stack of three sealed sci-fi quarantine cargo crates, one large crate with two smaller ones on top, glowing'
+        ' seams, heavy latches, a red glowing lock panel, hazard stripes. Solid grouped cargo prop.',
+        'Dark slate composite panels, glowing red and cyan seams, yellow black hazard stripes, worn metal latches,'
+        ' scuffed edges, crisp hard surface normal detail.'),
+    'drone_dock': ('digital', 'prop', 15000, (1.9, 1.6, 1.9), None,
+        'Square charging cradle platform with four short pylons and a small round security drone parked on top, the'
+        ' drone has a single glowing lens and folded rotor arms, thick power cables running from the base. Compact sci-fi'
+        ' prop.',
+        'Gunmetal grey platform with glowing cyan charge rings, white and dark grey drone shell, red lens glow, black'
+        ' cables, small warning decals without text, hard surface normal detail.'),
+    'glitch_cube_pile': ('digital', 'prop', 15000, (2.6, 1.5, 2.4), 'x',
+        'Pile of corrupted data cubes of different sizes heaped on the floor, some cubes cracked open showing glowing'
+        ' cores, a few cubes partly broken into smaller voxel fragments resting on the pile, solid grounded heap.',
+        'Matte black cube shells with glowing magenta and cyan cores, pixel noise patterns on the faces, bright edge'
+        ' highlights, subtle scanline texture, crisp bevel normal detail.'),
+    # Ruins
+    'toppled_streetlight': ('ruins', 'prop', 15000, (5.2, 1.2, 1.3), 'x',
+        'Toppled bent city street lamp post lying on its side on a chunk of broken concrete pavement, the lamp head'
+        ' cracked, a tangle of wires at the snapped base, a small traffic sign plate still attached, weeds around it.'
+        ' Long low wreckage prop.',
+        'Rusty dark green painted steel, cracked grey concrete, shattered amber lamp glass, faded blank sign plate, dry'
+        ' weeds and dust, peeling paint normal detail.'),
+    'newsstand_ruin': ('ruins', 'prop', 15000, (2.4, 2.6, 1.8), 'x',
+        'Abandoned city newspaper kiosk booth, small boxy stall with a dented roof awning, broken window, empty sagging'
+        ' magazine racks, scattered blank papers at the base, one side panel bent open. Compact urban ruin prop.',
+        'Faded red and grey painted sheet metal with rust streaks, dusty broken glass, yellowed blank paper, grime and'
+        ' soot, no readable text, weathered metal normal detail.'),
+    'shopping_cart_pile': ('ruins', 'prop', 15000, (2.4, 1.3, 1.7), 'x',
+        'Heap of three tangled abandoned shopping carts, one tipped over on its side, filled with junk bags, a broken'
+        ' traffic cone and loose debris, small concrete chunks around. Low grounded urban debris prop.',
+        'Rusty chrome wire baskets, faded red plastic handles, dirty grey and black plastic bags, orange cone, concrete'
+        ' dust, grime, detailed wire normal map.'),
+    'fallen_water_tank': ('ruins', 'landmark', 15000, (3.8, 2.8, 3.0), 'x',
+        'Large rooftop water tank fallen on its side onto a crushed steel stand, round riveted metal cylinder with a'
+        ' dented split, a short ladder bent beside it, rubble around the base. Bulky post-apocalyptic landmark prop.',
+        'Rust orange and faded teal painted steel with heavy corrosion, dark interior through the split, grey concrete'
+        ' rubble, dust, riveted metal normal detail.'),
+    'tire_barricade': ('ruins', 'prop', 15000, (3.0, 1.4, 1.6), 'x',
+        'Improvised survivor barricade of stacked old car tires and two rusty oil drums, a wooden pallet and a sheet of'
+        ' corrugated metal leaning against them, tied with chains. Low wide grounded barrier prop.',
+        'Worn black rubber tires, rusty red and blue oil drums, grey weathered pallet wood, corroded corrugated steel,'
+        ' chains, dust, rubber and rust normal detail.'),
+    # Cave
+    'glow_coral': ('cave', 'prop', 15000, (2.0, 1.9, 2.0), None,
+        'Clump of bioluminescent tube coral growing from a dark rock base, many thick hollow tubes of different heights'
+        ' with flared glowing openings, a few round glowing bulbs between them. Compact solid underground organism prop.',
+        'Dark wet basalt base, pale violet and teal tube walls, bright cyan glowing tube rims and bulbs, slick organic'
+        ' surface, fine organic normal detail.'),
+    'ore_vein_boulder': ('cave', 'prop', 15000, (2.4, 1.6, 2.0), 'x',
+        'Large cracked cave boulder split by bright glowing blue ore veins, a few raw crystal points breaking out of the'
+        ' cracks, small rock chips around the base, heavy grounded rock prop.',
+        'Dark charcoal stone with rough grain, vivid electric blue glowing ore veins, pale blue crystal tips, grey rock'
+        ' dust, strong rock normal detail.'),
+    'miners_campfire': ('cave', 'prop', 15000, (2.6, 1.0, 2.6), None,
+        'Abandoned miners camp, ring of stones around a burned out campfire with charred logs, a cooking pot on a small'
+        ' iron tripod, a rolled bedroll and a wooden stool beside it, an old oil lantern on a flat rock. Low wide camp prop.',
+        'Grey fieldstones, black charred wood with faint orange embers, dark iron pot, faded brown canvas bedroll, worn'
+        ' wood, warm amber lantern glass, dust.'),
+    'drill_rig': ('cave', 'prop', 15000, (2.6, 2.6, 2.0), 'x',
+        'Old rusty mining drill machine on a small tracked base, a long drill bit angled down into the rock, a boxy engine'
+        ' with exhaust pipe, levers and a cracked pressure gauge, hoses coiled on the side. Compact heavy machinery prop.',
+        'Rusty yellow and black painted steel, worn dark iron drill bit, black rubber hoses, brass gauge, oil stains,'
+        ' cave dust, detailed machinery normal map.'),
+    'fossil_ribcage': ('cave', 'landmark', 15000, (4.6, 2.8, 2.4), 'x',
+        'Giant fossilized creature ribcage emerging from a long rock mound, a row of large curved rib bones arching over,'
+        ' part of the spine visible along the top, small crystals growing between the ribs. Long ancient landmark prop.',
+        'Pale ivory and tan fossil bone with darker stained cracks, dark grey cave rock, glowing violet and cyan crystal'
+        ' clusters, fine bone and rock normal detail.'),
+})
+
 _ledger_lock = threading.Lock()
 _print_lock = threading.Lock()
 

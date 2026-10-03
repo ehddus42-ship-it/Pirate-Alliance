@@ -186,6 +186,9 @@ namespace AcRoguelike.GameTheme.Editor
             for(int i=0;i<3;i++)Prop(g,"arcade_cabinet",new Vector3(9,0,20+i*3.2f),2.8f,235,true);
             Prop(g,"pinball_table",new Vector3(-8.6f,0,23),2.7f,155,true);
             Prop(g,"prize_cabinet",new Vector3(-9,0,29),3.1f,155,true);
+            // Decor batch: a claw machine beside the room-number display and a CRT pile closing the east row.
+            Decor(g,"claw_machine",new Vector3(-8.8f,0,18.2f),2.3f,155,true);
+            Decor(g,"crt_stack",new Vector3(9.2f,0,30.6f),2.2f,220,true);
             Portal(g,32.8f); Coins(g,-4,7,6); FloorWord(g,"PLAY",new Vector3(-2.3f,.025f,17),.45f);
             PixelInvader(g,new Vector3(17,4.5f,12),.52f,"Purple");
             Tetromino(g,new Vector3(17,2.7f,25),1.4f,2,"Cyan",false);
@@ -230,6 +233,9 @@ namespace AcRoguelike.GameTheme.Editor
             Prop(g,"controller_bench",new Vector3(-8,0,32),1.2f,160,true);
             Prop(g,"arcade_cabinet",new Vector3(8.5f,0,3),2.8f,210,true);
             Display(g,new Vector3(-9.5f,0,3),flags?"06":"02");
+            if(flags)Decor(g,"dance_machine",new Vector3(12.8f,0,29.2f),2.6f,250,false);
+            else Decor(g,"speaker_tower",new Vector3(12.6f,0,9.6f),2.1f,250,false);
+            Decor(g,"cartridge_crate",new Vector3(-6.4f,0,3.1f),1.1f,flags?20:-15,true);
             Coins(g,flags?3:-3,11,4);
         }
 
@@ -259,6 +265,8 @@ namespace AcRoguelike.GameTheme.Editor
                 Tetromino(g,new Vector3(15.3f,6,20),1.25f,0,"Pink",false);
                 Prop(g,"racing_cockpit",new Vector3(8,0,7),3.1f,300,true);
                 Prop(g,"handheld_monument",new Vector3(8.6f,0,29.5f),5.1f,220,true);
+                Decor(g,"crt_stack",new Vector3(-8.8f,0,20),2.2f,120,true);
+                Decor(g,"speaker_tower",new Vector3(8.6f,0,15.6f),2,240,true);
                 FloorWord(g,"NEXT",new Vector3(-2.3f,.025f,10),.35f);
             }
             else
@@ -270,6 +278,8 @@ namespace AcRoguelike.GameTheme.Editor
                 BlockPlatform(g,new Vector3(-7.8f,0,26),1.5f,4,"Amber");
                 Prop(g,"joystick_tower",new Vector3(8,0,29),4.6f,225,true);
                 Prop(g,"pinball_table",new Vector3(-8.6f,0,4.7f),2.5f,155,true);
+                Decor(g,"air_hockey",new Vector3(-8.9f,0,19.4f),1,90,true);
+                Decor(g,"claw_machine",new Vector3(8.2f,0,14.3f),2.3f,230,true);
                 FloorWord(g,"STACK",new Vector3(-3,.025f,7),.3f);
             }
             for(int z=4;z<34;z+=3)g.Box("Cyan",new Vector3(3.5f,.02f,z),new Vector3(.09f,.025f,1.25f));
@@ -285,6 +295,8 @@ namespace AcRoguelike.GameTheme.Editor
             Prop(g,"prize_cabinet",new Vector3(8.7f,0,30.5f),3.8f,215,true);
             Prop(g,"controller_bench",new Vector3(-8,0,23),1.3f,160,true);
             Prop(g,"joystick_tower",new Vector3(-8.8f,0,30),3.4f,180,true);
+            Decor(g,"dance_machine",new Vector3(-8.6f,0,18.4f),2.6f,150,true);
+            Decor(g,"air_hockey",new Vector3(9.6f,0,18.5f),1,90,true);
             for(int z=7;z<33;z+=5)
             {
                 g.Box("Shell",new Vector3(7.4f,-.004f,z),new Vector3(3.9f,.04f,4.5f),.01f);
@@ -305,6 +317,8 @@ namespace AcRoguelike.GameTheme.Editor
             Prop(g,"prize_cabinet",new Vector3(-8.8f,0,19),3.2f,165,true);
             Prop(g,"controller_bench",new Vector3(-8,0,9),1.25f,165,true);
             Prop(g,"pinball_table",new Vector3(8.2f,0,7),2.7f,220,true);
+            Decor(g,"claw_machine",new Vector3(-8.8f,0,13.6f),2.3f,150,true);
+            Decor(g,"cartridge_crate",new Vector3(8.7f,0,21.8f),1.1f,220,true);
             for(int side=-1;side<=1;side+=2)for(int n=0;n<3;n++)
             {
                 float x=side*(7.5f+n*.8f); var p=new Vector3(x,.25f,25+n*1.4f);
@@ -406,6 +420,11 @@ namespace AcRoguelike.GameTheme.Editor
             for(int n=0;n<text.Length;n++)if(Glyphs.TryGetValue(text[n],out var glyph))
                 for(int y=0;y<5;y++)for(int x=0;x<3;x++)if(glyph[y*3+x]=='1')
                     g.Box(color,origin+(floor?new Vector3((n*4+x)*cell,0,-y*cell):new Vector3((n*4+x)*cell,-y*cell,0)),floor?new Vector3(cell*.87f,.012f,cell*.87f):new Vector3(cell*.87f,cell*.87f,.035f));
+        }
+        // Decor batch props are optional until their Meshy models are reviewed in: a missing one is skipped, not an error.
+        static void Decor(Geometry g,string key,Vector3 p,float height,float yaw,bool collision)
+        {
+            if(AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/Art/Meshy/game_"+key+"/game_"+key+".glb"))Prop(g,key,p,height,yaw,collision);
         }
         static void Prop(Geometry g,string key,Vector3 p,float height,float yaw,bool collision)
         {

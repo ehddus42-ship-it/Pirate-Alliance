@@ -20,6 +20,7 @@ import sys
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+import decor as decor_pass      # noqa: E402
 import materials as mt          # noqa: E402
 import preview                  # noqa: E402
 import room as rm               # noqa: E402
@@ -44,6 +45,7 @@ def build_rooms(themes, rooms=None):
             if rooms and index not in rooms:
                 continue
             r = factory()
+            r.decor = decor_pass.dress(name, r)
             built.append((name, module, r))
     return built
 

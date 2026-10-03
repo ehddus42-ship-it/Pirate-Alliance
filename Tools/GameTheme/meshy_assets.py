@@ -150,6 +150,44 @@ ASSETS = {'game_arcade_cabinet': ('game',
                            'directional pad, cyan and amber round button cushions, brushed aluminium feet, '
                            'subtle manufacturing seam lines, gentle rubbed edges and clean PBR detail.')}
 
+# Decor batch (2026-10): six more original arcade-floor props so the seven Game rooms stop repeating the same machines.
+ASSETS.update({
+    'game_claw_machine': ('game', 'prop', 9000, (1.4, 2.3, 1.4), None,
+        'Original arcade claw crane machine, tall square glass display box on a sturdy cabinet base, a metal claw hanging'
+        ' from a gantry inside, a heap of round plush toy balls and capsules on the floor of the box, one joystick and one'
+        ' big button on the front ledge, prize chute door below. No lettering, brands or characters.',
+        'Deep midnight navy cabinet, warm ivory trim, clear glass with cyan reflections, raspberry and amber prize balls,'
+        ' chrome claw, cyan rim lights, light edge wear, rich PBR detail.'),
+    'game_crt_stack': ('game', 'prop', 9000, (2.0, 2.2, 1.4), 'x',
+        'Stack of five chunky retro CRT television sets of different sizes piled in a stepped pyramid, thick boxy bodies,'
+        ' rounded screens showing simple abstract pixel patterns, short antennas on two of them, tangled cables at the'
+        ' base. Solid grouped prop, no logos.',
+        'Ivory, warm grey and navy plastic casings, glowing cyan, amber and raspberry pixel screens, dark grilles, black'
+        ' cables, light scuffs, rich PBR detail.'),
+    'game_dance_machine': ('game', 'landmark', 12000, (2.4, 2.6, 2.4), None,
+        'Original rhythm dance arcade machine, a tall rear screen cabinet with two speaker towers, a wide square floor'
+        ' platform in front with a grid of large glowing arrow step pads and a safety bar, chunky bevelled block forms.'
+        ' No lettering, brands or characters.',
+        'Midnight navy and ivory panels, glowing cyan, amber and raspberry arrow pads, chrome safety bar, black speaker'
+        ' grilles with cyan rings, light wear, rich PBR detail.'),
+    'game_cartridge_crate': ('game', 'prop', 7000, (1.6, 1.1, 1.2), 'x',
+        'Open wooden shipping crate overflowing with chunky blank game cartridges, a few cartridges spilled on the floor'
+        ' in front, one cartridge leaning against the crate. Compact grounded prop, no labels, logos or text.',
+        'Pale stencilled pine crate boards, cartridges in navy, ivory, cyan, amber and raspberry plastic with blank label'
+        ' areas, metal contact edges, light dust, rich PBR detail.'),
+    'game_air_hockey': ('game', 'prop', 9000, (2.4, 1.0, 1.4), 'x',
+        'Original air hockey arcade table, long rectangular table with raised rails, a goal slot at each end, two round'
+        ' strikers and a puck on the playfield, a small blank score box on a short post at one side, sturdy legs.'
+        ' No lettering or brands.',
+        'Glossy ivory playfield with a cyan centre line and circles, midnight navy rails and body, raspberry and amber'
+        ' strikers, chrome corners, light wear, rich PBR detail.'),
+    'game_speaker_tower': ('game', 'prop', 8000, (1.4, 2.0, 1.0), 'x',
+        'Stack of retro arcade speaker cabinets and a big boxy boombox on top, round speaker cones of different sizes,'
+        ' equalizer light bars, chunky knobs, a coiled cable at the base. Solid vertical stacked prop, no logos.',
+        'Midnight navy and ivory casings, black speaker cones with cyan glowing rings, amber and raspberry equalizer'
+        ' lights, chrome knobs, light scuffs, rich PBR detail.'),
+})
+
 _ledger_lock = threading.Lock()
 _print_lock = threading.Lock()
 
