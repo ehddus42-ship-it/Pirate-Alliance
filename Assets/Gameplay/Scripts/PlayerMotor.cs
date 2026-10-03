@@ -17,6 +17,8 @@ namespace AcRoguelike
         public float dashSpeed = 13f;
         public float dashDuration = .19f;
         public float dashCooldown = .85f;
+        [Tooltip("Dash speed over the dash: time 0..1 is dash progress, value is a speed multiplier. The distance stays dashSpeed x dashDuration; the curve only decides how it is spread. Default: an instant burst that eases out into run speed (tuned in Tools/CombatLab).")]
+        public AnimationCurve dashSpeedCurve = DefaultDashSpeedCurve();
         public float turnSpeed = 540f;
         public float attackTurnSpeed = 1440f;
         public float aimDeadRadius = .65f;
@@ -27,6 +29,21 @@ namespace AcRoguelike
         [Tooltip("Face the movement direction while exploring, then face the aim point during attacks.")]
         public bool faceMovementDirection;
         public bool IsDashing => dashRemaining > 0 || dashMovedThisFrame;
+        /// <summary>Burst at the start, most of the distance by 60%, and an end speed that matches the run (4.2 m/s at 12.5 m/s).</summary>
+        public static AnimationCurve DefaultDashSpeedCurve() => new AnimationCurve(
+            new Keyframe(0f, 1.4f, -.0894f, -.0894f),
+            new Keyframe(.3f, 1.35f, -.4919f, -.4919f),
+            new Keyframe(.75f, .6f, -1.3733f, -1.3733f),
+            new Keyframe(1f, .33f, -1.08f, -1.08f));
+        /// <summary>Speed the dash hands over at its end (m/s): what the curve's last key works out to.</summary>
+        public float DashExitSpeed
+        {
+            get
+            {
+                float area = DashCurveArea();
+                return area > 1e-5f ? dashSpeed * DashCurveValue(1f) / area : dashSpeed;
+            }
+        }
         public float CooldownRemaining => Mathf.Max(0, cooldownRemaining);
         public Vector3 AimPoint { get; private set; }
         public Vector3 PlanarVelocity { get; private set; }
@@ -48,6 +65,9 @@ namespace AcRoguelike
         PlayerCombat combat;
         Vector3 velocity, dashDirection;
         float verticalSpeed, dashRemaining, cooldownRemaining;
+        const int DashCurveSamples = 64;
+        // Cumulative area under dashSpeedCurve, so a frame's share of the dash distance is exact at any frame rate.
+        float[] dashCurveArea;
         bool automated;
         Vector2 automatedMove;
         Vector3 automatedAim;
@@ -194,15 +214,17 @@ namespace AcRoguelike
             else if (dashThisFrame)
             {
                 float dashDt = Mathf.Min(dt, dashRemaining);
-                // Integrate the linear ease-out profile over this frame, preserving distance at low FPS.
+                // Integrate the dash speed curve over this frame, preserving distance at low FPS.
                 float duration = Mathf.Max(.01f, dashDuration);
                 float phase = 1f - dashRemaining / duration;
                 float endPhase = Mathf.Clamp01(phase + dashDt / duration);
-                float dashFactor = Mathf.Lerp(1.2f, .8f, (phase + endPhase) * .5f);
-                displacement = dashDirection * dashSpeed * dashFactor * dashDt;
+                displacement = dashDirection * (dashSpeed * duration * (DashProgress(endPhase) - DashProgress(phase)));
                 displacement += desired * targetSpeed * Mathf.Max(0, dt - dashDt);
                 dashRemaining = Mathf.Max(0, dashRemaining - dt);
-                velocity = desired * targetSpeed;
+                // Hand over without a hitch: a held stick runs on, a released one decelerates from the dash's exit speed.
+                velocity = dashRemaining > 0 || desired.sqrMagnitude > .01f
+                    ? desired * targetSpeed
+                    : dashDirection * Mathf.Min(DashExitSpeed, moveSpeed);
             }
             else
             {
@@ -305,6 +327,37 @@ namespace AcRoguelike
             if (faceMovementDirection || !animator || !animator.enabled || !animator.gameObject.activeInHierarchy) return;
             if (chest) chest.rotation = Quaternion.AngleAxis(torsoYaw * .72f, Vector3.up) * chest.rotation;
             if (neck) neck.rotation = Quaternion.AngleAxis(torsoYaw * .28f, Vector3.up) * neck.rotation;
+        }
+
+        void OnValidate() => dashCurveArea = null;
+
+        float DashCurveValue(float t)
+            => dashSpeedCurve != null && dashSpeedCurve.length > 0 ? Mathf.Max(0, dashSpeedCurve.Evaluate(t)) : 1f;
+
+        float DashCurveArea()
+        {
+            if (dashCurveArea == null)
+            {
+                dashCurveArea = new float[DashCurveSamples + 1];
+                float previous = DashCurveValue(0);
+                for (int i = 1; i <= DashCurveSamples; i++)
+                {
+                    float value = DashCurveValue(i / (float)DashCurveSamples);
+                    dashCurveArea[i] = dashCurveArea[i - 1] + (previous + value) * .5f / DashCurveSamples;
+                    previous = value;
+                }
+            }
+            return dashCurveArea[DashCurveSamples];
+        }
+
+        /// <summary>Share of the dash distance covered at dash progress t (0..1).</summary>
+        float DashProgress(float t)
+        {
+            float area = DashCurveArea();
+            if (area <= 1e-5f) return Mathf.Clamp01(t);
+            float f = Mathf.Clamp01(t) * DashCurveSamples;
+            int i = Mathf.Min((int)f, DashCurveSamples - 1);
+            return Mathf.Lerp(dashCurveArea[i], dashCurveArea[i + 1], f - i) / area;
         }
 
         public void SetAutomationInput(Vector2 input, Vector3 aim, bool dashPressed = false, bool walkHeld = false)

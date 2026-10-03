@@ -106,7 +106,9 @@ namespace AcRoguelike.Validation
                 Move(Vector2.zero, false, true);
                 yield return Wait(motor.dashDuration + .12f);
                 float distance = Vector3.ProjectOnPlane(motor.transform.position - dashStart, Vector3.up).magnitude;
-                float expectedDistance = motor.dashSpeed * motor.dashDuration;
+                // The dash covers speed x duration, then slides out from its exit speed at the motor's deceleration.
+                float exitSpeed = Mathf.Min(motor.DashExitSpeed, motor.moveSpeed);
+                float expectedDistance = motor.dashSpeed * motor.dashDuration + exitSpeed * exitSpeed / (2f * Mathf.Max(.01f, motor.deceleration));
                 Check("Free dash distance", motor.DashCount == dashCount + 1 && Mathf.Abs(distance - expectedDistance) < .3f && !motor.IsDashing,
                     expectedDistance.ToString("F3") + " m +/- 0.30; exactly one dash; finished", distance.ToString("F3") + " m; dash delta=" + (motor.DashCount - dashCount) + "; active=" + motor.IsDashing);
 

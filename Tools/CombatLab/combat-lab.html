@@ -99,7 +99,7 @@ summary::after{content:"+";color:var(--muted)} details[open] summary::after{cont
       </div>
     </details>
     <div id="groups"></div>
-    <p class="note">기본값은 Unity 코드(<b>PlayerMotor</b>, <b>MeleeSlash</b>, <b>JustDodgeFeedback</b>, <b>CopierMonster</b>, <b>LockerMonster</b>, <b>MonitorTurret</b>)의 현재 값이다요. 바꾼 값은 이 브라우저에 저장되고, 점(•)이 붙은 항목이 기본값과 다른 것이다요. 단위는 미터·초다요.</p>
+    <p class="note">플레이어 이동·대시 기본값은 실제 플레이어 프리팹(<b>AstraiaPlayer</b>, <b>LiminalExplorer</b>) 값이고, 나머지 기본값은 Unity 코드(<b>PlayerMotor</b>, <b>MeleeSlash</b>, <b>JustDodgeFeedback</b>, <b>CopierMonster</b>, <b>LockerMonster</b>, <b>MonitorTurret</b>)의 현재 값이다요. 바꾼 값은 이 브라우저에 저장되고, 점(•)이 붙은 항목이 기본값과 다른 것이다요. 단위는 미터·초다요.</p>
   </aside>
 </div>
 
@@ -108,8 +108,8 @@ summary::after{content:"+";color:var(--muted)} details[open] summary::after{cont
 // ---------------------------------------------------------------------------------------------- tuning
 const DEF = [
  ["플레이어", [
-  ["moveSpeed","이동 속도 (m/s)",4.2,1,10,.1],["accel","가속 (m/s²)",32,5,80,1],["decel","감속 (m/s²)",38,5,80,1],
-  ["dashSpeed","대시 속도 (m/s)",13,5,30,.5],["dashDuration","대시 시간 (s)",.19,.05,.5,.01],["dashCooldown","대시 재사용 (s)",.85,.1,2,.05],
+  ["moveSpeed","이동 속도 (m/s)",4.2,1,10,.1],["accel","가속 (m/s²)",24,5,80,1],["decel","감속 (m/s²)",38,5,80,1],
+  ["dashSpeed","대시 속도 (m/s)",12.5,5,30,.5],["dashDuration","대시 시간 (s)",.24,.05,.5,.01],["dashCooldown","대시 재사용 (s)",.72,.1,2,.02],
   ["attackMove","공격 중 이동 배율",.05,0,1,.01],["playerHP","최대 체력",100,20,400,5]]],
  ["콤보 (카타나 6타)", [
   ["attackSpeed","공격 속도 배율",1,.4,2,.05],["damageMul","피해 배율",1,.2,3,.05],["queueWindow","선입력 창 (s)",.3,0,.6,.01],
@@ -137,7 +137,7 @@ const DEF = [
 ];
 const T={}, DEFAULTS={};
 for(const [,rows] of DEF) for(const [k,,v] of rows){T[k]=v;DEFAULTS[k]=v;}
-const STORE="liminal-combat-lab-v1";
+const STORE="liminal-combat-lab-v2";
 try{const saved=JSON.parse(localStorage.getItem(STORE)||"null"); if(saved) for(const k in saved) if(k in T) T[k]=+saved[k];}catch(e){}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(T));}catch(e){}}
 
@@ -185,7 +185,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), towards=(v,t,d)=>v<t?Math.min(t,
 const CURVE_DEF=[
  {id:"accel",name:"이동 가속",field:"moveAccelCurve",x:"가속 진행 (0 → 최고 속도 도달 시간 = 이동 속도 ÷ 가속)",y:"속도 ÷ 이동 속도",yMax:1.3,mode:"linear",keys:[[0,0],[1,1]],presets:"rise"},
  {id:"decel",name:"이동 감속",field:"moveDecelCurve",x:"멈춤 진행 (손 뗀 순간 → 정지, 길이 = 속도 ÷ 감속)",y:"속도 ÷ 손 뗄 때 속도",yMax:1.3,mode:"linear",keys:[[0,1],[1,0]],presets:"fall"},
- {id:"dash",name:"대시 속도 프로필",field:"dashSpeedCurve",x:"대시 진행 (0 → 대시 시간)",y:"속도 배율 · 총 거리(속도×시간)는 그대로",yMax:2.6,mode:"smooth",keys:[[0,1.4],[.3,1.35],[.75,.6],[1,.315]],presets:"dash",area:true},
+ {id:"dash",name:"대시 속도 프로필",field:"dashSpeedCurve",x:"대시 진행 (0 → 대시 시간)",y:"속도 배율 · 총 거리(속도×시간)는 그대로",yMax:2.6,mode:"smooth",keys:[[0,1.4],[.3,1.35],[.75,.6],[1,.33]],presets:"dash",area:true},
  {id:"lunge",name:"돌진 속도 프로필",field:"lungeSpeedCurve",x:"돌진 진행 (0 → 목표 앞 도착)",y:"속도 배율 · 도착 지점은 그대로",yMax:2.6,mode:"linear",keys:[[0,1],[1,1]],presets:"profile",area:true},
  {id:"hitstop",name:"히트 스톱 복귀",field:"hitStopRecoveryCurve",x:"히트 스톱 진행 (0 → 스톱 시간)",y:"0 = 스톱 속도 · 1 = 정상 속도",yMax:1.3,mode:"linear",keys:[[0,0],[.65,0],[1,1]],presets:"rise"},
  {id:"slow",name:"저스트 회피 슬로 복귀",field:"justDodgeSlowCurve",x:"슬로 진행 (0 → 슬로 시간)",y:"0 = 슬로 속도 · 1 = 정상 속도",yMax:1.3,mode:"linear",keys:[[0,0],[.65,0],[1,1]],presets:"rise"},
@@ -196,10 +196,10 @@ const SHAPES={ // normalised 0→1 shapes, mapped onto each curve's start/end va
  rise:[["선형","linear",[[0,0],[1,1]]],["Ease In","smooth",[[0,0],[.55,.2],[1,1]]],["Ease Out","smooth",[[0,0],[.4,.78],[1,1]]],["S 커브","smooth",[[0,0],[.3,.1],[.7,.9],[1,1]]],["오버슈트","smooth",[[0,0],[.55,1.15],[.8,.97],[1,1]]],["버티다 복귀","linear",[[0,0],[.65,0],[1,1]]],["즉시","linear",[[0,0],[.02,1],[1,1]]]],
  fall:[["선형","linear",[[0,0],[1,1]]],["Ease In","smooth",[[0,0],[.55,.2],[1,1]]],["Ease Out","smooth",[[0,0],[.4,.78],[1,1]]],["S 커브","smooth",[[0,0],[.3,.1],[.7,.9],[1,1]]],["버티다 정지","linear",[[0,0],[.6,0],[1,1]]],["즉시","linear",[[0,0],[.02,1],[1,1]]]],
  profile:[["일정","linear",[[0,1],[1,1]]],["초반 폭발","smooth",[[0,2.1],[.35,1],[1,.25]]],["점점 빠르게","smooth",[[0,.45],[1,1.55]]],["중간 피크","smooth",[[0,.35],[.5,1.7],[1,.35]]],["끝 급정지","linear",[[0,1.25],[.8,1.25],[1,0]]],["Ease Out","smooth",[[0,1.8],[.5,.9],[1,0]]]],
- dash:[["추천 · 유저 친화","smooth",[[0,1.4],[.3,1.35],[.75,.6],[1,.315]]],["Unity 원본 (일정)","linear",[[0,1],[1,1]]],["초반 폭발","smooth",[[0,2.1],[.35,1],[1,.25]]],["중간 피크","smooth",[[0,.35],[.5,1.7],[1,.35]]],["끝 급정지","linear",[[0,1.25],[.8,1.25],[1,0]]]],
+ dash:[["추천 · 유저 친화","smooth",[[0,1.4],[.3,1.35],[.75,.6],[1,.33]]],["이전 Unity (1.2→0.8)","linear",[[0,1.2],[1,.8]]],["일정","linear",[[0,1],[1,1]]],["초반 폭발","smooth",[[0,2.1],[.35,1],[1,.25]]],["중간 피크","smooth",[[0,.35],[.5,1.7],[1,.35]]],["끝 급정지","linear",[[0,1.25],[.8,1.25],[1,0]]]],
  shake:[["일정","linear",[[0,1],[1,1]]],["선형 감쇠","linear",[[0,1],[1,0]]],["빠른 감쇠","smooth",[[0,1],[.25,.35],[1,0]]],["펀치","smooth",[[0,1.5],[.15,1],[1,0]]],["늦은 감쇠","smooth",[[0,1],[.6,.85],[1,0]]]],
 };
-const CURVE_STORE="liminal-combat-lab-curves-v2";
+const CURVE_STORE="liminal-combat-lab-curves-v3";
 const C={}, CDEF={};
 function curveFrom(def,keys,mode){ return {mode:mode||def.mode,keys:keys.map(([x,y])=>({x:+x,y:+y}))}; }
 for(const d of CURVE_DEF){ CDEF[d.id]=d; C[d.id]=curveFrom(d,d.keys,d.mode); }
@@ -467,7 +467,7 @@ function updatePlayer(dt){
   wantDash=false;
   if(pl.dash>0){ pl.dash-=dt; // dash curve: speed profile over the dash, total distance kept at speed × time
     const dd=Math.max(1e-4,pl.dashDur), u0=pl.dashT/dd; pl.dashT=Math.min(dd,pl.dashT+dt); const u1=pl.dashT/dd;
-    pl.p=add(pl.p,mul(pl.dashDir,T.dashSpeed*dd*(curveCDF("dash",u1)-curveCDF("dash",u0)))); mark("dash",u1); if(Math.random()<.6) fx.push({kind:"ghost",p:V(pl.p.x,pl.p.y),t:0,life:.18}); pl.v=mul(pl.dashDir,T.moveSpeed); confine(pl.p,.35); return; }
+    pl.p=add(pl.p,mul(pl.dashDir,T.dashSpeed*dd*(curveCDF("dash",u1)-curveCDF("dash",u0)))); mark("dash",u1); if(Math.random()<.6) fx.push({kind:"ghost",p:V(pl.p.x,pl.p.y),t:0,life:.18}); pl.v=mul(pl.dashDir,Math.min(T.moveSpeed,C.dash.area>1e-5?T.dashSpeed*Math.max(0,C.dash.lut[256])/C.dash.area:T.dashSpeed)); confine(pl.p,.35); return; }
   // Attack chain.
   const pressed=attackPressed; attackPressed=false;
   if(pl.atk<0){ if(pl.recovery<=0 && (pressed||attackHeld)) beginSwing(0); }
