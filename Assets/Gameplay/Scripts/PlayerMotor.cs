@@ -61,6 +61,7 @@ namespace AcRoguelike
         public bool IsLaunched => launched;
         public event System.Action Landed;
         CharacterController body;
+        CharacterObstacleSlide obstacleSlide;
         InputAction move, dash, walk, aimStick;
         PlayerCombat combat;
         Vector3 velocity, dashDirection;
@@ -242,13 +243,18 @@ namespace AcRoguelike
                 Landed?.Invoke();
             }
             Vector3 before = transform.position;
-            CollisionFlags collision = body.Move(displacement + Vector3.up * (verticalSpeed * dt));
+            CollisionFlags collision = launched
+                ? body.Move(displacement + Vector3.up * (verticalSpeed * dt))
+                : MoveWithSliding(displacement + Vector3.up * (verticalSpeed * dt));
             grounded = (collision & CollisionFlags.Below) != 0 || body.isGrounded;
             if ((collision & CollisionFlags.Below) != 0) verticalSpeed = -2f;
             dashMovedThisFrame = dashThisFrame;
-            if (dashThisFrame && (collision & CollisionFlags.Sides) != 0)
+            Vector3 actualMove = Vector3.ProjectOnPlane(transform.position - before, Vector3.up);
+            // Touching a pillar's edge should slide, not cancel the entire dash.
+            if (dashThisFrame && (collision & CollisionFlags.Sides) != 0
+                && actualMove.magnitude < displacement.magnitude * .2f)
             { dashRemaining = 0; dashMovedThisFrame = false; velocity = Vector3.zero; }
-            PlanarVelocity = dt > 0 ? Vector3.ProjectOnPlane(transform.position - before, Vector3.up) / dt : Vector3.zero;
+            PlanarVelocity = dt > 0 ? actualMove / dt : Vector3.zero;
             // Feet prefer the travel direction. The hips follow the pointer only far enough
             // to keep the spine from twisting past a comfortable aiming angle.
             if (faceMovementDirection)
@@ -303,6 +309,13 @@ namespace AcRoguelike
                 if (HasParameter(Dashing, AnimatorControllerParameterType.Bool)) animator.SetBool(Dashing, IsDashing);
             }
             if (aimMarker) aimMarker.position = new Vector3(AimPoint.x, transform.position.y + .025f, AimPoint.z);
+        }
+
+        internal CollisionFlags MoveWithSliding(Vector3 displacement)
+        {
+            if (!body) body = GetComponent<CharacterController>();
+            if (obstacleSlide == null) obstacleSlide = new CharacterObstacleSlide(body);
+            return obstacleSlide.Move(displacement);
         }
 
         void UpdateAim(Vector2 input)

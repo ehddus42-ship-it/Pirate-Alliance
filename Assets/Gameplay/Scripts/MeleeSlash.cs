@@ -283,7 +283,7 @@ namespace AcRoguelike
                 }
             }
             // Keep a little downward push so the move never reads as leaving the ground.
-            body.Move(delta + Vector3.down * .02f);
+            MoveBody(delta + Vector3.down * .02f);
         }
 
         /// <summary>Screen tilt of a cut: level for a flat sweep, steep for a diagonal one, mirrored by the sweep side.</summary>
@@ -335,10 +335,16 @@ namespace AcRoguelike
             {
                 Vector3 delta = Vector3.ProjectOnPlane(lungeTarget - transform.position, Vector3.up);
                 float step = lungeSpeed * Time.deltaTime;
-                if (delta.magnitude <= step) { body.Move(delta + Vector3.down * .02f); lungeUntil = 0; }
-                else body.Move(delta.normalized * step + Vector3.down * .02f);
+                if (delta.magnitude <= step) { MoveBody(delta + Vector3.down * .02f); lungeUntil = 0; }
+                else MoveBody(delta.normalized * step + Vector3.down * .02f);
             }
             if (drawn && !(combat && combat.IsAttacking) && secondHit == null && Time.time > sheatheAt) Draw(false);
+        }
+
+        void MoveBody(Vector3 displacement)
+        {
+            if (motor) motor.MoveWithSliding(displacement);
+            else body.Move(displacement);
         }
 
         void LateUpdate()

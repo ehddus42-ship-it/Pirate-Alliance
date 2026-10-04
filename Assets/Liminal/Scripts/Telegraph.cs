@@ -62,18 +62,22 @@ namespace AcRoguelike.Liminal
 
         static Material Make(bool overlay)
         {
-            var m = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit") ?? Shader.Find("Sprites/Default"));
-            m.SetFloat("_Surface", 1);
-            // Both layers alpha-blend; the glow layer just draws on top of the fill.
-            m.SetFloat("_Blend", 0);
-            m.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            m.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            m.SetFloat("_ZWrite", 0);
-            m.SetFloat("_Cull", 0);
-            m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-            m.SetColor("_BaseColor", Color.white);
-            m.renderQueue = overlay ? 3002 : 3001;
+            var m = CreateOverlayMaterial(overlay ? "Telegraph Glow" : "Telegraph Fill");
+            // Keep the rim above the fill, and both above transparent floor decorations.
+            m.renderQueue += overlay ? 1 : 0;
             return m;
+        }
+
+        /// <summary>Creates an owned warning material that remains readable over raised floor decorations.</summary>
+        public static Material CreateOverlayMaterial(string name)
+        {
+            // Resources keeps this runtime-only shader in player builds as well as the Editor.
+            // The particle shader has a fixed depth test; changing its queue alone cannot reveal
+            // warnings underneath water, planks or the raised decorative bridge decks.
+            var shader = Resources.Load<Shader>("TelegraphOverlay");
+            var material = new Material(shader) { name = name, renderQueue = 3101 };
+            material.SetColor("_BaseColor", Color.white);
+            return material;
         }
 
         static Material FillMaterial => fillMaterial ? fillMaterial : fillMaterial = Make(false);

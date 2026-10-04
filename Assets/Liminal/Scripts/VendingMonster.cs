@@ -46,6 +46,7 @@ namespace AcRoguelike.Liminal
         LiminalPlayerHealth player;
         LiminalRoom room;
         CharacterController body;
+        CharacterObstacleSlide movement;
         float stateTime, nextAttack, chargeTravel, footstepTime;
         int pattern, lastHits;
         bool initialized, hitDuringCharge, canPulled, canReleased, aimLocked;
@@ -207,8 +208,11 @@ namespace AcRoguelike.Liminal
         void Move(Vector3 step)
         {
             if (room && !room.Contains(transform.position + step, .7f)) step = Vector3.zero;
-            body.Move(step + Vector3.down * (3 * Time.deltaTime));
+            if (movement == null) movement = new CharacterObstacleSlide(body, CanOccupy);
+            movement.Move(step + Vector3.down * (3 * Time.deltaTime));
         }
+        bool CanOccupy(Vector3 position) => !room || room.Contains(position, .7f);
+
         Vector3 Steer(Vector3 direction)
         {
             for (int i = 0; i < 7; i++)

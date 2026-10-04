@@ -17,6 +17,7 @@ namespace AcRoguelike.Liminal
         Renderer[] discs = new Renderer[0];
         Transform[] discTransforms = new Transform[0];
         MaterialPropertyBlock block;
+        Material floorOverlay, telegraphOverlay, safeOverlay;
         Mesh quad, disc;
         float phaseTime, growDuration = .7f;
         static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
@@ -26,12 +27,13 @@ namespace AcRoguelike.Liminal
             Clear();
             Centers = safeCenters; Radius = radius; growDuration = Mathf.Max(.1f, growTime);
             block = block ?? new MaterialPropertyBlock();
+            EnsureOverlayMaterials();
             quad = quad ? quad : MakeQuad(); disc = disc ? disc : MakeDisc();
-            floor = MakeRenderer("RedFloor", quad, floorMaterial, center + Vector3.up * lift, rotation, new Vector3(size.x, 1, size.y), 0);
+            floor = MakeRenderer("RedFloor", quad, floorOverlay, center + Vector3.up * lift, rotation, new Vector3(size.x, 1, size.y), 0);
             discs = new Renderer[safeCenters.Length]; discTransforms = new Transform[safeCenters.Length];
             for (int i = 0; i < safeCenters.Length; i++)
             {
-                discs[i] = MakeRenderer("SafeZone" + i, disc, telegraphMaterial, safeCenters[i] + Vector3.up * (lift + .01f), Quaternion.identity, Vector3.zero, 1);
+                discs[i] = MakeRenderer("SafeZone" + i, disc, telegraphOverlay, safeCenters[i] + Vector3.up * (lift + .01f), Quaternion.identity, Vector3.zero, 1);
                 discTransforms[i] = discs[i].transform;
             }
             Phase = RedFieldPhase.Telegraph; phaseTime = 0; Apply();
@@ -41,11 +43,34 @@ namespace AcRoguelike.Liminal
         {
             if (Phase == RedFieldPhase.Hidden) return;
             Phase = RedFieldPhase.Judgement; phaseTime = 0;
-            foreach (var d in discs) if (d) d.sharedMaterial = safeMaterial;
+            foreach (var d in discs) if (d) d.sharedMaterial = safeOverlay;
             Apply();
         }
 
         public void Hide() { Clear(); Phase = RedFieldPhase.Hidden; }
+
+        void EnsureOverlayMaterials()
+        {
+            if (!floorOverlay) floorOverlay = MakeOverlay(floorMaterial, "Red Field Overlay");
+            if (!telegraphOverlay) telegraphOverlay = MakeOverlay(telegraphMaterial, "Safe Zone Warning Overlay");
+            if (!safeOverlay) safeOverlay = MakeOverlay(safeMaterial, "Safe Zone Active Overlay");
+        }
+
+        static Material MakeOverlay(Material source, string name)
+        {
+            // Keep the authored ring texture, while sharing the depth-independent warning shader.
+            // These are owned runtime copies; the prefab's materials remain reusable by the builder.
+            var material = Telegraph.CreateOverlayMaterial(name);
+            if (!source) return material;
+            if (source.HasProperty("_BaseColor")) material.SetColor(BaseColor, source.GetColor(BaseColor));
+            if (source.HasProperty("_BaseMap"))
+            {
+                material.SetTexture("_BaseMap", source.GetTexture("_BaseMap"));
+                material.SetTextureScale("_BaseMap", source.GetTextureScale("_BaseMap"));
+                material.SetTextureOffset("_BaseMap", source.GetTextureOffset("_BaseMap"));
+            }
+            return material;
+        }
 
         /// <summary>Judged from the character's feet on the floor plane.</summary>
         public bool IsSafe(Vector3 feet)
@@ -101,11 +126,21 @@ namespace AcRoguelike.Liminal
             floor = null; discs = new Renderer[0]; discTransforms = new Transform[0]; Centers = new Vector3[0];
         }
 
+        void OnDestroy()
+        {
+            if (floorOverlay) Destroy(floorOverlay);
+            if (telegraphOverlay) Destroy(telegraphOverlay);
+            if (safeOverlay) Destroy(safeOverlay);
+            if (quad) Destroy(quad);
+            if (disc) Destroy(disc);
+        }
+
         static Mesh MakeQuad()
         {
             var m = new Mesh { name = "FieldQuad" };
             m.vertices = new[] { new Vector3(-.5f, 0, -.5f), new Vector3(-.5f, 0, .5f), new Vector3(.5f, 0, .5f), new Vector3(.5f, 0, -.5f) };
             m.uv = new[] { Vector2.zero, Vector2.up, Vector2.one, Vector2.right };
+            m.colors = new[] { Color.white, Color.white, Color.white, Color.white };
             m.triangles = new[] { 0, 1, 2, 0, 2, 3 }; m.RecalculateNormals(); return m;
         }
 
@@ -113,15 +148,17 @@ namespace AcRoguelike.Liminal
         static Mesh MakeDisc()
         {
             var m = new Mesh { name = "FieldDisc" };
-            var v = new Vector3[DiscSegments + 1]; var uv = new Vector2[DiscSegments + 1]; var t = new int[DiscSegments * 3];
+            var v = new Vector3[DiscSegments + 1]; var uv = new Vector2[DiscSegments + 1]; var colors = new Color[DiscSegments + 1]; var t = new int[DiscSegments * 3];
             uv[0] = new Vector2(.5f, .5f);
+            colors[0] = Color.white;
             for (int i = 0; i < DiscSegments; i++)
             {
                 float a = i * Mathf.PI * 2 / DiscSegments;
                 v[i + 1] = new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)); uv[i + 1] = new Vector2(.5f + .5f * Mathf.Cos(a), .5f + .5f * Mathf.Sin(a));
+                colors[i + 1] = Color.white;
                 t[i * 3] = 0; t[i * 3 + 1] = 1 + (i + 1) % DiscSegments; t[i * 3 + 2] = 1 + i;
             }
-            m.vertices = v; m.uv = uv; m.triangles = t; m.RecalculateNormals(); return m;
+            m.vertices = v; m.uv = uv; m.colors = colors; m.triangles = t; m.RecalculateNormals(); return m;
         }
     }
 }

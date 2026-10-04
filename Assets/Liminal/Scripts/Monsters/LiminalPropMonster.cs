@@ -27,6 +27,7 @@ namespace AcRoguelike.Liminal
         protected LiminalPlayerHealth player;
         protected LiminalRoom room;
         protected CharacterController body;
+        CharacterObstacleSlide movement;
         /// <summary>Hit-reaction pivot (at the feet). Its child <see cref="pose"/> carries the procedural animation.</summary>
         protected Transform visual, pose;
         protected Telegraph telegraph;
@@ -140,9 +141,12 @@ namespace AcRoguelike.Liminal
             step.y = 0;
             if (room && !room.Contains(transform.position + step, 1f)) step = Vector3.zero;
             Vector3 before = transform.position;
-            body.Move(step + Vector3.down * (4f * Time.deltaTime));
+            if (movement == null) movement = new CharacterObstacleSlide(body, CanOccupy);
+            movement.Move(step + Vector3.down * (4f * Time.deltaTime));
             return Vector3.ProjectOnPlane(transform.position - before, Vector3.up).magnitude;
         }
+
+        bool CanOccupy(Vector3 position) => !room || room.Contains(position, 1f);
 
         protected Vector3 Steer(Vector3 preferred, float probe = 1.1f)
         {
