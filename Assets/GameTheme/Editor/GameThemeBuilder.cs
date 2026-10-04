@@ -41,11 +41,12 @@ namespace AcRoguelike.GameTheme.Editor
             stage.startRoom=rooms[0]; stage.endRoom=rooms[4]; stage.roomPool=new[]{rooms[1],rooms[2],rooms[3],rooms[5],rooms[6]};
             stage.middleRoomCount=3; stage.isBossStage=false; stage.ambientColor=Ambient; EditorUtility.SetDirty(stage);
             RegisterMission(stage);
+            GameTetrominoBossBuilder.Build();
             AssetDatabase.SaveAssets(); CreateScene(stage);
             var scenes=EditorBuildSettings.scenes.ToList();
             if(!scenes.Any(s=>s.path==ScenePath)) scenes.Add(new EditorBuildSettingsScene(ScenePath,true));
             EditorBuildSettings.scenes=scenes.ToArray(); AssetDatabase.SaveAssets();
-            Debug.Log("Game theme: seven rooms, five-room route, three voxel enemy roles, gate mission G06 built.");
+            Debug.Log("Game theme: eight room assets, five-room route ending in Drop Keeper, three voxel enemy roles, gate mission G06 built.");
         }
 
         public static void BuildAndValidate() { BuildAll(); GameThemeValidation.RunAll(); GameThemeOccluderValidation.RunBatch(); }

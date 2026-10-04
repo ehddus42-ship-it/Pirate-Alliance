@@ -1,15 +1,15 @@
 {
     "status": "passed",
-    "utc": "2026-10-03T08:28:26.1322332Z",
+    "utc": "2026-10-04T12:21:58.0475947Z",
     "unityVersion": "6000.3.19f1",
     "triangleScope": "Every active placed static/skinned scenery mesh including architecture. Player and runtime enemies excluded; not an FPS measurement.",
     "captureScope": "Actual Unity URP renders in isolated Edit Mode scenes: overview and gameplay-camera framing, with the player. Runtime combat is verified separately.",
-    "expectedRooms": 7,
-    "passedRooms": 7,
-    "captures": 14,
+    "expectedRooms": 8,
+    "passedRooms": 8,
+    "captures": 16,
     "roomTriangleBudget": 337270,
     "maximumRouteTriangleBudget": 1476948,
-    "maximumRouteTriangles": 430878,
+    "maximumRouteTriangles": 351267,
     "uniqueMeshTriangles": 226906,
     "distinctSeededRoutes": 42,
     "openScenesUnchanged": true,
@@ -433,6 +433,48 @@
                 }
             ],
             "errors": []
+        },
+        {
+            "roomId": "Game_08_Boss",
+            "path": "Assets/GameTheme/Prefabs/Rooms/Game_08_Boss.prefab",
+            "status": "passed",
+            "placedTriangles": 12760,
+            "renderers": 75,
+            "materials": 6,
+            "colliders": 9,
+            "meshColliders": 0,
+            "lights": 0,
+            "realtimeShadowLights": 0,
+            "meshyInstances": 2,
+            "sampledCells": 3796,
+            "walkableCells": 3756,
+            "reachedCells": 3756,
+            "reachableTargets": 4,
+            "capturePoint": {
+                "x": -0.25,
+                "y": 0.0,
+                "z": 17.75
+            },
+            "traversalFailures": [],
+            "enemySpawnChecks": [
+                {
+                    "spawn": "BossSpawn",
+                    "role": "DropKeeper",
+                    "prefab": "Assets/GameTheme/Resources/GameTheme/TetrominoBoss.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": 0.0,
+                        "y": 0.05000000074505806,
+                        "z": 23.0
+                    },
+                    "radius": 1.0199999809265137,
+                    "height": 3.0999999046325685,
+                    "skinWidth": 0.05999999865889549,
+                    "feetAboveFloor": 0.08000004291534424,
+                    "blockingObjects": []
+                }
+            ],
+            "errors": []
         }
     ],
     "meshes": [
@@ -531,7 +573,7 @@
             "path": "Assets/GameTheme/Art/Meshy/game_arcade_cabinet/game_arcade_cabinet.glb",
             "name": "",
             "vertices": 7755,
-            "instances": 21,
+            "instances": 23,
             "triangles": 6026
         },
         {
@@ -1140,7 +1182,7 @@
             "path": "Library/unity default resources",
             "name": "Cube",
             "vertices": 24,
-            "instances": 0,
+            "instances": 59,
             "triangles": 12
         }
     ],
@@ -1368,12 +1410,44 @@
             "pitch": 55.0,
             "yaw": 35.0,
             "fieldOfView": 36.0
+        },
+        {
+            "room": "Game_08_Boss",
+            "framing": "Overview",
+            "path": "Documentation/GameTheme/Previews/Game_08_Boss_Overview.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": 0.0,
+                "y": 2.5,
+                "z": 18.0
+            },
+            "distance": 58.0,
+            "pitch": 48.0,
+            "yaw": 32.0,
+            "fieldOfView": 44.0
+        },
+        {
+            "room": "Game_08_Boss",
+            "framing": "Gameplay",
+            "path": "Documentation/GameTheme/Previews/Game_08_Boss_Gameplay.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": -0.25,
+                "y": 0.6000000238418579,
+                "z": 17.75
+            },
+            "distance": 24.0,
+            "pitch": 55.0,
+            "yaw": 35.0,
+            "fieldOfView": 36.0
         }
     ],
     "checks": [
-        "Seven room assets; deterministic five-room routes with unique middle rooms, matching seams, no overlapping footprints and maximum-combination triangle guide checked.",
+        "Eight room assets; deterministic five-room routes with three unique middle rooms and final Drop Keeper arena, matching seams, no overlapping footprints and maximum-combination triangle guide checked.",
         "Saved scene player, camera, stage reference and build registration checked.",
-        "Sixth gate mission game_exhibition resolves to the playable Game stage."
+        "Gate mission G-06 game_exhibition resolves to the playable Game stage."
     ],
     "errors": []
 }

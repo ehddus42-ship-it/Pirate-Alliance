@@ -186,6 +186,17 @@ namespace AcRoguelike.Liminal
                         bossFill.rectTransform.sizeDelta = new Vector2(688f * signal.Health.Health / Mathf.Max(1, signal.Health.maxHealth), 10);
                         break;
                     }
+            if (run.LivingEnemyCount > 0 && run.ActiveRoomIndex >= 0 && run.ActiveRoomIndex < run.Rooms.Count &&
+                run.Rooms[run.ActiveRoomIndex].kind == LiminalRoomKind.Boss)
+                foreach (var keeper in run.Rooms[run.ActiveRoomIndex].GetComponentsInChildren<AcRoguelike.GameTheme.GameTetrominoBoss>())
+                    if (keeper.enabled && keeper.Health && keeper.Health.IsAlive)
+                    {
+                        bossGroup.SetActive(true);
+                        bossName.text = keeper.displayName;
+                        bossValue.text = $"{keeper.Health.Health} / {keeper.Health.maxHealth}";
+                        bossFill.rectTransform.sizeDelta = new Vector2(688f * keeper.Health.Health / Mathf.Max(1, keeper.Health.maxHealth), 10);
+                        break;
+                    }
             if (run.Phase == LiminalRunPhase.AugmentChoice && Keyboard.current != null)
             {
                 if (Keyboard.current.digit1Key.wasPressedThisFrame) run.SelectAugment(0);

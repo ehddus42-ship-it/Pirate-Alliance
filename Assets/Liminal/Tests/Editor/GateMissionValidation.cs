@@ -98,7 +98,10 @@ namespace AcRoguelike.Liminal.EditorTests
             EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
             report = new Report { utc = DateTime.UtcNow.ToString("O"), unityVersion = Application.unityVersion };
             var catalog = Resources.Load<GateMissionCatalog>("GateMissions");
-            Require(catalog && catalog.Missions.Count >= 6, "At least six gate missions are required.");
+            Require(catalog && catalog.Missions.Count >= 5, "At least five gate missions are required.");
+            Require(catalog.Missions.All(m => m != null && m.id != "digital_suppression" && m.destinationId != "digital" &&
+                m.stages != null && m.stages.All(s => s && s.stageId != "concept_digital")),
+                "The program prison theme must not appear in the playable mission catalog.");
             var keys = new HashSet<string> { "Hunter.MagicStones" };
             foreach (HunterProgress.Upgrade upgrade in Enum.GetValues(typeof(HunterProgress.Upgrade))) keys.Add("Hunter.Upgrade." + upgrade);
             foreach (var mission in catalog.Missions)
@@ -163,7 +166,7 @@ namespace AcRoguelike.Liminal.EditorTests
             }
             Require(run && run.Lobby && run.Phase == LiminalRunPhase.Lobby, "LiminalRun must initialize in the lobby.");
             var missions = run.AvailableMissions.ToArray();
-            Require(missions.Length >= 6 && missions.All(m => m.IsAvailable && m.DisplayDestination == "???"), "All unvisited destinations must be ???.");
+            Require(missions.Length >= 5 && missions.All(m => m.IsAvailable && m.DisplayDestination == "???"), "All unvisited destinations must be ???.");
             var font = HunterUi.CreateFont(null, out var source);
             Require(font && font.atlasPopulationMode == AtlasPopulationMode.Static, "Missing scene font must use the bundled static Korean main.");
             Require(font.HasCharacters("강화 게이트 미션 난이도 적 변이 숲 감옥 폐허 동굴 ???", out uint[] missing, true, true), "Korean font fallback has missing characters.");
@@ -174,6 +177,7 @@ namespace AcRoguelike.Liminal.EditorTests
 
             BeginCapture(run, 1280, 720);
             Invoke(run.Lobby, "OpenGate");
+            Require(!GameObject.Find("Mission_digital_suppression"), "The retired prison mission must not have a lobby card.");
             foreach (var mission in missions)
             {
                 Invoke(run.Lobby, "SelectMission", mission.id);
@@ -218,6 +222,9 @@ namespace AcRoguelike.Liminal.EditorTests
             ResizeCapture(1280, 720);
             Require(!run.EnterMission("missing-mission") && run.Phase == LiminalRunPhase.Lobby,
                 "An invalid mission must leave the player safely in the lobby.");
+            Require(!run.EnterMission("digital_suppression") && run.Phase == LiminalRunPhase.Lobby && run.ActiveMission == null,
+                "The retired prison mission must not be enterable by its old mission id.");
+            report.checks.Add("Program prison is absent from the mission catalog and lobby; its old mission id cannot enter a dungeon.");
 
             foreach (var mission in missions)
             {

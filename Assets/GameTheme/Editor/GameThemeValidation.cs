@@ -34,7 +34,7 @@ namespace AcRoguelike.GameTheme.Editor
             public string status, utc, unityVersion;
             public string triangleScope = "Every active placed static/skinned scenery mesh including architecture. Player and runtime enemies excluded; not an FPS measurement.";
             public string captureScope = "Actual Unity URP renders in isolated Edit Mode scenes: overview and gameplay-camera framing, with the player. Runtime combat is verified separately.";
-            public int expectedRooms = 7, passedRooms, captures;
+            public int expectedRooms = 8, passedRooms, captures;
             public long roomTriangleBudget = RoomBudget, maximumRouteTriangleBudget = RouteBudget, maximumRouteTriangles, uniqueMeshTriangles;
             public int distinctSeededRoutes;
             public bool openScenesUnchanged;
@@ -99,9 +99,9 @@ namespace AcRoguelike.GameTheme.Editor
             try
             {
                 isolated = EditorSceneManager.NewPreviewScene();
-                for (int index = 1; index <= 7; index++)
+                for (int index = 1; index <= 8; index++)
                 {
-                    var check = new RoomCheck { roomId = "Game_" + index.ToString("00"), path = RoomPath(index) };
+                    var check = new RoomCheck { roomId = RoomId(index), path = RoomPath(index) };
                     report.rooms.Add(check);
                     try { CheckRoom(index, isolated, check, meshes); }
                     catch (Exception ex) { check.errors.Add(ex.ToString()); }
@@ -128,14 +128,15 @@ namespace AcRoguelike.GameTheme.Editor
             report.meshes = meshes.Values.OrderByDescending(m => m.triangles).ToList();
             report.uniqueMeshTriangles = report.meshes.Sum(m => m.triangles);
             report.captures = report.images.Count;
-            if (report.captures != 14) report.errors.Add("Expected fourteen overview/gameplay-camera captures; got " + report.captures + ".");
+            if (report.captures != 16) report.errors.Add("Expected sixteen overview/gameplay-camera captures; got " + report.captures + ".");
             report.status = report.errors.Count == 0 ? "passed" : "failed";
             WriteJson(ReportPath, report);
-            Debug.Log("GAME_THEME_VALIDATION: " + report.status + " (" + report.passedRooms + "/7 rooms; " + report.captures + " captures). " + ReportPath);
+            Debug.Log("GAME_THEME_VALIDATION: " + report.status + " (" + report.passedRooms + "/8 rooms; " + report.captures + " captures). " + ReportPath);
             void Attempt(Action action, string label) { try { action(); } catch (Exception ex) { report.errors.Add(label + ": " + ex); } }
         }
 
-        static string RoomPath(int n) => Root + "/Prefabs/Rooms/Game_" + n.ToString("00") + ".prefab";
+        static string RoomId(int n) => n == 8 ? "Game_08_Boss" : "Game_" + n.ToString("00");
+        static string RoomPath(int n) => n == 8 ? GameTetrominoBossBuilder.ArenaPath : Root + "/Prefabs/Rooms/" + RoomId(n) + ".prefab";
         static void CheckRoom(int index, Scene scene, RoomCheck check, Dictionary<Mesh, MeshCheck> meshes)
         {
             var source = AssetDatabase.LoadAssetAtPath<GameObject>(check.path);
@@ -146,14 +147,14 @@ namespace AcRoguelike.GameTheme.Editor
                 instance.transform.SetPositionAndRotation(new Vector3(10000, 0, 10000), Quaternion.identity);
                 var room = instance.GetComponent<LiminalRoom>();
                 Require(room, "Missing LiminalRoom.");
-                Check(room.roomId == "Game_" + index.ToString("00"), "Room ID does not match its asset path.");
+                Check(room.roomId == RoomId(index), "Room ID does not match its asset path.");
                 Check(!string.IsNullOrWhiteSpace(room.displayName), "Display name is empty.");
                 Check(instance.activeInHierarchy && Near(instance.transform.localScale, Vector3.one), "Root must be active with unit scale.");
                 Check(instance.GetComponent<GameThemeRoom>(), "Missing GameThemeRoom monster opt-in.");
                 if (index == 1) Check(instance.GetComponent<GameThemeAtmosphere>(), "Arrival room needs GameThemeAtmosphere so lobby missions receive the same visual environment as the standalone scene.");
                 Check(Mathf.Abs(room.localBounds.size.x - Width) < Tolerance && Mathf.Abs(room.localBounds.size.z - Length) < Tolerance &&
                     Mathf.Abs(room.localBounds.center.x) < Tolerance && Mathf.Abs(room.localBounds.min.z) < Tolerance, "Bounds must be 26 x 36.4 m, centered on x=0, beginning at z=0.");
-                var expectedKind = index == 1 ? LiminalRoomKind.Arrival : index == 5 ? LiminalRoomKind.Threshold : LiminalRoomKind.Combat;
+                var expectedKind = index == 1 ? LiminalRoomKind.Arrival : index == 5 ? LiminalRoomKind.Threshold : index == 8 ? LiminalRoomKind.Boss : LiminalRoomKind.Combat;
                 Check(room.kind == expectedKind, "Unexpected room kind: " + room.kind + "; expected " + expectedKind + ".");
                 Require(room.entry && room.exit && room.playerSpawn, "Entry, exit and playerSpawn references are required.");
                 Check(Near(room.transform.InverseTransformPoint(room.entry.position), Vector3.zero), "Entry socket is not at (0,0,0).");
@@ -161,6 +162,7 @@ namespace AcRoguelike.GameTheme.Editor
                 Check(Vector3.Angle(room.entry.forward, room.transform.forward) < .1f && Vector3.Angle(room.exit.forward, room.transform.forward) < .1f, "Socket directions must both be +Z.");
                 Check(room.playerSpawn.IsChildOf(room.transform) && room.Contains(room.playerSpawn.position, .4f), "Player spawn is outside its room.");
                 if (room.kind == LiminalRoomKind.Combat) Check(room.enemySpawns != null && room.enemySpawns.Length >= 3, "Combat room needs at least three enemy spawns.");
+                if (room.kind == LiminalRoomKind.Boss) Check(room.enemySpawns != null && room.enemySpawns.Length == 1, "Drop Keeper arena needs exactly one boss spawn.");
                 foreach (var spawn in room.enemySpawns ?? Array.Empty<Transform>())
                     Check(spawn && spawn.IsChildOf(room.transform) && room.Contains(spawn.position, .4f), "Enemy spawn is missing or outside its room.");
                 CheckGate(room.entranceGate, true);
@@ -251,9 +253,11 @@ namespace AcRoguelike.GameTheme.Editor
         {
             var theme = room.GetComponent<GameThemeRoom>();
             var library = AssetDatabase.LoadAssetAtPath<GameVoxelMonsterLibrary>(Root + "/Resources/GameTheme/GameVoxelMonsterLibrary.asset");
-            if (!theme || !library || !physics.IsValid())
+            bool isBoss = room.kind == LiminalRoomKind.Boss;
+            var bossPrefab = isBoss ? AssetDatabase.LoadAssetAtPath<GameObject>(GameTetrominoBossBuilder.PrefabPath) : null;
+            if (!theme || (isBoss ? !bossPrefab : !library) || !physics.IsValid())
             {
-                check.errors.Add("Enemy body validation needs the theme marker, monster library and a valid physics scene.");
+                check.errors.Add("Enemy body validation needs the theme marker, the matching monster/boss prefab and a valid physics scene.");
                 return;
             }
             var overlaps = new Collider[256];
@@ -261,19 +265,19 @@ namespace AcRoguelike.GameTheme.Editor
             for (int index = 0; index < (room.enemySpawns?.Length ?? 0); index++)
             {
                 var spawn = room.enemySpawns[index];
-                var role = theme.RoleAt(index, room.kind == LiminalRoomKind.Boss);
-                var prefab = library.Prefab(role);
+                string role = isBoss ? "DropKeeper" : theme.RoleAt(index, false).ToString();
+                var prefab = isBoss ? bossPrefab : library.Prefab(theme.RoleAt(index, false));
                 var body = prefab ? prefab.GetComponent<CharacterController>() : null;
-                var result = new EnemySpawnCheck { spawn = spawn ? spawn.name : "Enemy_" + index, role = role.ToString(), prefab = prefab ? AssetDatabase.GetAssetPath(prefab) : "", status = "failed" };
+                var result = new EnemySpawnCheck { spawn = spawn ? spawn.name : "Enemy_" + index, role = role, prefab = prefab ? AssetDatabase.GetAssetPath(prefab) : "", status = "failed" };
                 check.enemySpawnChecks.Add(result);
                 if (!spawn || !body)
                 {
                     check.errors.Add(result.spawn + " (" + role + "): spawn or prefab CharacterController missing.");
                     continue;
                 }
-                // Match SpawnGameMonsters: it deliberately replaces the marker's y with room.y + .05.
+                // Normal enemies use room.y + .05; the dedicated boss preserves its authored marker height.
                 Vector3 position = spawn.position;
-                position.y = room.transform.position.y + .05f;
+                if (!isBoss) position.y = room.transform.position.y + .05f;
                 result.localPosition = room.transform.InverseTransformPoint(position);
                 Vector3 scale = prefab.transform.localScale;
                 float radialScale = Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.z));
@@ -322,11 +326,11 @@ namespace AcRoguelike.GameTheme.Editor
             var stage = AssetDatabase.LoadAssetAtPath<LiminalStageDefinition>(StagePath);
             Require(stage, "Missing Game stage definition.");
             Require(stage.startRoom && AssetDatabase.GetAssetPath(stage.startRoom) == RoomPath(1), "Start must be Game_01.");
-            Require(stage.endRoom && AssetDatabase.GetAssetPath(stage.endRoom) == RoomPath(5), "End must be Game_05.");
+            Require(stage.endRoom && AssetDatabase.GetAssetPath(stage.endRoom) == RoomPath(8) && stage.endRoom.kind == LiminalRoomKind.Boss, "End must be the Game_08_Boss arena.");
             Require(stage.middleRoomCount == 3 && stage.roomPool != null && stage.roomPool.Length == 5, "Stage must draw three middle rooms from five candidates.");
             Require(stage.roomPool.All(r => r) && stage.roomPool.Select(AssetDatabase.GetAssetPath).OrderBy(p => p).SequenceEqual(Pool.Select(RoomPath).OrderBy(p => p)), "Middle pool must contain 02,03,04,06,07 once each.");
-            Require(!stage.isBossStage, "Game exhibition is a five-room stage, not a boss stage.");
-            long fixedCount = report.rooms.Where(r => r.roomId == "Game_01" || r.roomId == "Game_05").Sum(r => r.placedTriangles);
+            Require(!stage.isBossStage, "Game exhibition must retain the five-room route instead of the standalone boss-stage route.");
+            long fixedCount = report.rooms.Where(r => r.roomId == RoomId(1) || r.roomId == RoomId(8)).Sum(r => r.placedTriangles);
             report.maximumRouteTriangles = fixedCount + report.rooms.Where(r => Pool.Any(n => r.roomId == "Game_" + n.ToString("00"))).OrderByDescending(r => r.placedTriangles).Take(3).Sum(r => r.placedTriangles);
             Require(report.maximumRouteTriangles <= RouteBudget, "Maximum five-room combination exceeds Ruins guide: " + report.maximumRouteTriangles + ".");
             var signatures = new HashSet<string>();
@@ -335,6 +339,7 @@ namespace AcRoguelike.GameTheme.Editor
             {
                 var route = stage.ChooseRoute(seed, 0);
                 Require(route.Length == 5 && route.Distinct().Count() == 5, "Route does not contain five distinct rooms at seed " + seed + ".");
+                Require(route[0] == stage.startRoom && route[4] == stage.endRoom, "Route does not end in Drop Keeper at seed " + seed + ".");
                 string signature = string.Join("|", route.Select(r => r.roomId));
                 Require(signature == string.Join("|", stage.ChooseRoute(seed, 0).Select(r => r.roomId)), "Non-deterministic route at seed " + seed + ".");
                 signatures.Add(signature); visited.UnionWith(route.Select(r => r.roomId));
@@ -361,7 +366,7 @@ namespace AcRoguelike.GameTheme.Editor
                 }
             }
             finally { Object.DestroyImmediate(host); }
-            report.checks.Add("Seven room assets; deterministic five-room routes with unique middle rooms, matching seams, no overlapping footprints and maximum-combination triangle guide checked.");
+            report.checks.Add("Eight room assets; deterministic five-room routes with three unique middle rooms and final Drop Keeper arena, matching seams, no overlapping footprints and maximum-combination triangle guide checked.");
         }
 
         static void CheckScene(Report report)
@@ -395,9 +400,9 @@ namespace AcRoguelike.GameTheme.Editor
             Require(catalog && catalog.missions != null, "Gate catalog is missing.");
             var missions = catalog.missions.Where(m => m != null && m.id == "game_exhibition").ToArray();
             Require(missions.Length == 1, "Gate catalog needs exactly one game_exhibition mission.");
-            Require(catalog.missions.Length >= 6 && catalog.missions[5] == missions[0], "Game mission must be the sixth mission.");
+            Require(missions[0].code == "G-06", "Game mission must retain its stable G-06 code when other missions are removed.");
             Require(missions[0].IsAvailable && missions[0].stages.Length == 1 && missions[0].stages[0] == AssetDatabase.LoadAssetAtPath<LiminalStageDefinition>(StagePath), "Game mission does not resolve to Stage_Game.");
-            report.checks.Add("Sixth gate mission game_exhibition resolves to the playable Game stage.");
+            report.checks.Add("Gate mission G-06 game_exhibition resolves to the playable Game stage.");
         }
 
         static void CaptureRoom(RoomCheck check, Report report)
@@ -636,10 +641,12 @@ namespace AcRoguelike.GameTheme.Editor
         [Serializable] public sealed class PlayReport
         {
             public string status = "running", utc;
-            public string scope = "Actual PlayerMotor walk/dash, voxel enemy spawn/attack, combat gate locking, test-damage clear and five-room Victory. Not a balance test; room transitions are teleported after their static paths are checked.";
+            public string scope = "Actual PlayerMotor walk/dash, three voxel encounters, one Meshy Drop Keeper encounter with a natural attack, combat gate locking, test-damage clear and five-room Victory. Not a balance test; room transitions are teleported after their static paths are checked.";
             public int physicalWalkChecks, physicalDashChecks, combatRoomsCleared, voxelEnemiesSpawned, observedAttacks, completedRooms;
+            public int bossesSpawned, bossRoomsCleared, observedBossAttacks;
             public float walkDistance, dashDistance;
             public List<CombatObservation> combatObservations = new List<CombatObservation>();
+            public CombatObservation bossObservation;
             public List<string> checks = new List<string>(), errors = new List<string>();
         }
         static PlayReport playReport;
@@ -651,6 +658,7 @@ namespace AcRoguelike.GameTheme.Editor
         static double stateStart, nextTick;
         static float combatGameStart;
         static CombatObservation combatObservation;
+        static GameTetrominoBoss observedBoss;
         static Vector3 movementStart;
 
         static GameThemeValidation()
@@ -688,7 +696,7 @@ namespace AcRoguelike.GameTheme.Editor
             SessionState.SetBool(ActiveKey+".VisitedExisted",PlayerPrefs.HasKey(visitedKey));
             SessionState.SetInt(ActiveKey+".VisitedValue",PlayerPrefs.GetInt(visitedKey));
             playReport = new PlayReport { utc = DateTime.UtcNow.ToString("O") };
-            wantedRoom = 0; run = null; motor = null; playerHealth = null;
+            wantedRoom = 0; run = null; motor = null; playerHealth = null; observedBoss = null;
             SavePlay(); SessionState.SetBool(ActiveKey, true); Next("AwaitRun");
             try { EditorSceneManager.OpenScene(ScenePath); EditorApplication.isPlaying = true; }
             catch (Exception ex) { FinishPlay(ex.ToString()); RestoreProgress(); throw; }
@@ -729,6 +737,21 @@ namespace AcRoguelike.GameTheme.Editor
                     combatObservation.completionReason = combatObservation.gameSeconds < 5 ? "insufficient_game_time_before_wall_timeout" : "wall_clock_timeout";
                     playReport.observedAttacks += combatObservation.observedAttacks;
                     FinishPlay($"Combat observation {combatObservation.roomId} reached the 40 wall-second limit: {combatObservation.gameSeconds:F2} game seconds, {combatObservation.wallSeconds:F2} wall seconds, {combatObservation.observedAttacks} attacks. At least 5 game seconds and one natural attack are required; no-attack observation stops at 15 game seconds.");
+                    return;
+                }
+            }
+            if (state == "ObserveBoss" && playReport?.bossObservation != null)
+            {
+                var observation = playReport.bossObservation;
+                observation.gameSeconds = Mathf.Max(0, Time.time - combatGameStart);
+                observation.wallSeconds = (float)(now - stateStart);
+                observation.observedFrames = Time.frameCount - observation.frameCountAtStart;
+                observation.observedAttacks = observedBoss ? Mathf.Max(0, observedBoss.Attacks - observation.attackCountAtStart) : 0;
+                if (observation.wallSeconds >= 40)
+                {
+                    observation.status = "failed";
+                    observation.completionReason = "wall_clock_timeout";
+                    FinishPlay($"Drop Keeper observation reached 40 wall seconds after {observation.gameSeconds:F2} game seconds with {observation.observedAttacks} attacks.");
                     return;
                 }
             }
@@ -793,6 +816,27 @@ namespace AcRoguelike.GameTheme.Editor
                             playReport.combatObservations.Add(combatObservation);
                             RecordCombatState("start", monsters, false);
                         }
+                        else if (room.kind == LiminalRoomKind.Boss)
+                        {
+                            var bosses = room.GetComponentsInChildren<GameTetrominoBoss>();
+                            Require(wantedRoom == 4 && room.roomId == RoomId(8), "Drop Keeper must occupy the final Game room.");
+                            Require(bosses.Length == 1 && room.enemySpawns.Length == 1 && run.LivingEnemyCount == 1, "Final Game room must register exactly one Drop Keeper.");
+                            Require(room.GetComponentsInChildren<TrafficLightBoss>().Length == 0 && room.GetComponentsInChildren<GameVoxelMonster>().Length == 0,
+                                "Foreign traffic-light or voxel boss leaked into the final Game room.");
+                            observedBoss = bosses[0];
+                            Require(observedBoss.Health && observedBoss.Health.IsAlive && observedBoss.GetComponent<CharacterController>().enabled,
+                                "Drop Keeper must have a living health component and enabled body.");
+                            Require(room.entranceGate.activeSelf && room.exitGate.activeSelf && !run.TryUseExit(), "Boss encounter must lock both gates and stage exit.");
+                            playReport.bossesSpawned++;
+                            playReport.bossObservation = new CombatObservation
+                            {
+                                roomIndex = wantedRoom, roomId = room.roomId,
+                                attackCountAtStart = observedBoss.Attacks, frameCountAtStart = Time.frameCount
+                            };
+                            combatGameStart = Time.time;
+                            RecordBossState("start", false);
+                            Next("ObserveBoss");
+                        }
                         else Next("CheckClear");
                         break;
                     case "ObserveCombat":
@@ -808,6 +852,19 @@ namespace AcRoguelike.GameTheme.Editor
                             $"Combat room {combatObservation.roomId} produced no natural attack after {combatObservation.gameSeconds:F2} game seconds ({combatObservation.wallSeconds:F2} wall seconds). Check approach movement and line of sight.");
                         foreach (var enemy in active) enemy.Health.TakeDamage(enemy.Health.maxHealth + 1);
                         playReport.combatRoomsCleared++;
+                        Next("CheckClear"); break;
+                    case "ObserveBoss":
+                        Require(observedBoss && observedBoss.Health && observedBoss.Health.IsAlive, "Drop Keeper vanished before attack observation completed.");
+                        bool patternCompleted = playReport.bossObservation.observedAttacks > 0 &&
+                            (observedBoss.Volleys >= 3 || observedBoss.BarsThrown > 0 || observedBoss.SummonWaves > 0);
+                        if (playReport.bossObservation.gameSeconds < 15 && !patternCompleted) return;
+                        playReport.bossObservation.status = patternCompleted ? "passed" : "failed";
+                        playReport.bossObservation.completionReason = patternCompleted ? "natural_boss_pattern_emitted" : "no_boss_pattern_within_15_game_seconds";
+                        playReport.observedBossAttacks = playReport.bossObservation.observedAttacks;
+                        RecordBossState("finish", true);
+                        Require(patternCompleted, "Drop Keeper did not emit a natural attack pattern within 15 game seconds.");
+                        observedBoss.Health.TakeDamage(observedBoss.Health.maxHealth + 1);
+                        playReport.bossRoomsCleared++;
                         Next("CheckClear"); break;
                     case "CheckClear":
                         if (run.LivingEnemyCount != 0 && now - stateStart < 2) return;
@@ -832,7 +889,9 @@ namespace AcRoguelike.GameTheme.Editor
                         Require(playReport.combatRoomsCleared == 3 && playReport.voxelEnemiesSpawned >= 9, "Expected three populated Game combat rooms.");
                         Require(playReport.combatObservations.Count == 3 && playReport.combatObservations.All(o => o.status == "passed" && o.gameSeconds >= 5 && o.observedAttacks >= 1),
                             "Every combat room must complete at least five game seconds of observation and show at least one natural attack.");
-                        playReport.checks.Add("Actual CharacterController walk and dash, at least one natural attack in each of three voxel encounters after five or more game seconds, gate locking/unlocking, all five room clears and Victory verified.");
+                        Require(playReport.bossesSpawned == 1 && playReport.bossRoomsCleared == 1 && playReport.observedBossAttacks >= 1 &&
+                            playReport.bossObservation != null && playReport.bossObservation.status == "passed", "Expected one naturally attacking Drop Keeper and a successful final boss clear.");
+                        playReport.checks.Add("Actual CharacterController walk and dash, natural attacks in all three voxel encounters, one natural Drop Keeper pattern within 15 game seconds, gate locking/unlocking, all five room clears and Victory verified.");
                         FinishPlay(null); break;
                 }
             }
@@ -866,9 +925,25 @@ namespace AcRoguelike.GameTheme.Editor
                 combatObservation.diagnostics.Add(label + " route="+route.ToString("F3")+" cell="+cell+" near="+near+" nearLocal="+room.transform.InverseTransformPoint(point).ToString("F3")+" sweepHits="+string.Join(",",sweepHits));
             }
             if(!capture || !Camera.main) return;
-            combatObservation.capture = "Documentation/GameTheme/PlayValidation/" + room.roomId + "_Combat.png";
+            CapturePlayRoom(combatObservation, "Combat");
+        }
+
+        static void RecordBossState(string label, bool capture)
+        {
+            var observation = playReport.bossObservation;
+            var room = run.Rooms[wantedRoom];
+            observation.diagnostics.Add(label + " bossLocal=" + room.transform.InverseTransformPoint(observedBoss.transform.position).ToString("F2") +
+                " playerLocal=" + room.transform.InverseTransformPoint(motor.transform.position).ToString("F2") + " state=" + observedBoss.State +
+                " attacks=" + observedBoss.Attacks + " volleys=" + observedBoss.Volleys + " shots=" + observedBoss.Shots +
+                " bars=" + observedBoss.BarsThrown + " summons=" + observedBoss.SummonWaves);
+            if (capture && Camera.main) CapturePlayRoom(observation, "Boss");
+        }
+
+        static void CapturePlayRoom(CombatObservation observation, string suffix)
+        {
+            observation.capture = "Documentation/GameTheme/PlayValidation/" + observation.roomId + "_" + suffix + ".png";
             var target = new RenderTexture(1280, 720, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
-            try { target.Create(); SaveImage(Camera.main, target, combatObservation.capture); }
+            try { target.Create(); SaveImage(Camera.main, target, observation.capture); }
             finally { target.Release(); Object.DestroyImmediate(target); }
         }
 

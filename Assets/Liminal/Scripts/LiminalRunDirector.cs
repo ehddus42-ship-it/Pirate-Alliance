@@ -200,7 +200,8 @@ namespace AcRoguelike.Liminal
                         ambush.enabled = false;
                     }
                 // Boss rooms that do not author their own boss get the traffic light boss.
-                if (!preview && room.kind == LiminalRoomKind.Boss && room.GetComponentsInChildren<TrafficLightBoss>(true).Length == 0)
+                if (!preview && room.kind == LiminalRoomKind.Boss && !room.GetComponent<AcRoguelike.GameTheme.GameThemeRoom>() &&
+                    room.GetComponentsInChildren<TrafficLightBoss>(true).Length == 0)
                     PlaceBoss(room);
                 if (!preview)
                     foreach (var signal in room.GetComponentsInChildren<TrafficLightBoss>(true))
@@ -259,7 +260,8 @@ namespace AcRoguelike.Liminal
                     if (gameTheme) SpawnGameMonsters(room, gameTheme, boss);
                     else SpawnOfficeMonsters(room, index, boss);
                 }
-                hud.Notify(gameTheme ? room.displayName + "\n복셀 몬스터가 나타났어. 예고선을 피하고 빈틈을 노려."
+                hud.Notify(gameTheme ? (boss ? "드롭 키퍼가 깨어났어.\n가속하는 블록과 벽에 튕기는 I자 블록을 피해."
+                    : room.displayName + "\n복셀 몬스터가 나타났어. 예고선을 피하고 빈틈을 노려.")
                     : boss ? "교차로의 신호등이 깨어나고 있어.\n바닥의 예고선을 보고 회피해."
                     : room.displayName + "\n사무용품들이 깨어났어. 모두 정리하면 문이 열려.", 4);
             }
@@ -319,6 +321,19 @@ namespace AcRoguelike.Liminal
 
         void SpawnGameMonsters(LiminalRoom room, AcRoguelike.GameTheme.GameThemeRoom theme, bool boss)
         {
+            if (boss)
+            {
+                Transform marker = room.enemySpawns != null && room.enemySpawns.Length > 0 ? room.enemySpawns[0] : null;
+                Vector3 position = marker ? marker.position : room.transform.TransformPoint(new Vector3(0, .05f, 23));
+                Vector3 look = (room.entry ? room.entry.position : room.transform.position) - position;
+                look.y = 0;
+                var keeper = AcRoguelike.GameTheme.GameTetrominoBoss.Create(position,
+                    Quaternion.LookRotation(look.sqrMagnitude > .01f ? look : -room.transform.forward), room.transform);
+                if (!keeper) throw new InvalidOperationException("게임 테마 보스 프리팹이 없어.");
+                keeper.Setup(health, room, StageIndex);
+                Register(keeper.Health);
+                return;
+            }
             int count = Mathf.Max(1, room.enemySpawns == null ? 0 : room.enemySpawns.Length);
             for (int i = 0; i < count; i++)
             {
@@ -574,6 +589,8 @@ namespace AcRoguelike.Liminal
 
         void ClearProjectiles()
         {
+            foreach (var p in FindObjectsByType<AcRoguelike.GameTheme.TetrominoProjectile>(FindObjectsSortMode.None)) Destroy(p.gameObject);
+            foreach (var p in FindObjectsByType<AcRoguelike.GameTheme.TetrominoCharger>(FindObjectsSortMode.None)) Destroy(p.gameObject);
             foreach (var p in FindObjectsByType<PaperProjectile>(FindObjectsSortMode.None)) Destroy(p.gameObject);
             foreach (var p in FindObjectsByType<BinaryProjectile>(FindObjectsSortMode.None)) Destroy(p.gameObject);
             foreach (var p in FindObjectsByType<VendingCanProjectile>(FindObjectsSortMode.None)) Destroy(p.gameObject);
