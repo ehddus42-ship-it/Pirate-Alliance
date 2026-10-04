@@ -201,6 +201,7 @@ namespace AcRoguelike.Liminal
                     }
                 // Boss rooms that do not author their own boss get the traffic light boss.
                 if (!preview && room.kind == LiminalRoomKind.Boss && !room.GetComponent<AcRoguelike.GameTheme.GameThemeRoom>() &&
+                    !room.GetComponent<AcRoguelike.RuinsBoss.RuinsBossArena>() &&
                     room.GetComponentsInChildren<TrafficLightBoss>(true).Length == 0)
                     PlaceBoss(room);
                 if (!preview)
@@ -255,13 +256,24 @@ namespace AcRoguelike.Liminal
                 room.SetGates(true, true);
                 bool boss = room.kind == LiminalRoomKind.Boss;
                 var gameTheme = room.GetComponent<AcRoguelike.GameTheme.GameThemeRoom>();
+                bool ruins = CurrentStage && CurrentStage.stageId == "concept_ruins";
                 if (!authoredBoss)
                 {
                     if (gameTheme) SpawnGameMonsters(room, gameTheme, boss);
+                    else if (ruins && boss && room.TryGetComponent<AcRoguelike.RuinsBoss.RuinsBossArena>(out var ruinsArena))
+                    {
+                        var storm = ruinsArena.Spawn(health, StageIndex);
+                        Register(storm.Health);
+                        Register(storm.leftMachine.Health, false);
+                        Register(storm.rightMachine.Health, false);
+                    }
+                    else if (ruins) SpawnRuinsMonsters(room, index);
                     else SpawnOfficeMonsters(room, index, boss);
                 }
                 hud.Notify(gameTheme ? (boss ? "드롭 키퍼가 깨어났어.\n가속하는 블록과 벽에 튕기는 I자 블록을 피해."
                     : room.displayName + "\n복셀 몬스터가 나타났어. 예고선을 피하고 빈틈을 노려.")
+                    : ruins ? (boss ? "폭풍의 군주가 전쟁 기계를 깨우고 있어.\n전기 탄막 사이를 빠져나가고, 미사일 착탄 예고를 피해."
+                    : room.displayName + "\n잔해 속 기계들이 움직여. 공격 예고를 피하고 회수 동작을 노려.")
                     : boss ? "교차로의 신호등이 깨어나고 있어.\n바닥의 예고선을 보고 회피해."
                     : room.displayName + "\n사무용품들이 깨어났어. 모두 정리하면 문이 열려.", 4);
             }
@@ -314,6 +326,25 @@ namespace AcRoguelike.Liminal
             foreach (var monster in spawned)
             {
                 if (monster is MonitorTurret) continue;
+                monster.Setup(health, room, StageIndex);
+                Register(monster.Health);
+            }
+        }
+
+        void SpawnRuinsMonsters(LiminalRoom room, int roomIndex)
+        {
+            int count = Mathf.Max(1, room.enemySpawns == null ? 0 : room.enemySpawns.Length);
+            for (int i = 0; i < count; i++)
+            {
+                Transform marker = room.enemySpawns != null && i < room.enemySpawns.Length ? room.enemySpawns[i] : null;
+                Vector3 position = marker ? marker.position : room.transform.TransformPoint(room.localBounds.center + Vector3.forward * (i * 2));
+                position.y = room.transform.position.y + .05f;
+                Vector3 look = (room.entry ? room.entry.position : room.transform.position) - position;
+                look.y = 0;
+                var kind = (AcRoguelike.Ruins.RuinsMonsterKind)((roomIndex - 1 + i) % 5);
+                var monster = AcRoguelike.Ruins.RuinsMonster.Create(kind, position,
+                    Quaternion.LookRotation(look.sqrMagnitude > .01f ? look : -room.transform.forward), room.transform);
+                if (!monster) throw new InvalidOperationException("폐허 테마 몬스터 프리팹이 없어: " + kind);
                 monster.Setup(health, room, StageIndex);
                 Register(monster.Health);
             }

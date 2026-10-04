@@ -197,6 +197,17 @@ namespace AcRoguelike.Liminal
                         bossFill.rectTransform.sizeDelta = new Vector2(688f * keeper.Health.Health / Mathf.Max(1, keeper.Health.maxHealth), 10);
                         break;
                     }
+            if (run.LivingEnemyCount > 0 && run.ActiveRoomIndex >= 0 && run.ActiveRoomIndex < run.Rooms.Count &&
+                run.Rooms[run.ActiveRoomIndex].kind == LiminalRoomKind.Boss)
+                foreach (var storm in run.Rooms[run.ActiveRoomIndex].GetComponentsInChildren<AcRoguelike.RuinsBoss.RuinsStormBoss>())
+                    if (storm.enabled && storm.Health && storm.Health.IsAlive && !storm.EncounterCancelled)
+                    {
+                        bossGroup.SetActive(true);
+                        bossName.text = storm.displayName + $"   <color=#70DCEA>기계 각성 {storm.MachinesActivated}/2</color>";
+                        bossValue.text = $"{storm.Health.Health} / {storm.Health.maxHealth}";
+                        bossFill.rectTransform.sizeDelta = new Vector2(688f * storm.Health.Health / Mathf.Max(1, storm.Health.maxHealth), 10);
+                        break;
+                    }
             if (run.Phase == LiminalRunPhase.AugmentChoice && Keyboard.current != null)
             {
                 if (Keyboard.current.digit1Key.wasPressedThisFrame) run.SelectAugment(0);

@@ -68,10 +68,13 @@ namespace AcRoguelike.StageConcepts.Editor
             if (stage)
             {
                 stage.startRoom = built[StartIndex];
-                stage.endRoom = built[EndIndex];
+                var apocalypseArena = key == "Ruins"
+                    ? AssetDatabase.LoadAssetAtPath<GameObject>(AcRoguelike.RuinsBoss.Editor.RuinsBossBuilder.ArenaPath) : null;
+                stage.endRoom = apocalypseArena ? apocalypseArena.GetComponent<LiminalRoom>() : built[EndIndex];
                 stage.roomPool = PoolIndices.Select(i => built[i]).ToArray();
                 stage.middleRoomCount = 3;
                 EditorUtility.SetDirty(stage);
+                if (apocalypseArena) AcRoguelike.RuinsBoss.Editor.RuinsBossBuilder.ConnectStage();
             }
             return RoomsPerTheme;
         }

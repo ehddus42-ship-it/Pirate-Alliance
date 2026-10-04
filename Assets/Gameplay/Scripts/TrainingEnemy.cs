@@ -24,6 +24,8 @@ namespace AcRoguelike
         public int HitCount { get; private set; }
         public bool IsAlive => Health > 0;
         public bool CanBeTargeted { get; set; } = true;
+        /// <summary>Owner-controlled immunity, independent of targeting and mission damage scaling.</summary>
+        public bool IgnoreDamage { get; set; }
         public Vector3 AimPoint => aimAnchor ? aimAnchor.position : transform.position + Vector3.up;
 
         Collider[] colliders;
@@ -39,7 +41,7 @@ namespace AcRoguelike
 
         public void TakeDamage(int damage)
         {
-            if (!IsAlive || damage <= 0) return;
+            if (!IsAlive || IgnoreDamage || damage <= 0) return;
             damage = Mathf.Max(1, Mathf.RoundToInt(damage * incomingDamageMultiplier));
             HitCount++;
             Health = Mathf.Max(0, Health - damage);
