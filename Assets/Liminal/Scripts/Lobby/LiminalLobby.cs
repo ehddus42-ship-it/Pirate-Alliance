@@ -11,7 +11,7 @@ namespace AcRoguelike.Liminal
 {
     /// <summary>
     /// Active lobby: the Korea Hunter Association's gate control zone, a plaza in Seoul built at runtime.
-    /// It has barricades, association banners, a blue booth, the skyline with N Seoul Tower, and a huge violet
+    /// It has barricades, association banners, a blue booth, the skyline with N Seoul Tower, and a burning blue
     /// gate. Association staff and visiting hunters (<see cref="LobbyNpc"/>) consult the medic, check equipment,
     /// prepare for expeditions and take breaks while guards keep watch. The hunter walks it in everyday clothes:
     /// - talk to the association agent to buy permanent upgrades with magic stones;
@@ -40,6 +40,7 @@ namespace AcRoguelike.Liminal
         public Interactable Nearest { get; private set; }
         public LobbyNpc Agent => agent;
         public IReadOnlyList<LobbyNpc> Officials => officials;
+        public BlueFireGate GateFire { get; private set; }
 
         public sealed class Interactable
         {
@@ -56,10 +57,6 @@ namespace AcRoguelike.Liminal
         LobbyNpc agent;
         readonly List<LobbyNpc> officials = new List<LobbyNpc>();
         bool greeted;
-        Transform gateCore;
-        Transform[] gateRings;
-        Light gateLight;
-        float sparkClock;
         GameObject window;
         GateFade fade;
         bool entering;
@@ -267,38 +264,32 @@ namespace AcRoguelike.Liminal
             var gate = new GameObject("Gate").transform;
             gate.SetParent(transform, false);
             gate.localPosition = new Vector3(0, 0, 13.5f);
-            // Scaffold truss around the rift, as in the concept art.
-            foreach (float x in new[] { -4.6f, 4.6f })
+            var casing = Mat(null, new Color(.12f, .18f, .23f), .38f, default, .55f);
+            var reinforcement = Mat(null, new Color(.46f, .54f, .58f), .5f, default, .65f);
+            var blueLens = Mat(null, new Color(.1f, .53f, .9f), .65f, default, .15f, new Color(.06f, .85f, 2.2f));
+            // Repaired containment posts frame the fire without a crossbar hiding its rising crown.
+            foreach (float side in new[] { -1f, 1f })
             {
-                Block("TrussPillar", gate.localPosition + new Vector3(x, 3.6f, 0), new Vector3(.45f, 7.2f, .45f), metal, true);
-                for (int k = 0; k < 4; k++)
-                    Block("TrussBrace", gate.localPosition + new Vector3(x, .9f + k * 1.7f, 0), new Vector3(.08f, 2.1f, .08f), metal, false).localRotation = Quaternion.Euler(0, 0, (k % 2 == 0 ? 35 : -35));
-                Block("TrussLight", gate.localPosition + new Vector3(x, 7.4f, -.3f), new Vector3(.6f, .4f, .4f), Mat(null, new Color(1, .95f, .8f), .8f, default, 0, new Color(2.2f, 2f, 1.6f)), false);
+                float x = side * 4.35f;
+                Block("ContainmentFoot", gate.localPosition + new Vector3(x, .22f, .22f), new Vector3(1.05f, .44f, 1.5f), dark, true);
+                Block("ContainmentPost", gate.localPosition + new Vector3(x, 2.75f, .32f), new Vector3(.36f, 5.5f, .42f), casing, true);
+                Block("ContainmentBrace", gate.localPosition + new Vector3(x + side * .33f, 2.0f, .58f), new Vector3(.16f, 4.2f, .25f), metal, false).localRotation = Quaternion.Euler(0, 0, side * 9);
+                foreach (float y in new[] { .9f, 2.9f, 4.9f })
+                {
+                    Block("BoltedRepairSleeve", gate.localPosition + new Vector3(x, y, .32f), new Vector3(.46f, .26f, .52f), reinforcement, false);
+                    foreach (float bolt in new[] { -.12f, .12f })
+                        Block("AnchorBolt", gate.localPosition + new Vector3(x + bolt, y, .045f), new Vector3(.04f, .055f, .026f), dark, false);
+                }
+                foreach (float y in new[] { 1.25f, 4.25f })
+                {
+                    Block("EmitterMount", gate.localPosition + new Vector3(x - side * .22f, y, -.07f), new Vector3(.62f, .68f, .30f), casing, false);
+                    Cylinder("EmitterHousing", gate.localPosition + new Vector3(x - side * .22f, y, -.27f), new Vector3(.48f, .1f, .48f), metal).localRotation = Quaternion.Euler(90, 0, 0);
+                    Cylinder("BlueEmitterLens", gate.localPosition + new Vector3(x - side * .22f, y, -.38f), new Vector3(.32f, .012f, .32f), blueLens).localRotation = Quaternion.Euler(90, 0, 0);
+                }
             }
-            Block("TrussBeam", gate.localPosition + new Vector3(0, 7.3f, 0), new Vector3(9.7f, .45f, .45f), metal, true);
             Block("GatePlinth", gate.localPosition + new Vector3(0, .12f, 0), new Vector3(9.6f, .24f, 2.2f), dark, true);
-            // The rift: a dark core inside layered, counter-rotating violet swirls, with a glow on the floor.
-            gateCore = new GameObject("Rift").transform;
-            gateCore.SetParent(gate, false);
-            gateCore.localPosition = new Vector3(0, 3.6f, 0);
-            Disc(gateCore, "Core", 3.3f, new Color(.08f, .02f, .2f, .97f), new Color(.45f, .22f, 1f, .9f), false, 0);
-            gateRings = new Transform[4];
-            for (int i = 0; i < gateRings.Length; i++)
-            {
-                gateRings[i] = Disc(gateCore, "Swirl" + i, 3.5f - i * .55f, new Color(.6f, .4f, 1f, 0), new Color(.75f, .55f, 1f, .75f - i * .1f), true, i * 1.7f + 1);
-                gateRings[i].localPosition = Vector3.back * (.02f + i * .02f);
-            }
-            var floorGlow = Disc(gate, "FloorGlow", 5f, new Color(.5f, .3f, 1f, .5f), new Color(.5f, .3f, 1f, 0), true, 0);
-            floorGlow.localPosition = new Vector3(0, .26f, -1.5f);
-            floorGlow.localRotation = Quaternion.Euler(90, 0, 0);
-            var lightGo = new GameObject("GateLight");
-            lightGo.transform.SetParent(gate, false);
-            lightGo.transform.localPosition = new Vector3(0, 3.6f, -2.5f);
-            gateLight = lightGo.AddComponent<Light>();
-            gateLight.type = LightType.Point;
-            gateLight.color = new Color(.62f, .45f, 1f);
-            gateLight.range = 16;
-            gateLight.intensity = 5;
+            Block("GateThreshold", gate.localPosition + new Vector3(0, .246f, -1.02f), new Vector3(5.5f, .015f, .11f), blueLens, false);
+            GateFire = BlueFireGate.Build(gate, owned);
         }
 
         void BuildBooth(Material canopy, Material white, Material metal)
@@ -327,21 +318,6 @@ namespace AcRoguelike.Liminal
         // ---- per frame ---------------------------------------------------------------------------------------
         void Update()
         {
-            float t = Time.time;
-            if (gateRings != null)
-                for (int i = 0; i < gateRings.Length; i++)
-                {
-                    gateRings[i].localRotation = Quaternion.Euler(0, 0, t * (i % 2 == 0 ? 40 : -55) * (1 + i * .3f));
-                    gateRings[i].localScale = Vector3.one * (1 + .04f * Mathf.Sin(t * 2.3f + i));
-                }
-            if (gateLight) gateLight.intensity = 4.5f + Mathf.Sin(t * 3.1f) * .8f + Mathf.Sin(t * 7.7f) * .3f;
-            sparkClock -= Time.deltaTime;
-            if (gateCore && sparkClock <= 0)
-            {
-                sparkClock = .35f;
-                float a = UnityEngine.Random.value * Mathf.PI * 2;
-                HitFeedback.Sparks(gateCore.position + new Vector3(Mathf.Cos(a) * 3.2f, Mathf.Sin(a) * 3.2f, -.2f), new Vector3(Mathf.Cos(a), Mathf.Sin(a), -.3f), 3, .6f);
-            }
             if (run == null || run.Phase != LiminalRunPhase.Lobby || entering) return;
             var keyboard = Keyboard.current;
             var pad = Gamepad.current;
@@ -756,61 +732,27 @@ namespace AcRoguelike.Liminal
             go.transform.localRotation = Quaternion.Euler(0, yaw, 0);
         }
 
-        /// <summary>A flat disc facing -Z (toward the plaza) with a radial colour gradient; additive or alpha-blended.</summary>
-        Transform Disc(Transform parent, string name, float radius, Color inner, Color outer, bool additive, float wobble)
-        {
-            var go = new GameObject(name);
-            go.transform.SetParent(parent, false);
-            const int segments = 64, rings = 6;
-            var mesh = new Mesh { name = name };
-            var v = new List<Vector3>(); var c = new List<Color>(); var t = new List<int>();
-            for (int r = 0; r <= rings; r++)
-                for (int s = 0; s <= segments; s++)
-                {
-                    float u = r / (float)rings, a = s / (float)segments * Mathf.PI * 2;
-                    // A swirl: the radius wobbles with angle and ring, so the bands read as twisting energy.
-                    float rr = radius * u * (1 + (wobble > 0 ? .06f * Mathf.Sin(a * 3 + u * wobble * 4) : 0));
-                    v.Add(new Vector3(Mathf.Cos(a + u * wobble) * rr, Mathf.Sin(a + u * wobble) * rr, 0));
-                    var col = Color.Lerp(inner, outer, u);
-                    if (wobble > 0) col.a *= Mathf.Clamp01(Mathf.Sin(u * Mathf.PI) * 1.6f) * (.6f + .4f * Mathf.Sin(a * 5 + wobble));
-                    c.Add(col);
-                }
-            for (int r = 0; r < rings; r++)
-                for (int s = 0; s < segments; s++)
-                {
-                    int a = r * (segments + 1) + s, b = a + 1, cc = a + segments + 1, d = cc + 1;
-                    t.Add(a); t.Add(cc); t.Add(b); t.Add(b); t.Add(cc); t.Add(d);
-                }
-            mesh.SetVertices(v); mesh.SetColors(c); mesh.SetTriangles(t, 0); mesh.RecalculateBounds();
-            owned.Add(mesh);
-            go.AddComponent<MeshFilter>().sharedMesh = mesh;
-            var renderer = go.AddComponent<MeshRenderer>();
-            renderer.sharedMaterial = additive ? HitFeedback.Additive : HitFeedback.Blended;
-            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            return go.transform;
-        }
-
         void OnDestroy() { foreach (var o in owned) if (o) Destroy(o); }
     }
 
-    /// <summary>Violet full-screen curtain for walking into a gate: fades in, runs the midpoint action, fades out.</summary>
     public sealed class GateMissionCardFocus : MonoBehaviour, ISelectHandler
     {
         public Action Selected;
         public void OnSelect(BaseEventData eventData) => Selected?.Invoke();
     }
 
+    /// <summary>Deep blue gate transition. Runs the mission action once at the opaque midpoint.</summary>
     public sealed class GateFade : MonoBehaviour
     {
         Image image;
         Action midpoint;
         float started = -1;
         bool fired;
-        static readonly Color Violet = new Color(.35f, .2f, .7f, 1);
+        static readonly Color GateBlue = new Color(.025f, .12f, .32f, 1);
 
         public static GateFade Create(Transform canvas)
         {
-            var img = HunterUi.Fill("GateFade", canvas, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, Vector2.zero, new Color(Violet.r, Violet.g, Violet.b, 0));
+            var img = HunterUi.Fill("GateFade", canvas, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, Vector2.zero, new Color(GateBlue.r, GateBlue.g, GateBlue.b, 0));
             var r = img.rectTransform; r.anchorMin = Vector2.zero; r.anchorMax = Vector2.one; r.offsetMin = r.offsetMax = Vector2.zero;
             img.transform.SetAsLastSibling();
             var fade = img.gameObject.AddComponent<GateFade>();
@@ -833,7 +775,7 @@ namespace AcRoguelike.Liminal
             if (started < 0) return;
             float t = Time.unscaledTime - started;
             float a = t < .55f ? t / .55f : 1 - Mathf.Clamp01((t - .65f) / .6f);
-            image.color = new Color(Violet.r, Violet.g, Violet.b, a);
+            image.color = new Color(GateBlue.r, GateBlue.g, GateBlue.b, a);
             if (!fired && t >= .6f) { fired = true; midpoint?.Invoke(); }
             if (t >= 1.25f) { started = -1; image.enabled = false; }
         }
