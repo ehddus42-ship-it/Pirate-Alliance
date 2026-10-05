@@ -21,7 +21,7 @@ namespace AcRoguelike.Liminal.Editor
     {
         const string Active = "Lobby.ExpansionValidation";
         const string Folder = "Library/LobbyExpansionValidation";
-        const string Captures = "Documentation/Liminal/LobbyExpansion";
+        static string Captures => SessionState.GetString(Active + ".output", "Documentation/Liminal/LobbyExpansion");
         [Serializable] sealed class Report
         {
             public string status = "running", utc, unityVersion;
@@ -96,6 +96,9 @@ namespace AcRoguelike.Liminal.Editor
             report = new Report { utc = DateTime.UtcNow.ToString("O"), unityVersion = Application.unityVersion };
             try
             {
+                string[] args = Environment.GetCommandLineArgs();
+                int output = Array.IndexOf(args, "-lobbyValidationOutput");
+                SessionState.SetString(Active + ".output", output >= 0 && output + 1 < args.Length ? args[output + 1] : "Documentation/Liminal/LobbyExpansion");
                 EditorSceneManager.OpenScene("Assets/Liminal/Scenes/LiminalRun.unity", OpenSceneMode.Single);
                 CapturePrefs(); Save();
                 SessionState.SetBool(Active + ".finished", false); SessionState.SetBool(Active, true);
@@ -123,7 +126,8 @@ namespace AcRoguelike.Liminal.Editor
                 if (Time.frameCount == lastFrame) return;
                 lastFrame = Time.frameCount;
                 if (!routine.MoveNext()) { Finish(null); return; }
-                if (routine.Current is Wait wait) { waiting = wait; deadline = now + wait.seconds; }
+                // Capturing several review cameras may take seconds inside MoveNext; start the wait after that work.
+                if (routine.Current is Wait wait) { waiting = wait; deadline = EditorApplication.timeSinceStartup + wait.seconds; }
             }
             catch (Exception ex) { Finish(ex.ToString()); }
         }
@@ -143,6 +147,24 @@ namespace AcRoguelike.Liminal.Editor
             cast = run.Lobby.Officials.ToArray();
             routines = run.Lobby.GetComponentsInChildren<LobbyRoutine>();
             Check(cast.Length == 13 && cast.All(n => n), "The live lobby contains all 13 officials and hunters.");
+            var ground = run.Lobby.GetComponentInChildren<LobbyRecoveryGround>();
+            var streets = run.Lobby.GetComponentInChildren<LobbyRestoredStreets>();
+            var symbols = run.Lobby.GetComponentInChildren<LobbySymbolFixtures>();
+            var neighbourhood = run.Lobby.GetComponentInChildren<LobbyRecoveredBlock>();
+            Check(ground && streets && symbols && neighbourhood, "Recovered paving, repaired streets, symbol-only fixtures and neighbourhood are present.");
+            Check(ground.GetComponentsInChildren<Collider>().Length == 0, "Surface repairs introduce no collision steps or snags.");
+            Check(symbols.FixtureCount == 5 && symbols.GetComponentsInChildren<Collider>().Length == 5, "All five former printed fixtures are replaced with symbol-only furniture.");
+            foreach (var section in new Component[] { ground, streets, symbols, neighbourhood })
+            {
+                Check(section.GetComponentsInChildren<TextMesh>(true).Length == 0 && section.GetComponentsInChildren<TMP_Text>(true).Length == 0,
+                    section.name + " uses geometric markings without readable street labels.");
+                var geometry = section.GetComponentsInChildren<MeshFilter>();
+                long triangles = geometry.Sum(f => f.sharedMesh ? Enumerable.Range(0, f.sharedMesh.subMeshCount).Sum(s => (long)f.sharedMesh.GetIndexCount(s) / 3) : 0);
+                Check(geometry.Length > 0 && triangles > 0 && triangles < 100000,
+                    section.name + " has bounded static geometry: " + triangles + " triangles in " + geometry.Length + " meshes.");
+                Check(section.GetComponentsInChildren<Renderer>().All(r => r.sharedMaterials.All(m => m && m.shader && !m.shader.name.Contains("Error"))),
+                    section.name + " has valid render materials.");
+            }
             var roles = new[] { Find("FieldMedic"), Find("GateEngineer"), Find("RookieHunter"), Find("VeteranHunter") };
             string[][] labels = { new[] { "idle", "walk", "talk", "greet", "inspect", "listen" },
                 new[] { "idle", "walk", "talk", "greet", "phone", "inspect" },
@@ -183,7 +205,12 @@ namespace AcRoguelike.Liminal.Editor
             yield return Seconds(.6f);
             Check(engineer.GetComponentInChildren<LobbyHandProp>().Visible && veteran.GetComponentInChildren<LobbyHandProp>().Visible,
                 "Telephone and drink props follow their active hand animations.");
-            CaptureView("validation-overview", new Vector3(0, 1, 1), new Vector3(20, 28, -27), 18);
+            CaptureView("validation-overview", new Vector3(0, 1, 2), new Vector3(24, 31, -30), 23);
+            CaptureView("validation-repairs", new Vector3(-16.5f, .5f, -7), new Vector3(5, 7, -8), 5.5f);
+            CaptureView("validation-crossing", new Vector3(-2, .5f, -16), new Vector3(6, 9, -9), 7);
+            CaptureView("validation-facilities", new Vector3(13.2f, .9f, -4.6f), new Vector3(-5, 3, -4), 2.1f);
+            Camera.main.GetComponent<IsometricFollowCamera>().Snap();
+            Capture(Camera.main, "validation-player-view");
             CaptureView("validation-medical", Midpoint(medic, Find("MedicalVisitor")) + Vector3.up, new Vector3(5, 4.5f, -6), 3.7f);
             CaptureView("validation-workshop", engineer.transform.localPosition + new Vector3(0, 1, .8f), new Vector3(-5, 4, 6), 3.35f);
             CaptureView("validation-rest", rookie.transform.localPosition + new Vector3(0, 1, .9f), new Vector3(5, 5, 6), 4.1f);
@@ -214,6 +241,13 @@ namespace AcRoguelike.Liminal.Editor
             Check(medic.Current == "greet", "The medic greets a player who approaches.");
             yield return Seconds(6);
             Check(medicalRoutine.GreetingCount == greetings + 1, "Standing beside an NPC does not repeatedly trigger greetings.");
+
+            motor.ResetAt(run.Lobby.SpawnPoint);
+            foreach (var point in new[] { new Vector3(0, .05f, -14), new Vector3(-16, .05f, -14), new Vector3(-16, .05f, -3) })
+            {
+                var perimeterWalk = WalkTo(point, "repaired plaza circulation " + point);
+                while (perimeterWalk.MoveNext()) yield return perimeterWalk.Current;
+            }
 
             // Follow playable floor routes, then use the same interaction delegates as E/gamepad A.
             motor.ResetAt(run.Lobby.SpawnPoint);
@@ -324,6 +358,7 @@ namespace AcRoguelike.Liminal.Editor
         {
             const int width = 1800, height = 1200;
             var target = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+            float previousAspect = camera.aspect;
             var previous = RenderTexture.active; Texture2D pixels = null;
             try
             {
@@ -336,7 +371,7 @@ namespace AcRoguelike.Liminal.Editor
                 Directory.CreateDirectory(Captures); string path = Captures + "/" + name + ".png";
                 File.WriteAllBytes(path, pixels.EncodeToPNG()); report.captures.Add(path); Save();
             }
-            finally { RenderTexture.active = previous; if (pixels) Object.DestroyImmediate(pixels); target.Release(); Object.DestroyImmediate(target); }
+            finally { camera.aspect = previousAspect; RenderTexture.active = previous; if (pixels) Object.DestroyImmediate(pixels); target.Release(); Object.DestroyImmediate(target); }
         }
         static void CapturePrefs()
         {

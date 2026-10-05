@@ -108,7 +108,7 @@ namespace AcRoguelike.Liminal
         void Construct()
         {
             var stone = Mat(LobbyTextures.Paving(), new Color(.8f, .79f, .76f), .25f, new Vector2(11, 9));
-            var asphalt = Mat(null, new Color(.2f, .21f, .24f), .15f);
+            var asphalt = LobbyRecoveryGround.CreateRoadMaterial(owned);
             var metal = Mat(null, new Color(.3f, .32f, .36f), .55f, default, .6f);
             var stripe = Mat(LobbyTextures.Stripes(), Color.white, .3f, new Vector2(3, 1));
             var navy = Mat(LobbyTextures.Banner(), Color.white, .2f);
@@ -127,6 +127,10 @@ namespace AcRoguelike.Liminal
             // Ground: paved plaza with an asphalt road beyond.
             Block("Plaza", new Vector3(0, -.05f, 0), new Vector3(44, .1f, 36), stone, true);
             Block("Road", new Vector3(0, -.06f, 0), new Vector3(120, .1f, 110), asphalt, true);
+            LobbyRecoveryGround.Build(transform, owned);
+            LobbyRestoredStreets.Build(transform, owned);
+            LobbySymbolFixtures.Build(transform, owned);
+            LobbyRecoveredBlock.Build(transform, owned);
             // Invisible walls keep the player on the plaza.
             foreach (var (p, s) in new[] { (new Vector3(0, 1.5f, 18.2f), new Vector3(44, 3, .4f)), (new Vector3(0, 1.5f, -18.2f), new Vector3(44, 3, .4f)),
                                            (new Vector3(22.2f, 1.5f, 0), new Vector3(.4f, 3, 36)), (new Vector3(-22.2f, 1.5f, 0), new Vector3(.4f, 3, 36)) })
@@ -166,15 +170,10 @@ namespace AcRoguelike.Liminal
             BuildBooth(canopy, white, metal);
             Prop(Library?.waitingBench, new Vector3(10.5f, 0, -1.5f), -90);
             Prop(Library?.waitingBench, new Vector3(10.5f, 0, 2.4f), -90);
-            Prop(Library?.vendingMachine, new Vector3(13.2f, 0, -5.5f), -90);
-            Prop(Library?.waterDispenser, new Vector3(13.2f, 0, -3.6f), -90);
             Prop(Library?.planter, new Vector3(-13.5f, 0, -8), 0);
             Prop(Library?.planter, new Vector3(13.5f, 0, 8), 0);
             Prop(Library?.planter, new Vector3(-13.5f, 0, 8.5f), 0);
             Prop(Library?.trashBin, new Vector3(8.8f, 0, -6.5f), 0);
-            Prop(Library?.cautionSign, new Vector3(-1.9f, 0, 7.6f), 20);
-            Prop(Library?.cautionSign, new Vector3(1.9f, 0, 7.6f), -20);
-            Prop(Library?.directoryKiosk, new Vector3(3.5f, 0, -12), 180);
             Prop(Library?.foldingBarrier, new Vector3(-16, 0, 12), 30);
             Prop(Library?.foldingBarrier, new Vector3(16, 0, 12), -30);
 
