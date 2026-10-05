@@ -12,8 +12,8 @@ namespace AcRoguelike.Liminal
     /// <summary>
     /// Active lobby: the Korea Hunter Association's gate control zone, a plaza in Seoul built at runtime.
     /// It has barricades, association banners, a blue booth, the skyline with N Seoul Tower, and a huge violet
-    /// gate. Everyone in it is a Meshy-made association official (<see cref="LobbyNpc"/>): the agent at the booth,
-    /// staff chatting and walking their rounds, and gate guards on watch. The hunter walks it in everyday clothes:
+    /// gate. Association staff and visiting hunters (<see cref="LobbyNpc"/>) consult the medic, check equipment,
+    /// prepare for expeditions and take breaks while guards keep watch. The hunter walks it in everyday clothes:
     /// - talk to the association agent to buy permanent upgrades with magic stones;
     /// - walk into the gate to start a run.
     /// There are no menu buttons until the player interacts with something.
@@ -30,6 +30,10 @@ namespace AcRoguelike.Liminal
         public const string OfficerCharacter = "association_officer";
         public const string DirectorCharacter = "association_director";
         public const string GuardCharacter = "association_guard";
+        public const string MedicCharacter = "field_medic";
+        public const string EngineerCharacter = "gate_engineer";
+        public const string RookieCharacter = "rookie_hunter";
+        public const string VeteranCharacter = "veteran_hunter";
 
         public Vector3 SpawnPoint => transform.TransformPoint(new Vector3(0, .05f, -9));
         public bool WindowOpen => window;
@@ -219,6 +223,8 @@ namespace AcRoguelike.Liminal
             // The folder is in his right hand: the left one holds the phone during calls.
             HeldBoard.Attach(clerk, false, new Vector3(.24f, .32f, .02f), Mat(null, new Color(.16f, .22f, .42f), .3f), clipMat, null, owned);
             LobbyRoutine.Patrol(clerk, new[] { new Vector3(-6.5f, 0, -1f), new Vector3(-5.2f, 0, -7f), new Vector3(5.4f, 0, -7f), new Vector3(6.4f, 0, -.5f) }, "phone", .82f, 31);
+            LobbyHandProp.Attach(clerk, LobbyHandProp.Kind.Phone, true, owned);
+            BuildAmbientLife();
 
             // The gate entry trigger.
             var gateMark = new GameObject("GateEntry").transform;
@@ -232,6 +238,30 @@ namespace AcRoguelike.Liminal
         }
 
         static LiminalMonsterLibrary Library => LiminalMonsterLibrary.Instance;
+
+        void BuildAmbientLife()
+        {
+            LobbyActivityStations.Build(transform, owned);
+            var medic = Official(MedicCharacter, new[] { "idle", "walk", "talk", "greet", "inspect", "listen" },
+                LobbyActivityStations.MedicPosition, 90, 1.66f, "FieldMedic");
+            var visitor = Official(RookieCharacter, new[] { "idle", "walk", "talk", "greet", "warmup", "breath" },
+                LobbyActivityStations.PatientPosition, 270, 1.73f, "MedicalVisitor");
+            LobbyRoutine.ChatPair(medic, new[] { "inspect", "talk", "listen" }, visitor, new[] { "talk", "breath" }, 47);
+
+            var engineer = Official(EngineerCharacter, new[] { "idle", "walk", "talk", "greet", "phone", "inspect" },
+                LobbyActivityStations.EngineerPosition, 0, 1.79f, "GateEngineer");
+            LobbyRoutine.Station(engineer, new[] { "inspect", "phone", "talk" }, 59);
+            LobbyHandProp.Attach(engineer, LobbyHandProp.Kind.Phone, true, owned);
+
+            var rookie = Official(RookieCharacter, new[] { "idle", "walk", "talk", "greet", "warmup", "breath" },
+                LobbyActivityStations.RookiePosition, 0, 1.77f, "RookieHunter");
+            LobbyRoutine.Station(rookie, new[] { "warmup", "breath", "talk" }, 71);
+
+            var veteran = Official(VeteranCharacter, new[] { "idle", "walk", "talk", "greet", "drink", "look" },
+                LobbyActivityStations.VeteranPosition, 90, 1.71f, "VeteranHunter");
+            LobbyRoutine.Station(veteran, new[] { "look", "drink", "talk" }, 83);
+            LobbyHandProp.Attach(veteran, LobbyHandProp.Kind.TakeawayCup, true, owned);
+        }
 
         void BuildGate(Material metal, Material dark)
         {

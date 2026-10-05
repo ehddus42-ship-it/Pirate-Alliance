@@ -60,6 +60,28 @@ namespace AcRoguelike.Liminal
         public bool Has(string label) => Index(label) >= 0;
         public bool PlayingOnce => once >= 0;
         public float TurnSpeed { get; set; } = 240;
+        public int ClipCount => tracks.Count;
+        public bool AnimationReady => graph.IsValid() && animator && animator.isHuman && tracks.Count > 0;
+
+        public float ClipLength(string label)
+        {
+            int index = Index(label);
+            return index >= 0 ? tracks[index].Length : 0;
+        }
+
+        /// <summary>The actual fade weight, used by held objects so they follow their animation's entrance and exit.</summary>
+        public float ClipWeight(string label)
+        {
+            int index = Index(label);
+            return index >= 0 ? tracks[index].weight : 0;
+        }
+
+        public void SetPlaybackRate(string label, float rate)
+        {
+            int index = Index(label);
+            if (index < 0) return;
+            foreach (var player in tracks[index].players) player.SetSpeed(Mathf.Clamp(rate, .15f, 2f));
+        }
 
         public static string ModelPath(string character) => $"LiminalLobby/{character}/{character}";
         public static string ClipPath(string character, string label) => $"LiminalLobby/{character}/{character}@{label}";
@@ -135,6 +157,7 @@ namespace AcRoguelike.Liminal
         void Build(List<(string label, AnimationClip clip)> clips)
         {
             if (!animator || clips.Count == 0) return;
+            animator.runtimeAnimatorController = null;
             animator.applyRootMotion = false;
             animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
             graph = PlayableGraph.Create("LobbyNpc." + Character);
@@ -169,6 +192,19 @@ namespace AcRoguelike.Liminal
         {
             int index = Index(label);
             if (index < 0) index = 0;
+            // A work task needs its lead-in: lift the cup or reach for an item before using it.
+            // Idle, speech and walking retain their varied phases. Repeated per-frame Play calls do not restart.
+            if (index != loop && index < tracks.Count &&
+                (label == "inspect" || label == "drink" || label == "phone" || label == "listen" || label == "warmup" || label == "breath"))
+            {
+                var track = tracks[index];
+                track.active = 0;
+                track.seam = -1;
+                track.players[0].SetTime(0);
+                track.players[1].SetTime(0);
+                track.mixer.SetInputWeight(0, 1);
+                track.mixer.SetInputWeight(1, 0);
+            }
             loop = index;
         }
 
@@ -280,12 +316,21 @@ namespace AcRoguelike.Liminal
             // Ground the feet after the animation has posed the skeleton this frame: lower (or raise) the model until
             // the lower toe sits at its rest-pose height. Smoothed, so a stepping foot does not jolt the body.
             if (!grounded || !model || !leftToe || !rightToe) return;
+            // Jumping jacks intentionally lift both feet. Preserve that authored flight rather than pinning it down.
+            if (ClipWeight("warmup") > .2f)
+            {
+                ground = Mathf.Lerp(ground, 0, 1 - Mathf.Exp(-Time.deltaTime * 14));
+                model.localPosition = modelBase + Vector3.up * ground;
+                return;
+            }
             float toe = Mathf.Min(leftToe.position.y, rightToe.position.y) - transform.position.y - ground;
             float want = Mathf.Clamp(restToe - toe, -.25f, .1f);
             ground = Mathf.Lerp(ground, want, 1 - Mathf.Exp(-Time.deltaTime * 14));
             model.localPosition = modelBase + Vector3.up * ground;
         }
 
+        void OnEnable() { if (graph.IsValid()) graph.Play(); }
+        void OnDisable() { if (graph.IsValid()) graph.Stop(); }
         void OnDestroy() { if (graph.IsValid()) graph.Destroy(); }
 
         // ---- shared helpers ---------------------------------------------------------------------------------
@@ -372,27 +417,43 @@ namespace AcRoguelike.Liminal
         Mode mode;
         LobbyNpc npc, partner;
         LobbyRoutine leader;   // chat: the partner whose clock drives the turn-taking (null on the leader)
+        string[] activities;
         string activity;
+        int activityIndex;
         Vector3[] path;
         int next;
-        float clock, pause, speed;
+        float clock, pause, speed, strideSpeed = .82f;
         bool busy, walking;
         System.Random random;
         bool greetArmed = true;
         float lastGreet = -100;
+        CapsuleCollider capsule;
+        readonly RaycastHit[] sweepHits = new RaycastHit[24];
         public const float Notice = 2.3f, Rearm = 3.6f, GreetCooldown = 12f, GreetSeconds = 5.2f;
 
         public Mode Kind => mode;
         public bool Walking => walking;
+        public string CurrentActivity => npc ? npc.Current : null;
+        public int ActivityChanges { get; private set; }
+        public int GreetingCount { get; private set; }
+        public int CompletedStops { get; private set; }
+        public float DistanceTravelled { get; private set; }
 
         public static LobbyRoutine Station(LobbyNpc npc, string activity, int seed)
-            => Add(npc, Mode.Station, activity, seed);
+            => Station(npc, new[] { activity }, seed);
+
+        /// <summary>Cycles several real work clips with a quiet pause between tasks. Seeds offset each person's day.</summary>
+        public static LobbyRoutine Station(LobbyNpc npc, string[] activities, int seed)
+            => Add(npc, Mode.Station, activities, seed);
 
         /// <summary>Two officials in conversation: `first` talks first, then they take turns on one shared clock.</summary>
         public static (LobbyRoutine, LobbyRoutine) ChatPair(LobbyNpc first, string firstActivity, LobbyNpc second, string secondActivity, int seed)
+            => ChatPair(first, new[] { firstActivity }, second, new[] { secondActivity }, seed);
+
+        public static (LobbyRoutine, LobbyRoutine) ChatPair(LobbyNpc first, string[] firstActivities, LobbyNpc second, string[] secondActivities, int seed)
         {
-            var a = Add(first, Mode.Chat, firstActivity, seed);
-            var b = Add(second, Mode.Chat, secondActivity, seed + 1);
+            var a = Add(first, Mode.Chat, firstActivities, seed);
+            var b = Add(second, Mode.Chat, secondActivities, seed + 1);
             a.partner = second; b.partner = first;
             a.busy = true;
             a.clock = a.Range(3f, 6f);
@@ -401,32 +462,61 @@ namespace AcRoguelike.Liminal
         }
 
         public static LobbyRoutine Patrol(LobbyNpc npc, Vector3[] localPath, string pauseActivity, float speed, int seed)
+            => Patrol(npc, localPath, new[] { pauseActivity }, speed, seed);
+
+        public static LobbyRoutine Patrol(LobbyNpc npc, Vector3[] localPath, string[] pauseActivities, float speed, int seed, float strideSpeed = .82f)
         {
-            var r = Add(npc, Mode.Patrol, pauseActivity, seed);
-            r.path = localPath;
-            r.speed = speed;
-            var body = npc.gameObject.AddComponent<Rigidbody>();
+            var r = Add(npc, Mode.Patrol, pauseActivities, seed);
+            r.path = localPath == null ? null : (Vector3[])localPath.Clone();
+            r.speed = Mathf.Max(0, speed);
+            // The existing association clerk clip is calibrated at .82 m/s. Other walking clips may supply their own stride.
+            r.strideSpeed = Mathf.Max(.1f, strideSpeed);
+            var body = npc.GetComponent<Rigidbody>();
+            if (!body) body = npc.gameObject.AddComponent<Rigidbody>();
             body.isKinematic = true;
             body.interpolation = RigidbodyInterpolation.None;
             return r;
         }
 
-        static LobbyRoutine Add(LobbyNpc npc, Mode mode, string activity, int seed)
+        static LobbyRoutine Add(LobbyNpc npc, Mode mode, string[] activities, int seed)
         {
             var r = npc.gameObject.AddComponent<LobbyRoutine>();
             r.npc = npc;
             r.mode = mode;
-            r.activity = activity;
             r.random = new System.Random(seed);
+            var usable = new List<string>();
+            if (activities != null)
+                foreach (var label in activities)
+                    if (!string.IsNullOrEmpty(label) && npc.Has(label) && !usable.Contains(label)) usable.Add(label);
+            r.activities = usable.Count > 0 ? usable.ToArray() : new[] { "idle" };
+            r.activityIndex = r.random.Next(r.activities.Length);
+            r.activity = r.activities[r.activityIndex];
+            r.capsule = npc.GetComponent<CapsuleCollider>();
             r.clock = r.Range(1, 5);
             return r;
         }
 
         float Range(float a, float b) => a + (float)random.NextDouble() * (b - a);
 
+        void NextActivity()
+        {
+            activity = activities[activityIndex];
+            activityIndex = (activityIndex + 1) % activities.Length;
+            ActivityChanges++;
+        }
+
+        float ActivitySeconds() => Mathf.Clamp(npc.ClipLength(activity), 2.5f, 9f);
+
         void Update()
         {
-            if (!npc) return;
+            if (!npc || !npc.isActiveAndEnabled || Time.deltaTime <= 0) return;
+            // An explicit player conversation owns the animation and look target until it closes.
+            if (npc.Talking)
+            {
+                walking = false;
+                npc.LookAt(null);
+                return;
+            }
             float dt = Time.deltaTime;
             var player = LobbyNpc.Player;
             Vector3 toPlayer = player ? player.position - transform.position : Vector3.positiveInfinity;
@@ -437,29 +527,42 @@ namespace AcRoguelike.Liminal
             {
                 greetArmed = false;
                 lastGreet = Time.time;
+                GreetingCount++;
                 npc.PlayOnce("greet", null, GreetSeconds);
             }
             switch (mode)
             {
                 case Mode.Station:
                     npc.LookAt(near ? player.position : (Vector3?)null);
+                    if (near || npc.PlayingOnce)
+                    {
+                        npc.Play("idle");
+                        break;
+                    }
                     clock -= dt;
                     if (clock <= 0)
                     {
                         busy = !busy;
-                        clock = busy ? Range(2.5f, 5f) : Range(5f, 11f);
+                        if (busy) NextActivity();
+                        clock = busy ? ActivitySeconds() : Range(3.5f, 7.5f);
                     }
                     npc.Play(busy && !near ? activity : "idle");
                     break;
                 case Mode.Chat:
                     npc.LookAt(near ? player.position : partner ? partner.transform.position : (Vector3?)null);
-                    if (leader) busy = !leader.busy;
+                    if (leader && leader.isActiveAndEnabled)
+                    {
+                        bool nowBusy = !leader.busy;
+                        if (nowBusy && !busy) NextActivity();
+                        busy = nowBusy;
+                    }
                     else
                     {
                         clock -= dt;
                         if (clock <= 0)
                         {
                             busy = !busy;
+                            if (busy) NextActivity();
                             clock = busy ? Range(3f, 6f) : Range(2.5f, 5f);
                         }
                     }
@@ -473,7 +576,12 @@ namespace AcRoguelike.Liminal
 
         void UpdatePatrol(float dt, Transform player, Vector3 toPlayer, bool near)
         {
-            if (path == null || path.Length < 2) return;
+            if (path == null || path.Length < 2 || !npc.Has("walk"))
+            {
+                walking = false;
+                npc.Play("idle");
+                return;
+            }
             // Mid-greeting: stand still and face the player.
             if (npc.PlayingOnce)
             {
@@ -493,9 +601,12 @@ namespace AcRoguelike.Liminal
             if (d.magnitude < .12f)
             {
                 next = (next + 1) % path.Length;
-                pause = Range(2.5f, 5.5f);
-                // Every other stop is a phone call, the rest a short wait.
-                npc.Play(next % 2 == 0 && npc.Has(activity) ? activity : "idle");
+                CompletedStops++;
+                // Alternate a task with a brief rest, and vary the task at subsequent stops.
+                bool doActivity = CompletedStops % 2 == 1;
+                if (doActivity) NextActivity();
+                pause = doActivity ? ActivitySeconds() : Range(2.5f, 4.5f);
+                npc.Play(doActivity ? activity : "idle");
                 walking = false;
                 return;
             }
@@ -511,14 +622,48 @@ namespace AcRoguelike.Liminal
                 return;
             }
             npc.LookAt(null);
-            npc.Play("walk");
-            walking = true;
             float yaw = Quaternion.LookRotation(transform.parent ? transform.parent.InverseTransformDirection(dir) : dir).eulerAngles.y;
             npc.SetRestYaw(yaw);
             // Walk only once roughly facing the way, so turns read as turns rather than a slide.
             float facing = Vector3.Dot(transform.forward, dir);
             float step = Mathf.Min(d.magnitude, speed * dt * Mathf.Clamp01((facing - .2f) / .6f));
+            step = ClearStep(dir, step);
+            walking = step > .0001f;
+            npc.Play(walking ? "walk" : "idle");
+            if (walking) npc.SetPlaybackRate("walk", Mathf.Clamp(step / Mathf.Max(.0001f, dt) / strideSpeed, .45f, 1.25f));
             transform.position += dir * step;
+            DistanceTravelled += step;
+        }
+
+        float ClearStep(Vector3 direction, float requested)
+        {
+            if (requested <= 0 || !capsule) return requested;
+            var scale = transform.lossyScale;
+            float radius = capsule.radius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.z));
+            float half = Mathf.Max(radius, capsule.height * Mathf.Abs(scale.y) * .5f);
+            Vector3 centre = transform.TransformPoint(capsule.center);
+            // Lift the sweep slightly so the flat lobby floor is never mistaken for a forward obstacle.
+            Vector3 low = centre - Vector3.up * (half - radius) + Vector3.up * .04f;
+            Vector3 high = centre + Vector3.up * (half - radius);
+            int count = Physics.CapsuleCastNonAlloc(low, high, Mathf.Max(.05f, radius - .035f), direction,
+                sweepHits, requested + .15f, ~0, QueryTriggerInteraction.Ignore);
+            float available = requested;
+            for (int i = 0; i < count; i++)
+            {
+                var hit = sweepHits[i];
+                if (!hit.collider || hit.collider.transform.IsChildOf(transform)) continue;
+                if (hit.normal.y > .7f) continue;
+                available = Mathf.Min(available, Mathf.Max(0, hit.distance - .12f));
+            }
+            return available;
+        }
+
+        void OnDisable()
+        {
+            walking = false;
+            if (!npc) return;
+            npc.LookAt(null);
+            if (!npc.Talking) npc.Play("idle");
         }
     }
 
