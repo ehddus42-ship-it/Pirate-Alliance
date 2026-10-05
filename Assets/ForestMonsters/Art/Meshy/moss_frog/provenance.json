@@ -1,0 +1,77 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "forest/moonlit",
+  "role": "Elastic hopping frog body; extendable tongue and victim pull are implemented in Unity.",
+  "prompt": "Large magical forest frog in natural low crouched rest pose facing +Z. Broad toadlike body, wide clearly defined mouth, two large golden turquoise eyes above snout, two short separated front legs, powerful folded hind thighs, visible webbed feet grounded. Leaflike brow crests, small moss tufts along back, pebbled damp skin. No clothing, staff or humanoid arms. Mouth slightly open but no visible extended tongue, no insect prey. Single isolated original stylized realistic fantasy game monster, complete visible object, centered, forward faces +Z, up +Y. No floor, pedestal, text or logos. Strong readable silhouette from an elevated three-quarter action game camera, sculpted organic detail, clear large forms, elegant moonlit enchanted forest quality.",
+  "texture_prompt": "Rich emerald and moss green frog skin, pale warm mint throat and belly, dark teal dorsal patches, golden amber irises, deep glossy pupils, small subtle cyan bioluminescent freckles on brows and back. Fine pebbled amphibian skin normals, moist satin finish, leaflike brow and natural moss. Elegant enchanted forest animal, no armor or writing.",
+  "preview_task_id": "01a10a74-37fc-72d5-9515-10e7c1a4db9a",
+  "refine_task_id": "01a10a75-3043-763b-9769-8dfca48276e3",
+  "created_utc": "2026-10-05T05:07:39.056404+00:00",
+  "requested_triangles": 14000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 14528,
+    "vertices": 13239,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.7699329257011414,
+      -0.5420739054679871,
+      -0.9516770243644714
+    ],
+    "unity_bounds_max": [
+      0.7720709443092346,
+      0.5559329986572266,
+      0.951073944568634
+    ],
+    "bytes": 4749516
+  },
+  "consumed_credits": 30,
+  "target_size_m": [
+    2.0,
+    1.35,
+    2.1
+  ],
+  "unity_front_axis": "+Z (requested; review before assembly)",
+  "recommended_ground_offset_y": 0.5420739054679871,
+  "review": "Pending thumbnail and Unity assembly review.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 6122660,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 2048px; tangent normals renormalized; binary payload compactly repacked.",
+  "recommended_uniform_scale": 1.2295004657330004,
+  "recommended_local_offset_after_scale": [
+    -0.0013143474371982433,
+    0.6664801192345965,
+    0.0003707434449281245
+  ]
+}
