@@ -4,12 +4,12 @@ using UnityEngine.SceneManagement;
 
 namespace AcRoguelike.Ruins
 {
-    /// <summary>A locked ground strike: the warning, visual and single damage check share one centre and radius.</summary>
+    /// <summary>A locked remote strike. Its caster cues the attack; the pulse appears only when it strikes.</summary>
     public sealed class RuinsGroundPulse : MonoBehaviour
     {
         public bool Finished { get; private set; }
         public bool Exploded { get; private set; }
-        public bool WarningVisible => warning && warning.Visible && !Exploded && !Finished;
+        public bool WarningVisible => false;
         public int DamageAttempts { get; private set; }
         public bool HitPlayer { get; private set; }
         public float Radius { get; private set; }
@@ -22,7 +22,6 @@ namespace AcRoguelike.Ruins
         bool hadRoom;
         int damage;
         float age;
-        Telegraph warning;
         LineRenderer shockRing;
         Material pulseMaterial;
         readonly RaycastHit[] coverHits = new RaycastHit[64];
@@ -37,8 +36,6 @@ namespace AcRoguelike.Ruins
             var pulse = go.AddComponent<RuinsGroundPulse>();
             pulse.owner = owner; pulse.target = target; pulse.room = room; pulse.hadRoom = room;
             pulse.Radius = Mathf.Max(.1f, radius); pulse.Delay = Mathf.Max(.15f, delay); pulse.damage = Mathf.Max(1, damage);
-            pulse.warning = Telegraph.Create(go.transform, "Locked induction warning");
-            pulse.warning.Circle(center, pulse.Radius, 0);
             if (owner) owner.Defeated += pulse.OwnerDefeated;
             if (target) target.Died += pulse.Cancel;
             return pulse;
@@ -54,7 +51,6 @@ namespace AcRoguelike.Ruins
             age += dt;
             if (!Exploded)
             {
-                warning.Circle(Center, Radius, Mathf.Clamp01(age / Delay));
                 if (age >= Delay) Explode();
             }
             else
@@ -73,7 +69,6 @@ namespace AcRoguelike.Ruins
         void Explode()
         {
             Exploded = true;
-            warning.Release();
             Vector3 toPlayer = target.transform.position - Center;
             toPlayer.y = 0;
             var body = target.GetComponent<CharacterController>();
@@ -135,7 +130,6 @@ namespace AcRoguelike.Ruins
         {
             if (Finished) return;
             Finished = true;
-            if (warning) warning.Hide();
             Unsubscribe();
             gameObject.SetActive(false);
             Destroy(gameObject);

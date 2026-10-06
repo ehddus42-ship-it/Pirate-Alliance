@@ -29,7 +29,6 @@ namespace AcRoguelike.GameTheme
         public const float VolleyWarning = 1.2f, BarWarning = 1.9f, SummonWarning = 1.4f;
 
         readonly Vector3[] summonPositions = new Vector3[3];
-        readonly Telegraph[] summonWarnings = new Telegraph[3];
         readonly Collider[] overlaps = new Collider[32];
         Vector3 aim = Vector3.forward;
         Transform heldBar;
@@ -68,12 +67,6 @@ namespace AcRoguelike.GameTheme
                 Health.aimAnchor = anchor;
             }
             Health.visibleRenderers = GetComponentsInChildren<Renderer>();
-            for (int i = 0; i < summonWarnings.Length; i++)
-            {
-                if (!summonWarnings[i]) summonWarnings[i] = Telegraph.Create(transform);
-                summonWarnings[i].name = "Z Summon Warning " + (i + 1);
-                summonWarnings[i].Hide();
-            }
             pattern = 0;
             nextAttack = Time.time + 1.6f;
             Enter(GameTetrominoBossState.Approach);
@@ -159,39 +152,31 @@ namespace AcRoguelike.GameTheme
         {
             float duration = State == GameTetrominoBossState.VolleyWindup ? VolleyWarning : State == GameTetrominoBossState.BarWindup ? BarWarning : SummonWarning;
             float progress = Mathf.Clamp01(elapsed / duration);
-            // The last 0.7 / 0.9 seconds are fully committed; the warning cannot chase a late dodge.
+            // The last 0.7 / 0.9 seconds are fully committed; aim cannot chase a late dodge.
             float trackingTime = State == GameTetrominoBossState.BarWindup ? 1f : .5f;
             if (elapsed < trackingTime && to.sqrMagnitude > .001f) aim = to.normalized;
             Face(aim, 240);
             poseOffset = Vector3.up * (.08f + Mathf.Sin(progress * Mathf.PI) * .08f);
             poseScale = new Vector3(1 + progress * .04f, 1 - progress * .055f, 1);
             poseRotation = Quaternion.Euler(-7 * progress, 0, Mathf.Sin(elapsed * 5) * 2);
-            if (State == GameTetrominoBossState.VolleyWindup)
-                TelegraphFan(transform.position, aim, 18, 24, progress);
-            else if (State == GameTetrominoBossState.BarWindup)
+            AttackCue(progress);
+            if (State == GameTetrominoBossState.BarWindup)
             {
-                TelegraphLine(transform.position, aim, 20, 1.35f, progress);
                 if (heldBar)
                 {
                     heldBar.localScale = Vector3.one * Mathf.SmoothStep(.05f, 1, progress * 4);
                     heldBar.localRotation = Quaternion.Euler(0, elapsed * 630, 0);
                 }
             }
-            else
-            {
-                for (int i = 0; i < summonWarnings.Length; i++)
-                    if (summonWarnings[i]) summonWarnings[i].Circle(summonPositions[i], 1.15f, progress);
-            }
             if (progress < 1) return;
             HideTelegraph();
-            for (int i = 0; i < summonWarnings.Length; i++) if (summonWarnings[i]) summonWarnings[i].Release();
             Attacks++;
             Enter(State == GameTetrominoBossState.VolleyWindup ? GameTetrominoBossState.Volley : State == GameTetrominoBossState.BarWindup ? GameTetrominoBossState.BarThrow : GameTetrominoBossState.Summon);
         }
 
         void FireVolley()
         {
-            // All three fans share the announced direction. The projectile itself switches from slow drop to fast drop.
+            // All three fans share the committed direction. The projectile itself switches from slow drop to fast drop.
             while (volley < 3 && elapsed >= volley * .25f)
             {
                 for (int shot = 0; shot < 3; shot++)
@@ -230,7 +215,7 @@ namespace AcRoguelike.GameTheme
                 released = true;
                 for (int i = 0; i < summonPositions.Length; i++)
                 {
-                    // A moving obstacle may enter a promised spot during its warning. Never spawn inside it.
+                    // A moving obstacle may enter a reserved spot during preparation. Never spawn inside it.
                     if (!SpawnPositionClear(summonPositions[i])) continue;
                     var charger = TetrominoCharger.Spawn(summonPositions[i], Quaternion.LookRotation(aim), Health, player, room);
                     if (charger) SummonedChargers++;
@@ -322,7 +307,7 @@ namespace AcRoguelike.GameTheme
         {
             DestroyHeldBar();
             if (telegraph) telegraph.Hide();
-            for (int i = 0; i < summonWarnings.Length; i++) if (summonWarnings[i]) summonWarnings[i].Hide();
+            AttackAnticipation.Hide(transform);
             if (State != GameTetrominoBossState.Dead) Enter(GameTetrominoBossState.Approach);
             nextAttack = Time.time + 1.5f;
         }

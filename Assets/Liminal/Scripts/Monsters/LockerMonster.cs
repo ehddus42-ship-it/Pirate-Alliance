@@ -101,6 +101,10 @@ namespace AcRoguelike.Liminal
                 eye.transform.localScale = new Vector3(.12f, .05f, .02f) * 1.0f;
                 eye.GetComponent<Renderer>().sharedMaterial = eyeMaterial;
             }
+            // The two visible eyes belong to one face; keep the glint between them.
+            var faceAnchor = pose.Find("FaceAnchor");
+            if (!faceAnchor) { faceAnchor = new GameObject("FaceAnchor").transform; faceAnchor.SetParent(pose, false); }
+            faceAnchor.position = interior.TransformPoint(new Vector3(0, .3f, -.02f));
             interior.gameObject.SetActive(false);
             door.gameObject.SetActive(false);
             tentacles = new Tentacle[3];

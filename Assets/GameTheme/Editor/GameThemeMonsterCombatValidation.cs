@@ -124,9 +124,13 @@ namespace AcRoguelike.GameTheme.Editor
                     role + ": submillimetre controller movement is not discarded at high frame rates.");
                 int before = player.Health;
                 Capture(role + "_Idle", monster.transform.position);
-                yield return Until(() => monster.IsWindingUp && monster.TelegraphVisible, 12, role + " initial visible windup");
-                Check(monster.TelegraphVisible && player.Health == before, role + ": warning is visible before damage.");
+                yield return Until(() => monster.IsWindingUp && (role == GameVoxelRole.BitSentry || monster.TelegraphVisible),
+                    12, role + " initial windup");
+                Check(monster.TelegraphVisible == (role != GameVoxelRole.BitSentry) && player.Health == before,
+                    role + ": only body attacks show a floor outline before damage.");
                 yield return Seconds(.55f);
+                Check(monster.TelegraphVisible == (role != GameVoxelRole.BitSentry),
+                    role + ": projectile anticipation stays free of floor and trajectory previews.");
                 Capture(role + "_Warning", monster.transform.position);
                 Vector3 locked = monster.LockedDirection;
                 PlacePlayer(player.transform.position + Vector3.right * 5);
@@ -141,15 +145,17 @@ namespace AcRoguelike.GameTheme.Editor
                 Check(Vector3.Distance(position, monster.transform.position) < .001f && Quaternion.Angle(pose, monster.transform.Find("Visual/Pose").localRotation) < .01f && attacks == monster.Attacks,
                     role + ": pausing freezes movement, pose and attack timing.");
                 Time.timeScale = 1;
+                yield return Until(() => monster.AttackCueVisible, 2, role + " pre-attack glint");
+                Check(player.Health == before, role + ": the face or body glint is visible before attack damage.");
                 yield return Until(() => monster.State == GameVoxelState.Recover, 8, role + " attack recovery");
                 Check(player.Health == before, role + ": sidestepping the committed warning avoids damage.");
                 if (role == GameVoxelRole.BitSentry) Check(monster.Shots == 3, "BitSentry: exactly three staggered bolts per volley.");
 
-                // Repeat with the player deliberately staying inside the warned area.
+                // Repeat with the player deliberately staying inside the committed attack area.
                 Vector3 strikePosition = monster.transform.position + monster.transform.forward * (role == GameVoxelRole.StackGuardian ? 2.5f : role == GameVoxelRole.BitSentry ? 7 : 4);
                 PlacePlayer(strikePosition);
                 yield return Until(() => player.Health < before, 15, role + " damages the stationary target");
-                Check(player.Health < before, role + ": the real attack hits a stationary target inside its warning.");
+                Check(player.Health < before, role + ": the real attack hits a stationary target in its committed area.");
                 HitFeedback.CancelHitStop();
                 monster.enabled = false;
                 foreach (var bolt in Object.FindObjectsByType<GamePixelBolt>(FindObjectsSortMode.None)) Object.Destroy(bolt.gameObject);
@@ -182,7 +188,8 @@ namespace AcRoguelike.GameTheme.Editor
                 yield return Until(() => monster.IsWindingUp, 12, role + " death during anticipation");
                 attacks = monster.Attacks;
                 monster.Health.TakeDamage(monster.Health.maxHealth * 100);
-                Check(!monster.TelegraphVisible && !monster.GetComponent<CharacterController>().enabled, role + ": death immediately cancels the warning and collision.");
+                Check(!monster.TelegraphVisible && !monster.AttackCueVisible && !monster.GetComponent<CharacterController>().enabled,
+                    role + ": death immediately cancels the outline, glint and collision.");
                 yield return Seconds(.3f);
                 Check(monster.Attacks == attacks && Object.FindObjectsByType<GamePixelBolt>(FindObjectsSortMode.None).Length == 0,
                     role + ": death prevents pending attacks and removes owned bolts.");

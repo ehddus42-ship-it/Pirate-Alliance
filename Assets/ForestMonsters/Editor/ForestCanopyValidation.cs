@@ -134,26 +134,38 @@ namespace AcRoguelike.Forest.Editor
                 butterfly.Setup(arena.Player, arena.Room, 0); tree.Setup(arena.Player, arena.Room, 0);
                 var rig = butterfly.GetComponentInChildren<ForestButterflyWingRig>();
                 Require(rig && rig.AnimatedVertexCount > 100, "Butterfly must deform actual Meshy wing geometry.");
-                float firstFlap = rig.FlapDegrees; bool sawPollenWarning = false, sawWindWarning = false, pollenCaptured = false;
+                float firstFlap = rig.FlapDegrees;
+                bool sawPollenWarning = false, sawWindWindup = false, sawWindFlash = false, sawThrowFlash = false, pollenCaptured = false;
                 var limit = new Deadline(16, "natural butterfly/treant FSM");
                 while (butterfly.WindShots == 0 || tree.RootWaves == 0)
                 {
                     sawPollenWarning |= butterfly.State == ForestButterflyState.PollenWindup && butterfly.TelegraphVisible;
-                    sawWindWarning |= butterfly.State == ForestButterflyState.WindWindup && butterfly.TelegraphVisible;
+                    if (butterfly.State == ForestButterflyState.WindWindup)
+                    {
+                        sawWindWindup = true;
+                        sawWindFlash |= butterfly.AttackCueVisible;
+                        Require(!butterfly.TelegraphVisible, "Ranged wind must not display a ground trajectory warning.");
+                    }
+                    if (tree.State == ForestTreantState.ThrowWindup)
+                    {
+                        sawThrowFlash |= tree.AttackCueVisible;
+                        Require(!tree.TelegraphVisible, "Thrown saplings must not display a landing warning.");
+                    }
                     if (!pollenCaptured && butterfly.State == ForestButterflyState.PollenBurst && butterfly.StateTime > .08f)
                     {
                         pollenCaptured = true; ForestMonsterValidation.CaptureAttack(butterfly.transform.position + Vector3.up * .6f, "canopy_butterfly_pollen_burst");
                     }
                     limit.Check(); arena.Step(); yield return null;
                 }
-                Require(sawPollenWarning && sawWindWarning && butterfly.PollenBursts >= 1 && butterfly.DamageAttempts == 1 && Mathf.Abs(rig.FlapDegrees - firstFlap) > .01f,
-                    "Butterfly must show both warnings, animate its wings and use one pollen damage attempt per burst.");
+                Require(sawPollenWarning && sawWindWindup && butterfly.PollenBursts >= 1 && butterfly.DamageAttempts == 1 && Mathf.Abs(rig.FlapDegrees - firstFlap) > .01f,
+                    "Butterfly must outline close pollen attacks, wind up ranged wind without a ground warning, animate its wings and use one pollen damage attempt per burst.");
                 Require(tree.SaplingsThrown >= 1 && tree.RootWaves >= 1, "Walking tree must naturally throw a sapling and send a root wave.");
+                Require(sawWindFlash && sawThrowFlash, "Ranged wind and thrown saplings must flash on their caster before release.");
                 butterfly.Health.TakeDamage(butterfly.Health.maxHealth); tree.Health.TakeDamage(tree.Health.maxHealth);
                 arena.Step(); yield return null;
                 Require(tree.ActiveSaplings == 0 && butterfly.State == ForestButterflyState.Dead && tree.State == ForestTreantState.Dead,
                     "Monster death must cancel owned hazards and stop the action state machines.");
-                record?.Invoke("Natural butterfly FSM shows pollen/wind warnings and actual mesh wing flaps; elderwood throws Meshy saplings then roots; deaths clean up all summons.");
+                record?.Invoke("Natural butterfly FSM outlines pollen but hides ranged wind trajectories; elderwood throws saplings without landing warnings, then roots; deaths clean up all summons.");
             }
         }
 

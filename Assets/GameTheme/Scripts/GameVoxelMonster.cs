@@ -50,6 +50,15 @@ namespace AcRoguelike.GameTheme
             leftLimb = pose.Find("LeftLimb");
             rightLimb = pose.Find("RightLimb");
             crown = pose.Find("Crown");
+            if (!pose.Find("FaceAnchor"))
+            {
+                var face = new GameObject("FaceAnchor").transform;
+                face.SetParent(pose, false);
+                // Eye-cell centres/front faces from GameThemeMonsterBuilder, including each Model offset.
+                face.localPosition = role == GameVoxelRole.PixelMaw ? new Vector3(0, 6 * .18f, 4.5f * .18f)
+                    : role == GameVoxelRole.BitSentry ? new Vector3(0, 5 * .16f + .08f, 3.5f * .16f)
+                    : new Vector3(.5f * .2f, 11 * .2f + .1f, 2.5f * .2f);
+            }
             if (leftLimb) leftRest = leftLimb.localPosition;
             if (rightLimb) rightRest = rightLimb.localPosition;
             if (crown) crownRest = crown.localPosition;
@@ -141,7 +150,7 @@ namespace AcRoguelike.GameTheme
             }
             else if (role == GameVoxelRole.BitSentry)
             {
-                TelegraphFan(transform.position, aim, 14, 13, progress);
+                AttackCue(progress);
                 if (leftLimb) leftLimb.localRotation = Quaternion.Euler(-25 * progress, 0, 0);
                 if (rightLimb) rightLimb.localRotation = Quaternion.Euler(-25 * progress, 0, 0);
                 if (crown) crown.localPosition = crownRest + Vector3.up * (.2f * progress);

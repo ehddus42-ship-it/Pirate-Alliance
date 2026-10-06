@@ -162,7 +162,7 @@ namespace AcRoguelike.RuinsBoss
         void DrawWarning(float progress)
         {
             if (Pattern == 0) TelegraphLine(transform.position, aim, chargeDistance + (body ? body.radius : 1), (body ? body.radius : 1) + .15f, progress);
-            else TelegraphFan(transform.position, aim, 18, 18, progress);
+            else AttackCue(progress);
         }
 
         void Charge(float dt)
@@ -224,6 +224,7 @@ namespace AcRoguelike.RuinsBoss
         {
             EncounterCancelled = true; IsWindingUp = false;
             if (telegraph) telegraph.Hide();
+            AttackAnticipation.Hide(transform);
             foreach (var projectile in projectiles) if (projectile) projectile.Cancel();
             projectiles.Clear();
             if (Health) { Health.CanBeTargeted = false; Health.IgnoreDamage = true; }

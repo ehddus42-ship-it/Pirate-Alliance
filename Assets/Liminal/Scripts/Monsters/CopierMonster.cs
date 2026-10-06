@@ -9,7 +9,7 @@ namespace AcRoguelike.Liminal
     /// heaves up into a low, short hop with almost no stretch, and lands with a crash that raises a ring of dust
     /// and shakes the floor (camera). It rattles for a moment, then gathers itself for the next hop.
     /// Attacks:
-    /// - Paper fan: the lid rattles while a fan telegraph grows, then it machine-guns sheets across the fan.
+    /// - Paper fan: the lid rattles and an attack glint flashes before it machine-guns sheets across the fan.
     /// - Paper snipe: aimed single sheets, one at a time, each with a short aim line and a recoil kick.
     /// </summary>
     public sealed class CopierMonster : LiminalPropMonster
@@ -87,10 +87,10 @@ namespace AcRoguelike.Liminal
                     Face(aimForward, 200);
                     if (stateTime < fanWindup)
                     {
-                        // Wind-up: the whole copier shudders harder and harder while the fan telegraph grows.
+                        // The cabinet shudders before the projectile burst; only its attack glint marks the release.
                         IsWindingUp = true;
                         rattle = Mathf.Max(rattle, stateTime / fanWindup);
-                        TelegraphFan(transform.position + aimForward * .5f, aimForward, fanRange * Mathf.Lerp(.5f, 1, stateTime / fanWindup), fanHalfAngle, stateTime / fanWindup);
+                        AttackCue(stateTime / fanWindup);
                         poseOffset = Vector3.down * .05f * (stateTime / fanWindup);
                         break;
                     }
@@ -111,7 +111,7 @@ namespace AcRoguelike.Liminal
                     if (t >= 1.15f) Enter(CopierState.Recover);
                     break;
                 case CopierState.PaperSnipe:
-                    // One sheet at a time: turn, a brief aim line, recoil, repeat.
+                    // One sheet at a time: turn, a brief attack glint, recoil, repeat.
                     Face(to, 260);
                     float cycle = stateTime - .2f;
                     int shot = Mathf.FloorToInt(cycle / snipeInterval);
@@ -120,7 +120,7 @@ namespace AcRoguelike.Liminal
                     {
                         IsWindingUp = within < snipeInterval * .6f;
                         if (within < snipeInterval * .6f)
-                            TelegraphLine(transform.position + transform.forward * .5f, transform.forward, snipeRange * .6f, .12f, within / (snipeInterval * .6f));
+                            AttackCue(within / (snipeInterval * .6f));
                         if (fired <= shot && within >= snipeInterval * .6f)
                         {
                             HideTelegraph();

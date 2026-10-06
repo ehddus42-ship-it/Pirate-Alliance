@@ -4,9 +4,39 @@ using UnityEngine.SceneManagement;
 
 namespace AcRoguelike.Forest
 {
+    /// <summary>Face sockets for the forest's single-mesh creatures, shared by runtime setup and previews.</summary>
+    public static class ForestAttackCueAnchors
+    {
+        public static Transform Prepare(Transform owner)
+        {
+            if (!owner) return null;
+            Vector3 location;
+            if (owner.GetComponent<ForestFrog>()) location = new Vector3(.5f, .44f, .92f);
+            else if (owner.GetComponent<ForestWorm>()) location = new Vector3(.5f, .86f, .92f);
+            else if (owner.GetComponent<ForestButterfly>()) location = new Vector3(.5f, .52f, .82f);
+            else if (owner.GetComponent<ForestTreant>()) location = new Vector3(.5f, .70f, .78f);
+            else if (owner.GetComponent<ForestSapling>()) location = new Vector3(.5f, .55f, .85f);
+            else return null;
+            return ForestAttackUtility.FaceAnchor(owner.Find("Visual/Pose"), location);
+        }
+    }
+
     internal static class ForestAttackUtility
     {
         static readonly Collider[] sightOverlaps = new Collider[48];
+
+        // The imported forest creatures use one mesh, so their visible faces have no head bones.
+        internal static Transform FaceAnchor(Transform pose, Vector3 normalizedPosition)
+        {
+            if (!pose) return null;
+            var model = pose.Find("Model");
+            Bounds bounds = LiminalMonsterKit.LocalBounds(model ? model : pose, pose);
+            var anchor = pose.Find("FaceAnchor");
+            if (!anchor) { anchor = new GameObject("FaceAnchor").transform; anchor.SetParent(pose, false); }
+            anchor.localPosition = bounds.min + Vector3.Scale(bounds.size, normalizedPosition);
+            return anchor;
+        }
+
         internal struct Impact
         {
             public float distance;

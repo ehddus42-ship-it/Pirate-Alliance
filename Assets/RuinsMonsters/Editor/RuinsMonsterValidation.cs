@@ -169,11 +169,14 @@ namespace AcRoguelike.Ruins.Editor
                         int attacks = monster.Attacks, shots = monster.Shots, strikes = monster.AreaStrikes;
                         Check(monster.StartAttack(pattern), monster.kind + " pattern " + pattern + " starts from idle.");
                         yield return Seconds(.2f);
-                        Check(monster.IsWindingUp && (monster.TelegraphVisible || room.GetComponentsInChildren<RuinsGroundPulse>().Any(p => p.WarningVisible)),
-                            monster.kind + " pattern " + pattern + " announces its range before damage.");
+                        bool closeOrConnected = monster.kind == RuinsMonsterKind.PenitentHusk || monster.kind == RuinsMonsterKind.MourningMatron ||
+                            (monster.kind == RuinsMonsterKind.OssuaryMedusa && pattern == 1);
+                        Check(monster.IsWindingUp && monster.TelegraphVisible == closeOrConnected &&
+                            !room.GetComponentsInChildren<RuinsGroundPulse>().Any(p => p.WarningVisible),
+                            monster.kind + " pattern " + pattern + " reserves ground outlines for close or connected attacks.");
                         if (monster.kind == RuinsMonsterKind.OssuaryMedusa && pattern == 0)
                         {
-                            Check(monster.AreaStrikes == strikes + 3 && rig.GeneratedMeshes.Length == 8, "Medusa prepares three ground warnings and eight flexible tentacles.");
+                            Check(monster.AreaStrikes == strikes + 3 && rig.GeneratedMeshes.Length == 8, "Medusa prepares three unmarked ground strikes and eight flexible tentacles.");
                             var mesh = rig.GeneratedMeshes[0]; var before = mesh.vertices;
                             yield return Seconds(.2f);
                             Check(before.Where((v, i) => Vector3.Distance(v, mesh.vertices[i]) > .002f).Any(), "Medusa tentacle vertices deform during anticipation.");
@@ -184,6 +187,7 @@ namespace AcRoguelike.Ruins.Editor
                                 "Pause freezes body movement, attack timing and flexible tentacles.");
                             Time.timeScale = 1;
                         }
+                        yield return Until(() => monster.AttackCueVisible, 3, monster.kind + " pre-attack flash");
                         Capture(Camera.main, monster.kind + "-warning-" + pattern);
                         yield return Until(() => monster.Attacks == attacks + 1 && monster.State == RuinsMonsterState.Recovery, 8, monster.kind + " attack/recovery");
                         Check(monster.Attacks == attacks + 1 && !monster.TelegraphVisible, monster.kind + " executes once and exposes a recovery window.");

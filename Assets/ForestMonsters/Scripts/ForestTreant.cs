@@ -32,6 +32,7 @@ namespace AcRoguelike.Forest
             displayName = "달빛 고목"; nextAttack = Time.time + 1.65f; State = ForestTreantState.Stalk;
             if (pose)
             {
+                ForestAttackCueAnchors.Prepare(transform);
                 canopy = pose.GetComponent<ForestCanopyRig>(); if (!canopy) canopy = pose.gameObject.AddComponent<ForestCanopyRig>();
                 canopy.Initialize(pose.Find("Model") ? pose.Find("Model") : pose);
             }
@@ -70,7 +71,7 @@ namespace AcRoguelike.Forest
                     break;
                 case ForestTreantState.ThrowWindup:
                     MoveBody(Vector3.zero); Face(aim, 70);
-                    telegraph.Circle(landing, .85f, elapsed / throwWindup);
+                    AttackCue(elapsed / throwWindup);
                     poseRotation = Quaternion.Euler(-17f * Mathf.Clamp01(elapsed / throwWindup), 0, -7f);
                     if (elapsed >= throwWindup)
                     {
@@ -112,6 +113,7 @@ namespace AcRoguelike.Forest
         public void CancelAttack()
         {
             if (telegraph) telegraph.Hide();
+            AttackAnticipation.Hide(transform);
             foreach (var sapling in saplings) if (sapling) sapling.Cancel(); saplings.Clear();
             foreach (var root in roots) if (root) root.Cancel(); roots.Clear();
             if (State != ForestTreantState.Dead) { Enter(ForestTreantState.Stalk); nextAttack = Time.time + 1.5f; }

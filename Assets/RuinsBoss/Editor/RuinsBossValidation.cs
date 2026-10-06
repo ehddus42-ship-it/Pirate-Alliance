@@ -177,7 +177,7 @@ namespace AcRoguelike.RuinsBoss.Editor
                 int before = boss.ElectricShots, completed = boss.PatternsCompleted;
                 Check(boss.StartPattern(pattern), "Electric pattern " + pattern + " starts with anticipation.");
                 yield return Seconds(.55f);
-                Check(boss.GetComponentsInChildren<Telegraph>().Any(t => t.Visible), "Pattern " + pattern + " has readable floor warnings.");
+                Check(boss.GetComponentsInChildren<Telegraph>().All(t => !t.Visible), "Pattern " + pattern + " has no projectile floor or trajectory previews.");
                 if (pattern == 0)
                 {
                     Check(Quaternion.Angle(rest, bone.localRotation) > .05f, "The imported skeleton changes pose during casting.");
@@ -187,6 +187,8 @@ namespace AcRoguelike.RuinsBoss.Editor
                     Check(Mathf.Abs(boss.StateTime - elapsed) < .0001f && Vector3.Distance(p, left.transform.position) < .0001f && Quaternion.Angle(q, bone.localRotation) < .001f,
                         "Pausing freezes casting, skeleton animation and machines."); Time.timeScale = 1;
                 }
+                yield return Until(() => boss.AttackCueVisible, 2, "Electric pattern pre-attack glint");
+                Check(boss.ElectricShots == before, "Pattern " + pattern + " glints on the caster before firing.");
                 CaptureEncounter(arena, "warning-" + pattern);
                 yield return Until(() => boss.ElectricShots > before + 4, 7, "Pattern emits electric bullets");
                 var bullets = arena.GetComponentsInChildren<RuinsBossProjectile>().Where(p => p.Kind == RuinsBossProjectileKind.Electric).ToArray();
@@ -217,6 +219,7 @@ namespace AcRoguelike.RuinsBoss.Editor
                 Vector3 locked = machine.LockedDirection;
                 Check(machine.TelegraphVisible, machine.kind + " charge has a visible corridor.");
                 motor.ResetAt(arena.transform.TransformPoint(new Vector3(3, .05f, 13)));
+                yield return Until(() => machine.AttackCueVisible, 2, "Machine charge glint");
                 yield return Until(() => machine.State == RuinsBossState.Recovery, 8, "Charge ends");
                 Check(machine.Travelled <= machine.chargeDistance + .01f && Vector3.Angle(locked, machine.LockedDirection) < .1f && machine.DamageAttempts <= damageAttempts + 1,
                     machine.kind + " commits its direction and respects the charge distance.");
@@ -225,6 +228,10 @@ namespace AcRoguelike.RuinsBoss.Editor
                 yield return Until(() => machine.State == RuinsBossState.Idle, 8, "Machine missile idle");
                 int shots = machine.Shots;
                 Check(machine.StartAttack(1), machine.kind + " begins its missile warning.");
+                yield return Seconds(.4f);
+                Check(!machine.TelegraphVisible, machine.kind + " missile windup has no floor preview.");
+                yield return Until(() => machine.AttackCueVisible, 2, "Machine missile glint");
+                Check(machine.Shots == shots, machine.kind + " glints before launching missiles.");
                 yield return Until(() => machine.Shots >= shots + 2, 8, "Machine missile volley");
                 Check(machine.Shots == shots + 2, machine.kind + " emits two weakly homing Meshy missiles.");
             }
@@ -234,7 +241,8 @@ namespace AcRoguelike.RuinsBoss.Editor
             RuinsBossProjectile.LaunchArtillery(boss.turret.position + Vector3.up * 3, motor.transform.position, boss.Health, run.PlayerHealth, arena, 1);
             RuinsBossProjectile.FireHoming(left.transform.position + Vector3.up, Vector3.forward, left.Health, run.PlayerHealth, arena, 1);
             boss.Health.TakeDamage(100000); HitFeedback.CancelHitStop();
-            Check(boss.EncounterCancelled && left.EncounterCancelled && right.EncounterCancelled && !boss.GetComponent<CharacterController>().enabled,
+            Check(boss.EncounterCancelled && left.EncounterCancelled && right.EncounterCancelled && !boss.AttackCueVisible
+                && !left.AttackCueVisible && !right.AttackCueVisible && !boss.GetComponent<CharacterController>().enabled,
                 "Boss death shuts down both machines, all warning patterns and collision immediately.");
             yield return Seconds(.2f);
             Check(arena.GetComponentsInChildren<RuinsBossProjectile>().Length == 0 && arena.GetComponentsInChildren<RuinsBossImpact>().Length == 0,

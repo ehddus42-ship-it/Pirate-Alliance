@@ -105,8 +105,9 @@ namespace AcRoguelike.RuinsBoss.Editor
                 arena.PlacePlayer(Vector3.up * .05f);
                 Vector3 landing = Vector3.zero;
                 var artillery = RuinsBossProjectile.LaunchArtillery(new Vector3(-8, 3, -5), landing, arena.Owner, arena.Player, arena.Room, 21);
-                Require(artillery.WarningVisible && artillery.Impact.Radius == RuinsBossProjectile.ArtilleryRadius,
-                    "Artillery must show its exact landing footprint immediately.");
+                Require(!artillery.WarningVisible && artillery.Impact.GetComponentsInChildren<Telegraph>(true).Length == 0
+                    && artillery.Impact.Radius == RuinsBossProjectile.ArtilleryRadius,
+                    "Artillery must preserve its damage footprint without a landing preview.");
                 float firedAt = Time.time;
                 bool ascended = false, descending = false;
                 timeout = new Deadline(4, "locked artillery flight");
@@ -116,11 +117,12 @@ namespace AcRoguelike.RuinsBoss.Editor
                     ascended |= artillery.transform.position.y > 7;
                     descending |= artillery.Age > 1.2f && artillery.Direction.y < -.8f;
                     Require(artillery.LockedPoint == landing, "Artillery must not follow the target after launch.");
+                    Require(!artillery.WarningVisible, "Artillery must remain free of landing previews throughout flight.");
                     timeout.Check(); arena.Step(); yield return null;
                 }
                 Require(artillery.Finished && ascended && descending && Time.time - firedAt >= 1.5f && artillery.DamageAttempts == 0,
-                    "Artillery must rise, descend onto its fixed warning after at least 1.5 seconds, and miss a player who left it.");
-                record?.Invoke("Artillery rises then falls onto a fixed 2.1 m warning after 1.8 seconds; moving away avoids it.");
+                    "Artillery must rise, descend onto its fixed impact point after at least 1.5 seconds, and miss a player who left it.");
+                record?.Invoke("Artillery rises then falls onto a fixed 2.1 m footprint after 1.8 seconds without a landing preview; moving away avoids it.");
 
                 arena.PlacePlayer(new Vector3(0, .05f, 1));
                 health = arena.Player.Health;
@@ -142,7 +144,7 @@ namespace AcRoguelike.RuinsBoss.Editor
                 while (artillery && !artillery.Finished) { timeout.Check(); arena.Step(); yield return null; }
                 HitFeedback.CancelHitStop();
                 Require(artillery.DamageAttempts == 1 && artillery.HitPlayer && arena.Player.Health == health - 21,
-                    "Uncovered artillery must deal one configured hit inside its warning.");
+                    "Uncovered artillery must deal one configured hit inside its impact footprint.");
                 record?.Invoke("Uncovered artillery deals one 21-damage hit through the existing player health gate.");
 
                 arena.PlacePlayer(new Vector3(20, .05f, 20));
@@ -153,8 +155,9 @@ namespace AcRoguelike.RuinsBoss.Editor
                 try
                 {
                     for (int i = 0; i < 3; i++) yield return null;
-                    Require(electric && electric.transform.position == before && artillery && artillery.transform.position == arcBefore && artillery.WarningVisible,
-                        "Pause must freeze bullet travel, artillery flight and warning completion.");
+                    Require(electric && electric.transform.position == before && artillery && artillery.transform.position == arcBefore
+                        && !artillery.WarningVisible && !artillery.Impact.Exploded,
+                        "Pause must freeze bullet travel, artillery flight and the pending explosion without a landing preview.");
                 }
                 finally { Time.timeScale = oldScale; }
                 electric.Cancel(); artillery.Cancel();

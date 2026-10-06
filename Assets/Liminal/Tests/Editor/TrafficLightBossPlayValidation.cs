@@ -167,6 +167,8 @@ namespace AcRoguelike.Liminal.EditorTests
             yield return Until(() => field.Phase == RedFieldPhase.Telegraph, 2, "field telegraph");
             boss.GetArena(out Vector3 arenaCenter, out Quaternion arenaRotation, out Vector2 arenaSize);
             var centers = field.Centers.ToArray();
+            Check(!field.transform.Find("RedFloor").GetComponent<Renderer>().enabled,
+                "The field windup has no red floor fill.");
             Check(boss.Lamp == TrafficLampColor.Red, "The signal holds red while the field charges.");
             Check(centers.Length == boss.safeZoneCount && Mathf.Approximately(field.Radius, boss.safeRadius), "The field draws " + centers.Length + " safe circles of radius " + field.Radius + ".");
             Check(centers.All(c => { var l = Quaternion.Inverse(arenaRotation) * (c - arenaCenter); return Mathf.Abs(l.x) <= arenaSize.x * .5f && Mathf.Abs(l.z) <= arenaSize.y * .5f; }), "Every safe circle lies inside the arena.");
@@ -184,6 +186,8 @@ namespace AcRoguelike.Liminal.EditorTests
             Reset(exposed);
             int healthBefore = health.Health;
             yield return Until(() => field.Phase == RedFieldPhase.Judgement, 4, "field judgement");
+            Check(field.transform.Find("RedFloor").GetComponent<Renderer>().enabled,
+                "The red field appears only with its active damage phase.");
             yield return Shot("03_field_judgement");
             Check(boss.Lamp == TrafficLampColor.Green, "The signal turns green at the judgement.");
             Check(field.IsSafe(centers[0]) && field.IsSafe(centers[0] + Vector3.right * (field.Radius - .05f)) && !field.IsSafe(centers[0] + Vector3.right * (field.Radius + .05f) + Vector3.forward * 0),
@@ -212,6 +216,7 @@ namespace AcRoguelike.Liminal.EditorTests
             Check(boss.StartAttack(TrafficLightBossState.CarThrow), "Boss can start the car throw.");
             yield return Until(() => boss.StateTime >= 1.4f, 3, "aim lock");
             Check(boss.Lamp == TrafficLampColor.Yellow, "The signal shows yellow while the car is wound up.");
+            Check(!boss.warning || !boss.warning.enabled, "The thrown car has no trajectory warning.");
             yield return Shot("04_car_windup");
             yield return Until(() => boss.CarsThrown == thrown + 1, 4, "first car released");
             var car = UnityEngine.Object.FindFirstObjectByType<TrafficLightCarProjectile>();
@@ -240,7 +245,7 @@ namespace AcRoguelike.Liminal.EditorTests
             int impacts = TrafficLightCarProjectile.ImpactCount, hits = TrafficLightCarProjectile.HitCount;
             Check(boss.StartAttack(TrafficLightBossState.CarThrow), "Second car throw starts.");
             yield return Until(() => boss.StateTime >= 1.45f, 3, "second aim lock");
-            Reset(playerSpot + new Vector3(7, 0, 0));   // step off the telegraphed line after the aim is fixed
+            Reset(playerSpot + new Vector3(7, 0, 0));   // step aside after the aim is fixed
             yield return Until(() => boss.CarsThrown == thrown + 2, 4, "second car released");
             yield return Until(() => !UnityEngine.Object.FindFirstObjectByType<TrafficLightCarProjectile>(), 10, "dodged car leaves the arena");
             Check(health.Health == health.maximumHealth && TrafficLightCarProjectile.HitCount == hits, "Stepping off the locked line avoids the car.");

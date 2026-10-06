@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 namespace AcRoguelike.RuinsBoss
 {
-    /// <summary>A fixed artillery footprint. The same circle supplies warning, cover-tested damage and explosion rim.</summary>
+    /// <summary>A fixed artillery footprint with cover-tested damage and an explosion rim, revealed only on impact.</summary>
     [DefaultExecutionOrder(35)]
     public sealed class RuinsBossImpact : MonoBehaviour
     {
@@ -15,7 +15,7 @@ namespace AcRoguelike.RuinsBoss
         public bool Exploded { get; private set; }
         public bool HitPlayer { get; private set; }
         public int DamageAttempts { get; private set; }
-        public bool WarningVisible => !Finished && !Exploded && warning && warning.Visible;
+        public bool WarningVisible => false;
 
         TrainingEnemy owner;
         LiminalPlayerHealth target;
@@ -25,7 +25,6 @@ namespace AcRoguelike.RuinsBoss
         bool hadRoom, hadBrain;
         int damage;
         float age, startedAt;
-        Telegraph warning;
         LineRenderer ring, column;
         readonly RaycastHit[] hits = new RaycastHit[64];
         readonly Collider[] overlaps = new Collider[64];
@@ -46,8 +45,6 @@ namespace AcRoguelike.RuinsBoss
             }
             impact.startedAt = Time.time;
             impact.Radius = Mathf.Max(.1f, radius); impact.Delay = Mathf.Max(1.5f, delay); impact.damage = Mathf.Max(1, damage);
-            impact.warning = Telegraph.Create(go.transform, "Artillery landing warning");
-            impact.warning.Circle(center, impact.Radius, 0);
             if (owner) owner.Defeated += impact.OwnerDefeated;
             if (target) target.Died += impact.Cancel;
             return impact;
@@ -65,7 +62,6 @@ namespace AcRoguelike.RuinsBoss
             age = Mathf.Max(0, Time.time - startedAt);
             if (!Exploded)
             {
-                warning.Circle(Center, Radius, Mathf.Clamp01(age / Delay));
                 if (age >= Delay) Detonate();
             }
             else
@@ -89,7 +85,7 @@ namespace AcRoguelike.RuinsBoss
 
         void Detonate()
         {
-            Exploded = true; warning.Release();
+            Exploded = true;
             Vector3 to = target.transform.position - Center; to.y = 0;
             var body = target.GetComponent<CharacterController>();
             float bodyRadius = body ? body.radius * Mathf.Max(Mathf.Abs(target.transform.lossyScale.x), Mathf.Abs(target.transform.lossyScale.z)) : .3f;
@@ -150,7 +146,7 @@ namespace AcRoguelike.RuinsBoss
         public void Cancel()
         {
             if (Finished) return;
-            Finished = true; if (warning) warning.Hide();
+            Finished = true;
             Unsubscribe(); gameObject.SetActive(false); Destroy(gameObject);
         }
         void Unsubscribe()

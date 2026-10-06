@@ -32,6 +32,7 @@ namespace AcRoguelike.Forest
             displayName = "달가루 나비";
             if (pose)
             {
+                ForestAttackCueAnchors.Prepare(transform);
                 wings = pose.GetComponent<ForestButterflyWingRig>(); if (!wings) wings = pose.gameObject.AddComponent<ForestButterflyWingRig>();
                 wings.Initialize(pose.Find("Model") ? pose.Find("Model") : pose);
             }
@@ -66,6 +67,7 @@ namespace AcRoguelike.Forest
                     break;
                 case ForestButterflyState.PollenWindup:
                     MoveBody(Vector3.zero); telegraph.Circle(origin, pollenRadius, elapsed / pollenWindup);
+                    AttackCue(elapsed / pollenWindup);
                     poseOffset += Vector3.up * (.22f * Mathf.Clamp01(elapsed / pollenWindup));
                     if (elapsed >= pollenWindup)
                     {
@@ -81,7 +83,7 @@ namespace AcRoguelike.Forest
                     break;
                 case ForestButterflyState.WindWindup:
                     MoveBody(Vector3.zero); Face(aim, 160);
-                    TelegraphLine(origin, aim, 15f, 1.05f, elapsed / windWindup);
+                    AttackCue(elapsed / windWindup);
                     poseRotation *= Quaternion.Euler(-20f * Mathf.Clamp01(elapsed / windWindup), 0, 0);
                     if (elapsed >= windWindup)
                     {
@@ -111,12 +113,18 @@ namespace AcRoguelike.Forest
         public void CancelAttack()
         {
             if (telegraph) telegraph.Hide();
+            AttackAnticipation.Hide(transform);
             foreach (var shot in shots) if (shot) shot.Cancel(); shots.Clear();
             if (State != ForestButterflyState.Dead) { Enter(ForestButterflyState.Hover); nextAttack = Time.time + 1; }
         }
         protected override void OnHit(Vector3 direction, float impact)
         {
-            if (impact >= 1.4f && IsWindingUp) { if (telegraph) telegraph.Hide(); Enter(ForestButterflyState.Recovery); }
+            if (impact >= 1.4f && IsWindingUp)
+            {
+                if (telegraph) telegraph.Hide();
+                AttackAnticipation.Hide(transform);
+                Enter(ForestButterflyState.Recovery);
+            }
         }
         protected override void OnDeathStart(Vector3 direction)
         {

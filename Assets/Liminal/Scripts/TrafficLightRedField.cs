@@ -4,7 +4,7 @@ namespace AcRoguelike.Liminal
 {
     public enum RedFieldPhase { Hidden, Telegraph, Judgement }
 
-    /// <summary>Floor overlay for pattern 1: the whole arena glows red except circles that mark the safe ground.</summary>
+    /// <summary>Thin safe-ground outlines before judgement; the red field appears only while it deals damage.</summary>
     public sealed class TrafficLightRedField : MonoBehaviour
     {
         const int DiscSegments = 56;
@@ -15,6 +15,7 @@ namespace AcRoguelike.Liminal
         public float Radius { get; private set; }
         Renderer floor;
         Renderer[] discs = new Renderer[0];
+        Telegraph[] safeOutlines = new Telegraph[0];
         Transform[] discTransforms = new Transform[0];
         MaterialPropertyBlock block;
         Material floorOverlay, telegraphOverlay, safeOverlay;
@@ -31,10 +32,12 @@ namespace AcRoguelike.Liminal
             quad = quad ? quad : MakeQuad(); disc = disc ? disc : MakeDisc();
             floor = MakeRenderer("RedFloor", quad, floorOverlay, center + Vector3.up * lift, rotation, new Vector3(size.x, 1, size.y), 0);
             discs = new Renderer[safeCenters.Length]; discTransforms = new Transform[safeCenters.Length];
+            safeOutlines = new Telegraph[safeCenters.Length];
             for (int i = 0; i < safeCenters.Length; i++)
             {
                 discs[i] = MakeRenderer("SafeZone" + i, disc, telegraphOverlay, safeCenters[i] + Vector3.up * (lift + .01f), Quaternion.identity, Vector3.zero, 1);
                 discTransforms[i] = discs[i].transform;
+                safeOutlines[i] = Telegraph.Create(transform, "SafeZoneOutline" + i);
             }
             Phase = RedFieldPhase.Telegraph; phaseTime = 0; Apply();
         }
@@ -91,7 +94,8 @@ namespace AcRoguelike.Liminal
             float grow = Mathf.SmoothStep(0, 1, phaseTime / growDuration);
             if (floor)
             {
-                float alpha = Phase == RedFieldPhase.Telegraph ? Mathf.Lerp(0, .28f, Mathf.Clamp01(phaseTime / .5f)) + pulse * .07f : .52f + pulse * .16f;
+                floor.enabled = Phase == RedFieldPhase.Judgement;
+                float alpha = .52f + pulse * .16f;
                 block.SetColor(BaseColor, new Color(1, .06f, .04f, alpha));
                 floor.SetPropertyBlock(block);
             }
@@ -99,9 +103,15 @@ namespace AcRoguelike.Liminal
             {
                 if (!discs[i]) continue;
                 bool judged = Phase == RedFieldPhase.Judgement;
+                discs[i].enabled = judged;
+                if (safeOutlines[i])
+                {
+                    if (judged) safeOutlines[i].Hide();
+                    else safeOutlines[i].Circle(Centers[i], Radius * grow, Mathf.Clamp01(phaseTime / growDuration));
+                }
                 float scale = judged ? Radius * (1 + .03f * pulse) : Radius * grow;
                 discTransforms[i].localScale = new Vector3(scale, 1, scale);
-                block.SetColor(BaseColor, judged ? new Color(.35f, 1, .42f, .92f) : new Color(.2f, .5f, 1, .8f + pulse * .2f));
+                block.SetColor(BaseColor, new Color(.35f, 1, .42f, .92f));
                 discs[i].SetPropertyBlock(block);
             }
         }
@@ -123,7 +133,7 @@ namespace AcRoguelike.Liminal
         void Clear()
         {
             for (int i = transform.childCount - 1; i >= 0; i--) Destroy(transform.GetChild(i).gameObject);
-            floor = null; discs = new Renderer[0]; discTransforms = new Transform[0]; Centers = new Vector3[0];
+            floor = null; discs = new Renderer[0]; safeOutlines = new Telegraph[0]; discTransforms = new Transform[0]; Centers = new Vector3[0];
         }
 
         void OnDestroy()

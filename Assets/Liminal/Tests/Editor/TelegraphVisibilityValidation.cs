@@ -51,9 +51,8 @@ namespace AcRoguelike.Liminal.Editor
             Camera camera = null;
             RenderTexture target = null;
             Texture2D image = null;
-            var caches = new[] { typeof(Telegraph).GetField("fillMaterial", BindingFlags.Static | BindingFlags.NonPublic),
-                typeof(Telegraph).GetField("glowMaterial", BindingFlags.Static | BindingFlags.NonPublic) };
-            var previousCaches = new[] { caches[0].GetValue(null) as Material, caches[1].GetValue(null) as Material };
+            var cache = typeof(Telegraph).GetField("outlineMaterial", BindingFlags.Static | BindingFlags.NonPublic);
+            var previousCache = cache?.GetValue(null) as Material;
             Application.LogCallback log = (message, stack, type) =>
             {
                 if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert)
@@ -63,6 +62,7 @@ namespace AcRoguelike.Liminal.Editor
             try
             {
                 Directory.CreateDirectory(Output);
+                Require(cache != null, "The shared outline material cache must be available for isolated cleanup.");
                 Require(SystemInfo.graphicsDeviceType != GraphicsDeviceType.Null, "A graphics device is required (omit -nographics).");
                 scene = EditorSceneManager.NewPreviewScene();
                 root = new GameObject("Telegraph visibility preview");
@@ -99,13 +99,12 @@ namespace AcRoguelike.Liminal.Editor
                 owned.Add(flatMaterial);
                 var waterMaterial = new Material(RequireShader("Liminal/Quiet Water"));
                 owned.Add(waterMaterial);
-                var oldFill = LegacyMaterial(3001);
                 var oldRim = LegacyMaterial(3002);
-                owned.Add(oldFill); owned.Add(oldRim);
+                owned.Add(oldRim);
                 var telegraph = Telegraph.Create(root.transform, "Warning under test");
                 var renderers = telegraph.GetComponentsInChildren<MeshRenderer>();
-                Require(renderers.Length == 2, "The warning must have fill and rim renderers.");
-                var fixedMaterials = new[] { renderers[0].sharedMaterial, renderers[1].sharedMaterial };
+                Require(renderers.Length == 1, "A warning must have only one outline renderer and no fill renderer.");
+                var fixedMaterials = new[] { renderers[0].sharedMaterial };
                 foreach (var filter in telegraph.GetComponentsInChildren<MeshFilter>()) owned.Add(filter.sharedMesh);
 
                 var names = new[] { "floor", "water", "planks_013", "planks_020", "bridge_097" };
@@ -124,6 +123,7 @@ namespace AcRoguelike.Liminal.Editor
                         {
                             Draw(telegraph, shape, progress);
                             string key = shape + "_" + progress.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                            ValidateOutline(telegraph, key);
                             var vertices = WorldVertices(telegraph);
                             if (surface == 0) referenceVertices[key] = vertices;
                             else Require(SameVertices(vertices, referenceVertices[key]), "Surface height moved the " + key + " attack footprint.");
@@ -132,7 +132,7 @@ namespace AcRoguelike.Liminal.Editor
                             for (int i = 0; i < renderers.Length; i++)
                             {
                                 renderers[i].enabled = true;
-                                renderers[i].sharedMaterial = i == 0 ? oldFill : oldRim;
+                                renderers[i].sharedMaterial = oldRim;
                             }
                             var before = Capture(camera, image, target);
                             for (int i = 0; i < renderers.Length; i++) renderers[i].sharedMaterial = fixedMaterials[i];
@@ -146,14 +146,16 @@ namespace AcRoguelike.Liminal.Editor
                                 Save(image, after, names[surface] + "_" + key + "_after.png");
                                 Save(image, before, names[surface] + "_" + key + "_before.png");
                             }
-                            Require(result.visiblePixels > 250, names[surface] + " " + key + " is not visibly rendered.");
+                            Require(result.visiblePixels > 120, names[surface] + " " + key + " thin outline is not visibly rendered.");
                             if (surface == 0)
-                                Require(result.previousPixels > 250, "Legacy warning did not render on ordinary floor; comparison is invalid.");
+                                Require(result.previousPixels > 120, "Depth-tested outline did not render on ordinary floor; comparison is invalid.");
                             else
                                 Require(result.previousPixels < result.visiblePixels * .05f,
                                     names[surface] + " did not reproduce the legacy depth-occlusion bug.");
                             if (previousProgress != null)
                                 Require(result.progressChangedPixels > 100, names[surface] + " " + shape + " no longer shows charge progress.");
+                            Require(InteriorUnchanged(camera, after, hidden, shape == "fan" ? new Vector3(0, .038f, .1f) : new Vector3(0, .038f, 0)),
+                                names[surface] + " " + key + " fills its attack area instead of drawing only its edge.");
                             previousProgress = after;
                             telegraph.Hide();
                             Require(!telegraph.Visible && Changed(Capture(camera, image, target), hidden) < 8, "Hide left visible warning pixels.");
@@ -161,7 +163,8 @@ namespace AcRoguelike.Liminal.Editor
                     }
                 }
                 report.checks.Add("45 rendered circle/fan/line cases cover progress 0.15/0.55/0.98 on ordinary floor, actual Quiet Water, planks at 0.13/0.20 m and bridge at 0.97 m.");
-                report.checks.Add("Each raised surface reproduces the legacy disappearance, while the new warning remains visible. Charge progress, Hide and world-space mesh footprints are preserved.");
+                report.checks.Add("Each raised surface reproduces depth-tested outline disappearance, while the overlay remains visible. Charge progress, Hide and world-space footprints are preserved.");
+                report.checks.Add("Every warning has one renderer, white vertex/material colors and only 0.035 m wide edge bands; interior floor pixels stay unchanged.");
 
                 Draw(telegraph, "circle", .55f);
                 foreach (var renderer in renderers) renderer.enabled = false;
@@ -169,9 +172,13 @@ namespace AcRoguelike.Liminal.Editor
                 var block = new MaterialPropertyBlock();
                 block.SetColor("_BaseColor", new Color(1, 1, 1, 0));
                 foreach (var renderer in renderers) { renderer.enabled = true; renderer.SetPropertyBlock(block); }
-                Require(Changed(Capture(camera, image, target), alphaHidden) < 8, "Release alpha is ignored by the warning shader.");
-                telegraph.Hide();
-                report.checks.Add("Zero BaseColor alpha fully fades the fill and rim on a raised bridge.");
+                Require(Changed(Capture(camera, image, target), alphaHidden) < 8, "Zero alpha is ignored by the outline shader.");
+                Draw(telegraph, "circle", .98f);
+                Require(telegraph.Visible, "The warning must be visible immediately before release.");
+                telegraph.Release();
+                Require(!telegraph.Visible && !renderers[0].enabled && Changed(Capture(camera, image, target), alphaHidden) < 8,
+                    "Release must immediately hide the outline without an additional ground flash.");
+                report.checks.Add("Zero BaseColor alpha fully hides the outline; Release immediately removes the warning without a ground flash.");
                 ValidateRedField(root.transform, camera, image, target, owned, report);
             }
             catch (Exception exception)
@@ -185,13 +192,12 @@ namespace AcRoguelike.Liminal.Editor
                 // Dispose generated meshes/materials first so runtime OnDestroy never calls delayed Destroy in Edit Mode.
                 for (int i = owned.Count - 1; i >= 0; i--) if (owned[i]) Object.DestroyImmediate(owned[i]);
                 if (root) Object.DestroyImmediate(root);
-                for (int i = 0; i < caches.Length; i++)
-                    if (!previousCaches[i])
-                    {
-                        var created = caches[i].GetValue(null) as Material;
-                        caches[i].SetValue(null, previousCaches[i]);
-                        if (created) Object.DestroyImmediate(created);
-                    }
+                if (cache != null && !previousCache)
+                {
+                    var created = cache.GetValue(null) as Material;
+                    cache.SetValue(null, previousCache);
+                    if (created) Object.DestroyImmediate(created);
+                }
                 if (target) { target.Release(); Object.DestroyImmediate(target); }
                 if (image) Object.DestroyImmediate(image);
                 if (scene.IsValid()) EditorSceneManager.ClosePreviewScene(scene);
@@ -222,32 +228,45 @@ namespace AcRoguelike.Liminal.Editor
                 typeof(TrafficLightRedField).GetField("phaseTime", PrivateInstance).SetValue(field, .6f);
                 typeof(TrafficLightRedField).GetMethod("Apply", PrivateInstance).Invoke(field, null);
                 var safe = go.transform.Find("SafeZone0").GetComponent<Renderer>();
-                var withBlue = Capture(camera, image, target);
-                safe.enabled = false;
-                var redOnly = Capture(camera, image, target);
-                safe.enabled = true;
-                Require(Changed(withBlue, redOnly) > 100, "Blue safe-zone warning is hidden by the red field or bridge.");
-                Save(image, withBlue, "boss_blue_safe_zone.png");
-                var texture = sources[1].GetTexture("_BaseMap");
-                Require(texture && safe.sharedMaterial.GetTexture("_BaseMap") == texture, "Authored ring mask was lost.");
-                safe.sharedMaterial.SetTexture("_BaseMap", Texture2D.whiteTexture);
-                var withoutMask = Capture(camera, image, target);
-                Require(Changed(withBlue, withoutMask) > 100, "Safe-zone ring texture does not affect rendered pixels.");
-                safe.sharedMaterial.SetTexture("_BaseMap", texture);
+                var floor = go.transform.Find("RedFloor").GetComponent<Renderer>();
+                var safeOutline = go.transform.Find("SafeZoneOutline0").GetComponent<Telegraph>();
+                Require(!floor.enabled && !safe.enabled && safeOutline.Visible,
+                    "Field windup must show only a safe-zone outline, with no red floor or filled disc.");
+                ValidateOutline(safeOutline, "boss safe zone");
+                var withWhite = Capture(camera, image, target);
+                safeOutline.Hide();
+                var noField = Capture(camera, image, target);
+                Require(Changed(withWhite, noField) > 120, "White safe-zone outline is hidden by the raised bridge.");
+                Require(InteriorUnchanged(camera, withWhite, noField, new Vector3(0, .038f, 0)),
+                    "The safe-zone warning must leave its interior unfilled.");
+                typeof(TrafficLightRedField).GetMethod("Apply", PrivateInstance).Invoke(field, null);
+                Save(image, withWhite, "boss_white_safe_zone.png");
                 field.Judge();
+                Require(floor.enabled && safe.enabled && !safeOutline.Visible,
+                    "Judgement must replace the warning outline with the active danger field and safe zone.");
                 var withGreen = Capture(camera, image, target);
                 safe.enabled = false;
                 var judgedRedOnly = Capture(camera, image, target);
                 safe.enabled = true;
-                Require(Changed(withGreen, judgedRedOnly) > 100 && Changed(withBlue, withGreen) > 100,
-                    "Green safe-zone judgement is hidden or indistinguishable from its blue warning.");
+                Require(Changed(withGreen, judgedRedOnly) > 100 && Changed(withWhite, withGreen) > 100,
+                    "Green safe-zone judgement is hidden or indistinguishable from its white warning.");
+                Require(Changed(judgedRedOnly, noField) > 1000, "The active red danger field is not rendered.");
+                var texture = sources[2].GetTexture("_BaseMap");
+                Require(texture && safe.sharedMaterial.GetTexture("_BaseMap") == texture, "Authored active safe-zone ring mask was lost.");
+                safe.sharedMaterial.SetTexture("_BaseMap", Texture2D.whiteTexture);
+                var withoutMask = Capture(camera, image, target);
+                Require(Changed(withGreen, withoutMask) > 100, "Active safe-zone ring texture does not affect rendered pixels.");
+                safe.sharedMaterial.SetTexture("_BaseMap", texture);
                 Save(image, withGreen, "boss_green_safe_zone.png");
                 for (int i = 0; i < sources.Length; i++)
                     Require(EditorJsonUtility.ToJson(sources[i]) == snapshots[i], "Boss field modified an authored material.");
-                report.checks.Add("Boss blue/green safe zones remain visible above red and the bridge; authored ring texture affects rendered pixels; source materials are unchanged.");
+                report.checks.Add("Boss windup shows only a thin white safe-zone outline above the bridge. Red danger fill and textured green safe ground appear at judgement; source materials are unchanged.");
             }
             finally
             {
+                foreach (var warning in go.GetComponentsInChildren<Telegraph>())
+                    foreach (var filter in warning.GetComponentsInChildren<MeshFilter>())
+                        if (filter.sharedMesh) owned.Add(filter.sharedMesh);
                 foreach (string name in new[] { "floorOverlay", "telegraphOverlay", "safeOverlay", "quad", "disc" })
                 {
                     var item = typeof(TrafficLightRedField).GetField(name, PrivateInstance)?.GetValue(field) as Object;
@@ -261,6 +280,48 @@ namespace AcRoguelike.Liminal.Editor
             if (shape == "circle") telegraph.Circle(Vector3.zero, 2.8f, progress);
             else if (shape == "fan") telegraph.Fan(new Vector3(0, 0, -1.8f), Vector3.forward, 4f, 55, progress);
             else telegraph.Line(new Vector3(0, 0, -2.2f), Vector3.forward, 4.4f, 1.4f, progress);
+        }
+
+        static void ValidateOutline(Telegraph telegraph, string name)
+        {
+            Require(Mathf.Approximately(Telegraph.OutlineWidth, .035f), "Attack outlines must stay 0.035 m thin.");
+            var renderers = telegraph.GetComponentsInChildren<MeshRenderer>();
+            var filters = telegraph.GetComponentsInChildren<MeshFilter>();
+            Require(renderers.Length == 1 && filters.Length == 1, name + " must have one outline mesh and no fill mesh.");
+            Color materialColor = renderers[0].sharedMaterial.GetColor("_BaseColor");
+            Require(White(materialColor), name + " material must be white.");
+            var mesh = filters[0].sharedMesh;
+            var vertices = WorldVertices(telegraph);
+            var colors = mesh.colors;
+            Require(vertices.Length > 0 && vertices.Length % 4 == 0 && mesh.triangles.Length == vertices.Length / 4 * 6,
+                name + " must contain only edge bands, without an interior fill.");
+            Require(colors.Length == vertices.Length, name + " must color every outline vertex.");
+            foreach (Color color in colors)
+                Require(White(color) && color.a >= .58f - .001f && color.a <= .95f + .001f,
+                    name + " uses a colored or overbright warning vertex.");
+            for (int i = 0; i < vertices.Length; i += 4)
+            {
+                Require(Mathf.Abs(Vector3.Distance(vertices[i], vertices[i + 1]) - .035f) < .00001f &&
+                    Mathf.Abs(Vector3.Distance(vertices[i + 2], vertices[i + 3]) - .035f) < .00001f,
+                    name + " contains a thick edge or a filled strip.");
+            }
+        }
+
+        static bool White(Color color) => Mathf.Abs(color.r - 1) < .001f && Mathf.Abs(color.g - 1) < .001f && Mathf.Abs(color.b - 1) < .001f;
+
+        static bool InteriorUnchanged(Camera camera, Color32[] visible, Color32[] hidden, Vector3 world)
+        {
+            Vector3 pixel = camera.WorldToScreenPoint(world);
+            int x = Mathf.RoundToInt(pixel.x), y = Mathf.RoundToInt(pixel.y);
+            if (x < 2 || x >= Size - 2 || y < 2 || y >= Size - 2) return false;
+            for (int dy = -2; dy <= 2; dy++)
+                for (int dx = -2; dx <= 2; dx++)
+                {
+                    int i = (y + dy) * Size + x + dx;
+                    if (Math.Abs(visible[i].r - hidden[i].r) + Math.Abs(visible[i].g - hidden[i].g) + Math.Abs(visible[i].b - hidden[i].b) > 12)
+                        return false;
+                }
+            return true;
         }
 
         static Material LegacyMaterial(int queue)

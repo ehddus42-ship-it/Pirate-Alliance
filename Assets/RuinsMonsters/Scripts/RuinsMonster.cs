@@ -191,7 +191,7 @@ namespace AcRoguelike.Ruins
                     AreaStrikes++;
                 }
             }
-            // A visible warning exists immediately, including the first frame of an externally started attack.
+            // Commit the attack cue immediately, including externally started attacks.
             DrawWarning(0);
             if (visualRig) visualRig.SetMotion(State, 0, 0, pattern);
             return true;
@@ -214,10 +214,8 @@ namespace AcRoguelike.Ruins
 
         void DrawWarning(float progress)
         {
-            if (kind == RuinsMonsterKind.ScrapBulwark)
-                TelegraphLine(transform.position, aim, 18, .6f, progress);
-            else if (kind == RuinsMonsterKind.CarrionDrone)
-                TelegraphFan(transform.position, aim, 16, 17, progress);
+            if (kind == RuinsMonsterKind.ScrapBulwark || kind == RuinsMonsterKind.CarrionDrone)
+                AttackCue(progress);
             else if (kind == RuinsMonsterKind.PenitentHusk)
             {
                 if (pattern == 0) TelegraphFan(transform.position, aim, HuskReach, HuskHalfAngle, progress);
@@ -229,6 +227,7 @@ namespace AcRoguelike.Ruins
                 else TelegraphLine(transform.position, aim, MatronLungeDistance + MatronLungeReach, MatronLungeHalfWidth, progress);
             }
             else if (pattern == 1) TelegraphFan(transform.position, aim, TentacleRadius, TentacleHalfAngle, progress);
+            else AttackCue(progress);
         }
 
         void Attack(float dt)
@@ -352,6 +351,7 @@ namespace AcRoguelike.Ruins
         void CancelCombatArtifacts()
         {
             if (telegraph) telegraph.Hide();
+            AttackAnticipation.Hide(transform);
             for (int i = 0; i < pulses.Length; i++) { if (pulses[i]) pulses[i].Cancel(); pulses[i] = null; }
             foreach (var projectile in projectiles) if (projectile) projectile.Cancel();
             projectiles.Clear(); IsWindingUp = false; MovementSpeed = 0;

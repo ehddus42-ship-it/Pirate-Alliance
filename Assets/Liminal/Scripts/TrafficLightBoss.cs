@@ -74,7 +74,8 @@ namespace AcRoguelike.Liminal
 
         void Awake()
         {
-            TelegraphOverlay.Attach(warning, TrafficLightBossRig.CarReleaseTime - TrafficLightBossRig.CarAimTime);
+            // Cars are projectiles, so their trajectory has no ground warning.
+            if (warning) warning.enabled = false;
             Health = GetComponent<TrainingEnemy>(); body = GetComponent<CharacterController>();
             if (!animator) animator = GetComponentInChildren<Animator>();
             Health.Defeated += OnDefeated;
@@ -101,7 +102,7 @@ namespace AcRoguelike.Liminal
         {
             if (!initialized || !Health || !Health.IsAlive || State == TrafficLightBossState.Dead || Time.deltaTime <= 0) return;
             if (!player) player = FindFirstObjectByType<LiminalPlayerHealth>();
-            if (!player || !player.IsAlive) { if (warning) warning.enabled = false; return; }
+            if (!player || !player.IsAlive) { if (warning) warning.enabled = false; AttackAnticipation.Hide(transform); return; }
             stateTime += Time.deltaTime;
             Vector3 delta = player.transform.position - transform.position; delta.y = 0;
             float distance = delta.magnitude;
@@ -184,9 +185,11 @@ namespace AcRoguelike.Liminal
         void UpdateField(Vector3 delta)
         {
             if (stateTime < .6f) TurnTo(delta, 60);
+            if (!fieldJudged) AttackAnticipation.Show(transform, stateTime / TrafficLightBossRig.FieldJudgeTime);
             if (!fieldShown && stateTime >= .45f) ShowField();
             if (!fieldJudged && stateTime >= TrafficLightBossRig.FieldJudgeTime)
             {
+                AttackAnticipation.Hide(transform);
                 fieldJudged = true; nextFieldTick = stateTime;
                 if (field) field.Judge();
                 SetLamp(TrafficLampColor.Green); Play(slamSound, 1);
@@ -236,24 +239,12 @@ namespace AcRoguelike.Liminal
         {
             if (stateTime < TrafficLightBossRig.CarAimTime) TurnTo(delta, 80);
             if (!aimLocked && stateTime >= TrafficLightBossRig.CarAimTime)
-            { lockedTarget = player.transform.position; aimLocked = true; if (warning) warning.enabled = true; }
-            if (aimLocked && !carReleased) DrawCarLine();
-            if (carReleased && warning) warning.enabled = false;
+            { lockedTarget = player.transform.position; aimLocked = true; }
+            if (!carReleased) AttackAnticipation.Show(transform, stateTime / TrafficLightBossRig.CarReleaseTime);
             if (stateTime >= TrafficLightBossRig.ThrowDuration) FinishAttack();
         }
 
         Vector3 ReleasePoint() { var p = transform.TransformPoint(new Vector3(.6f, 0, 5.2f)); p.y = transform.position.y; return p; }
-
-        void DrawCarLine()
-        {
-            if (!warning) return;
-            Vector3 start = ReleasePoint(), heading = Vector3.ProjectOnPlane(lockedTarget - start, Vector3.up);
-            heading = heading.sqrMagnitude > .01f ? heading.normalized : transform.forward;
-            Vector3 side = Vector3.Cross(Vector3.up, heading) * 1.3f, end = start + heading * 60, lift = Vector3.up * .08f;
-            warning.positionCount = 5;
-            warning.SetPositions(new[] { start - side + lift, start + side + lift, end + side + lift, end - side + lift, start - side + lift });
-            warning.widthMultiplier = Mathf.Lerp(.06f, .28f, Mathf.InverseLerp(TrafficLightBossRig.CarAimTime, TrafficLightBossRig.CarReleaseTime, stateTime));
-        }
 
         void SpawnCar()
         {
@@ -280,6 +271,7 @@ namespace AcRoguelike.Liminal
 
         void ReleaseCar()
         {
+            AttackAnticipation.Hide(transform);
             carReleased = true;
             if (!heldCar || !player) return;
             if (!aimLocked) lockedTarget = player.transform.position;
@@ -343,6 +335,7 @@ namespace AcRoguelike.Liminal
 
         void SetState(TrafficLightBossState state)
         {
+            AttackAnticipation.Hide(transform);
             State = state; stateTime = 0; footstepTime = 0;
             if (warning) warning.enabled = false;
             if (state == TrafficLightBossState.Dormant)
@@ -452,6 +445,7 @@ namespace AcRoguelike.Liminal
 
         void OnDefeated(TrainingEnemy _)
         {
+            AttackAnticipation.Hide(transform);
             State = TrafficLightBossState.Dead; Health.CanBeTargeted = false;
             if (warning) warning.enabled = false;
             if (field) field.Hide();
@@ -470,7 +464,8 @@ namespace AcRoguelike.Liminal
             followCamera.focusOffset = Vector3.zero;
             if (originalPitch > 0) followCamera.pitch = originalPitch;
         }
-        void OnDestroy() { if (Health) Health.Defeated -= OnDefeated; if (heldCar) Destroy(heldCar); ReleaseCamera(); }
+        void OnDisable() { if (warning) warning.enabled = false; AttackAnticipation.Hide(transform); if (field) field.Hide(); }
+        void OnDestroy() { AttackAnticipation.Hide(transform); if (Health) Health.Defeated -= OnDefeated; if (heldCar) Destroy(heldCar); ReleaseCamera(); }
         void OnDrawGizmosSelected() { Gizmos.color = new Color(1, .2f, .15f, .7f); Gizmos.DrawWireSphere(transform.position, detectionRadius); }
     }
 }

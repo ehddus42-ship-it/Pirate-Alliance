@@ -7,7 +7,7 @@ namespace AcRoguelike.Liminal
     /// works as a turret.
     /// - Its screen scrolls dim green binary.
     /// - It swivels toward the player in short servo jerks.
-    /// - Before each shot the screen flares and an aim line appears. Then it fires a flat line of binary digits
+    /// - Before each shot the screen flares with an attack glint. Then it fires a flat line of binary digits
     ///   (<see cref="BinaryProjectile"/>) at the player.
     /// </summary>
     public sealed class MonitorTurret : LiminalPropMonster
@@ -118,7 +118,7 @@ namespace AcRoguelike.Liminal
                 // The aim locks a little before the shot, so a sidestep at the end dodges it.
                 if (p < .55f && to.sqrMagnitude > .1f) aimDirection = to.normalized;
                 flare = p;
-                TelegraphLine(transform.position, aimDirection, Mathf.Min(range, distance + 2), .14f, p);
+                AttackCue(p);
                 poseRotation = rest * Quaternion.Euler(Mathf.Sin(Time.time * 70) * 1.5f * p, 0, 0);
                 if (p >= 1)
                 {

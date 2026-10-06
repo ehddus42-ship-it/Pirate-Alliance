@@ -41,8 +41,13 @@ namespace AcRoguelike.RuinsBoss.Editor
                     Require(machine.Activate() && machine.StartAttack(0) && machine.TelegraphVisible,
                         kind + " must begin a visible charge warning before moving.");
                     var deadline = new Deadline(5, kind + " player charge contact");
+                    bool glinted = false;
                     while (machine.State != RuinsBossState.Recovery)
-                    { deadline.Check(); arena.Step(); yield return null; }
+                    {
+                        glinted |= machine.State == RuinsBossState.Windup && machine.AttackCueVisible;
+                        deadline.Check(); arena.Step(); yield return null;
+                    }
+                    Require(glinted, kind + " must flash on its body before charging.");
                     HitFeedback.CancelHitStop();
                     Require(machine.Attacks == 1 && machine.DamageAttempts == 1 && arena.Player.Health == health - machine.chargeDamage,
                         kind + " must deal exactly one charge hit to an unobstructed stationary player. "

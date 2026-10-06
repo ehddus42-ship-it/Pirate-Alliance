@@ -45,6 +45,7 @@ namespace AcRoguelike.Forest
             Health.CanBeTargeted = false; Health.IgnoreDamage = true; Health.Defeated += OnKilled;
             body = GetComponent<CharacterController>(); body.enabled = false;
             pose = transform.Find("Visual/Pose");
+            ForestAttackCueAnchors.Prepare(transform);
             movement = new CharacterObstacleSlide(body, p => !room || room.Contains(p, .45f));
             warning = Telegraph.Create(transform, "Sapling warning");
             State = ForestSaplingState.Thrown; elapsed = 0;
@@ -107,6 +108,7 @@ namespace AcRoguelike.Forest
             else if (State == ForestSaplingState.Exploding)
             {
                 warning.Circle(landing, explosionRadius, elapsed / explosionWindup);
+                AttackAnticipation.Show(transform, elapsed / explosionWindup);
                 if (pose)
                 {
                     float swell = Mathf.Clamp01(elapsed / explosionWindup);
@@ -159,6 +161,7 @@ namespace AcRoguelike.Forest
         public void Cancel()
         {
             if (Finished) return; State = ForestSaplingState.Finished;
+            AttackAnticipation.Hide(transform);
             if (warning) warning.Hide(); Unsubscribe(); gameObject.SetActive(false); Destroy(gameObject);
         }
         void Unsubscribe()

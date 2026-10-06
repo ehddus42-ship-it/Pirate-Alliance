@@ -122,10 +122,17 @@ namespace AcRoguelike.GameTheme.Editor
                 while (Time.time - started < .75f) { deadline.Check(); arena.Step(); yield return null; }
                 Vector3 locked = charger.LockedDirection;
                 arena.PlacePlayer(new Vector3(-4, .05f, 8));
-                while (!charger.Charging) { deadline.Check(); arena.Step(); yield return null; }
+                bool glinted = false;
+                while (!charger.Charging)
+                {
+                    var cue = charger.GetComponent<AttackAnticipation>();
+                    glinted |= cue && cue.Visible;
+                    deadline.Check(); arena.Step(); yield return null;
+                }
                 Require(Time.time - started >= .8f && Vector3.Angle(locked, charger.LockedDirection) < .1f,
                     "Late movement must not redirect the Z block's committed charge.");
-                record?.Invoke("Z charger: attackable, visible one-second warning, early tracking, committed late aim.");
+                Require(glinted, "The faceless Z block must flash at its body before charging.");
+                record?.Invoke("Z charger: attackable, one-second outline, body glint, early tracking, committed late aim.");
                 Object.DestroyImmediate(charger.gameObject);
 
                 arena.PlacePlayer(new Vector3(0, .05f, 8));

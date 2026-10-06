@@ -58,7 +58,7 @@ namespace AcRoguelike.Liminal
 
         void Awake()
         {
-            // The charge line keeps its LineRenderer (logic and tests) but is drawn as a premium telegraph.
+            // Keep the authored charge footprint while the shared overlay draws its thin white outline.
             TelegraphOverlay.Attach(warning, VendingMonsterRig.WindupDuration);
             Health = GetComponent<TrainingEnemy>(); body = GetComponent<CharacterController>();
             if (!animator) animator = GetComponentInChildren<Animator>();
@@ -88,7 +88,7 @@ namespace AcRoguelike.Liminal
         {
             if (!initialized || !Health || !Health.IsAlive || State == VendingMonsterState.Dead || Time.deltaTime <= 0) return;
             if (!player) player = FindFirstObjectByType<LiminalPlayerHealth>();
-            if (!player || !player.IsAlive) { if (warning) warning.enabled = false; return; }
+            if (!player || !player.IsAlive) { if (warning) warning.enabled = false; AttackAnticipation.Hide(transform); return; }
             stateTime += Time.deltaTime;
             UpdateKnockback();
             Vector3 delta = player.transform.position - transform.position; delta.y = 0;
@@ -127,6 +127,7 @@ namespace AcRoguelike.Liminal
                     break;
                 case VendingMonsterState.ChargeWindup:
                     if (stateTime < .35f) { TurnTo(delta, 90); chargeDirection = transform.forward; }
+                    AttackAnticipation.Show(transform, stateTime / VendingMonsterRig.WindupDuration);
                     DrawChargeWarning();
                     if (stateTime >= VendingMonsterRig.WindupDuration) SetState(VendingMonsterState.Charging);
                     break;
@@ -148,6 +149,7 @@ namespace AcRoguelike.Liminal
                 case VendingMonsterState.CanThrow:
                     // Aim locks before the release. The player can dodge the physical projectile.
                     if (stateTime < 1.2f) TurnTo(delta, 110);
+                    if (!canReleased) AttackAnticipation.Show(transform, stateTime / VendingMonsterRig.CanReleaseTime);
                     if (!aimLocked && stateTime >= 1.45f) { lockedThrowPoint=player.transform.position+Vector3.up*.85f;aimLocked=true; }
                     if (stateTime >= VendingMonsterRig.ThrowDuration) FinishAttack();
                     break;
@@ -178,6 +180,7 @@ namespace AcRoguelike.Liminal
 
         void SetState(VendingMonsterState state)
         {
+            AttackAnticipation.Hide(transform);
             State = state; stateTime = 0; footstepTime = 0;
             if (warning) warning.enabled = state == VendingMonsterState.ChargeWindup;
             if (state == VendingMonsterState.Dormant)
@@ -253,7 +256,7 @@ namespace AcRoguelike.Liminal
             Vector3 side = Vector3.Cross(Vector3.up, chargeDirection) * .72f;
             warning.positionCount = 5;
             warning.SetPositions(new[] { p-side, p+side, p+chargeDirection*chargeDistance+side, p+chargeDirection*chargeDistance-side, p-side });
-            warning.widthMultiplier = Mathf.Lerp(.025f, .11f, stateTime / VendingMonsterRig.WindupDuration);
+            warning.widthMultiplier = .025f;
         }
         void PullCan()
         {
@@ -265,6 +268,7 @@ namespace AcRoguelike.Liminal
         }
         void ReleaseCan()
         {
+            AttackAnticipation.Hide(transform);
             canReleased = true;
             if (!heldCan || !player) return;
             if(!aimLocked) lockedThrowPoint = player.transform.position + Vector3.up * .85f;
@@ -342,6 +346,7 @@ namespace AcRoguelike.Liminal
 
         void OnDefeated(TrainingEnemy _)
         {
+            AttackAnticipation.Hide(transform);
             State = VendingMonsterState.Dead; Health.CanBeTargeted = false;
             if (warning) warning.enabled = false;
             if (heldCan) Destroy(heldCan);
@@ -355,7 +360,8 @@ namespace AcRoguelike.Liminal
             if (!death) death = gameObject.AddComponent<VendingMonsterDeath>();
             death.Play(this, HitDirection(), Mathf.Clamp(Health ? Health.LastHitImpact : 1, .6f, 2f));
         }
-        void OnDestroy() { if (Health) { Health.Defeated -= OnDefeated; Health.Damaged -= OnDamaged; } if (heldCan) Destroy(heldCan); }
+        void OnDisable() { if (warning) warning.enabled = false; AttackAnticipation.Hide(transform); }
+        void OnDestroy() { AttackAnticipation.Hide(transform); if (Health) { Health.Defeated -= OnDefeated; Health.Damaged -= OnDamaged; } if (heldCan) Destroy(heldCan); }
         void OnDrawGizmosSelected() { Gizmos.color = new Color(.1f, .85f, .7f, .7f); Gizmos.DrawWireSphere(transform.position, detectionRadius); }
     }
 }

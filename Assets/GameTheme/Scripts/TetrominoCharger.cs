@@ -78,11 +78,13 @@ namespace AcRoguelike.GameTheme
                 }
                 visual.localPosition = Vector3.up * (.65f + Mathf.Sin(elapsed * 15) * .045f);
                 visual.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(elapsed * 18) * 5);
+                AttackAnticipation.Show(transform, Mathf.Clamp01(elapsed / WindupDuration), visual);
                 warning.Line(transform.position + Vector3.up * .035f, direction, ChargeLength, .8f,
                     Mathf.Clamp01(elapsed / WindupDuration));
                 if (elapsed < WindupDuration) return;
                 Charging = true;
                 warning.Release();
+                AttackAnticipation.Hide(transform);
                 visual.localRotation = Quaternion.identity;
                 // Only spend the portion of this frame after the wind-up completed.
                 dt = Mathf.Max(0, elapsed - WindupDuration);
@@ -140,6 +142,7 @@ namespace AcRoguelike.GameTheme
             Charging = false;
             if (Health) Health.CanBeTargeted = false;
             if (warning) warning.Hide();
+            AttackAnticipation.Hide(transform);
             gameObject.SetActive(false);
             Destroy(gameObject);
         }

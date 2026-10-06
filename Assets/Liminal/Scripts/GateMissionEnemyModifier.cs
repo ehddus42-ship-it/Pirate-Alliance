@@ -51,8 +51,10 @@ namespace AcRoguelike.Liminal
                 if (!director || director.Phase == LiminalRunPhase.Lobby || director.Phase == LiminalRunPhase.InvalidConfiguration)
                 { ClearWarning(); yield break; }
                 warning.Circle(center, BurstRadius, elapsed / BurstDelay);
+                AttackAnticipation.Show(transform, elapsed / BurstDelay, allowDefeated: true);
                 yield return null;
             }
+            AttackAnticipation.Hide(transform);
             warning.Circle(center, BurstRadius, 1);
             warning.Release();
             if (director && director.Phase == LiminalRunPhase.Exploring && target && target.IsAlive)
@@ -67,6 +69,7 @@ namespace AcRoguelike.Liminal
 
         void ClearWarning()
         {
+            AttackAnticipation.Hide(transform);
             if (warning) { warning.Hide(); Destroy(warning.gameObject); }
             warning = null;
         }

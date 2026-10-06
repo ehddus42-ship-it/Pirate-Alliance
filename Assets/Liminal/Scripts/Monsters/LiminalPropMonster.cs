@@ -11,7 +11,7 @@ namespace AcRoguelike.Liminal
     /// - the hit reaction: a damped spring rocks the prop away from the hit, with an impact squash, a knockback
     ///   and a short stagger;
     /// - the death: knocked flying, it falls over, crashes with dust and a camera shake, lies there, then sinks;
-    /// - premium floor telegraphs (<see cref="Telegraph"/>) and distance-scaled "the floor shook" camera shakes.
+    /// - thin white attack outlines, a pre-attack glint, and distance-scaled camera shakes.
     /// Subclasses only write a procedural pose (<see cref="poseOffset"/>, <see cref="poseRotation"/>,
     /// <see cref="poseScale"/>) and their attacks in <see cref="Think"/>.
     /// </summary>
@@ -31,6 +31,7 @@ namespace AcRoguelike.Liminal
         /// <summary>Hit-reaction pivot (at the feet). Its child <see cref="pose"/> carries the procedural animation.</summary>
         protected Transform visual, pose;
         protected Telegraph telegraph;
+        AttackAnticipation anticipation;
         protected int stage;
         protected Vector3 poseOffset;
         protected Quaternion poseRotation = Quaternion.identity;
@@ -76,7 +77,7 @@ namespace AcRoguelike.Liminal
         {
             if (!Health || !Health.IsAlive || dying || Time.deltaTime <= 0) return;
             if (!player) player = FindFirstObjectByType<LiminalPlayerHealth>();
-            if (!player || !player.IsAlive) { if (telegraph) telegraph.Hide(); return; }
+            if (!player || !player.IsAlive) { if (telegraph) telegraph.Hide(); AttackAnticipation.Hide(transform); return; }
             float dt = Time.deltaTime;
             if (knockback.sqrMagnitude > .0025f)
             {
@@ -213,6 +214,7 @@ namespace AcRoguelike.Liminal
             dying = true;
             IsWindingUp = false;
             if (telegraph) telegraph.Hide();
+            AttackAnticipation.Hide(transform);
             if (body) body.enabled = false;
             StartCoroutine(Death());
         }
@@ -270,9 +272,17 @@ namespace AcRoguelike.Liminal
 
         // ---- telegraphs ------------------------------------------------------------------------------------
         public bool TelegraphVisible => telegraph && telegraph.Visible;
+        public bool AttackCueVisible => anticipation && anticipation.Visible;
+
+        protected void AttackCue(float progress)
+        {
+            AttackAnticipation.Show(transform, progress);
+            if (!anticipation) anticipation = GetComponent<AttackAnticipation>();
+        }
 
         protected void TelegraphFan(Vector3 origin, Vector3 forward, float radius, float halfAngle, float progress)
         {
+            AttackCue(progress);
             if (!telegraph) return;
             origin.y = transform.position.y;
             telegraph.Fan(origin, forward, radius, halfAngle, progress);
@@ -280,12 +290,13 @@ namespace AcRoguelike.Liminal
 
         protected void TelegraphLine(Vector3 origin, Vector3 forward, float length, float halfWidth, float progress)
         {
+            AttackCue(progress);
             if (!telegraph) return;
             origin.y = transform.position.y;
             telegraph.Line(origin, forward, length, halfWidth, progress);
         }
 
-        /// <summary>The telegraphed attack fires now: the telegraph bursts and fades.</summary>
-        protected void HideTelegraph() { if (telegraph) telegraph.Release(); }
+        /// <summary>The attack fires now: anticipation ends immediately.</summary>
+        protected void HideTelegraph() { if (telegraph) telegraph.Release(); AttackAnticipation.Hide(transform); }
     }
 }

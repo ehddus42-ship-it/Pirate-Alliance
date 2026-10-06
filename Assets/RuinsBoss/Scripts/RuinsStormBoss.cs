@@ -37,12 +37,11 @@ namespace AcRoguelike.RuinsBoss
         protected override float LyingHalfDepth => .7f;
 
         readonly List<RuinsBossProjectile> projectiles = new List<RuinsBossProjectile>();
-        readonly Telegraph[] warnings = new Telegraph[18];
         readonly Transform[] launchPorts = new Transform[2];
         LiminalPlayerHealth subscribedPlayer;
         RuinsWarMachine waking;
         RuinsBossRig turretRig;
-        Vector3 safeDirection = Vector3.back, volleyCenter;
+        Vector3 safeDirection = Vector3.back;
         readonly Vector3[] artilleryPoints = new Vector3[3];
         float elapsed, encounterTime, nextPattern, artilleryClock, artilleryVolleyTime;
         int nextPatternIndex, wave, artilleryVolley;
@@ -81,8 +80,6 @@ namespace AcRoguelike.RuinsBoss
                     else if (part.name == "LaunchPortB") launchPorts[1] = part;
                 }
             }
-            for (int i = 0; i < warnings.Length; i++)
-                if (!warnings[i]) warnings[i] = Telegraph.Create(transform, "Electric pattern warning " + i);
             encounterTime = 0; nextPattern = 1.5f; artilleryClock = Mathf.Max(7, artilleryInterval * .75f);
             artilleryVolley = 3; nextPatternIndex = 0;
             Enter(RuinsBossState.Idle);
@@ -103,7 +100,7 @@ namespace AcRoguelike.RuinsBoss
                     break;
                 case RuinsBossState.Windup:
                     DrawWarning(Mathf.Clamp01(elapsed / Mathf.Max(.1f, warningDuration)));
-                    if (elapsed >= warningDuration) { HideWarnings(true); wave = 0; Enter(RuinsBossState.Attack); }
+                    if (elapsed >= warningDuration) { HideWarnings(); wave = 0; Enter(RuinsBossState.Attack); }
                     break;
                 case RuinsBossState.Attack:
                     UpdatePattern();
@@ -132,7 +129,7 @@ namespace AcRoguelike.RuinsBoss
                 (hp <= .5f || encounterTime >= 32)) candidate = rightMachine;
             if (!candidate) return false;
             waking = candidate; activationCommitted = false;
-            HideWarnings(false); Enter(RuinsBossState.Awakening);
+            HideWarnings(); Enter(RuinsBossState.Awakening);
             if (visualRig) visualRig.BeginActivation(candidate.transform, activationDuration);
             if (candidate.visualRig) candidate.visualRig.BeginActivation(transform, activationDuration);
             return true;
@@ -147,7 +144,6 @@ namespace AcRoguelike.RuinsBoss
             safeDirection = Vector3.ProjectOnPlane(player.transform.position - transform.position, Vector3.up).normalized;
             if (safeDirection.sqrMagnitude < .01f) safeDirection = transform.forward;
             Face(safeDirection, 10000);
-            volleyCenter = transform.position;
             PatternsStarted++; wave = 0;
             Enter(RuinsBossState.Windup); DrawWarning(0);
             if (visualRig) visualRig.SetState(State, 0);
@@ -159,15 +155,7 @@ namespace AcRoguelike.RuinsBoss
 
         void DrawWarning(float progress)
         {
-            // Thin previews show lanes, not a solid arena-wide danger disc. The escape wedge stays empty.
-            for (int i = 0; i < warnings.Length; i++)
-            {
-                Vector3 direction = Quaternion.Euler(0, i * 20f, 0) * safeDirection;
-                bool relevant = !SafeDirection(direction);
-                if (Pattern == 2 && Vector3.Angle(safeDirection, direction) > 78) relevant = false;
-                if (relevant) warnings[i].Line(volleyCenter, direction, Pattern == 2 ? 19 : 14, .16f, progress);
-                else warnings[i].Hide();
-            }
+            AttackCue(progress);
             IsWindingUp = true;
         }
 
@@ -219,11 +207,13 @@ namespace AcRoguelike.RuinsBoss
         {
             if (!turret || !player || !player.IsAlive) return;
             artilleryClock -= dt;
+            if (artilleryVolley >= 3 && artilleryClock <= .35f)
+                AttackAnticipation.Show(turret, Mathf.Clamp01(1 - artilleryClock / .35f));
             if (artilleryVolley >= 3 && artilleryClock <= 0)
             {
                 Vector3 center = player.transform.position;
                 Vector3 side = Vector3.Cross(Vector3.up, safeDirection).normalized;
-                // Three fixed circles leave large gaps. Nothing tracks after the volley is committed.
+                // Three fixed impact points leave large gaps. Nothing tracks after the volley is committed.
                 artilleryPoints[0] = ClampPoint(center);
                 artilleryPoints[1] = ClampPoint(center + side * 5.8f + safeDirection * 1.5f);
                 artilleryPoints[2] = ClampPoint(center - side * 5.8f + safeDirection * 1.5f);
@@ -258,17 +248,18 @@ namespace AcRoguelike.RuinsBoss
         {
             State = state; elapsed = 0; IsWindingUp = state == RuinsBossState.Windup || state == RuinsBossState.Awakening;
         }
-        void HideWarnings(bool release)
+        void HideWarnings()
         {
             if (telegraph) telegraph.Hide();
-            foreach (var warning in warnings) if (warning) { if (release) warning.Release(); else warning.Hide(); }
+            AttackAnticipation.Hide(transform);
             IsWindingUp = false;
         }
 
         public void CancelEncounter()
         {
             EncounterCancelled = true;
-            HideWarnings(false);
+            HideWarnings();
+            AttackAnticipation.Hide(turret);
             foreach (var projectile in projectiles) if (projectile) projectile.Cancel();
             projectiles.Clear(); artilleryVolley = 3;
             if (leftMachine) leftMachine.CancelEncounter();

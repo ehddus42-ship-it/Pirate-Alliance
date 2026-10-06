@@ -51,10 +51,10 @@ namespace AcRoguelike.Ruins.Editor
                     var deadline = new Deadline(4, "committed projectile range");
                     while (shot && !shot.Finished) { deadline.Check(); arena.Step(); yield return null; }
                     Require(shot.Finished && Mathf.Abs(shot.Travelled - shot.MaximumTravel) < .01f && shot.DamageAttempts == 0,
-                        "Shots must pass other monsters and stop at their exact warning range.");
+                        "Shots must pass other monsters and stop at their exact configured range.");
                 }
                 Object.DestroyImmediate(friendly);
-                record?.Invoke("Shots ignore other monsters and expire at 18 m scrap / 16 m amber warning range.");
+                record?.Invoke("Shots ignore other monsters and expire at 18 m scrap / 16 m amber range.");
 
                 arena.PlacePlayer(new Vector3(0, .05f, 2));
                 health = arena.Player.Health;
@@ -103,7 +103,8 @@ namespace AcRoguelike.Ruins.Editor
                 wall = arena.Box("Pulse cover", new Vector3(0, 1.5f, .4f), new Vector3(4, 3, .025f));
                 health = arena.Player.Health;
                 var pulse = RuinsGroundPulse.Create(Vector3.zero, 1.15f, .3f, arena.Owner, arena.Player, arena.Room, 12);
-                Require(pulse.WarningVisible && !pulse.Exploded, "A new ground pulse must display its pending circular warning.");
+                Require(!pulse.WarningVisible && !pulse.Exploded && pulse.GetComponentsInChildren<Telegraph>(true).Length == 0,
+                    "A pending remote pulse must not create a ground warning.");
                 timeout = new Deadline(2, "covered pulse");
                 while (pulse && !pulse.Exploded) { timeout.Check(); arena.Step(); yield return null; }
                 Require(pulse.Exploded && pulse.DamageAttempts == 0 && arena.Player.Health == health,
@@ -115,14 +116,14 @@ namespace AcRoguelike.Ruins.Editor
                 Require(pulse.Exploded && pulse.DamageAttempts == 0 && arena.Player.Health == health,
                     "A pulse emitter embedded inside solid cover must not strike out through it.");
                 pulse.Cancel(); Object.DestroyImmediate(wall);
-                record?.Invoke("Locked circular warning shares its damage radius; solid scenery blocks its strike.");
+                record?.Invoke("Remote pulses omit ground warnings and retain their locked damage radius; solid scenery blocks the strike.");
 
                 pulse = RuinsGroundPulse.Create(Vector3.zero, 1.15f, .3f, arena.Owner, arena.Player, arena.Room, 12);
                 timeout = new Deadline(2, "open pulse hit");
                 while (pulse && !pulse.Exploded) { timeout.Check(); arena.Step(); yield return null; }
                 HitFeedback.CancelHitStop();
                 Require(pulse.Exploded && pulse.DamageAttempts == 1 && pulse.HitPlayer && arena.Player.Health == health - 12,
-                    "An unobstructed pulse must deal one configured hit inside its warned radius.");
+                    "An unobstructed pulse must deal one configured hit inside its damage radius.");
                 timeout = new Deadline(2, "pulse visual fade");
                 while (pulse && !pulse.Finished) { timeout.Check(); arena.Step(); yield return null; }
                 Require(pulse.Finished && pulse.DamageAttempts == 1, "The fading shock ring must not deal repeated damage.");
@@ -137,7 +138,7 @@ namespace AcRoguelike.Ruins.Editor
                 try
                 {
                     for (int i = 0; i < 3; i++) yield return null;
-                    Require(contact && contact.transform.position == shotPosition && pulse && pulse.WarningVisible && !pulse.Exploded,
+                    Require(contact && contact.transform.position == shotPosition && pulse && !pulse.WarningVisible && !pulse.Exploded && !pulse.Finished,
                         "Pause must freeze travelling shots and pending ground strikes.");
                 }
                 finally { Time.timeScale = oldScale; }
@@ -148,8 +149,8 @@ namespace AcRoguelike.Ruins.Editor
                 contact = RuinsProjectile.Fire(new Vector3(-8, 1, -8), Vector3.forward, arena.Owner, arena.Player, arena.Room, 9);
                 arena.Owner.TakeDamage(arena.Owner.maxHealth);
                 Require(pulse.Finished && contact.Finished && !pulse.WarningVisible && !pulse.gameObject.activeSelf && !contact.gameObject.activeSelf,
-                    "Owner defeat must immediately cancel every owned warning and shot.");
-                record?.Invoke("Owner defeat immediately disables owned shots and circular warnings.");
+                    "Owner defeat must immediately cancel every owned pulse and shot.");
+                record?.Invoke("Owner defeat immediately disables owned shots and pending pulses.");
             }
 
             using (var arena = new Arena())
@@ -160,8 +161,8 @@ namespace AcRoguelike.Ruins.Editor
                 arena.Player.TakeDamage(arena.Player.Health);
                 HitFeedback.CancelHitStop();
                 Require(pulse.Finished && shot.Finished && !pulse.WarningVisible && !pulse.gameObject.activeSelf && !shot.gameObject.activeSelf,
-                    "Target death must immediately cancel every owned warning and shot.");
-                record?.Invoke("Target death immediately disables shots and circular warnings.");
+                    "Target death must immediately cancel every owned pulse and shot.");
+                record?.Invoke("Target death immediately disables shots and pending pulses.");
             }
             using (var arena = new Arena())
             {

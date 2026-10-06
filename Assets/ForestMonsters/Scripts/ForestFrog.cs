@@ -64,6 +64,7 @@ namespace AcRoguelike.Forest
             displayName = "이끼 개구리";
             box = pose && pose.Find("Model") ? LiminalMonsterKit.LocalBounds(pose.Find("Model"), pose)
                 : new Bounds(Vector3.up * .7f, new Vector3(2.2f, 1.4f, 1.8f));
+            ForestAttackCueAnchors.Prepare(transform);
             rig?.Dispose();
             rig = new ForestSoftBodyRig(pose ? pose.Find("Model") : null, pose, box);
             if (!tongue) BuildTongue();
@@ -424,6 +425,7 @@ namespace AcRoguelike.Forest
             ReleasePlayer();
             HideTongue();
             if (telegraph) telegraph.Hide();
+            AttackAnticipation.Hide(transform);
             IsWindingUp = false;
             if (initialized) { State = ForestFrogState.Recover; stateTime = 0; }
         }

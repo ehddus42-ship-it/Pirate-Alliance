@@ -115,6 +115,7 @@ namespace AcRoguelike.Liminal.EditorTests
                     case 6:
                         if(monster.CansGripped<1)break;
                         Check(monster.canGrip.GetComponentsInChildren<VendingCanProjectile>().Length==1,"Can is parented to the gripping hand during extraction.");
+                        Check(!monster.warning.enabled,"Can windup does not reveal the projectile trajectory.");
                         Go(7);break;
                     case 7:
                         if(monster.CansThrown<1)break;

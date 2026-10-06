@@ -152,8 +152,8 @@ namespace AcRoguelike.GameTheme.Editor
             var cable = rig.GeneratedMeshes[3]; Vector3[] cableBefore = cable.vertices;
             Check(boss.StartAttack(0), "Volley pattern starts from idle."); yield return Seconds(.55f);
             Vector3[] cableAfter = cable.vertices;
-            Check(boss.TelegraphVisible && Vector3.Distance(hand, rig.leftHand.localPosition) > .05f &&
-                cableBefore.Where((v, i) => Vector3.Distance(v, cableAfter[i]) > .005f).Any(), "Volley anticipation bends the cable and moves its earbud hand with a visible warning.");
+            Check(!boss.TelegraphVisible && Vector3.Distance(hand, rig.leftHand.localPosition) > .05f &&
+                cableBefore.Where((v, i) => Vector3.Distance(v, cableAfter[i]) > .005f).Any(), "Volley anticipation bends the cable and moves its earbud hand without a floor preview.");
             Time.timeScale = 0; yield return RealSeconds(.08);
             hand = rig.leftHand.localPosition; Quaternion pose = rig.transform.localRotation; float stateTime = boss.StateTime;
             cableBefore = cable.vertices; Vector3 bodyPosition = boss.transform.position;
@@ -162,12 +162,17 @@ namespace AcRoguelike.GameTheme.Editor
                 Mathf.Abs(boss.StateTime - stateTime) < .0001f && Vector3.Distance(bodyPosition, boss.transform.position) < .0001f &&
                 cableBefore.SequenceEqual(cable.vertices), "Time scale zero freezes body, hands, cable vertices and attack timing.");
             Time.timeScale = 1;
+            yield return Until(() => boss.AttackCueVisible, 2, "Volley pre-attack glint");
+            Check(boss.Shots == shots && !boss.TelegraphVisible, "Volley glints on the boss before firing with no trajectory preview.");
             yield return Until(() => boss.Shots >= shots + 9, 8, "Nine soft-drop shots");
             Check(boss.Shots == shots + 9 && boss.Volleys == 3, "The announced volley emits exactly nine blocks in three fans.");
             Capture(Camera.main, "attack-0-soft-drop");
 
             boss.CancelAttack(); Check(boss.StartAttack(1), "Spinning I pattern starts from idle.");
             yield return Seconds(.8f); Capture(Camera.main, "attack-1-spinning-I");
+            Check(!boss.TelegraphVisible, "Thrown I block has no floor or trajectory preview.");
+            yield return Until(() => boss.AttackCueVisible, 2, "I block pre-attack glint");
+            Check(boss.BarsThrown == bars, "The boss glints before releasing its I block.");
             yield return Until(() => boss.BarsThrown == bars + 1, 8, "I block release");
             var bar = Object.FindObjectsByType<TetrominoProjectile>(FindObjectsSortMode.None).FirstOrDefault(p => p.Ricochet);
             Check(bar, "I pattern releases one real ricochet projectile."); Quaternion spin = bar.transform.GetChild(0).localRotation;
@@ -176,6 +181,9 @@ namespace AcRoguelike.GameTheme.Editor
                 "Released I block visibly spins without duplicate throws.");
 
             boss.CancelAttack(); Check(boss.StartAttack(2), "Three-Z summon pattern finds three clear positions.");
+            yield return Seconds(.55f);
+            Check(boss.GetComponentsInChildren<Telegraph>().All(t => !t.Visible), "Summon preparation has no detached floor markers.");
+            yield return Until(() => boss.AttackCueVisible, 2, "Summon pre-attack glint");
             yield return Until(() => boss.SummonWaves == waves + 1, 8, "Z summon release");
             var chargers = arena.GetComponentsInChildren<TetrominoCharger>();
             Check(boss.SummonedChargers == summons + 3 && chargers.Length == 3 && chargers.All(c => c.WindingUp && c.Health.IsAlive),
@@ -185,7 +193,7 @@ namespace AcRoguelike.GameTheme.Editor
             TetrominoProjectile.Fire(arena.transform.TransformPoint(new Vector3(-8, 1, 15)), Vector3.forward, boss.Health, run.PlayerHealth, arena, 1, TetrominoShape.I, true);
             int attacks = boss.Attacks;
             boss.Health.TakeDamage(boss.Health.maxHealth * 100); HitFeedback.CancelHitStop();
-            Check(!boss.Health.IsAlive && !boss.TelegraphVisible && !boss.GetComponent<CharacterController>().enabled &&
+            Check(!boss.Health.IsAlive && !boss.TelegraphVisible && !boss.AttackCueVisible && !boss.GetComponent<CharacterController>().enabled &&
                 boss.GetComponentsInChildren<Telegraph>(true).All(t => !t.Visible), "Boss death immediately cancels pending warnings and body collision.");
             yield return Seconds(.15f);
             Check(boss.Attacks == attacks && Object.FindObjectsByType<TetrominoProjectile>(FindObjectsSortMode.None).Length == 0 &&

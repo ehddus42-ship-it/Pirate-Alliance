@@ -44,6 +44,7 @@ namespace AcRoguelike.Forest
             displayName = "달빛 지렁이";
             box = pose && pose.Find("Model") ? LiminalMonsterKit.LocalBounds(pose.Find("Model"), pose)
                 : new Bounds(Vector3.up * .45f, new Vector3(.95f, .9f, 3));
+            ForestAttackCueAnchors.Prepare(transform);
             rig?.Dispose();
             rig = new ForestSoftBodyRig(pose ? pose.Find("Model") : null, pose, box);
             undergroundDepth = Mathf.Max(1.2f, box.max.y + .4f);
@@ -65,6 +66,7 @@ namespace AcRoguelike.Forest
             {
                 case ForestWormState.BurrowWarning:
                     telegraph.Circle(transform.position, eruptionRadius, Mathf.Clamp01(stateTime / Mathf.Max(.3f, eruptionWarning)));
+                    AttackCue(stateTime / Mathf.Max(.3f, eruptionWarning));
                     poseOffset = Vector3.down * undergroundDepth;
                     if (stateTime >= eruptionWarning)
                     {
@@ -239,6 +241,7 @@ namespace AcRoguelike.Forest
         void OnDisable()
         {
             if (telegraph) telegraph.Hide();
+            AttackAnticipation.Hide(transform);
             IsWindingUp = false;
         }
         protected override void OnDeathStart(Vector3 direction)
