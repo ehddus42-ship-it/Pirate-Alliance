@@ -10,7 +10,7 @@ namespace AcRoguelike.Liminal.EditorTests
 {
     /// <summary>
     /// Edit Mode checks for the augment rules (no scene needed): catalog integrity, the common/character pool, offer
-    /// rolls, exclusions, stack limits, 효율검술's combo cap, 예금's payouts and the melee hook maths.
+    /// rolls, conflicting picks, stack limits, 효율검술's combo cap, 예금's payouts and the melee hook maths.
     /// Play Mode coverage (a cleared combat room pauses and offers cards) is in LiminalPlayValidation.
     /// </summary>
     public static class AugmentValidation
@@ -44,10 +44,7 @@ namespace AcRoguelike.Liminal.EditorTests
                 Require(all.Select(a => a.id).Distinct().Count() == all.Count, "Augment ids must be unique.");
                 Require(all.All(a => !string.IsNullOrWhiteSpace(a.title) && !string.IsNullOrWhiteSpace(a.description)), "Every augment needs a title and a description.");
                 Require(all.Count(a => a.IsCommon) >= 8, "The eight common augments are missing.");
-                foreach (var a in all)
-                    foreach (string other in a.excludes)
-                        Require(AugmentCatalog.Find(other) != null, $"{a.id} excludes an unknown augment {other}.");
-                report.checks.Add($"Catalog: {all.Count} augments, unique ids, texts present, exclusions resolve.");
+                report.checks.Add($"Catalog: {all.Count} augments, unique ids, texts present.");
 
                 // The test hunter sees only common augments; a character augment joins only its own hunter's pool.
                 const string probeId = "validation_probe_character";
@@ -68,16 +65,17 @@ namespace AcRoguelike.Liminal.EditorTests
                 }
                 report.checks.Add("Rolls: 200 deals of three different common cards.");
 
-                // 알아하쇼 is unique; mutually exclusive picks disappear from the pool.
+                // Uniqueness still applies even though conflicting effects stay in the pool.
                 augments.Acquire(AugmentCatalog.Find(AugmentCatalog.AutoSupport));
                 Require(!AugmentCatalog.IsOfferable(AugmentCatalog.Find(AugmentCatalog.AutoSupport), augments, hunter), "알아하쇼 was offered twice.");
-                augments.Acquire(AugmentCatalog.Find(AugmentCatalog.Steadfast));
-                Require(!AugmentCatalog.IsOfferable(AugmentCatalog.Find(AugmentCatalog.FxWarrior), augments, hunter)
-                    && !AugmentCatalog.IsOfferable(AugmentCatalog.Find(AugmentCatalog.CountingStar), augments, hunter),
-                    "Crit augments were offered next to 우직하게 (crit fixed at 0%).");
-                Require(augments.CritChance(.9f) == 0 && Mathf.Approximately(augments.DamageMultiplier(null, false), HunterAugments.SteadfastMultiplier),
-                    "우직하게 must fix crit at 0% and multiply damage by 1.3.");
-                report.checks.Add("알아하쇼 unique; 우직하게 fixes crit at 0%, ×1.3 damage, and blocks FX전사 / Counting Star.");
+                report.checks.Add("알아하쇼 stays unique.");
+
+                foreach (string critId in new[] { AugmentCatalog.FxWarrior, AugmentCatalog.CountingStar })
+                {
+                    CheckConflictingPair(augments, hunter, AugmentCatalog.Steadfast, critId);
+                    CheckConflictingPair(augments, hunter, critId, AugmentCatalog.Steadfast);
+                }
+                report.checks.Add("Conflicting picks: 우직하게 / FX전사 and 우직하게 / Counting Star are dealt and acquired in both orders (160 deals); crit stays 0%, damage ×1.3, duplicates stay excluded.");
 
                 // 효율검술 trims two swings per pick and stops appearing once no swing would remain (6-swing combo).
                 augments.ResetRun();
@@ -121,6 +119,32 @@ namespace AcRoguelike.Liminal.EditorTests
             Directory.CreateDirectory(Path.GetDirectoryName(ReportPath));
             File.WriteAllText(ReportPath, JsonUtility.ToJson(report, true));
             return report;
+        }
+
+        /// <summary>Offers and acquires a conflicting pair without changing its effects or uniqueness.</summary>
+        static void CheckConflictingPair(HunterAugments augments, string hunter, string heldId, string nextId)
+        {
+            augments.ResetRun();
+            var held = AugmentCatalog.Find(heldId);
+            var next = AugmentCatalog.Find(nextId);
+            augments.Acquire(held);
+            bool appeared = false;
+            var random = new System.Random(19);
+            for (int i = 0; i < 40; i++)
+            {
+                var offers = AugmentCatalog.Roll(augments, hunter, LiminalRunDirector.AugmentChoices, random);
+                Require(offers.Count == 3 && offers.Select(o => o.id).Distinct().Count() == offers.Count,
+                    "A conflicting build must still get three different cards.");
+                Require(!offers.Contains(held), $"Unique held augment {heldId} was offered again.");
+                if (offers.Contains(next)) appeared = true;
+            }
+            Require(appeared, $"Conflicting augment {nextId} never appeared while holding {heldId}.");
+            augments.Acquire(next);
+            Require(augments.Has(heldId) && augments.Has(nextId), "A conflicting pick removed an earlier augment.");
+            Require(augments.CritChance(.1f) == 0 && Mathf.Approximately(augments.DamageMultiplier(null, false), HunterAugments.SteadfastMultiplier),
+                "우직하게 must still fix crit at 0% and multiply damage by 1.3 in either pick order.");
+            Require(!AugmentCatalog.IsOfferable(held, augments, hunter) && !AugmentCatalog.IsOfferable(next, augments, hunter),
+                "Allowing conflicting effects must not allow duplicate unique augments.");
         }
 
         /// <summary>Runs three picks with 예금 at `depositPick` (filler augments elsewhere) and returns the stones paid.</summary>

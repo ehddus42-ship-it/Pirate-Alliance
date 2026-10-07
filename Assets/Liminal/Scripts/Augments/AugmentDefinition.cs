@@ -20,8 +20,6 @@ namespace AcRoguelike.Liminal
         public readonly string characterId;
         /// <summary>How many times one run can take it (1 = never offered again once taken).</summary>
         public readonly int maxStacks;
-        /// <summary>Augments that cancel this one out: it is not offered while any of them is held (and vice versa).</summary>
-        public readonly string[] excludes;
         /// <summary>Extra offer rule (for example "only while the combo keeps at least one swing").</summary>
         public readonly Func<HunterAugments, bool> canOffer;
         /// <summary>Applied once per pick, after the stack count went up.</summary>
@@ -30,7 +28,7 @@ namespace AcRoguelike.Liminal
         public bool IsCommon => string.IsNullOrEmpty(characterId);
 
         public AugmentDefinition(string id, string title, string description, AugmentRarity rarity = AugmentRarity.Common,
-            string characterId = null, int maxStacks = 1, string[] excludes = null,
+            string characterId = null, int maxStacks = 1,
             Func<HunterAugments, bool> canOffer = null, Action<HunterAugments> onAcquire = null)
         {
             this.id = id;
@@ -39,7 +37,6 @@ namespace AcRoguelike.Liminal
             this.rarity = rarity;
             this.characterId = characterId;
             this.maxStacks = Mathf.Max(1, maxStacks);
-            this.excludes = excludes ?? Array.Empty<string>();
             this.canOffer = canOffer;
             this.onAcquire = onAcquire;
         }

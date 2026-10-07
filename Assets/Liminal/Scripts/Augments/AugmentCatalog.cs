@@ -34,19 +34,16 @@ namespace AcRoguelike.Liminal
                 $"지원스킬을 직접 쓸 수 없다.\n대신 공격 {HunterAugments.AutoSupportHits}타마다 지원스킬이 자동 발동한다.",
                 onAcquire: a => a.ApplySupportLock()),
             new AugmentDefinition(CountingStar, "Counting Star",
-                $"치명타 적중 시 별똥별이 떨어진다.\n(재사용 대기 {HunterAugments.StarCooldown:0}초)",
-                excludes: new[] { Steadfast }),
+                $"치명타 적중 시 별똥별이 떨어진다.\n(재사용 대기 {HunterAugments.StarCooldown:0}초)"),
             new AugmentDefinition(Steadfast, "우직하게",
-                $"치명타 확률이 0%로 고정된다.\n모든 공격 피해 ×{HunterAugments.SteadfastMultiplier:0.0}",
-                excludes: new[] { CountingStar, FxWarrior }),
+                $"치명타 확률이 0%로 고정된다.\n모든 공격 피해 ×{HunterAugments.SteadfastMultiplier:0.0}"),
             new AugmentDefinition(Yarara, "야라라라",
                 $"콤보 마지막 공격 때 가장 가까운 적 하나를 날려 보낸다. 날아간 적이 다른 적과 부딪히면 그 적이 피해를 입는다.\n보스는 넉백 대신 마지막 공격 피해 ×{HunterAugments.YararaBossMultiplier:0.0}"),
             new AugmentDefinition(Deposit, "예금",
                 $"이후 증강을 고를 때마다 마석 +{HunterAugments.DepositPerPick}.\n2번째 증강으로 고르면 즉시 +{HunterAugments.DepositSecond}, 3번째 증강으로 고르면 즉시 +{HunterAugments.DepositThird}.",
                 onAcquire: a => a.ApplyDeposit()),
             new AugmentDefinition(FxWarrior, "FX전사 헌터짱",
-                $"치명타 확률 +{HunterAugments.FxCritBonus * 100:0}%.\n치명타 피해가 {HunterAugments.FxCritMin}배~{HunterAugments.FxCritMax}배 사이에서 무작위로 들어간다.",
-                excludes: new[] { Steadfast }),
+                $"치명타 확률 +{HunterAugments.FxCritBonus * 100:0}%.\n치명타 피해가 {HunterAugments.FxCritMin}배~{HunterAugments.FxCritMax}배 사이에서 무작위로 들어간다."),
             new AugmentDefinition(FuturesWarrior, "선물거래 전사 헌터짱",
                 $"반격 피해가 {HunterAugments.FuturesMin}배~{HunterAugments.FuturesMax}배 사이에서 무작위로 들어간다."),
         };
@@ -79,9 +76,7 @@ namespace AcRoguelike.Liminal
             if (augment == null || owner == null) return false;
             if (!augment.IsCommon && augment.characterId != characterId) return false;
             if (owner.Stacks(augment.id) >= augment.maxStacks) return false;
-            foreach (string other in augment.excludes) if (owner.Stacks(other) > 0) return false;
-            foreach (var held in all)
-                if (owner.Stacks(held.id) > 0 && Array.IndexOf(held.excludes, augment.id) >= 0) return false;
+            // Conflicting effects deliberately stay in the pool: a pick can be useless for this build.
             return augment.canOffer == null || augment.canOffer(owner);
         }
 
