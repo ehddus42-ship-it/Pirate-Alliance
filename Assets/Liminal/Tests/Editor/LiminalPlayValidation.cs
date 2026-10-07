@@ -561,6 +561,24 @@ namespace AcRoguelike.Liminal.EditorTests
                     case "CheckClear":
                         Require(run.LivingEnemyCount == 0, "Dead enemies still block the route.");
                         var clearedRoom = run.Rooms[wantedRoom];
+                        if (clearedRoom.kind == LiminalRoomKind.Combat)
+                        {
+                            // A cleared normal combat room deals up to three different common augments and pauses for the pick.
+                            Require(run.Phase == LiminalRunPhase.AugmentChoice, "A cleared combat room did not offer augments.");
+                            var offers = run.AugmentOffers;
+                            Require(offers.Count > 0 && offers.Count <= LiminalRunDirector.AugmentChoices
+                                && offers.Select(o => o.id).Distinct().Count() == offers.Count && offers.All(o => o.IsCommon),
+                                "Augment offers must be one to three different common augments for the test hunter.");
+                            Require(Time.timeScale == 0, "The augment pick did not pause the run.");
+                            int picksBefore = run.Augments.PickCount;
+                            string picked = offers[0].id;
+                            run.SelectAugment(0);
+                            Require(run.Phase == LiminalRunPhase.Exploring && run.Augments.PickCount == picksBefore + 1 && run.Augments.Has(picked),
+                                "Picking an augment did not grant it and resume the run.");
+                            run.SelectAugment(0);
+                            Require(run.Augments.PickCount == picksBefore + 1, "A second pick was granted from one offer.");
+                            report.checks.Add($"Combat room {wantedRoom + 1}: augment offer ({offers.Count} cards) picked '{picked}' and resumed.");
+                        }
                         Require(!clearedRoom.entranceGate || !clearedRoom.entranceGate.activeSelf, "Entrance stayed locked after clear.");
                         if (wantedRoom < run.Rooms.Count - 1)
                         {
@@ -586,23 +604,20 @@ namespace AcRoguelike.Liminal.EditorTests
                             Require(run.StageIndex == 0 && run.Phase == LiminalRunPhase.Exploring, "Victory restart failed.");
                             Require(RouteIds(run.Rooms) == initialRoute, "Same-seed restart changed the first route.");
                             Require(run.PlayerHealth.maximumHealth == 100 && run.PlayerHealth.Health == 100, "Restart retained health upgrades.");
+                            Require(run.Augments.PickCount == 0 && run.AugmentHistory == "증강 없음"
+                                && run.player.GetComponent<PlayerCombat>().comboStartIndex == 0, "Restart retained augments.");
                             Next("TestDefeat");
                         }
                         else Next("SelectAugment");
                         break;
                     case "SelectAugment":
-                        Require(run.Phase == LiminalRunPhase.AugmentChoice, "Stage clear skipped augment choice.");
+                        // Augments come from cleared combat rooms; a non-final stage exit goes straight to the next gate.
+                        Require(run.Phase == LiminalRunPhase.NextStageChoice, "Stage exit did not reveal the next stage.");
                         int stage = run.StageIndex;
-                        run.SelectAugment(stage % 3);
-                        Require(run.Phase == LiminalRunPhase.NextStageChoice, "Augment choice did not reveal the next stage.");
-                        float cooldown = caster.cooldown;
-                        int flames = caster.flameCount, maxHealth = run.PlayerHealth.maximumHealth;
-                        run.SelectAugment((stage + 1) % 3);
-                        Require(caster.cooldown == cooldown && caster.flameCount == flames && run.PlayerHealth.maximumHealth == maxHealth, "A duplicate augment was awarded.");
                         run.ContinueToNextStage();
                         run.ContinueToNextStage();
                         Require(run.StageIndex == stage + 1 && run.Phase == LiminalRunPhase.Exploring, "Next-stage choice skipped or duplicated a stage.");
-                        report.checks.Add($"Stage {stage + 1}: one augment only, one next-stage choice only.");
+                        report.checks.Add($"Stage {stage + 1}: one next-stage choice only.");
                         wantedRoom = 0;
                         EnterWantedRoom(motor);
                         break;

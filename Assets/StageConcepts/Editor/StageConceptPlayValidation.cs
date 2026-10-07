@@ -74,6 +74,8 @@ namespace AcRoguelike.StageConcepts.Editor
                 {
                     case "AwaitRun":
                         run=UnityEngine.Object.FindFirstObjectByType<LiminalRunDirector>();
+                        // Automated runs skip augment offers so random augments cannot change what this validation measures.
+                        LiminalRunDirector.SuppressAugmentOffers = true;
                         if(!run || run.Rooms.Count==0) return;
                         Require(run.Phase==LiminalRunPhase.Exploring,"Run did not enter Exploring.");
                         Require(run.Rooms.Count==4 && run.stages.Length==1,"Expected four rooms and one theme per scene.");

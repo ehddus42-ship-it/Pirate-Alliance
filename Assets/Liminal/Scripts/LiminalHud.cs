@@ -254,11 +254,13 @@ namespace AcRoguelike.Liminal
                 { child.gameObject.SetActive(false); Destroy(child.gameObject); }
             if (run.Phase == LiminalRunPhase.AugmentChoice)
             {
-                Heading("게이트 구역 정리 완료", "증강 선택");
-                Choice(0, "잔향", "공격 속도 +19%", 0);
-                Choice(1, "도깨비불", "적중 시 불꽃 +2", 1);
-                Choice(2, "굳은 매듭", "최대 체력 +25\n체력 25 회복", 2);
-                HunterUi.Text("Keys", modalContent, font, "1 · 2 · 3", 14, HunterUi.Muted, new Vector2(0, -440), new Vector2(960, 22), FontStyles.Bold, TextAlignmentOptions.Center);
+                Heading("구역 정리 완료", "AUGMENT · 증강 선택");
+                var offers = run.AugmentOffers;
+                // Cards stay centred when the pool deals fewer than three.
+                float left = 480 - (offers.Count * 300 - 20) * .5f;
+                for (int i = 0; i < offers.Count; i++) Choice(left + i * 300, offers[i], i);
+                string keys = offers.Count == 1 ? "1" : offers.Count == 2 ? "1 · 2" : "1 · 2 · 3";
+                HunterUi.Text("Keys", modalContent, font, keys, 14, HunterUi.Muted, new Vector2(0, -440), new Vector2(960, 22), FontStyles.Bold, TextAlignmentOptions.Center);
             }
             else if (run.Phase == LiminalRunPhase.NextStageChoice)
             {
@@ -298,12 +300,16 @@ namespace AcRoguelike.Liminal
             HunterUi.Title(modalContent, font, title, new Vector2(40, -50), 880, 30);
         }
 
-        void Choice(int column, string title, string description, int option)
+        void Choice(float x, AugmentDefinition augment, int option)
         {
-            var card = HunterUi.Button("Augment_" + option, modalContent, font, "", new Vector2(40 + column * 300, -150), new Vector2(280, 270), () => run.SelectAugment(option));
+            var card = HunterUi.Button("Augment_" + option, modalContent, font, "", new Vector2(x, -130), new Vector2(280, 300), () => run.SelectAugment(option));
             HunterUi.Text("Index", card, font, $"0{option + 1}", 14, HunterUi.Gold, new Vector2(20, -18), new Vector2(60, 20), FontStyles.Bold);
-            HunterUi.Title(card, font, title, new Vector2(20, -42), 240, 24);
-            HunterUi.Text("Description", card, font, description, 18, HunterUi.Cream, new Vector2(20, -110), new Vector2(240, 140));
+            string scope = augment.IsCommon ? "공용" : "전용";
+            HunterUi.Text("Rarity", card, font, $"{scope} · {AugmentDefinition.RarityLabel(augment.rarity)}", 13, AugmentDefinition.RarityColor(augment.rarity),
+                new Vector2(80, -18), new Vector2(180, 20), FontStyles.Bold, TextAlignmentOptions.TopRight);
+            int held = run.Augments ? run.Augments.Stacks(augment.id) : 0;
+            HunterUi.Title(card, font, held > 0 ? $"{augment.title} +" : augment.title, new Vector2(20, -42), 240, 24);
+            HunterUi.Text("Description", card, font, augment.description, 15, HunterUi.Cream, new Vector2(20, -100), new Vector2(240, 190));
         }
 
         void OnDestroy()

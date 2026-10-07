@@ -169,6 +169,8 @@ namespace AcRoguelike.Liminal.EditorTests
             for (int i = 0; i < 90; i++)
             {
                 run = UnityEngine.Object.FindFirstObjectByType<LiminalRunDirector>();
+                // Automated runs skip augment offers so random augments cannot change what this validation measures.
+                LiminalRunDirector.SuppressAugmentOffers = true;
                 if (run && run.Lobby && run.Phase == LiminalRunPhase.Lobby) break;
                 yield return null;
             }

@@ -115,6 +115,8 @@ namespace AcRoguelike.GameTheme.Editor
         static IEnumerator Run()
         {
             yield return Until(() => (run = Object.FindFirstObjectByType<LiminalRunDirector>()) && run.Lobby && run.Phase == LiminalRunPhase.Lobby, 20, "Lobby startup");
+            // Automated runs skip augment offers so random augments cannot change what this validation measures.
+            LiminalRunDirector.SuppressAugmentOffers = true;
             var mission = run.AvailableMissions.Single(m => m.id == "game_exhibition");
             Check(mission.code == "G-06" && run.EnterMission(mission.id), "G-06 starts through the real lobby mission entry.");
             yield return Until(() => run.Rooms.Count == 4 && run.ActiveRoomIndex == 0, 10, "Game route startup");

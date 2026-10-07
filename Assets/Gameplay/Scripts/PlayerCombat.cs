@@ -29,6 +29,10 @@ namespace AcRoguelike
         public bool IsAttacking => AttackIndex >= 0;
         /// <summary>Zero-based attack index, or -1 when idle. Maps to Animator states Attack1 to Attack6.</summary>
         public int AttackIndex { get; private set; } = -1;
+        [Tooltip("First swing of a combo. Run modifiers (augments) can skip the opening swings.")]
+        public int comboStartIndex;
+        /// <summary>The swing a fresh combo starts on (comboStartIndex clamped into the combo).</summary>
+        public int ComboStart => Mathf.Clamp(comboStartIndex, 0, ComboLength - 1);
         public Vector3 AttackDirection { get; private set; }
         public float AnimationSpeed => 1f / attackTimeScale;
         public float MovementMultiplier => IsAttacking ? attackMovementMultiplier : 1;
@@ -132,7 +136,7 @@ namespace AcRoguelike
 
             if (!IsAttacking)
             {
-                if (recoveryRemaining <= 0 && (bufferRemaining > 0 || (holdToAttack && held))) BeginAttack(0);
+                if (recoveryRemaining <= 0 && (bufferRemaining > 0 || (holdToAttack && held))) BeginAttack(ComboStart);
                 return;
             }
 

@@ -116,6 +116,8 @@ namespace AcRoguelike.Ruins.Editor
         {
             ValidatePrefabs();
             yield return Until(() => (run = Object.FindFirstObjectByType<LiminalRunDirector>()) && run.Lobby && run.Phase == LiminalRunPhase.Lobby, 20, "Lobby startup");
+            // Automated runs skip augment offers so random augments cannot change what this validation measures.
+            LiminalRunDirector.SuppressAugmentOffers = true;
             var mission = run.AvailableMissions.Single(m => m.id == "ruins_clearance");
             Check(mission.code == "G-04" && run.EnterMission(mission.id), "G-04 starts through the real lobby mission entry.");
             yield return Until(() => run.Rooms.Count == 4 && run.ActiveRoomIndex == 0, 10, "Ruins route startup");

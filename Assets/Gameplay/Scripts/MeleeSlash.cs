@@ -81,7 +81,27 @@ namespace AcRoguelike
         public float counterMultiplier = 1.5f;
         [Tooltip("Permanent damage multiplier (lobby upgrades).")]
         public float damageMultiplier = 1f;
+        [Tooltip("Base crit chance per target hit (0..1). Augments can change it.")]
+        [Range(0, 1)] public float critChance = .1f;
+        [Tooltip("Base crit damage multiplier. Augments can change it.")]
+        public float critMultiplier = 1.5f;
+        /// <summary>Hits that landed as crits this run (for tests and HUD).</summary>
+        public int CritCount { get; private set; }
         float counterUntil;
+        IMeleeHitHooks hooks;
+        bool hooksSearched;
+
+        /// <summary>Run modifiers (augments) on the player, looked up once; call after adding or removing them.</summary>
+        public void RefreshHooks() => hooksSearched = false;
+
+        IMeleeHitHooks Hooks
+        {
+            get
+            {
+                if (!hooksSearched) { hooks = GetComponent<IMeleeHitHooks>(); hooksSearched = true; }
+                return hooks;
+            }
+        }
 
         bool weaponHidden;
 
@@ -192,9 +212,12 @@ namespace AcRoguelike
         {
             Vector3 chest = transform.position + Vector3.up * 1.05f;
             bool counter = CounterActive;
+            var hooks = Hooks;
             baseDamage = Mathf.RoundToInt(baseDamage * Mathf.Max(.1f, damageMultiplier));
-            bool heavy = counter || swing.finisher && (second || swing.secondHitDelay <= 0);
-            if (counter) baseDamage = Mathf.RoundToInt(baseDamage * counterMultiplier);
+            // The combo's final cut: the finisher's second cut, or the finisher itself when it has only one.
+            bool comboFinal = swing.finisher && (second || swing.secondHitDelay <= 0);
+            bool heavy = counter || comboFinal;
+            if (counter) baseDamage = Mathf.RoundToInt(baseDamage * (hooks != null ? hooks.CounterMultiplier(counterMultiplier) : counterMultiplier));
             bool launch = swing.finisher && second;
             // The arc plays even on a miss, so every swing reads as a cut.
             HitFeedback.SlashArc(chest, direction, from, to, swing.arcRadius, roll, heavy ? .95f : .62f,
@@ -224,10 +247,19 @@ namespace AcRoguelike
                 enemy.LastHitDirection = push;
                 enemy.LastHitImpact = impact;
                 Vector3 point = enemy.AimPoint - push * .25f;
-                int damage = baseDamage + Random.Range(-2, 3);
+                float multiplier = hooks != null ? hooks.DamageMultiplier(enemy, comboFinal) : 1f;
+                float chance = hooks != null ? hooks.CritChance(critChance) : critChance;
+                bool crit = chance > 0 && Random.value < chance;
+                if (crit) multiplier *= hooks != null ? hooks.CritMultiplier(critMultiplier) : critMultiplier;
+                int damage = Mathf.Max(1, Mathf.RoundToInt((baseDamage + Random.Range(-2, 3)) * multiplier));
                 bool lethal = damage >= enemy.Health;
                 enemy.TakeDamage(damage);
-                HitFeedback.Hit(enemy, point, push, damage, heavy || lethal);
+                HitFeedback.Hit(enemy, point, push, damage, heavy || lethal || crit, crit);
+                if (crit)
+                {
+                    CritCount++;
+                    hooks?.OnCrit(enemy);
+                }
                 // The cut itself, drawn across the target along the swing's screen tilt.
                 if (heavy) HitFeedback.CrossSlash(point, 1.1f);
                 else HitFeedback.SlashLine(point, ScreenAngle(direction, from, to, roll), 2.1f, .1f, HitFeedback.Sakura * 2.2f, .18f);
@@ -238,6 +270,7 @@ namespace AcRoguelike
             {
                 HitCount++;
                 LastHitTarget = first;
+                hooks?.OnCutLanded(first, comboFinal);
                 HitFeedback.HitStop(heavy ? swing.hitStop * 1.6f : swing.hitStop, heavy ? .04f : .08f);
                 HitFeedback.Shake(heavy ? swing.shake * 1.8f : swing.shake, heavy ? .24f : .12f);
             }

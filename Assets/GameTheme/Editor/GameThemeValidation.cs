@@ -765,6 +765,8 @@ namespace AcRoguelike.GameTheme.Editor
                 {
                     case "AwaitRun":
                         run = Object.FindFirstObjectByType<LiminalRunDirector>();
+                        // Automated runs skip augment offers so random augments cannot change what this validation measures.
+                        LiminalRunDirector.SuppressAugmentOffers = true;
                         if (!run || run.Rooms.Count == 0) return;
                         Require(run.Phase == LiminalRunPhase.Exploring && run.Rooms.Count == 4 && run.stages.Length == 1, "Expected an exploring, four-room Game run.");
                         Require(run.Rooms.All(r => r.roomId.StartsWith("Game_", StringComparison.Ordinal)), "Wrong theme loaded.");

@@ -82,6 +82,8 @@ namespace AcRoguelike
         public static void HitStop(float seconds, float scale = .06f)
         {
             if (seconds <= 0 || slowMotion) return;
+            // A hit that opens a pause (a kill that ends a room) must not restart time under the menu.
+            if (Time.timeScale <= 0) return;
             if (stopScale < 0 && Mathf.Abs(Time.timeScale - 1) > .001f) return;
             if (stopRoutine != null) Host.StopCoroutine(stopRoutine);
             stopRoutine = Host.StartCoroutine(HitStopRoutine(seconds, scale));
@@ -103,7 +105,7 @@ namespace AcRoguelike
         /// </summary>
         public static void SlowMotion(float seconds, float scale)
         {
-            if (seconds <= 0) return;
+            if (seconds <= 0 || Time.timeScale <= 0) return;
             if (stopScale < 0 && Mathf.Abs(Time.timeScale - 1) > .001f) return; // paused
             if (stopRoutine != null) Host.StopCoroutine(stopRoutine);
             slowMotion = true;
@@ -155,8 +157,12 @@ namespace AcRoguelike
         }
 
         // ---- hit effects ----------------------------------------------------------------------------------
-        public static void Hit(TrainingEnemy enemy, Vector3 point, Vector3 direction, int damage, bool heavy)
+        public static void Hit(TrainingEnemy enemy, Vector3 point, Vector3 direction, int damage, bool heavy) => Hit(enemy, point, direction, damage, heavy, false);
+
+        /// <summary>A melee hit; crit hits show a gold number with a burst of extra sparks.</summary>
+        public static void Hit(TrainingEnemy enemy, Vector3 point, Vector3 direction, int damage, bool heavy, bool crit)
         {
+            if (crit) Sparks(point, direction, 16, 1.8f);
             Sparks(point, direction, heavy ? 22 : 13, heavy ? 1.5f : 1f);
             Petals(point, heavy ? 12 : 6);
             Ring(point, direction, heavy ? 1.6f : 1.0f);
@@ -167,7 +173,7 @@ namespace AcRoguelike
                 var body = enemy.transform.Find("Visual");
                 Jitter(body ? body : enemy.transform.childCount > 0 ? enemy.transform.GetChild(0) : null, heavy ? .1f : .06f, heavy ? .2f : .13f);
             }
-            DamageNumber(point + Vector3.up * .5f, damage, heavy);
+            DamageNumber(point + Vector3.up * .5f, damage, heavy, crit);
             Play(heavy ? Sfx.HeavyHit : Sfx.Hit, heavy ? .9f : .7f);
         }
 
@@ -314,19 +320,22 @@ namespace AcRoguelike
             flash.Trigger();
         }
 
-        public static void DamageNumber(Vector3 point, int amount, bool heavy)
+        public static void DamageNumber(Vector3 point, int amount, bool heavy) => DamageNumber(point, amount, heavy, false);
+
+        public static void DamageNumber(Vector3 point, int amount, bool heavy, bool crit)
         {
             if (!numberFont) numberFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             var go = new GameObject("Damage " + amount);
             go.transform.position = point + new Vector3(Random.Range(-.35f, .35f), 0, Random.Range(-.2f, .2f));
             var text = go.AddComponent<TextMesh>();
-            text.text = amount.ToString();
+            text.text = crit ? amount + "!" : amount.ToString();
             text.font = numberFont;
             text.fontSize = 64;
             text.characterSize = heavy ? .052f : .038f;
             text.anchor = TextAnchor.MiddleCenter;
             text.fontStyle = FontStyle.Bold;
-            text.color = heavy ? new Color(1f, .45f, .62f) : new Color(1f, .93f, .82f);
+            text.color = crit ? new Color(1f, .82f, .25f) : heavy ? new Color(1f, .45f, .62f) : new Color(1f, .93f, .82f);
+            if (crit) text.characterSize *= 1.15f;
             var renderer = go.GetComponent<MeshRenderer>();
             renderer.sharedMaterial = numberFont.material;
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;

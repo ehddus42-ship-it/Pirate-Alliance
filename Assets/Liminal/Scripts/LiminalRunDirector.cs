@@ -42,6 +42,14 @@ namespace AcRoguelike.Liminal
         public int ClearedRoomCount { get; private set; }
         public bool ExitAvailable => Phase == LiminalRunPhase.Exploring && AllRoomsCleared() && NearExit();
         public string AugmentHistory { get; private set; } = "증강 없음";
+        /// <summary>The cards on the table while Phase is AugmentChoice (up to three).</summary>
+        public IReadOnlyList<AugmentDefinition> AugmentOffers => augmentOffers;
+        public HunterAugments Augments => augments;
+        /// <summary>Automated play validators set this so cleared rooms do not pause for an augment pick.</summary>
+        public static bool SuppressAugmentOffers;
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics() => SuppressAugmentOffers = false;
+        public const int AugmentChoices = 3;
         public event Action StageChanged;
         public event Action RoomChanged;
 
@@ -56,6 +64,8 @@ namespace AcRoguelike.Liminal
         LiminalHud hud;
         LiminalLobby lobby;
         PlayerCombat combat;
+        HunterAugments augments;
+        readonly List<AugmentDefinition> augmentOffers = new List<AugmentDefinition>();
         static readonly Vector3 LobbyOffset = new Vector3(0, 0, -420);
         float originalMoveSpeed, originalWalkSpeed, originalCooldown;
         int originalFlames;
@@ -78,6 +88,10 @@ namespace AcRoguelike.Liminal
                 combat = player.GetComponent<PlayerCombat>();
                 health = player.GetComponent<LiminalPlayerHealth>() ?? player.gameObject.AddComponent<LiminalPlayerHealth>();
                 health.Died += OnPlayerDied;
+                // The current playable hunter is a test character without augments of its own.
+                if (!player.GetComponent<HunterCharacter>()) player.gameObject.AddComponent<HunterCharacter>();
+                if (!player.TryGetComponent(out augments)) augments = player.gameObject.AddComponent<HunterAugments>();
+                augments.Initialize(this);
             }
             if (motor) { originalMoveSpeed = motor.moveSpeed; originalWalkSpeed = motor.walkSpeed; }
             if (caster) { originalCooldown = caster.cooldown; originalFlames = caster.flameCount; caster.holdToCast = true; caster.requireLineOfSight = true; }
@@ -95,6 +109,8 @@ namespace AcRoguelike.Liminal
             StageIndex = 0;
             PendingReward = 0;
             AugmentHistory = "증강 없음";
+            augmentOffers.Clear();
+            if (augments) augments.ResetRun();
             if (motor) { motor.moveSpeed = originalMoveSpeed; motor.walkSpeed = originalWalkSpeed; }
             if (caster) { caster.cooldown = originalCooldown; caster.flameCount = originalFlames; }
             if (health) health.ResetHealth();
@@ -482,8 +498,11 @@ namespace AcRoguelike.Liminal
             if (living.Count == 0 && ActiveRoomIndex >= 0)
             {
                 MarkRoomCleared(ActiveRoomIndex);
-                hud.Notify(rooms[ActiveRoomIndex].kind == LiminalRoomKind.Boss
+                bool bossRoom = rooms[ActiveRoomIndex].kind == LiminalRoomKind.Boss;
+                hud.Notify(bossRoom
                     ? "마지막 문이 응답했어.\n출구로 이동해 E를 눌러 줘." : "공간이 조용해졌어.\n열린 문으로 계속 이동해.", 3.5f);
+                // Every cleared normal (non-boss) combat room offers an augment.
+                if (!bossRoom && rooms[ActiveRoomIndex].kind == LiminalRoomKind.Combat && Phase == LiminalRunPhase.Exploring) OfferAugments();
             }
         }
 
@@ -516,19 +535,46 @@ namespace AcRoguelike.Liminal
         {
             if (!ExitAvailable) return false;
             PendingReward += 40;
-            SetPhase(StageIndex >= stages.Length - 1 ? LiminalRunPhase.Victory : LiminalRunPhase.AugmentChoice);
+            // Augments come from cleared combat rooms; a stage exit goes straight to the next gate.
+            SetPhase(StageIndex >= stages.Length - 1 ? LiminalRunPhase.Victory : LiminalRunPhase.NextStageChoice);
+            return true;
+        }
+
+        /// <summary>Magic stones earned mid-run (augments such as 예금), paid out with the rest in the lobby.</summary>
+        public void AddReward(int stones)
+        {
+            if (stones > 0) PendingReward += stones;
+        }
+
+        /// <summary>Deals up to three augment cards (common pool plus the hunter's own) and pauses for the pick.</summary>
+        public bool OfferAugments()
+        {
+            augmentOffers.Clear();
+            if (!augments || SuppressAugmentOffers) return false;
+            var random = new System.Random(unchecked(seed * 31 + StageIndex * 977 + ClearedRoomCount * 7919 + augments.PickCount));
+            augmentOffers.AddRange(AugmentCatalog.Roll(augments, augments.CharacterId, AugmentChoices, random));
+            if (augmentOffers.Count == 0) return false;
+            SetPhase(LiminalRunPhase.AugmentChoice);
             return true;
         }
 
         public void SelectAugment(int option)
         {
-            if (Phase != LiminalRunPhase.AugmentChoice || option < 0 || option > 2) return;
-            string title;
-            if (option == 0) { caster.cooldown *= .84f; title = "잔향 · 시전 간격 -16%"; }
-            else if (option == 1) { caster.flameCount += 2; title = "도깨비불 · 불꽃 +2"; }
-            else { health.IncreaseMaximum(25); title = "굳은 매듭 · 최대 체력 +25"; }
+            if (Phase != LiminalRunPhase.AugmentChoice || option < 0 || option >= augmentOffers.Count) return;
+            Acquire(augmentOffers[option]);
+            SetPhase(LiminalRunPhase.Exploring);
+        }
+
+        void Acquire(AugmentDefinition augment)
+        {
+            augmentOffers.Clear();
+            int paidBefore = augments.DepositPaid;
+            augments.Acquire(augment);
+            int paid = augments.DepositPaid - paidBefore;
+            int stack = augments.Stacks(augment.id);
+            string title = stack > 1 ? $"{augment.title} ×{stack}" : augment.title;
             AugmentHistory = AugmentHistory == "증강 없음" ? title : AugmentHistory + "\n" + title;
-            SetPhase(LiminalRunPhase.NextStageChoice);
+            if (hud) hud.Notify(paid > 0 ? $"증강 획득: {augment.title}\n예금: 마석 +{paid}" : $"증강 획득: {augment.title}", 2.4f);
         }
 
         public void ContinueToNextStage()

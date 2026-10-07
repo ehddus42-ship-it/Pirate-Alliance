@@ -142,6 +142,8 @@ namespace AcRoguelike.Liminal.Editor
         static IEnumerator Run()
         {
             yield return Until(() => (run = Object.FindFirstObjectByType<LiminalRunDirector>()) && run.Lobby && run.Phase == LiminalRunPhase.Lobby, 20, "Lobby startup");
+            // Automated runs skip augment offers so random augments cannot change what this validation measures.
+            LiminalRunDirector.SuppressAugmentOffers = true;
             motor = run.player.GetComponent<PlayerMotor>();
             motor.SetAutomationInput(Vector2.zero, run.player.position + Vector3.forward, false);
             cast = run.Lobby.Officials.ToArray();

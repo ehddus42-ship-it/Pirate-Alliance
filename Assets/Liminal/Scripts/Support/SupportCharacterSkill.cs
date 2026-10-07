@@ -93,7 +93,11 @@ namespace AcRoguelike.Liminal
             }
             bool playing = run && run.Phase == LiminalRunPhase.Exploring && Time.timeScale > 0 && player
                            && (!run.PlayerHealth || run.PlayerHealth.IsAlive);
-            if (playing && action.WasPressedThisFrame()) TryActivate();
+            if (playing && action.WasPressedThisFrame())
+            {
+                if (ManualLocked) { var lockedHud = run.GetComponent<LiminalHud>(); if (lockedHud) lockedHud.Notify(LockReason, 1.6f); }
+                else TryActivate();
+            }
             if (caster)
             {
                 if (caster.CastCount != lastCastCount && OneUpActive && playing)
@@ -103,10 +107,25 @@ namespace AcRoguelike.Liminal
             RefreshHud();
         }
 
-        /// <summary>Starts the skill if it is ready. Public for automated play tests.</summary>
-        public bool TryActivate()
+        /// <summary>Augments can take the skill out of the player's hands (it then fires on its own).</summary>
+        public bool ManualLocked { get; private set; }
+        string LockReason = "";
+
+        public void SetManualLock(bool locked, string reason = "")
         {
-            if (!run || !run.player || CooldownRemaining > 0) return false;
+            ManualLocked = locked;
+            LockReason = reason;
+        }
+
+        /// <summary>Starts the skill if it is ready. Public for automated play tests.</summary>
+        public bool TryActivate() => Activate(false);
+
+        /// <summary>Starts the skill even while it cools down (augment-driven automatic casts).</summary>
+        public bool ForceActivate() => Activate(true);
+
+        bool Activate(bool ignoreCooldown)
+        {
+            if (!run || !run.player || (!ignoreCooldown && CooldownRemaining > 0)) return false;
             Activations++;
             readyAt = Time.time + cooldown;
             portraitPulse = 1;

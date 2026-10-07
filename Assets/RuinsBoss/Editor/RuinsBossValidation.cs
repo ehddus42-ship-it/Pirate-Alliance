@@ -123,6 +123,8 @@ namespace AcRoguelike.RuinsBoss.Editor
         static IEnumerator RunMachinesOnly()
         {
             yield return Until(() => (run = Object.FindFirstObjectByType<LiminalRunDirector>()) && run.Phase == LiminalRunPhase.Lobby, 20, "Lobby startup");
+            // Automated runs skip augment offers so random augments cannot change what this validation measures.
+            LiminalRunDirector.SuppressAugmentOffers = true;
             var checks = RuinsBossMachineValidation.Run(text => report.checks.Add(text));
             try { while (checks.MoveNext()) yield return checks.Current; }
             finally { (checks as IDisposable)?.Dispose(); }
