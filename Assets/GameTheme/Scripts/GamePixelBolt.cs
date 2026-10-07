@@ -7,6 +7,7 @@ namespace AcRoguelike.GameTheme
     public sealed class GamePixelBolt : MonoBehaviour
     {
         const float Radius = .18f;
+        public float Speed => ProjectileTuning.ScaleSpeed(8.5f);
         TrainingEnemy owner;
         LiminalPlayerHealth target;
         LiminalRoom room;
@@ -38,7 +39,7 @@ namespace AcRoguelike.GameTheme
         void Update()
         {
             if (!owner || !owner.IsAlive || !target || !target.IsAlive) { Destroy(gameObject); return; }
-            float step = Mathf.Min(remaining, 8.5f * Time.deltaTime);
+            float step = Mathf.Min(remaining, Speed * Time.deltaTime);
             if (step <= 0) return;
             RaycastHit? closest = null;
             foreach (var hit in Physics.SphereCastAll(transform.position, Radius, direction, step, ~0, QueryTriggerInteraction.Ignore))

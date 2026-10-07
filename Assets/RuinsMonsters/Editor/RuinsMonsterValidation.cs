@@ -118,12 +118,12 @@ namespace AcRoguelike.Ruins.Editor
             yield return Until(() => (run = Object.FindFirstObjectByType<LiminalRunDirector>()) && run.Lobby && run.Phase == LiminalRunPhase.Lobby, 20, "Lobby startup");
             var mission = run.AvailableMissions.Single(m => m.id == "ruins_clearance");
             Check(mission.code == "G-04" && run.EnterMission(mission.id), "G-04 starts through the real lobby mission entry.");
-            yield return Until(() => run.Rooms.Count == 5 && run.ActiveRoomIndex == 0, 10, "Ruins route startup");
+            yield return Until(() => run.Rooms.Count == 4 && run.ActiveRoomIndex == 0, 10, "Ruins route startup");
             Check(run.CurrentStage.stageId == "concept_ruins", "The apocalypse roster is scoped to concept_ruins.");
             motor = run.player.GetComponent<PlayerMotor>();
             motor.SetAutomationInput(Vector2.zero, run.player.position + Vector3.forward, false);
             var seen = new HashSet<RuinsMonsterKind>();
-            for (int index = 1; index <= 3; index++)
+            for (int index = 0; index < 3; index++)
             {
                 int wanted = index;
                 motor.ResetAt(run.Rooms[index].playerSpawn.position + Vector3.up * .05f);
@@ -216,8 +216,8 @@ namespace AcRoguelike.Ruins.Editor
                     "Ruins room " + index + " has no orphaned projectiles or delayed strikes after death.");
             }
             Check(seen.Count == 5, "All five apocalypse creatures appear during one three-room dungeon run.");
-            var exit = run.Rooms[4]; motor.ResetAt(exit.playerSpawn.position + Vector3.up * .05f);
-            yield return Until(() => run.ActiveRoomIndex == 4, 8, "Exit room activation");
+            var exit = run.Rooms[3]; motor.ResetAt(exit.playerSpawn.position + Vector3.up * .05f);
+            yield return Until(() => run.ActiveRoomIndex == 3, 8, "Exit room activation");
             var finale = exit.GetComponent<AcRoguelike.RuinsBoss.RuinsBossArena>();
             if (finale)
             {
@@ -228,16 +228,16 @@ namespace AcRoguelike.Ruins.Editor
             motor.ResetAt(exit.exit.position - exit.exit.forward * 2.5f + Vector3.up * .05f); yield return null;
             Check(run.ExitAvailable && run.TryUseExit() && run.Phase == LiminalRunPhase.Victory, "Clearing apocalypse rooms enables the mission exit and Victory.");
             run.RetryMission(); yield return null;
-            Check(run.ActiveMission == mission && run.Phase == LiminalRunPhase.Exploring && run.Rooms.Count == 5, "Retry preserves G-04 and rebuilds the route.");
+            Check(run.ActiveMission == mission && run.Phase == LiminalRunPhase.Exploring && run.Rooms.Count == 4, "Retry preserves G-04 and rebuilds the route.");
             run.ReturnToLobby(); yield return null;
             Check(run.Phase == LiminalRunPhase.Lobby && run.Rooms.Count == 0 && Object.FindObjectsByType<RuinsMonster>(FindObjectsSortMode.None).Length == 0,
                 "Returning to the lobby clears the apocalypse roster.");
             Check(run.EnterMission("game_exhibition"), "G-06 remains available.");
-            yield return Until(() => run.Rooms.Count == 5, 8, "Other-theme route");
-            motor.ResetAt(run.Rooms[1].playerSpawn.position + Vector3.up * .05f);
-            yield return Until(() => run.ActiveRoomIndex == 1 && run.LivingEnemyCount > 0, 8, "Other-theme encounter");
-            Check(run.Rooms[1].GetComponentsInChildren<RuinsMonster>().Length == 0 &&
-                run.Rooms[1].GetComponentsInChildren<AcRoguelike.GameTheme.GameVoxelMonster>().Length > 0,
+            yield return Until(() => run.Rooms.Count == 4, 8, "Other-theme route");
+            motor.ResetAt(run.Rooms[0].playerSpawn.position + Vector3.up * .05f);
+            yield return Until(() => run.ActiveRoomIndex == 0 && run.LivingEnemyCount > 0, 8, "Other-theme encounter");
+            Check(run.Rooms[0].GetComponentsInChildren<RuinsMonster>().Length == 0 &&
+                run.Rooms[0].GetComponentsInChildren<AcRoguelike.GameTheme.GameVoxelMonster>().Length > 0,
                 "The Game dungeon still uses its own voxel roster.");
             run.ReturnToLobby(); yield return null;
             var projectileChecks = RuinsProjectileValidation.Run(text => report.checks.Add(text));

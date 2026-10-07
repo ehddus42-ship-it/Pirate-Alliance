@@ -7,8 +7,13 @@ namespace AcRoguelike.GameTheme
     /// <summary>A committed soft-drop shot or an I bar that expires on its fourth wall contact.</summary>
     public sealed class TetrominoProjectile : MonoBehaviour
     {
-        public const float SlowSpeed = 2.2f, FastSpeed = 13.2f, SlowDuration = .65f, AccelerationDuration = .45f;
-        public const float RicochetSpeed = 11f;
+        public const float SlowSpeed = 2.2f * ProjectileTuning.SpeedMultiplier, FastSpeed = 13.2f * ProjectileTuning.SpeedMultiplier;
+        public const float SlowDuration = .65f, AccelerationDuration = .45f;
+        public const float RicochetSpeed = 11f * ProjectileTuning.SpeedMultiplier;
+        const float BaseSoftDropLifetime = 5.5f, RicochetLifetime = 18f / ProjectileTuning.SpeedMultiplier;
+        // Acceleration timing stays fixed. Extend the fast tail by the distance lost to slower travel.
+        static readonly float SoftDropLifetime = BaseSoftDropLifetime
+            + SoftDropDistance(BaseSoftDropLifetime) * (1f / ProjectileTuning.SpeedMultiplier - 1f) / FastSpeed;
         public float Speed { get; private set; }
         public int BounceCount { get; private set; }
         public int Damage { get; private set; }
@@ -55,14 +60,15 @@ namespace AcRoguelike.GameTheme
                 || (room && !room.Contains(transform.position))) { Finish(); return; }
             float dt = Time.deltaTime;
             if (dt <= 0) return;
-            float nextAge = Mathf.Min(age + dt, Ricochet ? 18f : 5.5f);
+            float lifetime = Ricochet ? RicochetLifetime : SoftDropLifetime;
+            float nextAge = Mathf.Min(age + dt, lifetime);
             float distance = Ricochet ? RicochetSpeed * (nextAge - age) : SoftDropDistance(nextAge) - SoftDropDistance(age);
             age = nextAge;
             Speed = Ricochet ? RicochetSpeed : Mathf.Lerp(SlowSpeed, FastSpeed,
                 Mathf.SmoothStep(0, 1, Mathf.InverseLerp(SlowDuration, SlowDuration + AccelerationDuration, age)));
             visual.Rotate(Ricochet ? Vector3.up : Vector3.forward, (Ricochet ? 540 : 115) * dt, Space.Self);
             Advance(distance);
-            if (age >= (Ricochet ? 18f : 5.5f)) Finish();
+            if (age >= lifetime) Finish();
         }
 
         // Integral of the speed curve: the slow/fast transition has the same travel at any frame rate.

@@ -26,9 +26,10 @@ namespace AcRoguelike.Liminal
         void Update()
         {
             if (!launched || Time.deltaTime <= 0) return;
-            age += Time.deltaTime;
+            // Slow the ballistic clock so gravity, the arc and the lifetime keep the same travel path.
+            float dt = Time.deltaTime * ProjectileTuning.SpeedMultiplier;
+            age += dt;
             if (age > lifetime || !owner || !target || !target.IsAlive || !owner.GetComponent<TrainingEnemy>().IsAlive) { Destroy(gameObject); return; }
-            float dt = Time.deltaTime;
             Vector3 step = velocity * dt + Physics.gravity * (.5f * dt * dt);
             var hits = Physics.SphereCastAll(transform.position, radius, step.normalized, step.magnitude,
                 ~0, QueryTriggerInteraction.Ignore);

@@ -24,6 +24,8 @@ namespace AcRoguelike.Ruins.Editor
                     var shot = RuinsProjectile.Fire(new Vector3(0, .9f, 0), Vector3.forward, arena.Owner,
                         arena.Player, arena.Room, 9, type == 1);
                     Require(shot.GetComponentsInChildren<MeshRenderer>().Length >= 4, "A shot needs its visible core and wake or fins.");
+                    Require(Mathf.Abs(shot.Speed - (type == 1 ? 6.48f : 4.44f)) < .001f,
+                        "Scrap and amber travel speeds must each be reduced to 60 percent exactly once.");
                     var deadline = new Deadline(2, "thin wall stop");
                     while (shot && !shot.Finished)
                     {
@@ -48,7 +50,7 @@ namespace AcRoguelike.Ruins.Editor
                 {
                     var shot = RuinsProjectile.Fire(new Vector3(0, .9f, 0), Vector3.forward, arena.Owner,
                         arena.Player, arena.Room, 9, type == 1);
-                    var deadline = new Deadline(4, "committed projectile range");
+                    var deadline = new Deadline(6, "committed projectile range");
                     while (shot && !shot.Finished) { deadline.Check(); arena.Step(); yield return null; }
                     Require(shot.Finished && Mathf.Abs(shot.Travelled - shot.MaximumTravel) < .01f && shot.DamageAttempts == 0,
                         "Shots must pass other monsters and stop at their exact configured range.");

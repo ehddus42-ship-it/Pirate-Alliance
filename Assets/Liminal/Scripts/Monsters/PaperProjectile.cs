@@ -40,7 +40,7 @@ namespace AcRoguelike.Liminal
             paper.direction = Vector3.ProjectOnPlane(direction, Vector3.up).normalized;
             paper.side = Vector3.Cross(Vector3.up, paper.direction);
             paper.origin = position;
-            paper.speed = speed;
+            paper.speed = ProjectileTuning.ScaleSpeed(speed);
             paper.range = range;
             paper.damage = damage;
             paper.owner = owner;
@@ -55,7 +55,7 @@ namespace AcRoguelike.Liminal
         {
             float dt = Time.deltaTime;
             if (dt <= 0) return;
-            age += dt;
+            age += dt * ProjectileTuning.SpeedMultiplier;
             if (landed)
             {
                 float t = (Time.time - landedAt) / .9f;

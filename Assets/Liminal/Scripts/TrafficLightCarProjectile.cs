@@ -21,7 +21,8 @@ namespace AcRoguelike.Liminal
 
         public void Launch(Vector3 heading, float travelSpeed, int amount, TrafficLightBoss source, LiminalPlayerHealth player, float floorHeight)
         {
-            boss = source; owner = source.transform; target = player; damage = amount; speed = travelSpeed; floorY = floorHeight;
+            boss = source; owner = source.transform; target = player; damage = amount;
+            speed = ProjectileTuning.ScaleSpeed(travelSpeed); floorY = floorHeight;
             heading.y = 0; direction = heading.sqrMagnitude > .001f ? heading.normalized : source.transform.forward;
             origin = transform.position; startHeight = origin.y - floorHeight; launched = true;
             transform.rotation = Quaternion.LookRotation(direction);
@@ -31,7 +32,7 @@ namespace AcRoguelike.Liminal
         {
             if (!launched || Time.deltaTime <= 0) return;
             age += Time.deltaTime;
-            if (age > lifetime || !owner || !boss.Health.IsAlive) { Destroy(gameObject); return; }
+            if (age > ProjectileTuning.ScaleFlightDuration(lifetime) || !owner || !boss.Health.IsAlive) { Destroy(gameObject); return; }
             float step = speed * Time.deltaTime; travelled += step;
             Vector3 position = origin + direction * travelled;
             float descent = Mathf.SmoothStep(0, 1, travelled / dropDistance);

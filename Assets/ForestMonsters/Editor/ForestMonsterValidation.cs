@@ -128,12 +128,12 @@ namespace AcRoguelike.Forest.Editor
             yield return Until(() => (run = Object.FindFirstObjectByType<LiminalRunDirector>()) && run.Lobby && run.Phase == LiminalRunPhase.Lobby, 20, "Lobby startup");
             var mission = run.AvailableMissions.Single(m => m.id == "forest_survey");
             Check(run.EnterMission(mission.id), "G-02 starts through the real lobby mission entry.");
-            yield return Until(() => run.Rooms.Count == 5 && run.ActiveRoomIndex == 0, 10, "Forest route startup");
+            yield return Until(() => run.Rooms.Count == 4 && run.ActiveRoomIndex == 0, 10, "Forest route startup");
             Check(run.CurrentStage.stageId == "concept_forest", "Forest roster is scoped to concept_forest.");
             motor = run.player.GetComponent<PlayerMotor>();
             motor.SetAutomationInput(Vector2.zero, run.player.position + Vector3.forward, false);
             var seen = new HashSet<Type>();
-            for (int index = 1; index <= 3; index++)
+            for (int index = 0; index < 3; index++)
             {
                 int wanted = index;
                 motor.ResetAt(run.Rooms[index].playerSpawn.position + Vector3.up * .05f);
@@ -176,19 +176,19 @@ namespace AcRoguelike.Forest.Editor
                     "Forest room " + index + " has no delayed attacks after owners die.");
             }
             Check(seen.Count == 4, "All four forest creatures appear in one three-room run.");
-            var exit = run.Rooms[4]; motor.ResetAt(exit.playerSpawn.position + Vector3.up * .05f);
-            yield return Until(() => run.ActiveRoomIndex == 4, 8, "Exit room activation");
+            var exit = run.Rooms[3]; motor.ResetAt(exit.playerSpawn.position + Vector3.up * .05f);
+            yield return Until(() => run.ActiveRoomIndex == 3, 8, "Exit room activation");
             motor.ResetAt(exit.exit.position - exit.exit.forward * 2.5f + Vector3.up * .05f); yield return null;
             Check(run.ExitAvailable && run.TryUseExit() && run.Phase == LiminalRunPhase.Victory, "Forest room clears unlock the mission exit and Victory.");
             run.RetryMission(); yield return null;
-            Check(run.ActiveMission == mission && run.Rooms.Count == 5, "Retry preserves G-02 and rebuilds the forest route.");
+            Check(run.ActiveMission == mission && run.Rooms.Count == 4, "Retry preserves G-02 and rebuilds the forest route.");
             run.ReturnToLobby(); yield return null;
             Check(run.Phase == LiminalRunPhase.Lobby && run.Rooms.Count == 0 && !Object.FindFirstObjectByType<ForestFrog>() && !Object.FindFirstObjectByType<ForestTreant>(), "Lobby return clears the forest roster.");
             Check(run.EnterMission("game_exhibition"), "Another theme remains available.");
-            yield return Until(() => run.Rooms.Count == 5, 8, "Other-theme route");
-            motor.ResetAt(run.Rooms[1].playerSpawn.position + Vector3.up * .05f);
-            yield return Until(() => run.ActiveRoomIndex == 1 && run.LivingEnemyCount > 0, 8, "Other-theme encounter");
-            Check(run.Rooms[1].GetComponentsInChildren<AcRoguelike.GameTheme.GameVoxelMonster>().Length > 0 && !Object.FindFirstObjectByType<ForestButterfly>(), "The Game dungeon keeps its own roster.");
+            yield return Until(() => run.Rooms.Count == 4, 8, "Other-theme route");
+            motor.ResetAt(run.Rooms[0].playerSpawn.position + Vector3.up * .05f);
+            yield return Until(() => run.ActiveRoomIndex == 0 && run.LivingEnemyCount > 0, 8, "Other-theme encounter");
+            Check(run.Rooms[0].GetComponentsInChildren<AcRoguelike.GameTheme.GameVoxelMonster>().Length > 0 && !Object.FindFirstObjectByType<ForestButterfly>(), "The Game dungeon keeps its own roster.");
             run.ReturnToLobby(); yield return null;
             var checks = ForestWormFrogValidation.Run(text => report.checks.Add(text));
             try { while (checks.MoveNext()) yield return checks.Current; } finally { (checks as IDisposable)?.Dispose(); }

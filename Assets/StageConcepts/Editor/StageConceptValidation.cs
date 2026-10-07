@@ -11,7 +11,7 @@ using Object = UnityEngine.Object;
 
 namespace AcRoguelike.StageConcepts.Editor
 {
-    /// <summary>Read-only asset checks and isolated physics checks for the four concept dungeons (seven rooms each, five per run).</summary>
+    /// <summary>Read-only asset checks and isolated physics checks for the four concept dungeons (four rooms per run).</summary>
     public static class StageConceptValidation
     {
         const string Root = "Assets/StageConcepts";
@@ -21,7 +21,7 @@ namespace AcRoguelike.StageConcepts.Editor
         const float Cell = .5f, Radius = .24f, Height = 1.65f, Step = .24f;
         // Raised walkways (bridge decks and their ramps) are sampled as floor up to this height above the room floor.
         const float MaxFloorHeight = 1.2f;
-        // Meshy set pieces are 15k-30k triangles each; a room may place up to 450k and a five-room route 1.8M.
+        // Meshy set pieces are 15k-30k triangles each; a room may place up to 450k and a four-room route 1.8M.
         const long RoomTriangleBudget = 450000, StageTriangleBudget = 1800000;
         const int RoomsPerTheme = StageConceptLayoutBuilder.RoomsPerTheme;
         static readonly string[] Themes = { "Forest", "Digital", "Ruins", "Cave" };
@@ -29,11 +29,11 @@ namespace AcRoguelike.StageConcepts.Editor
         [Serializable] public sealed class Report
         {
             public string status, utc, unityVersion;
-            public int expectedRooms = 4 * RoomsPerTheme, roomsPerTheme = RoomsPerTheme, roomsPerRun = 5, roomCount, passedRooms, stageCount, passedStages;
+            public int expectedRooms = 4 * RoomsPerTheme, roomsPerTheme = RoomsPerTheme, roomsPerRun = 4, roomCount, passedRooms, stageCount, passedStages;
             public int sceneCount, passedScenes, meshySlots, populatedMeshySlots, uniqueMeshes;
             public long totalPlacedTriangles, uniqueMeshTriangles;
             public long maximumRoomTriangles = RoomTriangleBudget, maximumStageTriangles = StageTriangleBudget;
-            public float roomWidth = Width, roomLength = Length, stageLength = Length * 5;
+            public float roomWidth = Width, roomLength = Length, stageLength = Length * 4;
             public float traversalSampleSpacing = Cell, capsuleRadius = Radius, capsuleHeight = Height, stepOffset = Step, maximumFloorHeight = MaxFloorHeight;
             public bool openScenesUnchanged;
             public List<RoomCheck> rooms = new List<RoomCheck>();
@@ -170,7 +170,7 @@ namespace AcRoguelike.StageConcepts.Editor
             {
                 report.checks.Add("All " + report.expectedRooms + " rooms have 26 x 36.4 m bounds, aligned sockets, gates, clear spawns and populated Meshy slots.");
                 report.checks.Add("Every room passes floor-supported capsule traversal (raised decks up to " + MaxFloorHeight + " m included) from player spawn to both doorways and all enemy spawns.");
-                report.checks.Add("Each stage starts at 01, ends at 05 and draws three unique middle rooms from 02, 03, 04, 06 and 07; seeded routes have aligned sockets and no overlapping room footprints.");
+                report.checks.Add("Each stage starts directly in random combat, draws three unique rooms from 02, 03, 04, 06 and 07, and retains its fixed final room; seeded routes have aligned sockets and no overlapping room footprints.");
                 report.checks.Add("All four saved scenes reference their own stage and have a player and following gameplay camera.");
                 report.checks.Add("Triangle counts include every placed static and skinned mesh; unique mesh totals are also recorded.");
             }
@@ -411,8 +411,9 @@ namespace AcRoguelike.StageConcepts.Editor
             var stage = AssetDatabase.LoadAssetAtPath<LiminalStageDefinition>(check.path);
             if (!stage) { check.errors.Add("Missing stage definition."); return; }
             var pool = StageConceptLayoutBuilder.PoolIndices;
-            Check(stage.startRoom && AssetDatabase.GetAssetPath(stage.startRoom) == RoomPath(check.theme, StageConceptLayoutBuilder.StartIndex), "Start room must reference the theme's 01 prefab.");
-            Check(stage.endRoom && AssetDatabase.GetAssetPath(stage.endRoom) == RoomPath(check.theme, StageConceptLayoutBuilder.EndIndex), "End room must reference the theme's 05 prefab.");
+            Check(stage.startRoom && AssetDatabase.GetAssetPath(stage.startRoom) == RoomPath(check.theme, StageConceptLayoutBuilder.StartIndex), "Legacy arrival reference must preserve the theme's 01 prefab outside the played route.");
+            string endPath = check.theme == "Ruins" ? AcRoguelike.RuinsBoss.Editor.RuinsBossBuilder.ArenaPath : RoomPath(check.theme, StageConceptLayoutBuilder.EndIndex);
+            Check(stage.endRoom && AssetDatabase.GetAssetPath(stage.endRoom) == endPath, "End room must retain the theme's fixed exit or authored boss prefab.");
             Check(stage.middleRoomCount == 3 && stage.roomPool != null && stage.roomPool.Length == pool.Length,
                 "Stage requires three middle room selections from " + pool.Length + " candidates.");
             if (stage.roomPool != null)
@@ -423,14 +424,17 @@ namespace AcRoguelike.StageConcepts.Editor
             }
             var routes = new HashSet<string>();
             var visited = new HashSet<string>();
-            for (int seed = 1; seed <= 32; seed++)
+            for (int seed = 1; seed <= 128; seed++)
             {
                 var route = stage.ChooseRoute(seed, 0);
                 string signature = string.Join("|", route.Select(r => r.roomId));
                 routes.Add(signature);
                 visited.UnionWith(route.Where(r => r).Select(r => r.roomId));
                 Check(signature == string.Join("|", stage.ChooseRoute(seed, 0).Select(r => r.roomId)), "Route is not deterministic for seed " + seed + ".");
-                Check(route.Length == 5 && route.Distinct().Count() == 5, "Seed " + seed + " does not select five unique rooms.");
+                Check(route.Length == 4 && route.Distinct().Count() == 4, "Seed " + seed + " does not select four unique rooms.");
+                Check(route[0].kind == LiminalRoomKind.Combat && route[route.Length - 1] == stage.endRoom && !route.Contains(stage.startRoom),
+                    "Seed " + seed + " must begin in random combat, omit the legacy arrival, and retain the fixed final room.");
+                Check(route.Take(3).All(room => stage.roomPool.Contains(room)), "Random rooms must come from this theme's variation pool.");
             }
             check.distinctSeededRoutes = routes.Count;
             Check(routes.Count > 1, "Multiple seeds should produce distinct middle-room orders.");
@@ -451,7 +455,7 @@ namespace AcRoguelike.StageConcepts.Editor
                 director.stages = new[] { stage };
                 director.seed = 73029;
                 director.GeneratePreview(0);
-                Check(director.Rooms.Count == 5, "Preview assembly did not produce five rooms.");
+                Check(director.Rooms.Count == 4, "Preview assembly did not produce four rooms.");
                 for (int i = 1; i < director.Rooms.Count; i++)
                 {
                     var previous = director.Rooms[i - 1];

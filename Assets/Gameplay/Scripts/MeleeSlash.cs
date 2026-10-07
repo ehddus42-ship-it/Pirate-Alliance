@@ -78,7 +78,7 @@ namespace AcRoguelike
         public int HitCount { get; private set; }
         /// <summary>Counter window after a just dodge: cuts deal more damage and land as heavy hits.</summary>
         public bool CounterActive => Time.unscaledTime < counterUntil;
-        public float counterMultiplier = 1.6f;
+        public float counterMultiplier = 1.5f;
         [Tooltip("Permanent damage multiplier (lobby upgrades).")]
         public float damageMultiplier = 1f;
         float counterUntil;

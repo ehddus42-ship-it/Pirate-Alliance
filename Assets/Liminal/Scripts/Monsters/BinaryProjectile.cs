@@ -37,7 +37,7 @@ namespace AcRoguelike.Liminal
             p.direction = Vector3.ProjectOnPlane(direction, Vector3.up).normalized;
             p.side = Vector3.Cross(Vector3.up, p.direction);
             p.origin = position;
-            p.speed = speed; p.range = range; p.damage = damage; p.owner = owner; p.target = target;
+            p.speed = ProjectileTuning.ScaleSpeed(speed); p.range = range; p.damage = damage; p.owner = owner; p.target = target;
             for (int i = 0; i < Length; i++) p.bits[i] = Random.value < .5f ? 0 : 1;
             p.strip = new GlyphStrip(Length, "Binary Stream");
             go.AddComponent<MeshFilter>().sharedMesh = p.strip.mesh;

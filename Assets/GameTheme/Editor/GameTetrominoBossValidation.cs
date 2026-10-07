@@ -117,11 +117,11 @@ namespace AcRoguelike.GameTheme.Editor
             yield return Until(() => (run = Object.FindFirstObjectByType<LiminalRunDirector>()) && run.Lobby && run.Phase == LiminalRunPhase.Lobby, 20, "Lobby startup");
             var mission = run.AvailableMissions.Single(m => m.id == "game_exhibition");
             Check(mission.code == "G-06" && run.EnterMission(mission.id), "G-06 starts through the real lobby mission entry.");
-            yield return Until(() => run.Rooms.Count == 5 && run.ActiveRoomIndex == 0, 10, "Game route startup");
-            Check(run.Rooms[4].roomId == "Game_08_Boss" && run.Rooms[4].kind == LiminalRoomKind.Boss && GameThemeAtmosphere.LeaseCount == 1,
-                "Five-room Game route ends in the dedicated arena and owns one atmosphere lease.");
+            yield return Until(() => run.Rooms.Count == 4 && run.ActiveRoomIndex == 0, 10, "Game route startup");
+            Check(run.Rooms[3].roomId == "Game_08_Boss" && run.Rooms[3].kind == LiminalRoomKind.Boss && GameThemeAtmosphere.LeaseCount == 1,
+                "Four-room Game route ends in the dedicated arena and owns one atmosphere lease.");
             motor = run.player.GetComponent<PlayerMotor>(); motor.SetAutomationInput(Vector2.zero, run.player.position + Vector3.forward, false);
-            for (int index = 1; index <= 3; index++)
+            for (int index = 0; index < 3; index++)
             {
                 int wanted = index;
                 motor.ResetAt(run.Rooms[index].playerSpawn.position + Vector3.up * .05f);
@@ -133,8 +133,8 @@ namespace AcRoguelike.GameTheme.Editor
                 HitFeedback.CancelHitStop();
                 yield return Until(() => run.LivingEnemyCount == 0 && !room.exitGate.activeSelf, 5, "Normal room clear " + index);
             }
-            var arena = run.Rooms[4]; motor.ResetAt(arena.playerSpawn.position + Vector3.up * .05f);
-            yield return Until(() => run.ActiveRoomIndex == 4 && run.LivingEnemyCount == 1, 8, "Boss room activation");
+            var arena = run.Rooms[3]; motor.ResetAt(arena.playerSpawn.position + Vector3.up * .05f);
+            yield return Until(() => run.ActiveRoomIndex == 3 && run.LivingEnemyCount == 1, 8, "Boss room activation");
             var bosses = arena.GetComponentsInChildren<GameTetrominoBoss>();
             Check(bosses.Length == 1 && arena.GetComponentsInChildren<TrafficLightBoss>().Length == 0 &&
                 arena.GetComponentsInChildren<GameVoxelMonster>().Length == 0, "Final room spawns exactly one Drop Keeper and no foreign boss.");
@@ -198,12 +198,12 @@ namespace AcRoguelike.GameTheme.Editor
             yield return Seconds(.15f);
             Check(boss.Attacks == attacks && Object.FindObjectsByType<TetrominoProjectile>(FindObjectsSortMode.None).Length == 0 &&
                 Object.FindObjectsByType<TetrominoCharger>(FindObjectsSortMode.None).Length == 0, "Boss death removes owned shots and summons and prevents pending attacks.");
-            Check(run.LivingEnemyCount == 0 && run.ClearedRoomCount == 5 && !arena.entranceGate.activeSelf, "Boss defeat clears the final registered encounter and unlocks the entrance.");
+            Check(run.LivingEnemyCount == 0 && run.ClearedRoomCount == 4 && !arena.entranceGate.activeSelf, "Boss defeat clears the final registered encounter and unlocks the entrance.");
             motor.ResetAt(arena.exit.position - arena.exit.forward * 2.5f + Vector3.up * .05f); yield return null;
             Check(run.ExitAvailable && run.TryUseExit() && run.Phase == LiminalRunPhase.Victory, "Defeating Drop Keeper enables the mission exit and Victory.");
             run.RetryMission(); yield return null;
-            Check(run.ActiveMission == mission && run.Phase == LiminalRunPhase.Exploring && run.Rooms.Count == 5 &&
-                run.Rooms[4].roomId == "Game_08_Boss" && GameThemeAtmosphere.LeaseCount == 1, "Retry preserves G-06, its final boss and one atmosphere lease.");
+            Check(run.ActiveMission == mission && run.Phase == LiminalRunPhase.Exploring && run.Rooms.Count == 4 &&
+                run.Rooms[3].roomId == "Game_08_Boss" && GameThemeAtmosphere.LeaseCount == 1, "Retry preserves G-06, its final boss and one atmosphere lease.");
             run.ReturnToLobby(); yield return null;
             Check(run.Phase == LiminalRunPhase.Lobby && run.ActiveMission == null && run.Rooms.Count == 0 && !GameThemeAtmosphere.IsApplied &&
                 Object.FindObjectsByType<GameTetrominoBoss>(FindObjectsSortMode.None).Length == 0, "Returning to the lobby clears the boss route and restores the environment.");

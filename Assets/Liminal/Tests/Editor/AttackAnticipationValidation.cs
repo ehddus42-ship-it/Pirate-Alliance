@@ -141,24 +141,26 @@ namespace AcRoguelike.Liminal.Editor
                         "Nonuniform parent scaling distorted the glint size: " + bx.magnitude + ", " + by.magnitude + ".");
                     Require(Mathf.Abs(Vector3.Dot(bx.normalized, by.normalized)) < .002f, "Nonuniform parent scaling sheared the glint.");
                 });
-                Check(report, "White line outlines contain only perimeter geometry at the configured world-space width", () =>
+                Check(report, "White line warnings contain only a central guide at the configured world-space width", () =>
                 {
-                    var owner = Owner(scene, "Scaled outline");
+                    var owner = Owner(scene, "Scaled center guide");
                     owner.localScale = new Vector3(2, 3, .5f); owner.rotation = Quaternion.Euler(0, 43, 0);
                     var warning = Telegraph.Create(owner);
                     var origin = new Vector3(2, .5f, 3);
                     warning.Line(origin, Vector3.forward, 6, .8f, .7f);
                     var mesh = warning.GetComponent<MeshFilter>().sharedMesh;
-                    Require(warning.Visible && mesh.vertexCount == 16 && mesh.triangles.Length == 24, "Line outline unexpectedly contains area-fill geometry.");
+                    Require(warning.Visible && mesh.vertexCount == 4 && mesh.triangles.Length == 6, "Line warning must contain one central guide without perimeter or area-fill geometry.");
                     var v = mesh.vertices;
                     for (int i = 0; i < v.Length; i += 4)
                     {
                         float width = Vector3.Distance(warning.transform.TransformPoint(v[i]), warning.transform.TransformPoint(v[i + 1]));
-                        Require(Mathf.Abs(width - Telegraph.OutlineWidth) < .001f, "Scaled outline width changed.");
+                        Require(Mathf.Abs(width - Telegraph.OutlineWidth) < .001f, "Scaled center-guide width changed.");
                     }
+                    Near(warning.transform.TransformPoint((v[0] + v[1]) * .5f), origin + Vector3.up * .038f, "Center-guide origin");
+                    Near(warning.transform.TransformPoint((v[2] + v[3]) * .5f), origin + Vector3.forward * 6 + Vector3.up * .038f, "Center-guide endpoint");
                     foreach (var color in mesh.colors)
-                        Require(color.r == 1 && color.g == 1 && color.b == 1, "Attack outline contains a colored vertex.");
-                    warning.Release(); Require(!warning.Visible, "Release did not hide the outline.");
+                        Require(color.r == 1 && color.g == 1 && color.b == 1, "Attack center guide contains a colored vertex.");
+                    warning.Release(); Require(!warning.Visible, "Release did not hide the center guide.");
                 });
                 InspectPrefabs(scene, report);
                 Check(report, "Render face and body glints for visual inspection", () => report.capture = Capture(scene));

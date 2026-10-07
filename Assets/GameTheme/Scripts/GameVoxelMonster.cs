@@ -199,7 +199,7 @@ namespace AcRoguelike.GameTheme
             {
                 if (volley < 3 && elapsed >= volley * .16f)
                 {
-                    Vector3 direction = Quaternion.Euler(0, (volley - 1) * 10, 0) * aim;
+                    Vector3 direction = Quaternion.Euler(0, EnemyFanPattern.Angle(volley, 3, 32f), 0) * aim;
                     // Spawn inside the body rather than beyond a nearby wall; swept collision covers the muzzle.
                     GamePixelBolt.Fire(transform.position + Vector3.up * .85f, direction, Health, player, room, champion ? 15 : 9);
                     volley++; Shots++;

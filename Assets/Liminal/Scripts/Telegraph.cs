@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace AcRoguelike.Liminal
 {
-    /// <summary>Thin white footprints for melee and attacks connected to their owner. No area fill.</summary>
+    /// <summary>Thin white center guides for melee and attacks connected to their owner.</summary>
     public sealed class Telegraph : MonoBehaviour
     {
         public const float OutlineWidth = .035f;
@@ -20,11 +20,11 @@ namespace AcRoguelike.Liminal
             var go = new GameObject(name) { layer = 2 };
             go.transform.SetParent(parent, false);
             var warning = go.AddComponent<Telegraph>();
-            warning.mesh = new Mesh { name = "White attack outline" };
+            warning.mesh = new Mesh { name = "White attack center guide" };
             warning.mesh.MarkDynamic();
             go.AddComponent<MeshFilter>().sharedMesh = warning.mesh;
             warning.outline = go.AddComponent<MeshRenderer>();
-            if (!outlineMaterial) outlineMaterial = CreateOverlayMaterial("White attack outline");
+            if (!outlineMaterial) outlineMaterial = CreateOverlayMaterial("White attack center guide");
             warning.outline.sharedMaterial = outlineMaterial;
             warning.outline.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             warning.outline.receiveShadows = false;
@@ -41,40 +41,26 @@ namespace AcRoguelike.Liminal
         }
 
         public void Fan(Vector3 origin, Vector3 forward, float radius, float halfAngle, float progress)
-            => Sector(origin, forward, radius, halfAngle, progress, false);
+            => CenterLine(origin, forward, radius, progress);
 
         public void Circle(Vector3 center, float radius, float progress)
-            => Sector(center, Vector3.forward, radius, 180, progress, true);
-
-        void Sector(Vector3 origin, Vector3 forward, float radius, float halfAngle, float progress, bool full)
         {
             Begin();
-            forward = Flat(forward);
             Color color = OutlineColor(progress);
-            int segments = Mathf.Max(12, Mathf.CeilToInt(halfAngle / 3f));
-            Vector3 first = origin + Quaternion.Euler(0, -halfAngle, 0) * forward * radius;
-            Vector3 previous = first;
-            for (int i = 1; i <= segments; i++)
-            {
-                Vector3 next = origin + Quaternion.Euler(0, Mathf.Lerp(-halfAngle, halfAngle, i / (float)segments), 0) * forward * radius;
-                Band(previous, next, color);
-                previous = next;
-            }
-            if (!full) { Band(origin, first, color); Band(previous, origin, color); }
+            // Radial attacks have no forward axis. Mark only their center with a compact cross.
+            float arm = Mathf.Min(.25f, Mathf.Max(0, radius) * .25f);
+            Band(center - Vector3.right * arm, center + Vector3.right * arm, color);
+            Band(center - Vector3.forward * arm, center + Vector3.forward * arm, color);
             End();
         }
 
         public void Line(Vector3 origin, Vector3 forward, float length, float halfWidth, float progress)
+            => CenterLine(origin, forward, length, progress);
+
+        void CenterLine(Vector3 origin, Vector3 forward, float length, float progress)
         {
             Begin();
-            forward = Flat(forward);
-            Vector3 side = Vector3.Cross(Vector3.up, forward) * halfWidth;
-            Vector3 end = origin + forward * length;
-            Color color = OutlineColor(progress);
-            Band(origin - side, end - side, color);
-            Band(end - side, end + side, color);
-            Band(end + side, origin + side, color);
-            Band(origin + side, origin - side, color);
+            Band(origin, origin + Flat(forward) * Mathf.Max(0, length), OutlineColor(progress));
             End();
         }
 
@@ -126,7 +112,7 @@ namespace AcRoguelike.Liminal
         }
     }
 
-    /// <summary>Adapts legacy charge outlines without rendering their original colored LineRenderer.</summary>
+    /// <summary>Converts legacy charge footprints to center guides without rendering the source LineRenderer.</summary>
     [DisallowMultipleComponent]
     public sealed class TelegraphOverlay : MonoBehaviour
     {
@@ -149,7 +135,7 @@ namespace AcRoguelike.Liminal
         void LateUpdate()
         {
             if (!source) return;
-            if (!telegraph) telegraph = Telegraph.Create(transform, "White charge outline");
+            if (!telegraph) telegraph = Telegraph.Create(transform, "White charge center guide");
             if (!source.enabled || !source.gameObject.activeInHierarchy)
             {
                 telegraph.Hide(); shownAt = -1; return;

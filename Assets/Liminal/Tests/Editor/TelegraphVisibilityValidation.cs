@@ -103,7 +103,7 @@ namespace AcRoguelike.Liminal.Editor
                 owned.Add(oldRim);
                 var telegraph = Telegraph.Create(root.transform, "Warning under test");
                 var renderers = telegraph.GetComponentsInChildren<MeshRenderer>();
-                Require(renderers.Length == 1, "A warning must have only one outline renderer and no fill renderer.");
+                Require(renderers.Length == 1, "A warning must have only one center-guide renderer and no fill renderer.");
                 var fixedMaterials = new[] { renderers[0].sharedMaterial };
                 foreach (var filter in telegraph.GetComponentsInChildren<MeshFilter>()) owned.Add(filter.sharedMesh);
 
@@ -123,7 +123,7 @@ namespace AcRoguelike.Liminal.Editor
                         {
                             Draw(telegraph, shape, progress);
                             string key = shape + "_" + progress.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
-                            ValidateOutline(telegraph, key);
+                            ValidateCenterGuide(telegraph, key, shape);
                             var vertices = WorldVertices(telegraph);
                             if (surface == 0) referenceVertices[key] = vertices;
                             else Require(SameVertices(vertices, referenceVertices[key]), "Surface height moved the " + key + " attack footprint.");
@@ -146,16 +146,23 @@ namespace AcRoguelike.Liminal.Editor
                                 Save(image, after, names[surface] + "_" + key + "_after.png");
                                 Save(image, before, names[surface] + "_" + key + "_before.png");
                             }
-                            Require(result.visiblePixels > 120, names[surface] + " " + key + " thin outline is not visibly rendered.");
+                            int minimumPixels = shape == "circle" ? 12 : 60;
+                            Require(result.visiblePixels > minimumPixels, names[surface] + " " + key + " center guide is not visibly rendered.");
                             if (surface == 0)
-                                Require(result.previousPixels > 120, "Depth-tested outline did not render on ordinary floor; comparison is invalid.");
+                                Require(result.previousPixels > minimumPixels, "Depth-tested center guide did not render on ordinary floor; comparison is invalid.");
                             else
                                 Require(result.previousPixels < result.visiblePixels * .05f,
                                     names[surface] + " did not reproduce the legacy depth-occlusion bug.");
                             if (previousProgress != null)
-                                Require(result.progressChangedPixels > 100, names[surface] + " " + shape + " no longer shows charge progress.");
-                            Require(InteriorUnchanged(camera, after, hidden, shape == "fan" ? new Vector3(0, .038f, .1f) : new Vector3(0, .038f, 0)),
-                                names[surface] + " " + key + " fills its attack area instead of drawing only its edge.");
+                                Require(result.progressChangedPixels > minimumPixels, names[surface] + " " + shape + " no longer shows charge progress.");
+                            Require(!InteriorUnchanged(camera, after, hidden, new Vector3(0, .038f, 0)),
+                                names[surface] + " " + key + " does not mark the center of its attack area.");
+                            var interior = new Vector3(shape == "circle" ? .6f : .45f, .038f, 0);
+                            var edge = shape == "circle" ? new Vector3(2.8f, .038f, 0) :
+                                shape == "fan" ? new Vector3(Mathf.Sin(55 * Mathf.Deg2Rad) * 2, .038f, -1.8f + Mathf.Cos(55 * Mathf.Deg2Rad) * 2) :
+                                new Vector3(1.4f, .038f, 0);
+                            Require(InteriorUnchanged(camera, after, hidden, interior) && InteriorUnchanged(camera, after, hidden, edge),
+                                names[surface] + " " + key + " draws away from its center guide or still shows a perimeter.");
                             previousProgress = after;
                             telegraph.Hide();
                             Require(!telegraph.Visible && Changed(Capture(camera, image, target), hidden) < 8, "Hide left visible warning pixels.");
@@ -163,8 +170,8 @@ namespace AcRoguelike.Liminal.Editor
                     }
                 }
                 report.checks.Add("45 rendered circle/fan/line cases cover progress 0.15/0.55/0.98 on ordinary floor, actual Quiet Water, planks at 0.13/0.20 m and bridge at 0.97 m.");
-                report.checks.Add("Each raised surface reproduces depth-tested outline disappearance, while the overlay remains visible. Charge progress, Hide and world-space footprints are preserved.");
-                report.checks.Add("Every warning has one renderer, white vertex/material colors and only 0.035 m wide edge bands; interior floor pixels stay unchanged.");
+                report.checks.Add("Each raised surface reproduces depth-tested guide disappearance, while the overlay remains visible. Charge progress, Hide and world-space positions are preserved.");
+                report.checks.Add("Every warning has one renderer and white 0.035 m wide center guides. Fan/line warnings use one central line, circles use a compact central cross; perimeter and off-center interior pixels stay unchanged.");
 
                 Draw(telegraph, "circle", .55f);
                 foreach (var renderer in renderers) renderer.enabled = false;
@@ -231,14 +238,16 @@ namespace AcRoguelike.Liminal.Editor
                 var floor = go.transform.Find("RedFloor").GetComponent<Renderer>();
                 var safeOutline = go.transform.Find("SafeZoneOutline0").GetComponent<Telegraph>();
                 Require(!floor.enabled && !safe.enabled && safeOutline.Visible,
-                    "Field windup must show only a safe-zone outline, with no red floor or filled disc.");
-                ValidateOutline(safeOutline, "boss safe zone");
+                    "Field windup must show only a safe-zone center mark, with no red floor or filled disc.");
+                ValidateCenterGuide(safeOutline, "boss safe zone", "circle");
                 var withWhite = Capture(camera, image, target);
                 safeOutline.Hide();
                 var noField = Capture(camera, image, target);
-                Require(Changed(withWhite, noField) > 120, "White safe-zone outline is hidden by the raised bridge.");
-                Require(InteriorUnchanged(camera, withWhite, noField, new Vector3(0, .038f, 0)),
-                    "The safe-zone warning must leave its interior unfilled.");
+                Require(Changed(withWhite, noField) > 12, "White safe-zone center mark is hidden by the raised bridge.");
+                Require(!InteriorUnchanged(camera, withWhite, noField, new Vector3(0, .038f, 0)) &&
+                    InteriorUnchanged(camera, withWhite, noField, new Vector3(.6f, .038f, 0)) &&
+                    InteriorUnchanged(camera, withWhite, noField, new Vector3(2f, .038f, 0)),
+                    "The safe-zone warning must mark only its center, leaving its perimeter and off-center interior clear.");
                 typeof(TrafficLightRedField).GetMethod("Apply", PrivateInstance).Invoke(field, null);
                 Save(image, withWhite, "boss_white_safe_zone.png");
                 field.Judge();
@@ -260,7 +269,7 @@ namespace AcRoguelike.Liminal.Editor
                 Save(image, withGreen, "boss_green_safe_zone.png");
                 for (int i = 0; i < sources.Length; i++)
                     Require(EditorJsonUtility.ToJson(sources[i]) == snapshots[i], "Boss field modified an authored material.");
-                report.checks.Add("Boss windup shows only a thin white safe-zone outline above the bridge. Red danger fill and textured green safe ground appear at judgement; source materials are unchanged.");
+                report.checks.Add("Boss windup shows only a thin white safe-zone center cross above the bridge. Red danger fill and textured green safe ground appear at judgement; source materials are unchanged.");
             }
             finally
             {
@@ -282,20 +291,20 @@ namespace AcRoguelike.Liminal.Editor
             else telegraph.Line(new Vector3(0, 0, -2.2f), Vector3.forward, 4.4f, 1.4f, progress);
         }
 
-        static void ValidateOutline(Telegraph telegraph, string name)
+        static void ValidateCenterGuide(Telegraph telegraph, string name, string shape)
         {
-            Require(Mathf.Approximately(Telegraph.OutlineWidth, .035f), "Attack outlines must stay 0.035 m thin.");
+            Require(Mathf.Approximately(Telegraph.OutlineWidth, .035f), "Attack center guides must stay 0.035 m thin.");
             var renderers = telegraph.GetComponentsInChildren<MeshRenderer>();
             var filters = telegraph.GetComponentsInChildren<MeshFilter>();
-            Require(renderers.Length == 1 && filters.Length == 1, name + " must have one outline mesh and no fill mesh.");
+            Require(renderers.Length == 1 && filters.Length == 1, name + " must have one center-guide mesh and no fill mesh.");
             Color materialColor = renderers[0].sharedMaterial.GetColor("_BaseColor");
             Require(White(materialColor), name + " material must be white.");
             var mesh = filters[0].sharedMesh;
             var vertices = WorldVertices(telegraph);
             var colors = mesh.colors;
-            Require(vertices.Length > 0 && vertices.Length % 4 == 0 && mesh.triangles.Length == vertices.Length / 4 * 6,
-                name + " must contain only edge bands, without an interior fill.");
-            Require(colors.Length == vertices.Length, name + " must color every outline vertex.");
+            Require(vertices.Length == (shape == "circle" ? 8 : 4) && mesh.triangles.Length == vertices.Length / 4 * 6,
+                name + " must contain only one central line or two central cross strokes.");
+            Require(colors.Length == vertices.Length, name + " must color every center-guide vertex.");
             foreach (Color color in colors)
                 Require(White(color) && color.a >= .58f - .001f && color.a <= .95f + .001f,
                     name + " uses a colored or overbright warning vertex.");
@@ -303,7 +312,10 @@ namespace AcRoguelike.Liminal.Editor
             {
                 Require(Mathf.Abs(Vector3.Distance(vertices[i], vertices[i + 1]) - .035f) < .00001f &&
                     Mathf.Abs(Vector3.Distance(vertices[i + 2], vertices[i + 3]) - .035f) < .00001f,
-                    name + " contains a thick edge or a filled strip.");
+                    name + " contains a thick guide or a filled strip.");
+                if (shape == "circle")
+                    Require(Vector3.Distance((vertices[i] + vertices[i + 1]) * .5f, (vertices[i + 2] + vertices[i + 3]) * .5f) <= .501f,
+                        name + " center cross extends beyond its compact 0.5 m size.");
             }
         }
 

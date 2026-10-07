@@ -58,7 +58,7 @@ namespace AcRoguelike.StageConcepts.Editor
             AssetDatabase.SaveAssets();
             StageConceptGallery.Sync();
             StageConceptGallery.OpenGallery();
-            return "Rebuilt four theme dungeons (seven rooms each, five per run) and synced the shared room gallery.";
+            return "Rebuilt four theme dungeons (seven authored rooms each, four per run) and synced the shared room gallery.";
         }
 
         public static string RebuildOneTheme(int theme)
@@ -77,7 +77,7 @@ namespace AcRoguelike.StageConcepts.Editor
             if (!stage) { stage = Object.Instantiate(source); AssetDatabase.CreateAsset(stage, path); }
             stage.name = Keys[theme]; stage.stageId = "concept_" + Keys[theme].ToLowerInvariant();
             stage.title = StageConceptNavigator.Titles[theme];
-            stage.subtitle = "스테이지 1 기반 테마 실험 · 일곱 공간 중 다섯을 지나 출구를 찾아라";
+            stage.subtitle = "무작위 일반방 세 곳을 지나 고정된 마지막 방으로";
             stage.middleRoomCount = 3; stage.isBossStage = false; stage.ambientColor = Ambient[theme];
             EditorUtility.SetDirty(stage);
             return stage;

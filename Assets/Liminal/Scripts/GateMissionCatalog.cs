@@ -38,7 +38,7 @@ namespace AcRoguelike.Liminal
                 int count = 0;
                 if (stages != null)
                     foreach (var stage in stages)
-                        if (stage) count += Mathf.Max(0, stage.middleRoomCount) + 2;
+                        if (stage) count += Mathf.Max(0, stage.middleRoomCount) + 1;
                 return count;
             }
         }
@@ -49,7 +49,7 @@ namespace AcRoguelike.Liminal
             {
                 if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(destinationId) || StageCount == 0) return false;
                 foreach (var stage in stages)
-                    if (!stage || !stage.startRoom || !stage.endRoom) return false;
+                    if (!stage || !stage.endRoom) return false;
                 return true;
             }
         }

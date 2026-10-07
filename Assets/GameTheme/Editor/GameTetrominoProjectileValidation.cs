@@ -23,12 +23,12 @@ namespace AcRoguelike.GameTheme.Editor
                 float started = Time.time;
                 var deadline = new Deadline(3, "soft-drop acceleration");
                 while (Time.time - started < .25f) { deadline.Check(); arena.Step(); yield return null; }
-                Require(shot && shot.Speed < 3, "A soft-drop shot must start slowly.");
+                Require(shot && Mathf.Abs(shot.Speed - 1.32f) < .001f, "A soft-drop shot must start at 60 percent of its original speed.");
                 Vector3 slowPosition = shot.transform.position;
                 while (Time.time - started < 1.3f) { deadline.Check(); arena.Step(); yield return null; }
-                Require(shot && shot.Speed > 12 && Vector3.Distance(slowPosition, shot.transform.position) > 5,
-                    "A soft-drop shot must visibly accelerate after its slow opening.");
-                record?.Invoke("Soft-drop projectile: four cells, slow opening, then accelerated travel.");
+                Require(shot && Mathf.Abs(shot.Speed - 7.92f) < .001f && Vector3.Distance(slowPosition, shot.transform.position) > 3,
+                    "A soft-drop shot must retain its acceleration timing and reach 60 percent of its original fast speed.");
+                record?.Invoke("Soft-drop projectile: four cells, 1.32 m/s opening, unchanged acceleration timing, then 7.92 m/s travel.");
                 Object.DestroyImmediate(shot.gameObject);
 
                 arena.PlacePlayer(new Vector3(0, .05f, 6));
@@ -59,6 +59,7 @@ namespace AcRoguelike.GameTheme.Editor
                 arena.PlacePlayer(new Vector3(0, .05f, 12));
                 shot = TetrominoProjectile.Fire(new Vector3(0, 1, 0), Vector3.right, arena.Owner,
                     arena.Player, arena.Room, 9, TetrominoShape.I, true);
+                Require(Mathf.Abs(shot.Speed - 6.6f) < .001f, "A ricochet must move at 60 percent of its original speed.");
                 deadline = new Deadline(3, "four ricochets");
                 int observedBounces = 0;
                 Quaternion initialRotation = shot.transform.GetChild(0).localRotation;

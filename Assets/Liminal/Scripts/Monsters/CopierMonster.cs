@@ -96,13 +96,13 @@ namespace AcRoguelike.Liminal
                     }
                     IsWindingUp = false;
                     HideTelegraph();
-                    // Machine-gun spray across the fan, sweeping one way with a little scatter: pa-pa-pa-pak.
+                    // Sweep through three paper groups. Fixed gaps remain clear throughout the burst.
                     float t = (stateTime - fanWindup) / fanDuration;
                     int due = Mathf.Min(fanSheets, Mathf.FloorToInt(t * fanSheets) + 1);
                     while (fired < due)
                     {
-                        float u = fanSheets <= 1 ? .5f : fired / (fanSheets - 1f);
-                        float angle = Mathf.Lerp(-fanHalfAngle, fanHalfAngle, sweepSign > 0 ? u : 1 - u) + Random.Range(-4f, 4f);
+                        int slot = sweepSign > 0 ? fired : fanSheets - 1 - fired;
+                        float angle = EnemyFanPattern.Angle(slot, fanSheets, fanHalfAngle);
                         Fire(Quaternion.Euler(0, angle, 0) * aimForward, 10.5f, fanRange, fanDamage);
                         fired++;
                         kick = 1;

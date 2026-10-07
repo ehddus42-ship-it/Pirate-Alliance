@@ -10,7 +10,7 @@ namespace AcRoguelike.Liminal
         [Tooltip("Maximum health at the start of a run, before augments (permanent upgrades raise it).")]
         public int baseMaximum = 100;
         [Tooltip("After a dash ends, hits are still evaded (and count as a just dodge) for this long.")]
-        public float dodgeGrace = .1f;
+        public float dodgeGrace = .26f;
         public int Health { get; private set; } = 100;
         public bool IsAlive => Health > 0;
         public int JustDodges { get; private set; }

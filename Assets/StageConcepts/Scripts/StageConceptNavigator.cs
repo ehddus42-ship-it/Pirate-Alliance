@@ -44,7 +44,7 @@ namespace AcRoguelike.StageConcepts
             if (GUI.Button(new Rect(x, y, 246, 30), "테마 실험실  [TAB]", button)) panelOpen = !panelOpen;
             if (!panelOpen) return;
             GUI.Box(new Rect(x, y + 34, 246, 244), GUIContent.none);
-            GUI.Label(new Rect(x + 12, y + 41, 222, 52), "스테이지 1 규모 · 7개 방 중 5개\n선택하면 해당 던전을 새로 시작합니다.", label);
+            GUI.Label(new Rect(x + 12, y + 41, 222, 52), "일반방 3개 + 고정 끝 방\n선택하면 해당 던전을 새로 시작합니다.", label);
             for (int i = 0; i < Keys.Length; i++)
                 if (GUI.Button(new Rect(x + 12, y + 98 + i * 32, 222, 28), "F" + (i + 1) + "  " + Titles[i] + (i == theme ? "  •" : ""), button)) Open(i);
             GUI.Label(new Rect(x + 12, y + 232, 222, 42), "WASD 이동 · SHIFT 대시 · 휠 확대", label);

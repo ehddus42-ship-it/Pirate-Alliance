@@ -117,7 +117,7 @@ namespace AcRoguelike.Liminal
             Vector3 position = Position();
             Quaternion facing = camera ? camera.transform.rotation : Quaternion.identity;
             sparkle.SetPositionAndRotation(position, Quaternion.identity);
-            float size = Mathf.Lerp(.38f, .72f, pulse);
+            float size = Mathf.Lerp(.76f, 1.44f, pulse);
             // Build in camera/world space before converting back, including non-uniform owner scales.
             sparkle.localScale = Vector3.one;
             for (int i = 0; i < glintVertices.Length; i++)

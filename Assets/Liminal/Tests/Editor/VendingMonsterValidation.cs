@@ -129,7 +129,7 @@ namespace AcRoguelike.Liminal.EditorTests
                         Check(pausedCan&&Vector3.Distance(pausedCan.transform.position,frozenPosition)<.001f,"Pause freezes ballistic can movement.");
                         Time.timeScale=1;Go(9);break;
                     case 9:
-                        if(player.Health>=healthBefore&&elapsed<2)break;
+                        if(player.Health>=healthBefore&&elapsed<ProjectileTuning.ScaleFlightDuration(2))break;
                         Check(player.Health<healthBefore,"Thrown can hits the player with swept collision.");
                         Check(monster.CansThrown==1&&monster.CansGripped==1,"Animation events and frame-step fallback do not duplicate cans.");
                         report.charges=monster.ChargeCount;report.cansGripped=monster.CansGripped;report.cansThrown=monster.CansThrown;
@@ -140,7 +140,7 @@ namespace AcRoguelike.Liminal.EditorTests
                         wallTestCan.Launch(player.transform.position+Vector3.up*.85f,1.2f,20,monster.transform,player);
                         Go(10);break;
                     case 10:
-                        if(elapsed<1.5)break;
+                        if(elapsed<ProjectileTuning.ScaleFlightDuration(1.5f))break;
                         Check(!wallTestCan&&player.Health==healthBefore,"Thrown can is blocked by a solid wall without damaging the player.");
                         monster.Health.TakeDamage(monster.Health.maxHealth);Go(11);break;
                     case 11:

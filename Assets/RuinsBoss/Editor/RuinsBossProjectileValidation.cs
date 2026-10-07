@@ -23,6 +23,8 @@ namespace AcRoguelike.RuinsBoss.Editor
                     var shot = type == 0
                         ? RuinsBossProjectile.FireElectric(new Vector3(0, .9f, 0), Vector3.forward, arena.Owner, arena.Player, arena.Room, 9, 13)
                         : RuinsBossProjectile.FireHoming(new Vector3(0, .9f, 0), Vector3.forward, arena.Owner, arena.Player, arena.Room, 9, 13);
+                    Require(Mathf.Abs(shot.Speed - 7.8f) < .001f,
+                        "Both boss projectile factories must scale the supplied speed to 60 percent exactly once.");
                     var deadline = new Deadline(2, "thin wall");
                     while (shot && !shot.Finished)
                     {
@@ -48,7 +50,7 @@ namespace AcRoguelike.RuinsBoss.Editor
                 while (fast && !fast.Finished) { rangeDeadline.Check(); arena.Step(); yield return null; }
                 Require(fast.Finished && Mathf.Abs(fast.Travelled - 28) < .01f && fast.DamageAttempts == 0,
                     "A fast projectile must stop exactly at its lifetime range without a negative-distance follow-up sweep.");
-                record?.Invoke("A 200 m/s shot still expires at 28 m without overshoot or a second sweep beyond its range.");
+                record?.Invoke("A base 200 m/s shot travels at 120 m/s and still expires at 28 m without overshoot.");
 
                 arena.PlacePlayer(new Vector3(15, .05f, 20));
                 var missile = RuinsBossProjectile.FireHoming(new Vector3(0, .9f, 0), Vector3.forward,
@@ -106,8 +108,9 @@ namespace AcRoguelike.RuinsBoss.Editor
                 Vector3 landing = Vector3.zero;
                 var artillery = RuinsBossProjectile.LaunchArtillery(new Vector3(-8, 3, -5), landing, arena.Owner, arena.Player, arena.Room, 21);
                 Require(!artillery.WarningVisible && artillery.Impact.GetComponentsInChildren<Telegraph>(true).Length == 0
-                    && artillery.Impact.Radius == RuinsBossProjectile.ArtilleryRadius,
-                    "Artillery must preserve its damage footprint without a landing preview.");
+                    && artillery.Impact.Radius == RuinsBossProjectile.ArtilleryRadius
+                    && Mathf.Abs(artillery.Impact.Delay - 3f) < .001f,
+                    "Artillery must preserve its damage footprint and use a three-second flight without a landing preview.");
                 float firedAt = Time.time;
                 bool ascended = false, descending = false;
                 timeout = new Deadline(4, "locked artillery flight");
@@ -118,11 +121,14 @@ namespace AcRoguelike.RuinsBoss.Editor
                     descending |= artillery.Age > 1.2f && artillery.Direction.y < -.8f;
                     Require(artillery.LockedPoint == landing, "Artillery must not follow the target after launch.");
                     Require(!artillery.WarningVisible, "Artillery must remain free of landing previews throughout flight.");
+                    if (artillery.Age < RuinsBossProjectile.ArtilleryWarningSeconds)
+                        Require(!artillery.Impact.Exploded, "The impact must wait for the slowed missile's arrival.");
                     timeout.Check(); arena.Step(); yield return null;
                 }
-                Require(artillery.Finished && ascended && descending && Time.time - firedAt >= 1.5f && artillery.DamageAttempts == 0,
-                    "Artillery must rise, descend onto its fixed impact point after at least 1.5 seconds, and miss a player who left it.");
-                record?.Invoke("Artillery rises then falls onto a fixed 2.1 m footprint after 1.8 seconds without a landing preview; moving away avoids it.");
+                Require(artillery.Finished && ascended && descending
+                    && Time.time - firedAt >= RuinsBossProjectile.ArtilleryWarningSeconds - .001f && artillery.DamageAttempts == 0,
+                    "Artillery must rise, descend onto its fixed impact point after three seconds, and miss a player who left it.");
+                record?.Invoke("Artillery rises then falls onto a fixed 2.1 m footprint after three seconds without a landing preview; moving away avoids it.");
 
                 arena.PlacePlayer(new Vector3(0, .05f, 1));
                 health = arena.Player.Health;

@@ -46,7 +46,7 @@ namespace AcRoguelike.GameTheme.Editor
             var scenes=EditorBuildSettings.scenes.ToList();
             if(!scenes.Any(s=>s.path==ScenePath)) scenes.Add(new EditorBuildSettingsScene(ScenePath,true));
             EditorBuildSettings.scenes=scenes.ToArray(); AssetDatabase.SaveAssets();
-            Debug.Log("Game theme: eight room assets, five-room route ending in Drop Keeper, three voxel enemy roles, gate mission G06 built.");
+            Debug.Log("Game theme: eight room assets, four-room route ending in Drop Keeper, three voxel enemy roles, gate mission G06 built.");
         }
 
         public static void BuildAndValidate() { BuildAll(); GameThemeValidation.RunAll(); GameThemeOccluderValidation.RunBatch(); }

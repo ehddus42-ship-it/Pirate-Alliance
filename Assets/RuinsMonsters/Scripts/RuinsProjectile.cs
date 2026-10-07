@@ -39,7 +39,7 @@ namespace AcRoguelike.Ruins
             direction.y = 0;
             shot.direction = direction.sqrMagnitude > .0001f ? direction.normalized : Vector3.forward;
             shot.Energy = energy; shot.Damage = Mathf.Max(1, damage);
-            shot.Speed = energy ? 10.8f : 7.4f;
+            shot.Speed = ProjectileTuning.ScaleSpeed(energy ? 10.8f : 7.4f);
             shot.CollisionRadius = energy ? .18f : .30f;
             go.transform.rotation = Quaternion.LookRotation(shot.direction);
             shot.BuildVisual();

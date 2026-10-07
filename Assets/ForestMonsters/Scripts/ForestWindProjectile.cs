@@ -6,7 +6,7 @@ namespace AcRoguelike.Forest
 {
     public sealed class ForestWindProjectile : MonoBehaviour
     {
-        public float Speed => 6.4f;
+        public float Speed => ProjectileTuning.ScaleSpeed(6.4f);
         public float Radius => .68f;
         public float MaximumTravel => 15f;
         public float Travelled { get; private set; }

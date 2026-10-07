@@ -176,12 +176,12 @@ namespace AcRoguelike.GameTheme
 
         void FireVolley()
         {
-            // All three fans share the committed direction. The projectile itself switches from slow drop to fast drop.
+            // Every wave keeps the same two escape lanes around the committed direction.
             while (volley < 3 && elapsed >= volley * .25f)
             {
                 for (int shot = 0; shot < 3; shot++)
                 {
-                    Vector3 direction = Quaternion.Euler(0, (shot - 1) * 18 + (volley == 1 ? 5 : -2), 0) * aim;
+                    Vector3 direction = Quaternion.Euler(0, EnemyFanPattern.Angle(shot, 3, 36f), 0) * aim;
                     TetrominoShape shape = (TetrominoShape)(1 + (volley * 3 + shot) % 5);
                     TetrominoProjectile.Fire(transform.position + Vector3.up * 1.05f, direction, Health, player, room, volleyDamage, shape, false);
                     Shots++;

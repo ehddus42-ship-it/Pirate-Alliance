@@ -133,11 +133,11 @@ namespace AcRoguelike.RuinsBoss.Editor
             yield return Until(() => (run = Object.FindFirstObjectByType<LiminalRunDirector>()) && run.Lobby && run.Phase == LiminalRunPhase.Lobby, 20, "Lobby startup");
             var mission = run.AvailableMissions.Single(m => m.id == "ruins_clearance");
             Check(run.EnterMission(mission.id), "G-04 starts through the actual lobby.");
-            yield return Until(() => run.Rooms.Count == 5 && run.ActiveRoomIndex == 0, 10, "Ruins route startup");
-            Check(run.Rooms[4].GetComponent<RuinsBossArena>() && run.Rooms[4].kind == LiminalRoomKind.Boss,
+            yield return Until(() => run.Rooms.Count == 4 && run.ActiveRoomIndex == 0, 10, "Ruins route startup");
+            Check(run.Rooms[3].GetComponent<RuinsBossArena>() && run.Rooms[3].kind == LiminalRoomKind.Boss,
                 "G-04 retains three ordinary combat rooms and ends in the apocalypse boss arena.");
             motor = run.player.GetComponent<PlayerMotor>(); motor.SetAutomationInput(Vector2.zero, run.player.position + Vector3.forward, false);
-            for (int index = 1; index <= 3; index++)
+            for (int index = 0; index < 3; index++)
             {
                 int wanted = index;
                 motor.ResetAt(run.Rooms[index].playerSpawn.position + Vector3.up * .05f);
@@ -148,8 +148,8 @@ namespace AcRoguelike.RuinsBoss.Editor
                 HitFeedback.CancelHitStop();
                 yield return Until(() => run.LivingEnemyCount == 0, 5, "Ordinary room clear");
             }
-            var arena = run.Rooms[4]; motor.ResetAt(arena.playerSpawn.position + Vector3.up * .05f);
-            yield return Until(() => run.ActiveRoomIndex == 4 && run.LivingEnemyCount == 1, 8, "Boss room entry");
+            var arena = run.Rooms[3]; motor.ResetAt(arena.playerSpawn.position + Vector3.up * .05f);
+            yield return Until(() => run.ActiveRoomIndex == 3 && run.LivingEnemyCount == 1, 8, "Boss room entry");
             var boss = arena.GetComponent<RuinsBossArena>().Boss;
             Check(boss && arena.GetComponentsInChildren<TrafficLightBoss>().Length == 0 && arena.GetComponentsInChildren<AcRoguelike.Ruins.RuinsMonster>().Length == 0,
                 "Dedicated finale contains the electrical boss without office or ordinary monsters.");
@@ -247,16 +247,16 @@ namespace AcRoguelike.RuinsBoss.Editor
             yield return Seconds(.2f);
             Check(arena.GetComponentsInChildren<RuinsBossProjectile>().Length == 0 && arena.GetComponentsInChildren<RuinsBossImpact>().Length == 0,
                 "Defeat leaves no live missile or delayed explosion behind.");
-            Check(run.LivingEnemyCount == 0 && run.ClearedRoomCount == 5, "Defeating the sovereign clears the encounter without requiring dormant-machine kills.");
+            Check(run.LivingEnemyCount == 0 && run.ClearedRoomCount == 4, "Defeating the sovereign clears the encounter without requiring dormant-machine kills.");
             motor.ResetAt(arena.exit.position - arena.exit.forward * 2.5f + Vector3.up * .05f); yield return null;
             Check(run.ExitAvailable && run.TryUseExit() && run.Phase == LiminalRunPhase.Victory, "Boss defeat enables exit and mission Victory.");
             run.RetryMission(); yield return null;
-            Check(run.Phase == LiminalRunPhase.Exploring && run.Rooms.Count == 5 && run.Rooms[4].GetComponent<RuinsBossArena>(), "Retry restores the same apocalypse boss route.");
+            Check(run.Phase == LiminalRunPhase.Exploring && run.Rooms.Count == 4 && run.Rooms[3].GetComponent<RuinsBossArena>(), "Retry restores the same apocalypse boss route.");
             run.ReturnToLobby(); yield return null;
             Check(Object.FindObjectsByType<RuinsStormBoss>(FindObjectsSortMode.None).Length == 0, "Lobby return unloads the encounter.");
             Check(run.EnterMission("game_exhibition"), "G-06 remains available.");
-            yield return Until(() => run.Rooms.Count == 5, 8, "Game route");
-            Check(run.Rooms[4].roomId == "Game_08_Boss" && !run.Rooms[4].GetComponent<RuinsBossArena>(), "Other theme keeps its own boss arena.");
+            yield return Until(() => run.Rooms.Count == 4, 8, "Game route");
+            Check(run.Rooms[3].roomId == "Game_08_Boss" && !run.Rooms[3].GetComponent<RuinsBossArena>(), "Other theme keeps its own boss arena.");
             run.ReturnToLobby(); yield return null;
             var projectileChecks = RuinsBossProjectileValidation.Run(text => report.checks.Add(text));
             try { while (projectileChecks.MoveNext()) yield return projectileChecks.Current; }

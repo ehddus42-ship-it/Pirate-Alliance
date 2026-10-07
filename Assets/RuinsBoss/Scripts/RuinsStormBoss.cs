@@ -135,7 +135,7 @@ namespace AcRoguelike.RuinsBoss
             return true;
         }
 
-        /// <summary>0: rings, 1: twin spiral, 2: alternating fans. The clear lane is locked at windup start.</summary>
+        /// <summary>0: rings, 1: twin spiral, 2: alternating fans. Clear lanes are locked at windup start.</summary>
         public bool StartPattern(int requestedPattern)
         {
             if (!initialized || EncounterCancelled || !Health || !Health.IsAlive || !player || !player.IsAlive ||
@@ -197,6 +197,8 @@ namespace AcRoguelike.RuinsBoss
         void FireElectric(Vector3 direction, float speed)
         {
             if (SafeDirection(direction)) return;
+            // Filter the final direction so later rings and spiral/fan offsets cannot fill these lanes.
+            if (EnemyFanPattern.IsRadialGap(Vector3.SignedAngle(safeDirection, direction, Vector3.up))) return;
             var shot = RuinsBossProjectile.FireElectric(ElectricOrigin, direction, Health, player, room, bulletDamage, speed);
             if (shot) { projectiles.Add(shot); ElectricShots++; }
         }

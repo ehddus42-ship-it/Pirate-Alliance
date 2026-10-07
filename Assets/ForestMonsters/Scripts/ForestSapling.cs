@@ -59,7 +59,7 @@ namespace AcRoguelike.Forest
             float dt = Time.deltaTime; if (dt <= 0) return; elapsed += dt;
             if (State == ForestSaplingState.Thrown)
             {
-                float t = Mathf.Clamp01(elapsed / FlightTime);
+                float t = Mathf.Clamp01(elapsed / ProjectileTuning.ScaleFlightDuration(FlightTime));
                 Vector3 destination = Vector3.Lerp(launch, landing, t) + Vector3.up * (2f * Mathf.Sin(t * Mathf.PI));
                 Vector3 delta = destination - transform.position;
                 if (delta.sqrMagnitude > .0001f && ForestAttackUtility.Sweep(gameObject.scene.GetPhysicsScene(), room,

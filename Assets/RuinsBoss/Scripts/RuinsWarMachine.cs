@@ -129,7 +129,8 @@ namespace AcRoguelike.RuinsBoss
                         MoveBody(Vector3.zero);
                         while (volley < 2 && elapsed >= volley * .42f)
                         {
-                            Vector3 direction = Quaternion.Euler(0, volley == 0 ? -7 : 7, 0) * aim;
+                            // Leave a central lane even after the missile's limited homing turn.
+                            Vector3 direction = Quaternion.Euler(0, EnemyFanPattern.Angle(volley, 2, 32f), 0) * aim;
                             var shot = RuinsBossProjectile.FireHoming(transform.position + Vector3.up * 1.1f, direction, Health, player, room, missileDamage, 6.2f);
                             if (shot) { projectiles.Add(shot); Shots++; }
                             volley++;

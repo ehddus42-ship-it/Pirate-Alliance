@@ -56,7 +56,6 @@ namespace AcRoguelike.Liminal
         LiminalHud hud;
         LiminalLobby lobby;
         PlayerCombat combat;
-        int runsStarted;
         static readonly Vector3 LobbyOffset = new Vector3(0, 0, -420);
         float originalMoveSpeed, originalWalkSpeed, originalCooldown;
         int originalFlames;
@@ -86,7 +85,7 @@ namespace AcRoguelike.Liminal
             hud.Initialize(this, hudFont);
             initialized = true;
             if (startInLobby) EnterLobby();
-            else StartNewRun(seed);
+            else StartNewRun(CreateRunSeed());
         }
 
         public void StartNewRun(int newSeed)
@@ -175,6 +174,17 @@ namespace AcRoguelike.Liminal
             }
             generated = new GameObject("GeneratedRoute").transform;
             generated.SetParent(transform, false);
+            if (!preview && selection[0].GetComponent<AcRoguelike.GameTheme.GameThemeRoom>())
+            {
+                // The old arrival prefab owns the authored profile, but no longer belongs to the playable route.
+                var template = stages[index].startRoom
+                    ? stages[index].startRoom.GetComponent<AcRoguelike.GameTheme.GameThemeAtmosphere>() : null;
+                var environment = new GameObject("Game theme environment");
+                environment.SetActive(false);
+                environment.transform.SetParent(generated, false);
+                environment.AddComponent<AcRoguelike.GameTheme.GameThemeAtmosphere>().profile = template ? template.profile : null;
+                environment.SetActive(true);
+            }
             Vector3 attachPosition = transform.position;
             Quaternion attachRotation = transform.rotation;
             for (int i = 0; i < selection.Length; i++)
@@ -344,7 +354,7 @@ namespace AcRoguelike.Liminal
                 position.y = room.transform.position.y + .05f;
                 Vector3 look = (room.entry ? room.entry.position : room.transform.position) - position;
                 look.y = 0;
-                var kind = (AcRoguelike.Ruins.RuinsMonsterKind)((roomIndex - 1 + i) % 5);
+                var kind = (AcRoguelike.Ruins.RuinsMonsterKind)((roomIndex + i) % 5);
                 var monster = AcRoguelike.Ruins.RuinsMonster.Create(kind, position,
                     Quaternion.LookRotation(look.sqrMagnitude > .01f ? look : -room.transform.forward), room.transform);
                 if (!monster) throw new InvalidOperationException("폐허 테마 몬스터 프리팹이 없어: " + kind);
@@ -363,7 +373,7 @@ namespace AcRoguelike.Liminal
                 position.y = room.transform.position.y + .05f;
                 Vector3 look = (room.entry ? room.entry.position : room.transform.position) - position;
                 look.y = 0;
-                var kind = (AcRoguelike.Forest.ForestMonsterKind)((roomIndex - 1 + i) % 4);
+                var kind = (AcRoguelike.Forest.ForestMonsterKind)((roomIndex + i) % 4);
                 var monster = AcRoguelike.Forest.ForestMonsterFactory.Create(kind, position,
                     Quaternion.LookRotation(look.sqrMagnitude > .01f ? look : -room.transform.forward), room.transform);
                 if (!monster) throw new InvalidOperationException("숲 테마 몬스터 프리팹이 없어: " + kind);
@@ -616,8 +626,15 @@ namespace AcRoguelike.Liminal
         {
             if (lobby) lobby.Leave(player);
             if (player) HunterProgress.Apply(player.gameObject);
-            int runSeed = runsStarted++ == 0 ? seed : unchecked(seed + 104729 * runsStarted);
-            StartNewRun(runSeed);
+            StartNewRun(CreateRunSeed());
+        }
+
+        int CreateRunSeed()
+        {
+            // Every destination gets fresh variations, including its first departure and retries.
+            // Explicit StartNewRun(seed) and editor previews remain reproducible.
+            int runSeed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+            return runSeed == seed ? unchecked(runSeed + 1) : runSeed;
         }
 
         void ClearRoute()

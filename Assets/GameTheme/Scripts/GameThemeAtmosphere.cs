@@ -6,7 +6,7 @@ using UnityEngine.Rendering.Universal;
 namespace AcRoguelike.GameTheme
 {
     /// <summary>
-    /// First-room lease for the exhibition's environment. Works for lobby missions and standalone scenes.
+    /// Route lease for the exhibition's environment. Works for lobby missions and standalone scenes.
     /// No asset is modified: the previous scene lighting, volumes and framing return when the last lease ends.
     /// </summary>
     [DisallowMultipleComponent]

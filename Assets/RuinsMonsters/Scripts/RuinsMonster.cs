@@ -243,7 +243,8 @@ namespace AcRoguelike.Ruins
                 MoveBody(Vector3.zero);
                 if (volley == 0)
                 {
-                    for (int i = -1; i <= 1; i++) Fire(Quaternion.Euler(0, i * 14f, 0) * aim, true, 9);
+                    for (int i = 0; i < 3; i++)
+                        Fire(Quaternion.Euler(0, EnemyFanPattern.Angle(i, 3, 32f), 0) * aim, true, 9);
                     volley = 3;
                 }
                 if (elapsed >= .35f) Enter(RuinsMonsterState.Recovery);

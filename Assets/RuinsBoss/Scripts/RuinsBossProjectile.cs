@@ -12,8 +12,9 @@ namespace AcRoguelike.RuinsBoss
     public sealed class RuinsBossProjectile : MonoBehaviour
     {
         public const float HomingSeconds = .9f, HomingDegreesPerSecond = 10f;
-        public const float ArtilleryWarningSeconds = 1.8f, ArtilleryRadius = 2.1f;
+        public const float ArtilleryWarningSeconds = 1.8f / ProjectileTuning.SpeedMultiplier, ArtilleryRadius = 2.1f;
         public const float MaximumTravel = 28f;
+        const float MaximumAge = 9f / ProjectileTuning.SpeedMultiplier;
         public RuinsBossProjectileKind Kind { get; private set; }
         public bool Finished { get; private set; }
         public bool HitPlayer => Kind == RuinsBossProjectileKind.Artillery && !ReferenceEquals(impact, null) ? impact.HitPlayer : hitPlayer;
@@ -66,6 +67,8 @@ namespace AcRoguelike.RuinsBoss
             var shot = Create(origin, Vector3.up, owner, target, room, damage, 0, RuinsBossProjectileKind.Artillery);
             shot.launchOrigin = origin;
             shot.LockedPoint = lockedPoint;
+            float top = Mathf.Max(origin.y, lockedPoint.y) + 6;
+            shot.Speed = ProjectileTuning.ScaleSpeed(2 * (top - origin.y) / .65f);
             shot.impact = RuinsBossImpact.Create(lockedPoint, ArtilleryRadius, ArtilleryWarningSeconds, owner, target, room, damage);
             return shot;
         }
@@ -85,7 +88,8 @@ namespace AcRoguelike.RuinsBoss
                 shot.hadBrain = shot.ownerBoss || shot.ownerMachine;
             }
             shot.firedAt = Time.time;
-            shot.Kind = kind; shot.Damage = Mathf.Max(1, damage); shot.Speed = Mathf.Max(.1f, speed);
+            shot.Kind = kind; shot.Damage = Mathf.Max(1, damage);
+            shot.Speed = kind == RuinsBossProjectileKind.Artillery ? 0 : ProjectileTuning.ScaleSpeed(Mathf.Max(.1f, speed));
             if (kind != RuinsBossProjectileKind.Artillery) direction.y = 0;
             shot.direction = direction.sqrMagnitude > .0001f ? direction.normalized : Vector3.forward;
             go.transform.rotation = Quaternion.LookRotation(shot.direction);
@@ -158,8 +162,9 @@ namespace AcRoguelike.RuinsBoss
             {
                 // Use the same scaled clock as the warning; birth-frame Update order cannot
                 // detonate the target while the visual missile is still in mid-air.
+                float previousAge = age;
                 age = Mathf.Max(0, Time.time - firedAt);
-                FlyArtillery();
+                FlyArtillery(age - previousAge);
                 if (!impact || impact.Finished || impact.Exploded)
                 {
                     if (impact)
@@ -173,7 +178,7 @@ namespace AcRoguelike.RuinsBoss
             else
             {
                 // Small substeps keep the gentle curved guidance and sweep stable across frame rates.
-                float remaining = Mathf.Min(dt, Mathf.Max(0, 9 - age));
+                float remaining = Mathf.Min(dt, Mathf.Max(0, MaximumAge - age));
                 while (remaining > .00001f && !Finished)
                 {
                     float step = Mathf.Min(remaining, 1f / 60f);
@@ -187,7 +192,7 @@ namespace AcRoguelike.RuinsBoss
                     age += step; remaining -= step;
                     Advance(Mathf.Min(Speed * step, MaximumTravel - Travelled));
                 }
-                if (!Finished && (age >= 9 || Travelled >= MaximumTravel - .0001f)) Cancel();
+                if (!Finished && (age >= MaximumAge || Travelled >= MaximumTravel - .0001f)) Cancel();
             }
             if (!Finished) AnimateVisual();
         }
@@ -212,27 +217,30 @@ namespace AcRoguelike.RuinsBoss
             if (Travelled >= MaximumTravel - .0001f) Cancel();
         }
 
-        void FlyArtillery()
+        void FlyArtillery(float elapsed)
         {
             Vector3 before = transform.position;
             float top = Mathf.Max(launchOrigin.y, LockedPoint.y) + 6;
-            if (age < .65f)
+            // Retain the arc and phase proportions while extending flight and impact together.
+            float flightAge = age * ProjectileTuning.SpeedMultiplier;
+            if (flightAge < .65f)
             {
-                float t = Mathf.Clamp01(age / .65f);
+                float t = Mathf.Clamp01(flightAge / .65f);
                 transform.position = Vector3.Lerp(launchOrigin, new Vector3(launchOrigin.x, top, launchOrigin.z), 1 - (1 - t) * (1 - t));
             }
-            else if (age < 1.05f)
+            else if (flightAge < 1.05f)
             {
-                float t = Mathf.SmoothStep(0, 1, (age - .65f) / .4f);
+                float t = Mathf.SmoothStep(0, 1, (flightAge - .65f) / .4f);
                 transform.position = Vector3.Lerp(new Vector3(launchOrigin.x, top, launchOrigin.z),
                     new Vector3(LockedPoint.x, top, LockedPoint.z), t) + Vector3.up * (Mathf.Sin(t * Mathf.PI) * .7f);
             }
             else
             {
-                float t = Mathf.Clamp01((age - 1.05f) / .75f);
+                float t = Mathf.Clamp01((flightAge - 1.05f) / .75f);
                 transform.position = Vector3.Lerp(new Vector3(LockedPoint.x, top, LockedPoint.z), LockedPoint + Vector3.up * .12f, t * t);
             }
             Vector3 travel = transform.position - before;
+            if (elapsed > 0) Speed = travel.magnitude / elapsed;
             Travelled += travel.magnitude;
             if (travel.sqrMagnitude > .000001f) { direction = travel.normalized; transform.rotation = Quaternion.LookRotation(direction); }
             if (age >= ArtilleryWarningSeconds && visual) visual.gameObject.SetActive(false);

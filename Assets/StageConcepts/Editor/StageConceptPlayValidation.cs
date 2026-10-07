@@ -76,9 +76,13 @@ namespace AcRoguelike.StageConcepts.Editor
                         run=UnityEngine.Object.FindFirstObjectByType<LiminalRunDirector>();
                         if(!run || run.Rooms.Count==0) return;
                         Require(run.Phase==LiminalRunPhase.Exploring,"Run did not enter Exploring.");
-                        Require(run.Rooms.Count==5 && run.stages.Length==1,"Expected five rooms and one theme per scene.");
+                        Require(run.Rooms.Count==4 && run.stages.Length==1,"Expected four rooms and one theme per scene.");
                         Require(run.CurrentStage.stageId=="concept_"+StageConceptBuilder.Keys[theme].ToLowerInvariant(),"Wrong scene theme loaded.");
-                        Require(run.ActiveRoomIndex==0 && run.ClearedRoomCount==1,"Arrival room did not activate and clear.");
+                        Require(run.ActiveRoomIndex==0 && run.ClearedRoomCount==0 && run.Rooms[0].kind==LiminalRoomKind.Combat && run.LivingEnemyCount>0,
+                            "The first random combat room did not activate with living enemies.");
+                        Require(run.Rooms[3].roomId==run.CurrentStage.endRoom.roomId && run.Rooms.All(room=>room.roomId!=run.CurrentStage.startRoom.roomId),
+                            "The fixed final room changed or the removed arrival returned.");
+                        run.PlayerHealth.GrantInvulnerability(60);
                         motor=run.player.GetComponent<PlayerMotor>(); Require(motor,"Player motor missing.");
                         movementStart=motor.transform.position;
                         var forward=Vector3.ProjectOnPlane(motor.viewCamera.transform.forward,Vector3.up).normalized;
@@ -91,13 +95,13 @@ namespace AcRoguelike.StageConcepts.Editor
                         Require(motor.transform.position.z-movementStart.z>2,"CharacterController failed actual forward movement.");
                         Require(Mathf.Abs(motor.transform.position.y)<.4f,"Player fell through the floor.");
                         report.physicalMovementChecks++;
-                        wantedRoom=1; EnterRoom(); break;
+                        wantedRoom=0; Next("AwaitRoom"); break;
                     case "AwaitRoom":
                         if(run.ActiveRoomIndex!=wantedRoom) return;
                         var room=run.Rooms[wantedRoom];
-                        if(room.kind==LiminalRoomKind.Combat)
+                        if(room.kind==LiminalRoomKind.Combat || room.kind==LiminalRoomKind.Boss)
                         {
-                            Require(run.LivingEnemyCount==3,"Combat room must spawn three enemies.");
+                            Require(run.LivingEnemyCount>0,"Combat room must spawn enemies.");
                             Require(room.entranceGate.activeSelf && room.exitGate.activeSelf,"Combat gates did not lock.");
                             Require(!run.TryUseExit(),"Uncleared room allowed stage completion.");
                             foreach(var enemy in room.GetComponentsInChildren<TrainingEnemy>()) enemy.TakeDamage(enemy.maxHealth+1);
@@ -107,22 +111,23 @@ namespace AcRoguelike.StageConcepts.Editor
                     case "CheckClear":
                         Require(run.LivingEnemyCount==0,"Defeated enemies remain in room counter.");
                         Require(!run.Rooms[wantedRoom].entranceGate.activeSelf,"Entrance gate remains locked.");
-                        if(wantedRoom<4)
+                        if(wantedRoom<run.Rooms.Count-1)
                         {
                             Require(!run.Rooms[wantedRoom].exitGate.activeSelf,"Exit gate remains locked.");
                             wantedRoom++; EnterRoom();
                         }
                         else
                         {
-                            Require(run.ClearedRoomCount==5,"Not all five rooms cleared.");
-                            motor.ResetAt(run.Rooms[4].exit.position-Vector3.forward*2.5f+Vector3.up*.05f);
+                            Require(run.ClearedRoomCount==4,"Not all four rooms cleared.");
+                            var finalRoom=run.Rooms[run.Rooms.Count-1];
+                            motor.ResetAt(finalRoom.exit.position-finalRoom.exit.forward*2.5f+Vector3.up*.05f);
                             Next("Exit");
                         }
                         break;
                     case "Exit":
                         Require(run.ExitAvailable && run.TryUseExit(),"Cleared stage exit unavailable.");
                         Require(run.Phase==LiminalRunPhase.Victory,"Standalone theme must end in Victory.");
-                        report.completedThemes++; report.checks.Add(StageConceptBuilder.Keys[theme]+": scene loads, actual movement works, three combat rooms spawn enemies and unlock, five-room route ends in Victory.");
+                        report.completedThemes++; report.checks.Add(StageConceptBuilder.Keys[theme]+": scene loads directly into random combat, actual movement works, combat gates unlock, four-room route with fixed final room ends in Victory.");
                         Save();
                         if(++theme==4) Finish(null);
                         else { run=null; Time.timeScale=1; SceneManager.LoadScene("StageConcept_"+StageConceptBuilder.Keys[theme]); Next("AwaitRun"); }

@@ -11,6 +11,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.SceneManagement;
 
 namespace AcRoguelike.Liminal.EditorTests
 {
@@ -85,14 +86,20 @@ namespace AcRoguelike.Liminal.EditorTests
         }
 
         [MenuItem("AC Roguelike/Liminal/Validate Gate Missions and Lobby UI")]
-        public static void Run()
+        public static void Run() => BeginValidation(false);
+
+        /// <summary>Focused batch entry point: each contract is the first departure in a freshly loaded scene.</summary>
+        public static void RunRouteChecks() => BeginValidation(true);
+
+        static void BeginValidation(bool routesOnly)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Stop Play Mode first.");
             if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().isDirty)
                 throw new InvalidOperationException("Save or discard the open scene yourself before running validation.");
             string[] args = Environment.GetCommandLineArgs();
             int outputArg = Array.IndexOf(args, "-gateValidationOutput");
-            string output = outputArg >= 0 && outputArg + 1 < args.Length ? args[outputArg + 1] : "Documentation/Liminal/GateMissionValidation";
+            string output = outputArg >= 0 && outputArg + 1 < args.Length ? args[outputArg + 1] :
+                routesOnly ? "Documentation/Liminal/GateRouteValidation" : "Documentation/Liminal/GateMissionValidation";
             SessionState.SetString(Prefix + "Output", Path.GetFullPath(output));
             Directory.CreateDirectory(output);
             EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
@@ -115,6 +122,7 @@ namespace AcRoguelike.Liminal.EditorTests
             SessionState.SetString(Prefix + "Report", JsonUtility.ToJson(report));
             SessionState.SetBool(Prefix + "Active", true);
             SessionState.SetBool(Prefix + "Finished", false);
+            SessionState.SetBool(Prefix + "RoutesOnly", routesOnly);
             foreach (var key in keys) PlayerPrefs.DeleteKey(key);
             PlayerPrefs.SetInt("Hunter.MagicStones", 99999);
             PlayerPrefs.Save();
@@ -128,7 +136,7 @@ namespace AcRoguelike.Liminal.EditorTests
             {
                 report = JsonUtility.FromJson<Report>(SessionState.GetString(Prefix + "Report", "{}"));
                 started = EditorApplication.timeSinceStartup;
-                routine = Validate();
+                routine = SessionState.GetBool(Prefix + "RoutesOnly", false) ? ValidateFreshDepartures() : Validate();
             }
             if (mode == PlayModeStateChange.EnteredEditMode)
             {
@@ -230,11 +238,14 @@ namespace AcRoguelike.Liminal.EditorTests
             {
                 bool game = mission.id == "game_exhibition";
                 EnvironmentSnapshot beforeGame = game ? EnvironmentSnapshot.Take() : null;
+                int previousSeed = run.seed;
                 Require(run.EnterMission(mission.id), "Mission entry failed: " + mission.id + ": " + run.LastMissionError);
                 yield return null;
+                Require(run.seed != previousSeed, "Mission entry reused its previous seed: " + mission.id);
                 Require(run.ActiveMission == mission && run.CurrentStage == mission.stages[0], "Selected mission stage was not loaded.");
                 var expected = mission.stages[0].ChooseRoute(run.seed, 0);
                 Require(run.Rooms.Select(r => r.roomId).SequenceEqual(expected.Select(r => r.roomId)), "Loaded rooms differ from the selected mission route.");
+                CheckActiveDeparture(run, mission);
                 Require(mission.IsDiscovered && mission.DisplayDestination == mission.destinationName, "Successful arrival must discover the destination.");
                 Require(HunterProgress.IsStageDiscovered(mission.stages[0].stageId), "Loaded stage was not discovered.");
                 foreach (var unseen in mission.stages.Skip(1)) Require(!HunterProgress.IsStageDiscovered(unseen.stageId), "Unvisited later stage was exposed.");
@@ -289,7 +300,9 @@ namespace AcRoguelike.Liminal.EditorTests
                         Capture("G06-game-combat-1280x720");
                     }
                 }
+                int retrySeed = run.seed;
                 run.RetryMission();
+                Require(run.seed != retrySeed, "Mission retry reused its previous seed: " + mission.id);
                 Require(run.ActiveMission == mission && run.CurrentStage == mission.stages[0], "Retry must keep the selected mission.");
                 if (game) CheckGameEnvironment();
                 run.ReturnToLobby();
@@ -309,6 +322,102 @@ namespace AcRoguelike.Liminal.EditorTests
             CheckWindow(); Capture("gate-discovered-1280x720");
             Invoke(run.Lobby, "CloseWindow");
             report.checks.Add("Mission and upgrade dialogs checked at 1280x720 and 1024x768; screenshots captured.");
+        }
+
+        static IEnumerator ValidateFreshDepartures()
+        {
+            var catalog = Resources.Load<GateMissionCatalog>("GateMissions");
+            Require(catalog, "Missing gate mission catalog.");
+            var missions = catalog.Missions.Where(m => m != null && m.IsAvailable).ToArray();
+            foreach (var mission in missions)
+            {
+                Require(mission.StageCount == 1 && mission.RoomCount == 4,
+                    mission.id + ": a playable mission must contain three random rooms and its fixed final room.");
+                var stage = mission.stages[0];
+                var pool = new HashSet<LiminalRoom>(stage.roomPool.Where(room => room));
+                var visited = new HashSet<LiminalRoom>();
+                var firstRooms = new HashSet<LiminalRoom>();
+                var routes = new HashSet<string>();
+                for (int seed = 1; seed <= 128; seed++)
+                {
+                    var route = stage.ChooseRoute(seed, 0);
+                    string signature = string.Join("|", route.Select(room => room.roomId));
+                    Require(signature == string.Join("|", stage.ChooseRoute(seed, 0).Select(room => room.roomId)),
+                        mission.id + ": explicit seeds must remain reproducible.");
+                    Require(route.Length == 4 && route.Distinct().Count() == 4 && route[0].kind == LiminalRoomKind.Combat &&
+                        route[3] == stage.endRoom && !route.Contains(stage.startRoom) && route.Take(3).All(pool.Contains),
+                        mission.id + ": route must begin in combat, exclude the old arrival, select unique variations, and preserve the final room.");
+                    visited.UnionWith(route.Take(3)); firstRooms.Add(route[0]); routes.Add(signature);
+                }
+                Require(visited.SetEquals(pool) && routes.Count > 1,
+                    mission.id + ": all ordinary variations must remain reachable across different seeds.");
+                Require(pool.Count(room => room.kind == LiminalRoomKind.Combat) < 2 || firstRooms.Count > 1,
+                    mission.id + ": the first combat room must vary when multiple combat candidates exist.");
+                report.checks.Add(mission.id + ": 128 reproducible seeds, " + routes.Count + " routes, all " + pool.Count +
+                    " candidates reached, random first combat room, no arrival or repeated room, fixed final room.");
+            }
+
+            for (int index = 0; index < missions.Length; index++)
+            {
+                if (index > 0)
+                {
+                    EditorSceneManager.LoadSceneInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+                    yield return null;
+                }
+                LiminalRunDirector run = null;
+                for (int frame = 0; frame < 180; frame++)
+                {
+                    run = UnityEngine.Object.FindFirstObjectByType<LiminalRunDirector>();
+                    if (run && run.Lobby && run.Phase == LiminalRunPhase.Lobby) break;
+                    yield return null;
+                }
+                Require(run && run.Lobby && run.Phase == LiminalRunPhase.Lobby && run.Rooms.Count == 0,
+                    "Fresh scene must initialize in the lobby before each mission's first departure.");
+                // Reloading a scene can deserialize a fresh catalog and new managed mission definitions.
+                // Resolve by stable id, then check identity against the newly loaded catalog.
+                string missionId = missions[index].id;
+                var mission = run.AvailableMissions.Single(candidate => candidate.id == missionId);
+                bool game = mission.id == "game_exhibition";
+                var beforeGame = game ? EnvironmentSnapshot.Take() : null;
+                int initialSeed = run.seed;
+                Require(run.EnterMission(mission.id), "First mission departure failed: " + mission.id + ": " + run.LastMissionError);
+                Require(run.seed != initialSeed, mission.id + ": first departure reused the serialized seed.");
+                CheckActiveDeparture(run, mission);
+                yield return null;
+                if (game) CheckGameEnvironment();
+                int retrySeed = run.seed;
+                run.RetryMission();
+                Require(run.seed != retrySeed, mission.id + ": retry reused its previous seed.");
+                CheckActiveDeparture(run, mission);
+                yield return null;
+                if (game) CheckGameEnvironment();
+                run.ReturnToLobby();
+                yield return null;
+                Require(run.Phase == LiminalRunPhase.Lobby && run.Rooms.Count == 0, mission.id + ": return left a route active.");
+                if (game) beforeGame.RequireRestored();
+                report.checks.Add(mission.id + ": fresh-scene first departure and retry choose new seeds, activate first-room enemies and gates, preserve final room, and return to lobby" +
+                    (game ? "; game atmosphere has exactly one lease and restores on return." : "."));
+            }
+        }
+
+        static void CheckActiveDeparture(LiminalRunDirector run, GateMissionDefinition mission)
+        {
+            Require(run.ActiveMission == mission && run.CurrentStage == mission.stages[0] && run.Phase == LiminalRunPhase.Exploring,
+                mission.id + ": wrong active mission or phase.");
+            var expected = mission.stages[0].ChooseRoute(run.seed, 0);
+            Require(run.Rooms.Count == 4 && run.Rooms.Select(room => room.roomId).SequenceEqual(expected.Select(room => room.roomId)),
+                mission.id + ": live route differs from its four-room seeded route.");
+            Require(run.Rooms[3].roomId == mission.stages[0].endRoom.roomId &&
+                run.Rooms.All(room => !mission.stages[0].startRoom || room.roomId != mission.stages[0].startRoom.roomId),
+                mission.id + ": fixed final room changed or the removed arrival returned.");
+            var first = run.Rooms[0];
+            Require(run.ActiveRoomIndex == 0 && first.kind == LiminalRoomKind.Combat && run.ClearedRoomCount == 0 && run.LivingEnemyCount > 0,
+                mission.id + ": first room must immediately begin combat with living enemies.");
+            Require(first.entranceGate && first.entranceGate.activeSelf && first.exitGate && first.exitGate.activeSelf && !run.TryUseExit(),
+                mission.id + ": first combat room must lock both gates until enemies are defeated.");
+            var enemies = first.GetComponentsInChildren<TrainingEnemy>().Where(enemy => enemy.IsAlive).ToArray();
+            Require(enemies.Length == run.LivingEnemyCount && enemies.All(enemy => enemy.GetComponent<GateMissionEnemyModifier>()),
+                mission.id + ": first-room enemies were not counted or given mission modifiers.");
         }
 
         static object Invoke(object target, string method, params object[] args)
