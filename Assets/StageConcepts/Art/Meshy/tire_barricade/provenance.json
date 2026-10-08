@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "ruins",
+  "role": "prop",
+  "prompt": "Improvised survivor barricade of stacked old car tires and two rusty oil drums, a wooden pallet and a sheet of corrugated metal leaning against them, tied with chains. Low wide grounded barrier prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Worn black rubber tires, rusty red and blue oil drums, grey weathered pallet wood, corroded corrugated steel, chains, dust, rubber and rust normal detail.",
+  "preview_task_id": "01a102b8-a1d6-77ad-aa1f-7d0dad66c2dc",
+  "refine_task_id": "01a102ba-3eaa-7097-9034-7e1d72e1daab",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:06:27.233767+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    3.0,
+    1.4,
+    1.6
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 14548,
+    "vertices": 22394,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3278414,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1767965,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2289652,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9488700032234192,
+      -0.7114729285240173,
+      -0.48840099573135376
+    ],
+    "unity_bounds_max": [
+      0.9507279992103577,
+      0.7057290077209473,
+      0.4914730191230774
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 8229532
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

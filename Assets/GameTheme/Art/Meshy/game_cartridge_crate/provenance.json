@@ -1,0 +1,101 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "game-theme original arcade hardware",
+  "theme": "game",
+  "role": "prop",
+  "prompt": "Open wooden shipping crate overflowing with chunky blank game cartridges, a few cartridges spilled on the floor in front, one cartridge leaning against the crate. Compact grounded prop, no labels, logos or text. Single isolated complete environment prop, full object visible, no scene or floor plane, no characters. Clear silhouette from an elevated three-quarter game camera, precise bevelled hard surfaces, large clean forms, no tiny floating pieces, rich PBR normal detail, premium stylized game asset.",
+  "texture_prompt": "Pale stencilled pine crate boards, cartridges in navy, ivory, cyan, amber and raspberry plastic with blank label areas, metal contact edges, light dust, rich PBR detail.",
+  "preview_task_id": "01a102b3-3034-7346-8fb4-586ac7926c9b",
+  "refine_task_id": "01a102b4-cab5-751f-a4e8-f4e37766f8f6",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:00:50.500834+00:00",
+  "texture_attempt": 1,
+  "rejected_geometry": [],
+  "rejected_textures": [],
+  "requested_triangles": 7000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "target_size_m": [
+    1.6,
+    1.1,
+    1.2
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 6278,
+    "vertices": 11251,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 354843,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 152926,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/png",
+        "bytes": 1073052,
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.8252469897270203,
+      -0.6874259114265442,
+      -0.951585054397583
+    ],
+    "unity_bounds_max": [
+      0.8248569965362549,
+      0.6772619485855103,
+      0.9494070410728455
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 2018460
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 7748520
+}

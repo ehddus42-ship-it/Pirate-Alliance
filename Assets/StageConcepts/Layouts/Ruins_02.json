@@ -1,0 +1,883 @@
+{
+ "roomId": "Ruins_02",
+ "displayName": "끊어진 고가도로",
+ "kind": "Combat",
+ "notes": "Broken overpass: the route runs under a severed highway deck through a jam of buses and burned cars.",
+ "playerSpawn": {
+  "x": 0.0,
+  "y": 0.05,
+  "z": 4.0
+ },
+ "enemySpawns": [
+  {
+   "x": -0.8,
+   "y": 0.08,
+   "z": 15.5
+  },
+  {
+   "x": 2.8,
+   "y": 0.08,
+   "z": 22.8
+  },
+  {
+   "x": -3.4,
+   "y": 0.08,
+   "z": 29.0
+  }
+ ],
+ "decor": [
+  {
+   "material": "Ruins_Asphalt",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_Asphalt.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_AsphaltPatch",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_AsphaltPatch.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Brick",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_Brick.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Concrete",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_Concrete.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_ConcreteDark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_ConcreteDark.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Dirt",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_Dirt.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Ember",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_Ember.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Ruins_FadedRoadPaint",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_FadedRoadPaint.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Fire",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_Fire.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Ruins_RustedSteel",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_RustedSteel.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Sidewalk",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_Sidewalk.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Soot",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_Soot.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Water",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_Water.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_Weeds",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_Weeds.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Ruins_WindowVoid",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Ruins_02_Ruins_WindowVoid.asset",
+   "castShadows": true
+  }
+ ],
+ "models": [
+  {
+   "key": "broken_overpass",
+   "position": {
+    "x": 1.0,
+    "y": 0.0,
+    "z": 18.4
+   },
+   "yaw": 90,
+   "targetSize": {
+    "x": 14.0,
+    "y": 7.0,
+    "z": 9.5
+   },
+   "modelYaw": 0.0,
+   "scale": 7.3605378,
+   "offset": {
+    "x": -0.00465,
+    "y": 2.7285,
+    "z": 0.00218
+   }
+  },
+  {
+   "key": "wrecked_vehicle",
+   "position": {
+    "x": -4.4,
+    "y": 0.0,
+    "z": 8.5
+   },
+   "yaw": 12,
+   "targetSize": {
+    "x": 2.6,
+    "y": 2.4,
+    "z": 6.6
+   },
+   "modelYaw": 90.0,
+   "scale": 3.4671458,
+   "offset": {
+    "x": -0.00386,
+    "y": 1.16788,
+    "z": 0.00298
+   }
+  },
+  {
+   "key": "burned_car",
+   "position": {
+    "x": 3.8,
+    "y": 0.0,
+    "z": 11.5
+   },
+   "yaw": 200,
+   "targetSize": {
+    "x": 2.0,
+    "y": 1.5,
+    "z": 4.2
+   },
+   "modelYaw": 90.0,
+   "scale": 1.861086,
+   "offset": {
+    "x": 0.00185,
+    "y": 0.75003,
+    "z": 0.0002
+   }
+  },
+  {
+   "key": "burned_car",
+   "position": {
+    "x": -1.4,
+    "y": 0.0,
+    "z": 26.0
+   },
+   "yaw": 170,
+   "targetSize": {
+    "x": 2.0,
+    "y": 1.5,
+    "z": 4.2
+   },
+   "modelYaw": 90.0,
+   "scale": 1.861086,
+   "offset": {
+    "x": 0.00185,
+    "y": 0.75003,
+    "z": 0.0002
+   }
+  },
+  {
+   "key": "wrecked_vehicle",
+   "position": {
+    "x": 4.8,
+    "y": 0.0,
+    "z": 29.5
+   },
+   "yaw": 192,
+   "targetSize": {
+    "x": 2.6,
+    "y": 2.4,
+    "z": 6.6
+   },
+   "modelYaw": 90.0,
+   "scale": 3.4671458,
+   "offset": {
+    "x": -0.00386,
+    "y": 1.16788,
+    "z": 0.00298
+   }
+  },
+  {
+   "key": "burned_car",
+   "position": {
+    "x": -6.6,
+    "y": 0.0,
+    "z": 31.5
+   },
+   "yaw": 35,
+   "targetSize": {
+    "x": 2.0,
+    "y": 1.5,
+    "z": 4.2
+   },
+   "modelYaw": 90.0,
+   "scale": 1.861086,
+   "offset": {
+    "x": 0.00185,
+    "y": 0.75003,
+    "z": 0.0002
+   }
+  },
+  {
+   "key": "concrete_barricade",
+   "position": {
+    "x": -8.8,
+    "y": 0.0,
+    "z": 21.0
+   },
+   "yaw": 88,
+   "targetSize": {
+    "x": 3.2,
+    "y": 1.2,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 0.7933051,
+   "offset": {
+    "x": -0.00027,
+    "y": 0.60222,
+    "z": 0.00808
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 9.4,
+    "y": 0.0,
+    "z": 22.6
+   },
+   "yaw": 30,
+   "targetSize": {
+    "x": 4.0,
+    "y": 1.8,
+    "z": 3.4
+   },
+   "modelYaw": 0.0,
+   "scale": 1.8293083,
+   "offset": {
+    "x": -0.01073,
+    "y": 0.63195,
+    "z": 0.01442
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": -9.8,
+    "y": 0.0,
+    "z": 14.0
+   },
+   "yaw": 200,
+   "targetSize": {
+    "x": 3.6,
+    "y": 1.5,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6140956,
+   "offset": {
+    "x": -0.00946,
+    "y": 0.5576,
+    "z": 0.01272
+   }
+  },
+  {
+   "key": "ruined_tower",
+   "position": {
+    "x": 18.0,
+    "y": 0.0,
+    "z": 6.0
+   },
+   "yaw": 92.32118234162596,
+   "targetSize": {
+    "x": 8.5,
+    "y": 18.6797,
+    "z": 9.0
+   },
+   "modelYaw": 0.0,
+   "scale": 9.8406946,
+   "offset": {
+    "x": -0.01004,
+    "y": 9.36591,
+    "z": -0.00925
+   }
+  },
+  {
+   "key": "ruined_tower",
+   "position": {
+    "x": 19.0,
+    "y": 0.0,
+    "z": 30.0
+   },
+   "yaw": 80.4231081494308,
+   "targetSize": {
+    "x": 8.5,
+    "y": 17.74476,
+    "z": 9.0
+   },
+   "modelYaw": 0.0,
+   "scale": 9.3481561,
+   "offset": {
+    "x": -0.00954,
+    "y": 8.89714,
+    "z": -0.00879
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 14.28269,
+    "y": 0.0,
+    "z": 14.2411
+   },
+   "yaw": 138.72757019930137,
+   "targetSize": {
+    "x": 3.6,
+    "y": 1.5,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6140956,
+   "offset": {
+    "x": -0.00946,
+    "y": 0.5576,
+    "z": 0.01272
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 15.44209,
+    "y": 0.0,
+    "z": 14.77609
+   },
+   "yaw": 114.45313159720786,
+   "targetSize": {
+    "x": 3.6,
+    "y": 1.5,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6140956,
+   "offset": {
+    "x": -0.00946,
+    "y": 0.5576,
+    "z": 0.01272
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 14.74403,
+    "y": 0.0,
+    "z": 15.09324
+   },
+   "yaw": 165.65366516810576,
+   "targetSize": {
+    "x": 3.6,
+    "y": 1.5,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6140956,
+   "offset": {
+    "x": -0.00946,
+    "y": 0.5576,
+    "z": 0.01272
+   }
+  },
+  {
+   "key": "rubble_pile",
+   "position": {
+    "x": 15.71437,
+    "y": 0.0,
+    "z": 3.81294
+   },
+   "yaw": 11.002037612927428,
+   "targetSize": {
+    "x": 3.6,
+    "y": 1.5,
+    "z": 3.0
+   },
+   "modelYaw": 0.0,
+   "scale": 1.6140956,
+   "offset": {
+    "x": -0.00946,
+    "y": 0.5576,
+    "z": 0.01272
+   }
+  },
+  {
+   "key": "concrete_barricade",
+   "position": {
+    "x": -6.6,
+    "y": 0.0,
+    "z": 0.45
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 3.3,
+    "y": 1.25,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 0.8263594,
+   "offset": {
+    "x": -0.00028,
+    "y": 0.62731,
+    "z": 0.00842
+   }
+  },
+  {
+   "key": "concrete_barricade",
+   "position": {
+    "x": 6.6,
+    "y": 0.0,
+    "z": 0.45
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 3.3,
+    "y": 1.25,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 0.8263594,
+   "offset": {
+    "x": -0.00028,
+    "y": 0.62731,
+    "z": 0.00842
+   }
+  },
+  {
+   "key": "concrete_barricade",
+   "position": {
+    "x": -6.6,
+    "y": 0.0,
+    "z": 35.95
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 3.3,
+    "y": 1.25,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 0.8263594,
+   "offset": {
+    "x": -0.00028,
+    "y": 0.62731,
+    "z": 0.00842
+   }
+  },
+  {
+   "key": "concrete_barricade",
+   "position": {
+    "x": 6.6,
+    "y": 0.0,
+    "z": 35.95
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 3.3,
+    "y": 1.25,
+    "z": 0.9
+   },
+   "modelYaw": 0.0,
+   "scale": 0.8263594,
+   "offset": {
+    "x": -0.00028,
+    "y": 0.62731,
+    "z": 0.00842
+   }
+  },
+  {
+   "key": "tire_barricade",
+   "position": {
+    "x": -10.34471,
+    "y": 0.0,
+    "z": 5.88825
+   },
+   "yaw": 288.4643472030709,
+   "targetSize": {
+    "x": 2.736,
+    "y": 1.2768,
+    "z": 1.4592
+   },
+   "modelYaw": 0.0,
+   "scale": 0.9009304,
+   "offset": {
+    "x": -0.00084,
+    "y": 0.64099,
+    "z": -0.00138
+   }
+  },
+  {
+   "key": "overturned_dumpster",
+   "position": {
+    "x": 9.71606,
+    "y": 0.0,
+    "z": 27.75621
+   },
+   "yaw": 231.82612474656824,
+   "targetSize": {
+    "x": 2.52539,
+    "y": 1.35289,
+    "z": 1.62346
+   },
+   "modelYaw": 0.0,
+   "scale": 0.9092574,
+   "offset": {
+    "x": -0.02261,
+    "y": 0.62383,
+    "z": -0.01115
+   }
+  },
+  {
+   "key": "newsstand_ruin",
+   "position": {
+    "x": 8.54589,
+    "y": 0.0,
+    "z": 32.25203
+   },
+   "yaw": 138.57600813590386,
+   "targetSize": {
+    "x": 2.46156,
+    "y": 2.66669,
+    "z": 1.84617
+   },
+   "modelYaw": 0.0,
+   "scale": 1.2952204,
+   "offset": {
+    "x": -0.00054,
+    "y": 0.86967,
+    "z": -0.00663
+   }
+  }
+ ],
+ "colliders": [
+  {
+   "name": "Overpass pier -5",
+   "center": {
+    "x": -5.2,
+    "y": 1.5,
+    "z": 18.4
+   },
+   "size": {
+    "x": 1.6,
+    "y": 3.0,
+    "z": 2.2
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Overpass pier 7",
+   "center": {
+    "x": 6.8,
+    "y": 1.5,
+    "z": 18.4
+   },
+   "size": {
+    "x": 1.6,
+    "y": 3.0,
+    "z": 2.2
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Lamp post 9,6",
+   "center": {
+    "x": 8.6,
+    "y": 1.5,
+    "z": 6.0
+   },
+   "size": {
+    "x": 0.35,
+    "y": 3.0,
+    "z": 0.35
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Lamp post -9,30",
+   "center": {
+    "x": -8.6,
+    "y": 1.5,
+    "z": 30.0
+   },
+   "size": {
+    "x": 0.35,
+    "y": 3.0,
+    "z": 0.35
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Barrel 2,20",
+   "center": {
+    "x": 1.8,
+    "y": 0.5,
+    "z": 20.5
+   },
+   "size": {
+    "x": 0.6,
+    "y": 1.0,
+    "z": 0.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Debris band east",
+   "center": {
+    "x": 12.3,
+    "y": 1.0,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.0,
+    "z": 33.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Debris band west",
+   "center": {
+    "x": -12.35,
+    "y": 1.0,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.0,
+    "z": 33.6
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__wrecked_vehicle",
+   "center": {
+    "x": -4.4,
+    "y": 0.8,
+    "z": 8.5
+   },
+   "size": {
+    "x": 2.21,
+    "y": 1.6,
+    "z": 5.61
+   },
+   "yaw": 12.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__burned_car",
+   "center": {
+    "x": 3.8,
+    "y": 0.8,
+    "z": 11.5
+   },
+   "size": {
+    "x": 1.7,
+    "y": 1.6,
+    "z": 3.57
+   },
+   "yaw": 200.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__burned_car",
+   "center": {
+    "x": -1.4,
+    "y": 0.8,
+    "z": 26.0
+   },
+   "size": {
+    "x": 1.7,
+    "y": 1.6,
+    "z": 3.57
+   },
+   "yaw": 170.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__wrecked_vehicle",
+   "center": {
+    "x": 4.8,
+    "y": 0.8,
+    "z": 29.5
+   },
+   "size": {
+    "x": 2.21,
+    "y": 1.6,
+    "z": 5.61
+   },
+   "yaw": 192.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__burned_car",
+   "center": {
+    "x": -6.6,
+    "y": 0.8,
+    "z": 31.5
+   },
+   "size": {
+    "x": 1.7,
+    "y": 1.6,
+    "z": 3.57
+   },
+   "yaw": 35.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__concrete_barricade",
+   "center": {
+    "x": -8.8,
+    "y": 0.6,
+    "z": 21.0
+   },
+   "size": {
+    "x": 3.0,
+    "y": 1.2,
+    "z": 0.8
+   },
+   "yaw": 88.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__rubble_pile",
+   "center": {
+    "x": 9.4,
+    "y": 0.8,
+    "z": 22.6
+   },
+   "size": {
+    "x": 3.0,
+    "y": 1.6,
+    "z": 2.4
+   },
+   "yaw": 30.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__rubble_pile",
+   "center": {
+    "x": -9.8,
+    "y": 0.7,
+    "z": 14.0
+   },
+   "size": {
+    "x": 2.6,
+    "y": 1.4,
+    "z": 2.2
+   },
+   "yaw": 200.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__tire_barricade",
+   "center": {
+    "x": -10.34471,
+    "y": 0.6384,
+    "z": 5.88825
+   },
+   "size": {
+    "x": 1.12953,
+    "y": 1.2768,
+    "z": 0.58265
+   },
+   "yaw": 288.4643,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__overturned_dumpster",
+   "center": {
+    "x": 9.71606,
+    "y": 0.61954,
+    "z": 27.75621
+   },
+   "size": {
+    "x": 1.10934,
+    "y": 1.23907,
+    "z": 1.07149
+   },
+   "yaw": 231.8261,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__newsstand_ruin",
+   "center": {
+    "x": 8.54589,
+    "y": 0.87009,
+    "z": 32.25203
+   },
+   "size": {
+    "x": 1.62463,
+    "y": 1.74018,
+    "z": 0.80874
+   },
+   "yaw": 138.576,
+   "pitch": 0.0,
+   "walkable": false
+  }
+ ],
+ "lights": [
+  {
+   "name": "Streetlight 9,6",
+   "position": {
+    "x": 7.4,
+    "y": 4.0,
+    "z": 6.0
+   },
+   "color": "#ffb46a",
+   "intensity": 1.7,
+   "range": 8.5
+  },
+  {
+   "name": "Barrel fire 2,20",
+   "position": {
+    "x": 1.8,
+    "y": 1.4,
+    "z": 20.5
+   },
+   "color": "#ff8a3a",
+   "intensity": 2.0,
+   "range": 7.0
+  }
+ ]
+}

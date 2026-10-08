@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "ruins",
+  "role": "prop",
+  "prompt": "Large metal city dumpster knocked over on its side, heavy lid hanging open, spilled trash bags, crushed boxes and scattered debris pouring out onto the ground in front of it, one small wheel bent. Solid chunky grounded urban debris prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Dented dark green painted steel with heavy rust streaks and scratches, black and grey trash bags, soggy brown cardboard, dust and grime, no text or logos, detailed metal normal map.",
+  "preview_task_id": "01a102c2-2d4b-720c-b2da-ded3f9234d5e",
+  "refine_task_id": "01a102c3-cc3f-75d1-abd0-55e5a67a0392",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:17:15.016027+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.8,
+    1.5,
+    1.8
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 15047,
+    "vertices": 25979,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3576782,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2414558,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2371467,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.8994209170341492,
+      -0.6860869526863098,
+      -0.8804728984832764
+    ],
+    "unity_bounds_max": [
+      0.9491448998451233,
+      0.6766419410705566,
+      0.9050089716911316
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 9376996
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

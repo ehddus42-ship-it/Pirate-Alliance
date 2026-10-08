@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "ruins",
+  "role": "landmark",
+  "prompt": "Abandoned roadside gas station canopy ruin, a wide flat roof canopy on four square steel columns, one front corner of the roof collapsed and hanging down, two old fuel pumps on a small concrete island beneath, broken light panels under the canopy. Post apocalyptic Earth, open structure, no signs, no text. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Faded white and teal painted metal canopy with rust streaks, dirty grey concrete island, sun bleached fuel pumps with cracked blank display panels, rust, dust and weeds at the base, fine weathered normal detail.",
+  "preview_task_id": "01a0f2c8-853a-706a-8048-01e6e1837b9a",
+  "refine_task_id": "01a0f2c9-d04b-75f3-9701-453d8662f081",
+  "attempt": 1,
+  "created_utc": "2026-09-30T14:50:14.119341+00:00",
+  "requested_triangles": 30000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    9.0,
+    5.2,
+    6.5
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 26207,
+    "vertices": 32405,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3664485,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2129119,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2795068,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9508299827575684,
+      -0.5258869528770447,
+      -0.9518530964851379
+    ],
+    "unity_bounds_max": [
+      0.9522100687026978,
+      0.5246319770812988,
+      0.9512500166893005
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 9942332
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

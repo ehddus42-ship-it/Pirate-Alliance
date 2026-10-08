@@ -106,7 +106,9 @@ namespace AcRoguelike.Validation
                 Move(Vector2.zero, false, true);
                 yield return Wait(motor.dashDuration + .12f);
                 float distance = Vector3.ProjectOnPlane(motor.transform.position - dashStart, Vector3.up).magnitude;
-                float expectedDistance = motor.dashSpeed * motor.dashDuration;
+                // The dash covers speed x duration, then slides out from its exit speed at the motor's deceleration.
+                float exitSpeed = Mathf.Min(motor.DashExitSpeed, motor.moveSpeed);
+                float expectedDistance = motor.dashSpeed * motor.dashDuration + exitSpeed * exitSpeed / (2f * Mathf.Max(.01f, motor.deceleration));
                 Check("Free dash distance", motor.DashCount == dashCount + 1 && Mathf.Abs(distance - expectedDistance) < .3f && !motor.IsDashing,
                     expectedDistance.ToString("F3") + " m +/- 0.30; exactly one dash; finished", distance.ToString("F3") + " m; dash delta=" + (motor.DashCount - dashCount) + "; active=" + motor.IsDashing);
 
@@ -141,7 +143,8 @@ namespace AcRoguelike.Validation
                 var observedIndices = new HashSet<int>();
                 combat.SetAutomationInput(true, true);
                 float comboWait = 0;
-                while (combat.AttackCount - attacksBefore < 3 && comboWait < 6)
+                int comboLength = combat.ComboLength;
+                while (combat.AttackCount - attacksBefore < comboLength && comboWait < 8)
                 {
                     yield return Wait(.04f);
                     comboWait += .04f;
@@ -156,9 +159,9 @@ namespace AcRoguelike.Validation
                 }
                 yield return Wait(.6f);
                 int attackDelta = combat.AttackCount - attacksBefore, castDelta = caster.CastCount - castsBefore;
-                Check("Three-hit combo and projectiles", attackDelta == 3 && castDelta == 3 && combat.CompletedComboCount == combosBefore + 1
-                    && observedIndices.Count == 3 && target.Health < target.maxHealth && !combat.IsAttacking,
-                    "attack indices 0/1/2; exactly 3 attacks and 3 casts; one completed combo; target damaged",
+                Check("Full katana combo hits", attackDelta == comboLength && castDelta == comboLength && combat.CompletedComboCount == combosBefore + 1
+                    && observedIndices.Count == comboLength && target.Health < target.maxHealth && !combat.IsAttacking,
+                    "every attack index; one cast per attack; one completed combo; target damaged",
                     "attacks=" + attackDelta + "; casts=" + castDelta + "; observed states=" + observedIndices.Count
                     + "; combos=" + (combat.CompletedComboCount - combosBefore) + "; damage=" + (target.maxHealth - target.Health));
 

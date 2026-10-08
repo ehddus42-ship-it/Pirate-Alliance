@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "digital",
+  "role": "prop",
+  "prompt": "Hexagonal metal projector pedestal with a glowing emitter ring on top, a solid floating translucent wireframe cube hologram hovering just above it, cooling vents and small panels on the sides. Compact sci-fi prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Dark graphite metal with bevelled edges, electric cyan emitter ring and hologram, thin magenta trim lights, small grey vents, precise hard surface normal detail.",
+  "preview_task_id": "01a102b3-8621-71ce-86ce-98f59311e8c5",
+  "refine_task_id": "01a102b5-200c-72b5-872e-e5ca5386ff47",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:01:11.510432+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    1.4,
+    1.9,
+    1.4
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 14305,
+    "vertices": 26270,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 2612901,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2265319,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2059737,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.6954100131988525,
+      -0.950827956199646,
+      -0.607836902141571
+    ],
+    "unity_bounds_max": [
+      0.6950259804725647,
+      0.9443809390068054,
+      0.611564040184021
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 7952584
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

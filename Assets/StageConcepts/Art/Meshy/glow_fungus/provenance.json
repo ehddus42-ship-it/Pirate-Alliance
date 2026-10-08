@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "cave",
+  "role": "prop",
+  "prompt": "Cluster of bioluminescent cave fungi growing on a low rock, several large flat shelf mushrooms stacked on the rock sides, a group of tall thin-stemmed round capped mushrooms on top, small glowing spore spheres, organic alien underground growth. Compact grounded prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Dark slate rock, luminous cyan and teal fungus caps with pale undersides, faint violet gills, glowing spore dots, moist surfaces, fine organic normal detail.",
+  "preview_task_id": "01a0f2cf-efb5-777b-b986-a256b85a7a9d",
+  "refine_task_id": "01a0f2d2-7dae-7581-b0ef-4320be517f72",
+  "attempt": 1,
+  "created_utc": "2026-09-30T14:59:42.545798+00:00",
+  "requested_triangles": 16000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.6,
+    2.4,
+    2.4
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 16549,
+    "vertices": 22110,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3388839,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1853267,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2401007,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9509600400924683,
+      -0.7925689816474915,
+      -0.7248799204826355
+    ],
+    "unity_bounds_max": [
+      0.9515620470046997,
+      0.7905950546264648,
+      0.7221711277961731
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 8551536
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

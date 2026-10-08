@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "digital",
+  "role": "prop",
+  "prompt": "Thick bundle of heavy data cables snaking along the floor into a chunky rectangular junction box with glowing status lights, cable clamps and connector plugs, a few cables lifting in a low arch. Long low floor prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Matte black and gunmetal cable sheaths, glowing cyan and violet data lines along the cables, dark grey metal junction box with green status LEDs, yellow and black warning stripes, fine panel normal detail.",
+  "preview_task_id": "01a102b3-3666-7178-9cda-509ae150ce24",
+  "refine_task_id": "01a102b6-12ce-7416-b25a-14b439dce916",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:02:34.786246+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    4.0,
+    0.9,
+    1.8
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 15179,
+    "vertices": 30130,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 2091801,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1537346,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1764604,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9483040571212769,
+      -0.7625330686569214,
+      -0.6684750318527222
+    ],
+    "unity_bounds_max": [
+      0.9497820138931274,
+      0.7544620037078857,
+      0.6830230355262756
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 6542388
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

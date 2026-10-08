@@ -1,0 +1,102 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "game-theme original arcade hardware",
+  "theme": "game",
+  "role": "landmark",
+  "prompt": "Colossal original handheld game console standing upright as an architectural monument, tall thick rectangular body with stepped beveled corners, large deeply inset square screen on upper half, oversized raised plus shaped directional pad lower left, three large diagonal circular buttons lower right, three simple speaker slots near bottom. Recognizable retro hardware silhouette, voxel-like geometric construction. No letters or logos. Single isolated complete environment prop, full object visible, no scene or floor plane, no characters. Clear silhouette from an elevated three-quarter game camera, precise bevelled hard surfaces, large clean forms, no tiny floating pieces, rich PBR normal detail, premium stylized game asset.",
+  "texture_prompt": "Warm ivory slightly aged polymer front shell with midnight navy side frame, cyan screen with glowing abstract pixel constellation, raspberry directional pad, amber circular action buttons, dark recessed speaker slots, tiny manufacturing seams and slight surface wear. Refined PBR plastic and metal.",
+  "preview_task_id": "01a100ab-b294-70b4-bca0-1090e50d7b9a",
+  "refine_task_id": "01a100ad-4a0a-70e8-a864-f0ed644eb206",
+  "attempt": 1,
+  "created_utc": "2026-10-03T07:32:43.212140+00:00",
+  "requested_triangles": 10000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    4.0,
+    6.8,
+    1.7
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 6235,
+    "vertices": 8944,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 1020291,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 536396,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/png",
+        "bytes": 3465337,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.48212501406669617,
+      -0.951962947845459,
+      -0.2017669379711151
+    ],
+    "unity_bounds_max": [
+      0.48300400376319885,
+      0.9509870409965515,
+      0.20081806182861328
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 5385300
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 2048px; tangent normals renormalized; binary payload compactly repacked.",
+  "review": "Meshy geometry and PBR thumbnails visually inspected; accepted for Unity in-room placement review.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 6775740,
+  "review_notes": "Strong handheld silhouette and broad screen, accepted as distant landmark. Screen faces must be oriented to the game camera.",
+  "sha256": "765a425c01bc1fdb259755ab3d4b64683eba7cc55da9ea61d1993e000b253284",
+  "unity_front_axis": "+Z",
+  "orientation_review": "Compared coarse GLB projections from Unity axis views; glTF X mirrored for glTFast. Final camera visibility is checked in Unity."
+}

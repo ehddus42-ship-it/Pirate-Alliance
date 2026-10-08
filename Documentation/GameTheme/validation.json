@@ -1,0 +1,1453 @@
+{
+    "status": "passed",
+    "utc": "2026-10-04T12:21:58.0475947Z",
+    "unityVersion": "6000.3.19f1",
+    "triangleScope": "Every active placed static/skinned scenery mesh including architecture. Player and runtime enemies excluded; not an FPS measurement.",
+    "captureScope": "Actual Unity URP renders in isolated Edit Mode scenes: overview and gameplay-camera framing, with the player. Runtime combat is verified separately.",
+    "expectedRooms": 8,
+    "passedRooms": 8,
+    "captures": 16,
+    "roomTriangleBudget": 337270,
+    "maximumRouteTriangleBudget": 1476948,
+    "maximumRouteTriangles": 351267,
+    "uniqueMeshTriangles": 226906,
+    "distinctSeededRoutes": 42,
+    "openScenesUnchanged": true,
+    "rooms": [
+        {
+            "roomId": "Game_01",
+            "path": "Assets/GameTheme/Prefabs/Rooms/Game_01.prefab",
+            "status": "passed",
+            "placedTriangles": 110121,
+            "renderers": 40,
+            "materials": 18,
+            "colliders": 19,
+            "meshColliders": 0,
+            "lights": 3,
+            "realtimeShadowLights": 0,
+            "meshyInstances": 14,
+            "sampledCells": 3796,
+            "walkableCells": 3354,
+            "reachedCells": 3338,
+            "reachableTargets": 13,
+            "capturePoint": {
+                "x": -0.25,
+                "y": 0.0,
+                "z": 17.75
+            },
+            "traversalFailures": [],
+            "enemySpawnChecks": [],
+            "errors": []
+        },
+        {
+            "roomId": "Game_02",
+            "path": "Assets/GameTheme/Prefabs/Rooms/Game_02.prefab",
+            "status": "passed",
+            "placedTriangles": 50198,
+            "renderers": 31,
+            "materials": 17,
+            "colliders": 82,
+            "meshColliders": 0,
+            "lights": 3,
+            "realtimeShadowLights": 0,
+            "meshyInstances": 3,
+            "sampledCells": 3796,
+            "walkableCells": 3173,
+            "reachedCells": 2522,
+            "reachableTargets": 6,
+            "capturePoint": {
+                "x": -0.25,
+                "y": 0.0,
+                "z": 17.75
+            },
+            "traversalFailures": [],
+            "enemySpawnChecks": [
+                {
+                    "spawn": "Enemy_A",
+                    "role": "PixelMaw",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/PixelMaw.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": 0.0,
+                        "y": 0.05000000074505806,
+                        "z": 13.0
+                    },
+                    "radius": 0.5799999833106995,
+                    "height": 1.649999976158142,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.050000011920928958,
+                    "blockingObjects": []
+                },
+                {
+                    "spawn": "Enemy_B",
+                    "role": "BitSentry",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/BitSentry.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": 1.0,
+                        "y": 0.05000000074505806,
+                        "z": 22.0
+                    },
+                    "radius": 0.5799999833106995,
+                    "height": 1.7200000286102296,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.050000011920928958,
+                    "blockingObjects": []
+                },
+                {
+                    "spawn": "Enemy_C",
+                    "role": "PixelMaw",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/PixelMaw.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": -1.0,
+                        "y": 0.05000000074505806,
+                        "z": 29.0
+                    },
+                    "radius": 0.5799999833106995,
+                    "height": 1.649999976158142,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.050000011920928958,
+                    "blockingObjects": []
+                }
+            ],
+            "errors": []
+        },
+        {
+            "roomId": "Game_03",
+            "path": "Assets/GameTheme/Prefabs/Rooms/Game_03.prefab",
+            "status": "passed",
+            "placedTriangles": 36608,
+            "renderers": 30,
+            "materials": 16,
+            "colliders": 33,
+            "meshColliders": 0,
+            "lights": 3,
+            "realtimeShadowLights": 0,
+            "meshyInstances": 2,
+            "sampledCells": 3796,
+            "walkableCells": 3329,
+            "reachedCells": 3195,
+            "reachableTargets": 6,
+            "capturePoint": {
+                "x": -0.25,
+                "y": 0.0,
+                "z": 16.25
+            },
+            "traversalFailures": [],
+            "enemySpawnChecks": [
+                {
+                    "spawn": "Enemy_A",
+                    "role": "StackGuardian",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/StackGuardian.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": -3.0,
+                        "y": 0.05000000074505806,
+                        "z": 14.0
+                    },
+                    "radius": 0.7200000286102295,
+                    "height": 2.6500000953674318,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.04999995231628418,
+                    "blockingObjects": []
+                },
+                {
+                    "spawn": "Enemy_B",
+                    "role": "BitSentry",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/BitSentry.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": 4.0,
+                        "y": 0.05000000074505806,
+                        "z": 25.0
+                    },
+                    "radius": 0.5799999833106995,
+                    "height": 1.7200000286102296,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.050000011920928958,
+                    "blockingObjects": []
+                },
+                {
+                    "spawn": "Enemy_C",
+                    "role": "PixelMaw",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/PixelMaw.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": -1.0,
+                        "y": 0.05000000074505806,
+                        "z": 29.0
+                    },
+                    "radius": 0.5799999833106995,
+                    "height": 1.649999976158142,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.050000011920928958,
+                    "blockingObjects": []
+                }
+            ],
+            "errors": []
+        },
+        {
+            "roomId": "Game_04",
+            "path": "Assets/GameTheme/Prefabs/Rooms/Game_04.prefab",
+            "status": "passed",
+            "placedTriangles": 128434,
+            "renderers": 42,
+            "materials": 18,
+            "colliders": 20,
+            "meshColliders": 0,
+            "lights": 3,
+            "realtimeShadowLights": 0,
+            "meshyInstances": 16,
+            "sampledCells": 3796,
+            "walkableCells": 3558,
+            "reachedCells": 3540,
+            "reachableTargets": 6,
+            "capturePoint": {
+                "x": -0.25,
+                "y": 0.0,
+                "z": 17.75
+            },
+            "traversalFailures": [],
+            "enemySpawnChecks": [
+                {
+                    "spawn": "Enemy_A",
+                    "role": "BitSentry",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/BitSentry.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": -3.0,
+                        "y": 0.05000000074505806,
+                        "z": 14.0
+                    },
+                    "radius": 0.5799999833106995,
+                    "height": 1.7200000286102296,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.050000011920928958,
+                    "blockingObjects": []
+                },
+                {
+                    "spawn": "Enemy_B",
+                    "role": "PixelMaw",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/PixelMaw.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": 3.0,
+                        "y": 0.05000000074505806,
+                        "z": 23.0
+                    },
+                    "radius": 0.5799999833106995,
+                    "height": 1.649999976158142,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.050000011920928958,
+                    "blockingObjects": []
+                },
+                {
+                    "spawn": "Enemy_C",
+                    "role": "StackGuardian",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/StackGuardian.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": -1.0,
+                        "y": 0.05000000074505806,
+                        "z": 29.0
+                    },
+                    "radius": 0.7200000286102295,
+                    "height": 2.6500000953674318,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.04999995231628418,
+                    "blockingObjects": []
+                }
+            ],
+            "errors": []
+        },
+        {
+            "roomId": "Game_05",
+            "path": "Assets/GameTheme/Prefabs/Rooms/Game_05.prefab",
+            "status": "passed",
+            "placedTriangles": 92371,
+            "renderers": 36,
+            "materials": 17,
+            "colliders": 16,
+            "meshColliders": 0,
+            "lights": 3,
+            "realtimeShadowLights": 0,
+            "meshyInstances": 11,
+            "sampledCells": 3796,
+            "walkableCells": 3488,
+            "reachedCells": 3472,
+            "reachableTargets": 3,
+            "capturePoint": {
+                "x": -0.25,
+                "y": 0.0,
+                "z": 17.75
+            },
+            "traversalFailures": [],
+            "enemySpawnChecks": [],
+            "errors": []
+        },
+        {
+            "roomId": "Game_06",
+            "path": "Assets/GameTheme/Prefabs/Rooms/Game_06.prefab",
+            "status": "passed",
+            "placedTriangles": 49754,
+            "renderers": 31,
+            "materials": 17,
+            "colliders": 82,
+            "meshColliders": 0,
+            "lights": 3,
+            "realtimeShadowLights": 0,
+            "meshyInstances": 3,
+            "sampledCells": 3796,
+            "walkableCells": 3173,
+            "reachedCells": 2522,
+            "reachableTargets": 6,
+            "capturePoint": {
+                "x": -0.25,
+                "y": 0.0,
+                "z": 17.75
+            },
+            "traversalFailures": [],
+            "enemySpawnChecks": [
+                {
+                    "spawn": "Enemy_A",
+                    "role": "PixelMaw",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/PixelMaw.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": 3.0,
+                        "y": 0.05000000074505806,
+                        "z": 13.0
+                    },
+                    "radius": 0.5799999833106995,
+                    "height": 1.649999976158142,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.050000011920928958,
+                    "blockingObjects": []
+                },
+                {
+                    "spawn": "Enemy_B",
+                    "role": "BitSentry",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/BitSentry.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": 1.0,
+                        "y": 0.05000000074505806,
+                        "z": 22.0
+                    },
+                    "radius": 0.5799999833106995,
+                    "height": 1.7200000286102296,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.050000011920928958,
+                    "blockingObjects": []
+                },
+                {
+                    "spawn": "Enemy_C",
+                    "role": "PixelMaw",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/PixelMaw.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": -3.0,
+                        "y": 0.05000000074505806,
+                        "z": 29.0
+                    },
+                    "radius": 0.5799999833106995,
+                    "height": 1.649999976158142,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.050000011920928958,
+                    "blockingObjects": []
+                }
+            ],
+            "errors": []
+        },
+        {
+            "roomId": "Game_07",
+            "path": "Assets/GameTheme/Prefabs/Rooms/Game_07.prefab",
+            "status": "passed",
+            "placedTriangles": 41100,
+            "renderers": 31,
+            "materials": 17,
+            "colliders": 33,
+            "meshColliders": 0,
+            "lights": 3,
+            "realtimeShadowLights": 0,
+            "meshyInstances": 2,
+            "sampledCells": 3796,
+            "walkableCells": 3339,
+            "reachedCells": 3185,
+            "reachableTargets": 6,
+            "capturePoint": {
+                "x": -0.25,
+                "y": 0.0,
+                "z": 16.25
+            },
+            "traversalFailures": [],
+            "enemySpawnChecks": [
+                {
+                    "spawn": "Enemy_A",
+                    "role": "StackGuardian",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/StackGuardian.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": -3.0,
+                        "y": 0.05000000074505806,
+                        "z": 14.0
+                    },
+                    "radius": 0.7200000286102295,
+                    "height": 2.6500000953674318,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.04999995231628418,
+                    "blockingObjects": []
+                },
+                {
+                    "spawn": "Enemy_B",
+                    "role": "BitSentry",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/BitSentry.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": 4.0,
+                        "y": 0.05000000074505806,
+                        "z": 25.0
+                    },
+                    "radius": 0.5799999833106995,
+                    "height": 1.7200000286102296,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.050000011920928958,
+                    "blockingObjects": []
+                },
+                {
+                    "spawn": "Enemy_C",
+                    "role": "PixelMaw",
+                    "prefab": "Assets/GameTheme/Prefabs/Monsters/PixelMaw.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": -1.0,
+                        "y": 0.05000000074505806,
+                        "z": 29.0
+                    },
+                    "radius": 0.5799999833106995,
+                    "height": 1.649999976158142,
+                    "skinWidth": 0.03500000014901161,
+                    "feetAboveFloor": 0.050000011920928958,
+                    "blockingObjects": []
+                }
+            ],
+            "errors": []
+        },
+        {
+            "roomId": "Game_08_Boss",
+            "path": "Assets/GameTheme/Prefabs/Rooms/Game_08_Boss.prefab",
+            "status": "passed",
+            "placedTriangles": 12760,
+            "renderers": 75,
+            "materials": 6,
+            "colliders": 9,
+            "meshColliders": 0,
+            "lights": 0,
+            "realtimeShadowLights": 0,
+            "meshyInstances": 2,
+            "sampledCells": 3796,
+            "walkableCells": 3756,
+            "reachedCells": 3756,
+            "reachableTargets": 4,
+            "capturePoint": {
+                "x": -0.25,
+                "y": 0.0,
+                "z": 17.75
+            },
+            "traversalFailures": [],
+            "enemySpawnChecks": [
+                {
+                    "spawn": "BossSpawn",
+                    "role": "DropKeeper",
+                    "prefab": "Assets/GameTheme/Resources/GameTheme/TetrominoBoss.prefab",
+                    "status": "passed",
+                    "localPosition": {
+                        "x": 0.0,
+                        "y": 0.05000000074505806,
+                        "z": 23.0
+                    },
+                    "radius": 1.0199999809265137,
+                    "height": 3.0999999046325685,
+                    "skinWidth": 0.05999999865889549,
+                    "feetAboveFloor": 0.08000004291534424,
+                    "blockingObjects": []
+                }
+            ],
+            "errors": []
+        }
+    ],
+    "meshes": [
+        {
+            "path": "Assets/GameTheme/Art/Meshy/game_racing_cockpit/game_racing_cockpit.glb",
+            "name": "",
+            "vertices": 17171,
+            "instances": 2,
+            "triangles": 11333
+        },
+        {
+            "path": "Assets/GameTheme/Art/Meshy/game_prize_cabinet/game_prize_cabinet.glb",
+            "name": "",
+            "vertices": 12232,
+            "instances": 9,
+            "triangles": 7247
+        },
+        {
+            "path": "Assets/GameTheme/Art/Meshy/game_pinball_table/game_pinball_table.glb",
+            "name": "",
+            "vertices": 11199,
+            "instances": 5,
+            "triangles": 7006
+        },
+        {
+            "path": "Assets/GameTheme/Art/Meshy/game_cartridge_arch/game_cartridge_arch.glb",
+            "name": "",
+            "vertices": 11586,
+            "instances": 2,
+            "triangles": 6979
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_01_Floor.asset",
+            "name": "Game_01_Floor",
+            "vertices": 14976,
+            "instances": 1,
+            "triangles": 6864
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_02_Floor.asset",
+            "name": "Game_02_Floor",
+            "vertices": 14976,
+            "instances": 1,
+            "triangles": 6864
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_05_Floor.asset",
+            "name": "Game_05_Floor",
+            "vertices": 14976,
+            "instances": 1,
+            "triangles": 6864
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_06_Floor.asset",
+            "name": "Game_06_Floor",
+            "vertices": 14976,
+            "instances": 1,
+            "triangles": 6864
+        },
+        {
+            "path": "Assets/GameTheme/Art/Meshy/game_controller_bench/game_controller_bench.glb",
+            "name": "",
+            "vertices": 7937,
+            "instances": 5,
+            "triangles": 6770
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_04_Floor.asset",
+            "name": "Game_04_Floor",
+            "vertices": 13824,
+            "instances": 1,
+            "triangles": 6336
+        },
+        {
+            "path": "Assets/GameTheme/Art/Meshy/game_handheld_monument/game_handheld_monument.glb",
+            "name": "",
+            "vertices": 8944,
+            "instances": 3,
+            "triangles": 6235
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_03_Floor.asset",
+            "name": "Game_03_Floor",
+            "vertices": 13248,
+            "instances": 1,
+            "triangles": 6072
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_Floor.asset",
+            "name": "Game_07_Floor",
+            "vertices": 13248,
+            "instances": 1,
+            "triangles": 6072
+        },
+        {
+            "path": "Assets/GameTheme/Art/Meshy/game_arcade_cabinet/game_arcade_cabinet.glb",
+            "name": "",
+            "vertices": 7755,
+            "instances": 23,
+            "triangles": 6026
+        },
+        {
+            "path": "Assets/GameTheme/Art/Meshy/game_joystick_tower/game_joystick_tower.glb",
+            "name": "",
+            "vertices": 6794,
+            "instances": 4,
+            "triangles": 5770
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_06_Ivory.asset",
+            "name": "Game_06_Ivory",
+            "vertices": 11472,
+            "instances": 1,
+            "triangles": 5296
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_02_Ivory.asset",
+            "name": "Game_02_Ivory",
+            "vertices": 11448,
+            "instances": 1,
+            "triangles": 5284
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_02_Shell.asset",
+            "name": "Game_02_Shell",
+            "vertices": 9984,
+            "instances": 1,
+            "triangles": 4576
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_06_Shell.asset",
+            "name": "Game_06_Shell",
+            "vertices": 9792,
+            "instances": 1,
+            "triangles": 4488
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_04_Carpet.asset",
+            "name": "Game_04_Carpet",
+            "vertices": 8640,
+            "instances": 1,
+            "triangles": 3960
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_01_FloorAlt.asset",
+            "name": "Game_01_FloorAlt",
+            "vertices": 7488,
+            "instances": 1,
+            "triangles": 3432
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_02_FloorAlt.asset",
+            "name": "Game_02_FloorAlt",
+            "vertices": 7488,
+            "instances": 1,
+            "triangles": 3432
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_05_FloorAlt.asset",
+            "name": "Game_05_FloorAlt",
+            "vertices": 7488,
+            "instances": 1,
+            "triangles": 3432
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_06_FloorAlt.asset",
+            "name": "Game_06_FloorAlt",
+            "vertices": 7488,
+            "instances": 1,
+            "triangles": 3432
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_02_Edge.asset",
+            "name": "Game_02_Edge",
+            "vertices": 6336,
+            "instances": 1,
+            "triangles": 2904
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_06_Edge.asset",
+            "name": "Game_06_Edge",
+            "vertices": 6336,
+            "instances": 1,
+            "triangles": 2904
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_05_Amber.asset",
+            "name": "Game_05_Amber",
+            "vertices": 5568,
+            "instances": 1,
+            "triangles": 2552
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_01_Glow.asset",
+            "name": "Game_01_Glow",
+            "vertices": 4584,
+            "instances": 1,
+            "triangles": 2292
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_04_CarpetMotif.asset",
+            "name": "Game_04_CarpetMotif",
+            "vertices": 4320,
+            "instances": 1,
+            "triangles": 2160
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_05_Ivory.asset",
+            "name": "Game_05_Ivory",
+            "vertices": 4416,
+            "instances": 1,
+            "triangles": 2148
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_03_Dark.asset",
+            "name": "Game_03_Dark",
+            "vertices": 4608,
+            "instances": 1,
+            "triangles": 2112
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_03_SoftPurple.asset",
+            "name": "Game_03_SoftPurple",
+            "vertices": 4608,
+            "instances": 1,
+            "triangles": 2112
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_03_SoftBlue.asset",
+            "name": "Game_03_SoftBlue",
+            "vertices": 4608,
+            "instances": 1,
+            "triangles": 2112
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_Dark.asset",
+            "name": "Game_07_Dark",
+            "vertices": 4608,
+            "instances": 1,
+            "triangles": 2112
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_SoftPurple.asset",
+            "name": "Game_07_SoftPurple",
+            "vertices": 4608,
+            "instances": 1,
+            "triangles": 2112
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_SoftBlue.asset",
+            "name": "Game_07_SoftBlue",
+            "vertices": 4608,
+            "instances": 1,
+            "triangles": 2112
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_05_Glow.asset",
+            "name": "Game_05_Glow",
+            "vertices": 4128,
+            "instances": 1,
+            "triangles": 2064
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_04_Cyan.asset",
+            "name": "Game_04_Cyan",
+            "vertices": 4296,
+            "instances": 1,
+            "triangles": 2004
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_03_Amber.asset",
+            "name": "Game_03_Amber",
+            "vertices": 4128,
+            "instances": 1,
+            "triangles": 1892
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_Amber.asset",
+            "name": "Game_07_Amber",
+            "vertices": 4128,
+            "instances": 1,
+            "triangles": 1892
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_03_Ivory.asset",
+            "name": "Game_03_Ivory",
+            "vertices": 3840,
+            "instances": 1,
+            "triangles": 1884
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_Shell.asset",
+            "name": "Game_07_Shell",
+            "vertices": 3936,
+            "instances": 1,
+            "triangles": 1804
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_Ivory.asset",
+            "name": "Game_07_Ivory",
+            "vertices": 3552,
+            "instances": 1,
+            "triangles": 1740
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_03_Shell.asset",
+            "name": "Game_03_Shell",
+            "vertices": 3744,
+            "instances": 1,
+            "triangles": 1716
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_04_Glow.asset",
+            "name": "Game_04_Glow",
+            "vertices": 3192,
+            "instances": 1,
+            "triangles": 1596
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_01_Purple.asset",
+            "name": "Game_01_Purple",
+            "vertices": 3456,
+            "instances": 1,
+            "triangles": 1584
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_02_Green.asset",
+            "name": "Game_02_Green",
+            "vertices": 3168,
+            "instances": 1,
+            "triangles": 1584
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_02_Purple.asset",
+            "name": "Game_02_Purple",
+            "vertices": 3168,
+            "instances": 1,
+            "triangles": 1584
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_06_Green.asset",
+            "name": "Game_06_Green",
+            "vertices": 3168,
+            "instances": 1,
+            "triangles": 1584
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_04_Ivory.asset",
+            "name": "Game_04_Ivory",
+            "vertices": 3144,
+            "instances": 1,
+            "triangles": 1536
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_02_Glow.asset",
+            "name": "Game_02_Glow",
+            "vertices": 2952,
+            "instances": 1,
+            "triangles": 1476
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_06_Purple.asset",
+            "name": "Game_06_Purple",
+            "vertices": 2904,
+            "instances": 1,
+            "triangles": 1452
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_06_Glow.asset",
+            "name": "Game_06_Glow",
+            "vertices": 2832,
+            "instances": 1,
+            "triangles": 1416
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_02_Amber.asset",
+            "name": "Game_02_Amber",
+            "vertices": 3072,
+            "instances": 1,
+            "triangles": 1408
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_03_Glow.asset",
+            "name": "Game_03_Glow",
+            "vertices": 2712,
+            "instances": 1,
+            "triangles": 1356
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_03_Cyan.asset",
+            "name": "Game_03_Cyan",
+            "vertices": 2856,
+            "instances": 1,
+            "triangles": 1348
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_06_Amber.asset",
+            "name": "Game_06_Amber",
+            "vertices": 2880,
+            "instances": 1,
+            "triangles": 1320
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_01_Ivory.asset",
+            "name": "Game_01_Ivory",
+            "vertices": 2640,
+            "instances": 1,
+            "triangles": 1284
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_02_Blue.asset",
+            "name": "Game_02_Blue",
+            "vertices": 2544,
+            "instances": 1,
+            "triangles": 1272
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_06_Blue.asset",
+            "name": "Game_06_Blue",
+            "vertices": 2544,
+            "instances": 1,
+            "triangles": 1272
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_03_Purple.asset",
+            "name": "Game_03_Purple",
+            "vertices": 2688,
+            "instances": 1,
+            "triangles": 1232
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_Cyan.asset",
+            "name": "Game_07_Cyan",
+            "vertices": 2472,
+            "instances": 1,
+            "triangles": 1172
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_04_Shell.asset",
+            "name": "Game_04_Shell",
+            "vertices": 2496,
+            "instances": 1,
+            "triangles": 1144
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_Glow.asset",
+            "name": "Game_07_Glow",
+            "vertices": 2136,
+            "instances": 1,
+            "triangles": 1068
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_Purple.asset",
+            "name": "Game_07_Purple",
+            "vertices": 2304,
+            "instances": 1,
+            "triangles": 1056
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_Pink.asset",
+            "name": "Game_07_Pink",
+            "vertices": 2304,
+            "instances": 1,
+            "triangles": 1056
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_01_Shell.asset",
+            "name": "Game_01_Shell",
+            "vertices": 2112,
+            "instances": 1,
+            "triangles": 968
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_01_Amber.asset",
+            "name": "Game_01_Amber",
+            "vertices": 2112,
+            "instances": 1,
+            "triangles": 968
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_05_Shell.asset",
+            "name": "Game_05_Shell",
+            "vertices": 2016,
+            "instances": 1,
+            "triangles": 924
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_04_Amber.asset",
+            "name": "Game_04_Amber",
+            "vertices": 1920,
+            "instances": 1,
+            "triangles": 880
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_03_Blue.asset",
+            "name": "Game_03_Blue",
+            "vertices": 1584,
+            "instances": 1,
+            "triangles": 744
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_03_Pink.asset",
+            "name": "Game_03_Pink",
+            "vertices": 1536,
+            "instances": 1,
+            "triangles": 704
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_01_Cyan.asset",
+            "name": "Game_01_Cyan",
+            "vertices": 1464,
+            "instances": 1,
+            "triangles": 700
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_02_Pink.asset",
+            "name": "Game_02_Pink",
+            "vertices": 1248,
+            "instances": 1,
+            "triangles": 572
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_Blue.asset",
+            "name": "Game_07_Blue",
+            "vertices": 1200,
+            "instances": 1,
+            "triangles": 568
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_06_Pink.asset",
+            "name": "Game_06_Pink",
+            "vertices": 1056,
+            "instances": 1,
+            "triangles": 484
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_05_Blue.asset",
+            "name": "Game_05_Blue",
+            "vertices": 1008,
+            "instances": 1,
+            "triangles": 480
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_Edge.asset",
+            "name": "Game_07_Edge",
+            "vertices": 960,
+            "instances": 1,
+            "triangles": 440
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_01_Edge.asset",
+            "name": "Game_01_Edge",
+            "vertices": 864,
+            "instances": 1,
+            "triangles": 396
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_03_Edge.asset",
+            "name": "Game_03_Edge",
+            "vertices": 864,
+            "instances": 1,
+            "triangles": 396
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_04_Edge.asset",
+            "name": "Game_04_Edge",
+            "vertices": 864,
+            "instances": 1,
+            "triangles": 396
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_05_Edge.asset",
+            "name": "Game_05_Edge",
+            "vertices": 864,
+            "instances": 1,
+            "triangles": 396
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_01_Dark.asset",
+            "name": "Game_01_Dark",
+            "vertices": 768,
+            "instances": 1,
+            "triangles": 352
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_02_Cyan.asset",
+            "name": "Game_02_Cyan",
+            "vertices": 696,
+            "instances": 1,
+            "triangles": 348
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_05_Cyan.asset",
+            "name": "Game_05_Cyan",
+            "vertices": 696,
+            "instances": 1,
+            "triangles": 348
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_06_Cyan.asset",
+            "name": "Game_06_Cyan",
+            "vertices": 696,
+            "instances": 1,
+            "triangles": 348
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_01_Blue.asset",
+            "name": "Game_01_Blue",
+            "vertices": 432,
+            "instances": 1,
+            "triangles": 216
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_04_Blue.asset",
+            "name": "Game_04_Blue",
+            "vertices": 432,
+            "instances": 1,
+            "triangles": 216
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_04_Screen.asset",
+            "name": "Game_04_Screen",
+            "vertices": 408,
+            "instances": 1,
+            "triangles": 196
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_02_Dark.asset",
+            "name": "Game_02_Dark",
+            "vertices": 384,
+            "instances": 1,
+            "triangles": 176
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_04_Dark.asset",
+            "name": "Game_04_Dark",
+            "vertices": 384,
+            "instances": 1,
+            "triangles": 176
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_05_Dark.asset",
+            "name": "Game_05_Dark",
+            "vertices": 384,
+            "instances": 1,
+            "triangles": 176
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_06_Dark.asset",
+            "name": "Game_06_Dark",
+            "vertices": 384,
+            "instances": 1,
+            "triangles": 176
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_Green.asset",
+            "name": "Game_07_Green",
+            "vertices": 384,
+            "instances": 1,
+            "triangles": 176
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_01_Screen.asset",
+            "name": "Game_01_Screen",
+            "vertices": 312,
+            "instances": 1,
+            "triangles": 152
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_02_Screen.asset",
+            "name": "Game_02_Screen",
+            "vertices": 312,
+            "instances": 1,
+            "triangles": 152
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_03_Screen.asset",
+            "name": "Game_03_Screen",
+            "vertices": 312,
+            "instances": 1,
+            "triangles": 152
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_05_Screen.asset",
+            "name": "Game_05_Screen",
+            "vertices": 312,
+            "instances": 1,
+            "triangles": 152
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_06_Screen.asset",
+            "name": "Game_06_Screen",
+            "vertices": 312,
+            "instances": 1,
+            "triangles": 152
+        },
+        {
+            "path": "Assets/GameTheme/Meshes/Game_07_Screen.asset",
+            "name": "Game_07_Screen",
+            "vertices": 312,
+            "instances": 1,
+            "triangles": 152
+        },
+        {
+            "path": "Library/unity default resources",
+            "name": "Cube",
+            "vertices": 24,
+            "instances": 59,
+            "triangles": 12
+        }
+    ],
+    "images": [
+        {
+            "room": "Game_01",
+            "framing": "Overview",
+            "path": "Documentation/GameTheme/Previews/Game_01_Overview.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": 0.0,
+                "y": 2.5,
+                "z": 18.0
+            },
+            "distance": 58.0,
+            "pitch": 48.0,
+            "yaw": 32.0,
+            "fieldOfView": 44.0
+        },
+        {
+            "room": "Game_01",
+            "framing": "Gameplay",
+            "path": "Documentation/GameTheme/Previews/Game_01_Gameplay.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": -0.25,
+                "y": 0.6000000238418579,
+                "z": 17.75
+            },
+            "distance": 24.0,
+            "pitch": 55.0,
+            "yaw": 35.0,
+            "fieldOfView": 36.0
+        },
+        {
+            "room": "Game_02",
+            "framing": "Overview",
+            "path": "Documentation/GameTheme/Previews/Game_02_Overview.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": 0.0,
+                "y": 2.5,
+                "z": 18.0
+            },
+            "distance": 58.0,
+            "pitch": 48.0,
+            "yaw": 32.0,
+            "fieldOfView": 44.0
+        },
+        {
+            "room": "Game_02",
+            "framing": "Gameplay",
+            "path": "Documentation/GameTheme/Previews/Game_02_Gameplay.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": -0.25,
+                "y": 0.6000000238418579,
+                "z": 17.75
+            },
+            "distance": 24.0,
+            "pitch": 55.0,
+            "yaw": 35.0,
+            "fieldOfView": 36.0
+        },
+        {
+            "room": "Game_03",
+            "framing": "Overview",
+            "path": "Documentation/GameTheme/Previews/Game_03_Overview.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": 0.0,
+                "y": 2.5,
+                "z": 18.0
+            },
+            "distance": 58.0,
+            "pitch": 48.0,
+            "yaw": 32.0,
+            "fieldOfView": 44.0
+        },
+        {
+            "room": "Game_03",
+            "framing": "Gameplay",
+            "path": "Documentation/GameTheme/Previews/Game_03_Gameplay.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": -0.25,
+                "y": 0.6000000238418579,
+                "z": 16.25
+            },
+            "distance": 24.0,
+            "pitch": 55.0,
+            "yaw": 35.0,
+            "fieldOfView": 36.0
+        },
+        {
+            "room": "Game_04",
+            "framing": "Overview",
+            "path": "Documentation/GameTheme/Previews/Game_04_Overview.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": 0.0,
+                "y": 2.5,
+                "z": 18.0
+            },
+            "distance": 58.0,
+            "pitch": 48.0,
+            "yaw": 32.0,
+            "fieldOfView": 44.0
+        },
+        {
+            "room": "Game_04",
+            "framing": "Gameplay",
+            "path": "Documentation/GameTheme/Previews/Game_04_Gameplay.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": -0.25,
+                "y": 0.6000000238418579,
+                "z": 17.75
+            },
+            "distance": 24.0,
+            "pitch": 55.0,
+            "yaw": 35.0,
+            "fieldOfView": 36.0
+        },
+        {
+            "room": "Game_05",
+            "framing": "Overview",
+            "path": "Documentation/GameTheme/Previews/Game_05_Overview.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": 0.0,
+                "y": 2.5,
+                "z": 18.0
+            },
+            "distance": 58.0,
+            "pitch": 48.0,
+            "yaw": 32.0,
+            "fieldOfView": 44.0
+        },
+        {
+            "room": "Game_05",
+            "framing": "Gameplay",
+            "path": "Documentation/GameTheme/Previews/Game_05_Gameplay.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": -0.25,
+                "y": 0.6000000238418579,
+                "z": 17.75
+            },
+            "distance": 24.0,
+            "pitch": 55.0,
+            "yaw": 35.0,
+            "fieldOfView": 36.0
+        },
+        {
+            "room": "Game_06",
+            "framing": "Overview",
+            "path": "Documentation/GameTheme/Previews/Game_06_Overview.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": 0.0,
+                "y": 2.5,
+                "z": 18.0
+            },
+            "distance": 58.0,
+            "pitch": 48.0,
+            "yaw": 32.0,
+            "fieldOfView": 44.0
+        },
+        {
+            "room": "Game_06",
+            "framing": "Gameplay",
+            "path": "Documentation/GameTheme/Previews/Game_06_Gameplay.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": -0.25,
+                "y": 0.6000000238418579,
+                "z": 17.75
+            },
+            "distance": 24.0,
+            "pitch": 55.0,
+            "yaw": 35.0,
+            "fieldOfView": 36.0
+        },
+        {
+            "room": "Game_07",
+            "framing": "Overview",
+            "path": "Documentation/GameTheme/Previews/Game_07_Overview.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": 0.0,
+                "y": 2.5,
+                "z": 18.0
+            },
+            "distance": 58.0,
+            "pitch": 48.0,
+            "yaw": 32.0,
+            "fieldOfView": 44.0
+        },
+        {
+            "room": "Game_07",
+            "framing": "Gameplay",
+            "path": "Documentation/GameTheme/Previews/Game_07_Gameplay.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": -0.25,
+                "y": 0.6000000238418579,
+                "z": 16.25
+            },
+            "distance": 24.0,
+            "pitch": 55.0,
+            "yaw": 35.0,
+            "fieldOfView": 36.0
+        },
+        {
+            "room": "Game_08_Boss",
+            "framing": "Overview",
+            "path": "Documentation/GameTheme/Previews/Game_08_Boss_Overview.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": 0.0,
+                "y": 2.5,
+                "z": 18.0
+            },
+            "distance": 58.0,
+            "pitch": 48.0,
+            "yaw": 32.0,
+            "fieldOfView": 44.0
+        },
+        {
+            "room": "Game_08_Boss",
+            "framing": "Gameplay",
+            "path": "Documentation/GameTheme/Previews/Game_08_Boss_Gameplay.png",
+            "width": 1600,
+            "height": 1000,
+            "focus": {
+                "x": -0.25,
+                "y": 0.6000000238418579,
+                "z": 17.75
+            },
+            "distance": 24.0,
+            "pitch": 55.0,
+            "yaw": 35.0,
+            "fieldOfView": 36.0
+        }
+    ],
+    "checks": [
+        "Eight room assets; deterministic five-room routes with three unique middle rooms and final Drop Keeper arena, matching seams, no overlapping footprints and maximum-combination triangle guide checked.",
+        "Saved scene player, camera, stage reference and build registration checked.",
+        "Gate mission G-06 game_exhibition resolves to the playable Game stage."
+    ],
+    "errors": []
+}

@@ -94,6 +94,7 @@ namespace AcRoguelike.Liminal.Editor
             AssetDatabase.SaveAssets();
             CreatePropPrefabs(overwrite);
             CreateStages(overwrite);
+            LiminalSessionBuilder.UpdateCatalog(LiminalSessionBuilder.EnsureSessionStage());
             if(overwrite || !File.Exists(GalleryPath)) CreateGallery();
             if(overwrite || !File.Exists(PropGalleryPath)) CreatePropGallery();
             if(overwrite || !File.Exists(RunPath)) CreateRun();
@@ -106,7 +107,7 @@ namespace AcRoguelike.Liminal.Editor
             AssetDatabase.SaveAssets();
             EditorSceneManager.OpenScene(GalleryPath);
             FrameGallery();
-            Debug.Log("LIMINAL_KIT_READY: 20 room variations, 4 stages, editable gallery and run scenes. " + ValidateAll("Documentation/Liminal/backrooms-authoring-validation.txt"));
+            Debug.Log("LIMINAL_KIT_READY: 20 room variations, one four-room session, editable gallery and run scenes. " + ValidateAll("Documentation/Liminal/backrooms-authoring-validation.txt"));
         }
 
         static void PrepareMaterials()
@@ -1236,6 +1237,7 @@ namespace AcRoguelike.Liminal.Editor
             }
             CreatePlayer(new Vector3(0,.1f,-1));
             CreateGalleryHud();
+            AcRoguelike.StageConcepts.Editor.StageConceptGallery.AppendToScene(scene);
             EditorSceneManager.SaveScene(scene,GalleryPath);
         }
 
@@ -1251,7 +1253,7 @@ namespace AcRoguelike.Liminal.Editor
         {
             var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);Environment(false);
             var player=CreatePlayer(new Vector3(0,.1f,3.5f));
-            var go=Group("LIMINAL RUN / Seeded Stage Assembly");var director=go.AddComponent<LiminalRunDirector>();director.player=player.transform;director.seed=73029;director.stages=Enumerable.Range(1,4).Select(i=>AssetDatabase.LoadAssetAtPath<LiminalStageDefinition>(Root+"/Stages/Stage_"+i.ToString("00")+".asset")).ToArray();director.hudFont=signageFont;
+            var go=Group("LIMINAL RUN / Seeded Stage Assembly");var director=go.AddComponent<LiminalRunDirector>();director.player=player.transform;director.seed=73029;director.stages=new[]{LiminalSessionBuilder.EnsureSessionStage()};director.hudFont=signageFont;
             // Keep a visible editable sample in the saved scene; the director replaces its own preview at run start.
             director.GeneratePreview(0);
             EditorSceneManager.SaveScene(scene,RunPath);

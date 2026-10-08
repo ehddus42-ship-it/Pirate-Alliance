@@ -1,0 +1,96 @@
+{
+  "provider": "Meshy AI",
+  "model": "meshy-7.1",
+  "concept_model": "gpt-image-2",
+  "role": "게이트 정비사",
+  "height_m": 1.78,
+  "target_triangles": 20000,
+  "texture_resolution": "2k",
+  "concept_prompt": "An original middle-aged Korean male gate technician, forty-five years old, stocky broad shoulders, rounded friendly face with short dark stubble, short slightly messy salt-and-pepper hair, safety goggles pushed up on forehead. Burnt orange utility vest with a few light reflective strips over rolled-sleeve slate-grey work shirt, grey work trousers with reinforced knees, dark chunky safety boots, compact tool pouches attached at both sides of belt, visible empty hands. Warm reliable veteran mechanic at a modern Seoul hunter association. Distinct robust silhouette, no hard hat, no weapon. Use the supplied image ONLY as a reference for the clean cel-shaded anime game art style, facial rendering and detail density. The new person must have the outfit described above, not a business suit. ONE adult character, full body including head and soles, front view facing camera, relaxed symmetrical A-pose with both arms STRAIGHT and 30 degrees away from the torso, hands at hip level, empty hands, fingers separated, both feet flat, legs slightly apart. No bent elbows, no pose, no props in hands. Clean white background, no text, no weapons, no frame, no floor shadow, soft even studio lighting. Polished stylized action-RPG NPC, readable simple large shapes and carefully placed clothing details.",
+  "delivered_geometry": {
+    "triangles": 20746,
+    "vertices": 24984,
+    "meshes": 1,
+    "materials": 1,
+    "source_bounds": [
+      {
+        "min": [
+          -0.8574060201644897,
+          -0.9517009854316711,
+          -0.19685104489326477
+        ],
+        "max": [
+          0.8564620018005371,
+          0.9526650309562683,
+          0.19094707071781158
+        ]
+      }
+    ]
+  },
+  "reference": "Tools/LiminalLobby/Reference/official.png (style only)",
+  "library_actions": {
+    "idle": 249,
+    "walk": 30,
+    "talk": 314,
+    "greet": 290,
+    "phone": 312,
+    "inspect": 276
+  },
+  "tasks": {
+    "concept": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 12,
+      "id": "01a10b89-c64e-72cb-a4f0-86b3e6ee96db",
+      "consumed_credits": 12
+    },
+    "model": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 30,
+      "id": "01a10b8a-cae5-7428-8d96-1751fcf89f54",
+      "consumed_credits": 30
+    },
+    "rig": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 5,
+      "id": "01a10b8c-5753-76f0-b406-e2f720db2099",
+      "consumed_credits": 5
+    },
+    "anim_idle": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8c-98d7-765f-88eb-39b057f0f259",
+      "consumed_credits": 3
+    },
+    "anim_walk": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8c-ce0b-736d-82b3-b29c11abe76a",
+      "consumed_credits": 3
+    },
+    "anim_talk": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8d-034f-74d6-9318-a1653c89c1d2",
+      "consumed_credits": 3
+    },
+    "anim_greet": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8d-384c-71d9-94fe-6b8ab2639168",
+      "consumed_credits": 3
+    },
+    "anim_phone": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8d-6f05-7478-8fb5-c21feec3e1c0",
+      "consumed_credits": 3
+    },
+    "anim_inspect": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8d-a4b8-76f6-8495-417d9aa6df09",
+      "consumed_credits": 3
+    }
+  },
+  "created_utc": "2026-10-05T10:14:30.183547+00:00"
+}

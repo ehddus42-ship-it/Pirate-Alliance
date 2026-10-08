@@ -32,7 +32,7 @@ namespace AcRoguelike
             if (Target && Target.IsAlive) lastTargetPoint = Target.AimPoint;
 
             transform.position = Vector3.MoveTowards(
-                transform.position, lastTargetPoint, speed * Time.deltaTime);
+                transform.position, lastTargetPoint, ProjectileTuning.ScaleSpeed(speed) * Time.deltaTime);
             if (card && Camera.main)
             {
                 var towardCamera = Camera.main.transform.position - card.position;
@@ -42,7 +42,7 @@ namespace AcRoguelike
 
             if ((transform.position - lastTargetPoint).sqrMagnitude <= hitDistance * hitDistance)
                 Detonate();
-            else if (lifetime >= maximumLifetime)
+            else if (lifetime >= ProjectileTuning.ScaleFlightDuration(maximumLifetime))
                 Destroy(gameObject);
         }
 

@@ -1,0 +1,32 @@
+{
+  "provider": "Meshy AI",
+  "model": "meshy-7.1",
+  "concept_model": "gpt-image-2",
+  "apis": [
+    "image-to-image v1",
+    "image-to-3d v1 (a-pose)",
+    "rigging v1",
+    "animations v1 (skinned clip FBX)"
+  ],
+  "reference": [
+    "official.png"
+  ],
+  "concept_prompt": "Redraw the woman in the reference image exactly as she is: a Korea Hunter Association agent, a Korean woman in her late 20s, dark brown hair tied in a low loose bun with soft side bangs, thin round silver glasses, lavender-grey eyes, calm gentle smile. The same Korea Hunter Association uniform design as the woman in the reference: charcoal grey, a fitted single-breasted jacket with a black leather belt and brass buckle at the waist, crisp white shirt, slim black tie, a white ID card on a lanyard clipped to the chest, a small gold wing emblem pin on the lapel, a knee-length pencil skirt, sheer skin-tone tights and black low-heel pumps. Draw ONE character only, as a clean 3D-modelling reference sheet: full body from the top of the head to the soles of the shoes, front view facing the camera, standing straight in a relaxed A-pose with both arms held about 30 degrees away from the body, palms facing the thighs, fingers relaxed and separated, empty hands holding nothing, feet slightly apart and flat on the ground. Plain pure white background, no floor shadow, no text, no frame, even soft studio lighting. Keep the clean cel-shaded anime art style and the uniform colours of the reference image.",
+  "height_m": 1.65,
+  "library_actions": {
+    "idle": 243,
+    "talk": 313,
+    "bow": 41
+  },
+  "tasks": {
+    "concept_0": "01a0f7f7-3701-71a7-956b-b0bcbc83700f",
+    "concept_1": "01a0f7f7-d124-76e7-9b6a-42b0ea786a8e",
+    "pick": 1,
+    "image3d": "01a0f7fa-4bae-7555-bd8d-4f7daf961ac1",
+    "rig": "01a0f7fc-a3e4-76a2-92c4-525d795f367f",
+    "anim_talk": "01a0f7fd-504a-71bc-9352-6985fef41b6e",
+    "anim_bow": "01a0f7fd-b752-76c0-b9a3-d07cf50a97e0",
+    "anim_idle": "01a0f803-226c-7525-a07f-1d3efd360b24"
+  },
+  "created_utc": "2026-10-01T15:34:07.825969+00:00"
+}

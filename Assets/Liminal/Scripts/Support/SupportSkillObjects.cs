@@ -236,7 +236,7 @@ namespace AcRoguelike.Liminal
         {
             owner = skill;
             target = point;
-            fallTime = Mathf.Max(.2f, duration);
+            fallTime = ProjectileTuning.ScaleFlightDuration(Mathf.Max(.2f, duration));
             radius = blastRadius;
             damage = blastDamage;
             start = target + new Vector3(-4.5f, 17f, -6.5f);
@@ -413,9 +413,9 @@ namespace AcRoguelike.Liminal
             {
                 Vector3 to = target.AimPoint - transform.position;
                 if (to.magnitude < .55f) { Hit(); return; }
-                direction = Vector3.RotateTowards(direction, to.normalized, 9f * dt, 0);
+                direction = Vector3.RotateTowards(direction, to.normalized, 9f * ProjectileTuning.SpeedMultiplier * dt, 0);
             }
-            transform.position += direction * Speed * dt;
+            transform.position += direction * ProjectileTuning.ScaleSpeed(Speed) * dt;
             transform.rotation = Quaternion.LookRotation(direction);
             // Chomp: squash the mouth axis like a two-frame sprite.
             float chomp = Mathf.Abs(Mathf.Sin(age * 18f));
@@ -426,7 +426,7 @@ namespace AcRoguelike.Liminal
                 pelletClock = 0;
                 SupportVoxels.Burst(transform.position - direction * .3f, 1, .2f, .1f, new[] { new Color(1f, .95f, .7f) }, 2.5f);
             }
-            if (age >= Lifetime || transform.position.y < -1) Destroy(gameObject);
+            if (age >= ProjectileTuning.ScaleFlightDuration(Lifetime) || transform.position.y < -1) Destroy(gameObject);
         }
 
         void Hit()
