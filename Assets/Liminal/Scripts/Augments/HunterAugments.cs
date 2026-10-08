@@ -84,7 +84,7 @@ namespace AcRoguelike.Liminal
         }
 
         // ---- per-augment effects -------------------------------------------------------------------------
-        /// <summary>Swings left in the combo if 효율검술 were taken once more.</summary>
+        /// <summary>Swings left in the combo if 효율적인 검술 were taken once more.</summary>
         public int ComboSwingsAfterNextTrim => (combat ? combat.ComboLength : 6) - 2 * (Stacks(AugmentCatalog.EfficientSwordplay) + 1);
 
         internal void ApplyCombo()

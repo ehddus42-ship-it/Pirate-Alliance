@@ -27,7 +27,10 @@ namespace AcRoguelike.Liminal
         GameObject canvasObject, modal, combatGroup, lobbyGroup, bossGroup;
         RectTransform modalContent, promptRoot, stamp;
         TextMeshProUGUI gateLabel, roomLabel, healthLabel, enemyLabel, bossName, bossValue, counterLabel, currencyLabel, lobbyTitle, promptLabel, promptKey;
-        Image healthFill, healthGhost, bossFill, dashFill;
+        Image healthFill, healthGhost, bossFill;
+        RectTransform dashTrack;
+        // One pip per stamina point: a dark slot and the fill that grows back as it recovers.
+        readonly System.Collections.Generic.List<Image> dashPips = new System.Collections.Generic.List<Image>();
         CanvasGroup stampGroup;
         float stampAt = -10, ghost = 1;
         string configurationError;
@@ -71,8 +74,7 @@ namespace AcRoguelike.Liminal
             for (int i = 1; i < 10; i++) HunterUi.Fill("Notch", track.rectTransform, new Vector2(i / 10f, .5f), new Vector2(.5f, .5f), Vector2.zero, new Vector2(1.5f, 10), new Color(.07f, .1f, .21f, .9f));
             healthLabel = HunterUi.Text("Health", status, font, "", 15, HunterUi.Cream, new Vector2(254, -55), new Vector2(66, 22), FontStyles.Bold, TextAlignmentOptions.TopRight);
             HunterUi.Text("DashLabel", status, font, "DASH", 11, HunterUi.Muted, new Vector2(16, -76), new Vector2(40, 16), FontStyles.Bold);
-            var dashTrack = HunterUi.Fill("DashTrack", status, new Vector2(0, 1), new Vector2(0, 1), new Vector2(56, -80), new Vector2(110, 5), new Color(.05f, .07f, .14f, 1));
-            dashFill = HunterUi.Fill("DashFill", dashTrack.rectTransform, new Vector2(0, .5f), new Vector2(0, .5f), Vector2.zero, new Vector2(110, 5), HunterUi.Gate);
+            dashTrack = HunterUi.Rect("DashTrack", status, new Vector2(0, 1), new Vector2(0, 1), new Vector2(56, -80), new Vector2(110, 5));
 
             // Gate indicator (top centre) and remaining enemies (top right).
             var gate = HunterUi.Window("Gate", combatGroup.transform, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -20), new Vector2(300, 52), font, null, true);
@@ -173,7 +175,7 @@ namespace AcRoguelike.Liminal
                 healthGhost.rectTransform.sizeDelta = new Vector2(232 * ghost, 10);
                 healthLabel.text = $"{run.PlayerHealth.Health}";
             }
-            if (motor) dashFill.rectTransform.sizeDelta = new Vector2(110 * (1 - Mathf.Clamp01(motor.CooldownRemaining / Mathf.Max(.01f, motor.dashCooldown))), 5);
+            if (motor) UpdateStamina();
             counterLabel.text = melee && melee.CounterActive ? "COUNTER" : "";
             bossGroup.SetActive(false);
             if (run.CurrentStage.isBossStage && run.LivingEnemyCount > 0)
@@ -213,6 +215,30 @@ namespace AcRoguelike.Liminal
                 if (Keyboard.current.digit1Key.wasPressedThisFrame) run.SelectAugment(0);
                 else if (Keyboard.current.digit2Key.wasPressedThisFrame) run.SelectAugment(1);
                 else if (Keyboard.current.digit3Key.wasPressedThisFrame) run.SelectAugment(2);
+            }
+        }
+
+        void UpdateStamina()
+        {
+            int count = Mathf.Max(1, motor.maxStamina);
+            const float width = 110, gap = 4;
+            float pip = (width - gap * (count - 1)) / count;
+            if (dashPips.Count != count)
+            {
+                for (int i = dashTrack.childCount - 1; i >= 0; i--) Destroy(dashTrack.GetChild(i).gameObject);
+                dashPips.Clear();
+                for (int i = 0; i < count; i++)
+                {
+                    var slot = HunterUi.Fill("DashPip", dashTrack, new Vector2(0, .5f), new Vector2(0, .5f), new Vector2(i * (pip + gap), 0), new Vector2(pip, 5), new Color(.05f, .07f, .14f, 1));
+                    dashPips.Add(HunterUi.Fill("DashFill", slot.rectTransform, new Vector2(0, .5f), new Vector2(0, .5f), Vector2.zero, new Vector2(pip, 5), HunterUi.Gate));
+                }
+            }
+            for (int i = 0; i < count; i++)
+            {
+                // Full pips glow in the gate colour; the one recovering fills in dimmer.
+                float fill = Mathf.Clamp01(motor.Stamina - i);
+                dashPips[i].rectTransform.sizeDelta = new Vector2(pip * fill, 5);
+                dashPips[i].color = fill >= 1 ? HunterUi.Gate : HunterUi.Muted;
             }
         }
 

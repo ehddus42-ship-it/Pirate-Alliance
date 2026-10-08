@@ -34,6 +34,7 @@ namespace AcRoguelike.Liminal
         public int StageIndex { get; private set; }
         public int ActiveRoomIndex { get; private set; }
         public int LivingEnemyCount => living.Count;
+        public bool InCombat => Phase == LiminalRunPhase.Exploring && living.Count > 0;
         public LiminalRunPhase Phase { get; private set; }
         public IReadOnlyList<LiminalRoom> Rooms => rooms;
         public LiminalPlayerHealth PlayerHealth => health;
@@ -119,6 +120,8 @@ namespace AcRoguelike.Liminal
 
         void Update()
         {
+            // Dashes only spend stamina while hostiles are alive in the run.
+            if (motor) motor.StaminaFree = !InCombat;
             if (Phase == LiminalRunPhase.Lobby) return;
             if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
             {

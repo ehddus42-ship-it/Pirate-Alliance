@@ -16,7 +16,14 @@ namespace AcRoguelike
         public float walkSpeed = 2.1f;
         public float dashSpeed = 13f;
         public float dashDuration = .19f;
+        [Tooltip("Seconds to recover one stamina pip (one dash).")]
         public float dashCooldown = .85f;
+        [Tooltip("Stamina pips: each dash spends one, so this many dashes can be chained.")]
+        [Min(1)] public int maxStamina = 3;
+        [Tooltip("Stamina only starts recovering this long after the latest dash.")]
+        public float staminaRegenDelay = .3f;
+        [Tooltip("Shortest time between two dash starts, so chained dashes stay readable.")]
+        public float dashInterval = .3f;
         [Tooltip("Dash speed over the dash: time 0..1 is dash progress, value is a speed multiplier. The distance stays dashSpeed x dashDuration; the curve only decides how it is spread. Default: an instant burst that eases out into run speed (tuned in Tools/CombatLab).")]
         public AnimationCurve dashSpeedCurve = DefaultDashSpeedCurve();
         public float turnSpeed = 540f;
@@ -44,14 +51,20 @@ namespace AcRoguelike
                 return area > 1e-5f ? dashSpeed * DashCurveValue(1f) / area : dashSpeed;
             }
         }
-        public float CooldownRemaining => Mathf.Max(0, cooldownRemaining);
+        /// <summary>Time until a dash can start: the dash interval, or the wait for the next stamina pip.</summary>
+        public float CooldownRemaining => Mathf.Max(cooldownRemaining,
+            StaminaFree || Stamina >= 1 ? 0 : (1 - Stamina) * dashCooldown + Mathf.Max(0, LastDashStart + staminaRegenDelay - Time.time));
+        /// <summary>Current stamina in pips (0..maxStamina, fractional while recovering).</summary>
+        public float Stamina { get; private set; } = 3;
+        /// <summary>Out of combat dashes cost nothing (set by the run director) and the gauge stays full.</summary>
+        public bool StaminaFree { get; set; }
         public Vector3 AimPoint { get; private set; }
         public Vector3 PlanarVelocity { get; private set; }
         public int DashCount { get; private set; }
         /// <summary>Time.time when the latest dash started (for just-dodge timing).</summary>
         public float LastDashStart { get; private set; } = -10;
-        /// <summary>A successful just dodge refunds the dash.</summary>
-        public void ResetDashCooldown() => cooldownRemaining = 0;
+        /// <summary>A successful just dodge refunds the dash: one stamina pip back, ready at once.</summary>
+        public void ResetDashCooldown() { cooldownRemaining = 0; Stamina = Mathf.Min(maxStamina, Stamina + 1); }
         public InputAction MoveAction => move;
         public InputAction DashAction => dash;
         public InputAction WalkAction => walk;
@@ -111,6 +124,7 @@ namespace AcRoguelike
             walk.AddBinding("<Gamepad>/leftTrigger");
             aimStick = new InputAction("Aim", InputActionType.Value, "<Gamepad>/rightStick");
             AimPoint = transform.position + Vector3.forward * 3;
+            Stamina = maxStamina;
             CacheAnimator();
         }
         void CacheAnimator()
@@ -187,12 +201,16 @@ namespace AcRoguelike
             if (combat && combat.IsAttacking) targetSpeed *= combat.MovementMultiplier;
             Vector3 aim = Vector3.ProjectOnPlane(AimPoint - transform.position, Vector3.up);
             cooldownRemaining = Mathf.Max(0, cooldownRemaining - dt);
+            if (StaminaFree) Stamina = maxStamina;
+            else if (Stamina < maxStamina && Time.time - LastDashStart >= staminaRegenDelay)
+                Stamina = Mathf.Min(maxStamina, Stamina + dt / Mathf.Max(.01f, dashCooldown));
             // Dash always wins over an attack: it cancels the swing (and any hit stop) the moment it is pressed.
-            if (wantsDash && cooldownRemaining <= 0 && (grounded || body.isGrounded))
+            if (wantsDash && cooldownRemaining <= 0 && (StaminaFree || Stamina >= 1) && (grounded || body.isGrounded))
             {
                 dashDirection = desired.sqrMagnitude > .01f ? desired.normalized : visual.forward;
                 dashDirection = Vector3.ProjectOnPlane(dashDirection, Vector3.up).normalized;
-                dashRemaining = Mathf.Max(.01f, dashDuration); cooldownRemaining = dashCooldown; DashCount++;
+                dashRemaining = Mathf.Max(.01f, dashDuration); cooldownRemaining = dashInterval; DashCount++;
+                if (!StaminaFree) Stamina -= 1;
                 LastDashStart = Time.time;
                 if (combat) combat.CancelAttack(false);
                 HitFeedback.CancelHitStop();
@@ -412,7 +430,7 @@ namespace AcRoguelike
             launched = false; launchVelocity = Vector3.zero; grounded = true;
             bool wasEnabled = body.enabled;
             body.enabled = false; transform.position = position; body.enabled = wasEnabled;
-            velocity = Vector3.zero; verticalSpeed = -2; dashRemaining = 0; cooldownRemaining = 0;
+            velocity = Vector3.zero; verticalSpeed = -2; dashRemaining = 0; cooldownRemaining = 0; Stamina = maxStamina;
             PlanarVelocity = Vector3.zero; dashMovedThisFrame = false; torsoYaw = 0;
             ResetDashAnimation();
             AimPoint = position + (visual ? visual.forward : transform.forward) * 3;

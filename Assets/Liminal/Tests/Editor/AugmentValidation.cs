@@ -10,7 +10,7 @@ namespace AcRoguelike.Liminal.EditorTests
 {
     /// <summary>
     /// Edit Mode checks for the augment rules (no scene needed): catalog integrity, the common/character pool, offer
-    /// rolls, conflicting picks, stack limits, 효율검술's combo cap, 예금's payouts and the melee hook maths.
+    /// rolls, conflicting picks, stack limits, 효율적인 검술's combo cap, 예금's payouts and the melee hook maths.
     /// Play Mode coverage (a cleared combat room pauses and offers cards) is in LiminalPlayValidation.
     /// </summary>
     public static class AugmentValidation
@@ -77,15 +77,15 @@ namespace AcRoguelike.Liminal.EditorTests
                 }
                 report.checks.Add("Conflicting picks: 우직하게 / FX전사 and 우직하게 / Counting Star are dealt and acquired in both orders (160 deals); crit stays 0%, damage ×1.3, duplicates stay excluded.");
 
-                // 효율검술 trims two swings per pick and stops appearing once no swing would remain (6-swing combo).
+                // 효율적인 검술 trims two swings per pick and stops appearing once no swing would remain (6-swing combo).
                 augments.ResetRun();
                 var swordplay = AugmentCatalog.Find(AugmentCatalog.EfficientSwordplay);
-                Require(AugmentCatalog.IsOfferable(swordplay, augments, hunter), "효율검술 missing from a fresh pool.");
+                Require(AugmentCatalog.IsOfferable(swordplay, augments, hunter), "효율적인 검술 missing from a fresh pool.");
                 augments.Acquire(swordplay);
-                Require(AugmentCatalog.IsOfferable(swordplay, augments, hunter), "효율검술 should still appear while two swings would remain.");
+                Require(AugmentCatalog.IsOfferable(swordplay, augments, hunter), "효율적인 검술 should still appear while two swings would remain.");
                 augments.Acquire(swordplay);
-                Require(!AugmentCatalog.IsOfferable(swordplay, augments, hunter), "효율검술 appeared although it would remove every swing.");
-                report.checks.Add("효율검술: offered at 6 and 4 swings, never when it would leave none.");
+                Require(!AugmentCatalog.IsOfferable(swordplay, augments, hunter), "효율적인 검술 appeared although it would remove every swing.");
+                report.checks.Add("효율적인 검술: offered at 6 and 4 swings, never when it would leave none.");
 
                 // FX전사 and 선물거래: crit chance +30%, random crit and counter multipliers inside their ranges.
                 augments.ResetRun();

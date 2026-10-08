@@ -27,7 +27,7 @@ namespace AcRoguelike.Liminal
 
         static readonly List<AugmentDefinition> all = new List<AugmentDefinition>
         {
-            new AugmentDefinition(EfficientSwordplay, "효율검술",
+            new AugmentDefinition(EfficientSwordplay, "효율적인 검술",
                 "기본공격 콤보의 첫 번째·두 번째 타격이 사라진다.\n남은 타격이 있을 때만 다시 등장한다.",
                 maxStacks: 99, canOffer: a => a.ComboSwingsAfterNextTrim > 0, onAcquire: a => a.ApplyCombo()),
             new AugmentDefinition(AutoSupport, "알아하쇼",
