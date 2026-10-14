@@ -24,6 +24,8 @@ Shader "NamgungLuna/Toon URP"
         [HideInInspector] _SrcBlend("Source Blend", Float) = 1
         [HideInInspector] _DstBlend("Destination Blend", Float) = 0
         [HideInInspector] _ZWrite("Depth Write", Float) = 1
+        // Screen-door fade (1 = solid), set per renderer, e.g. LunaOcclusionFade on the floating moon.
+        [HideInInspector] _Fade("Fade", Range(0,1)) = 1
     }
 
     SubShader
@@ -59,6 +61,7 @@ Shader "NamgungLuna/Toon URP"
             float _SrcBlend;
             float _DstBlend;
             float _ZWrite;
+            float _Fade;
         CBUFFER_END
 
         struct LunaAttributes
@@ -109,6 +112,15 @@ Shader "NamgungLuna/Toon URP"
             if (_AlphaClip > 0.5) clip(alpha - _Cutoff);
         }
 
+        // Ordered 4x4 dither: drops a growing share of pixels as _Fade goes to 0 (no sorting, still writes depth).
+        void LunaFadeClip(float4 positionCS)
+        {
+            if (_Fade >= 0.999) return;
+            static const float bayer[16] = { 0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5 };
+            uint2 p = uint2(positionCS.xy) & 3u;
+            clip(_Fade - (bayer[p.y * 4u + p.x] + 0.5) / 16.0);
+        }
+
         half3 LunaNormal(LunaVaryings input, bool isFrontFace)
         {
             half3 n = normalize(input.normalWS);
@@ -147,6 +159,7 @@ Shader "NamgungLuna/Toon URP"
             {
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+                LunaFadeClip(input.positionCS);
                 half4 baseSample = LunaBase(input.uv);
                 LunaClip(baseSample.a);
                 half3 normalWS = LunaNormal(input, IS_FRONT_VFACE(facing, true, false));
@@ -236,6 +249,7 @@ Shader "NamgungLuna/Toon URP"
             {
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+                LunaFadeClip(input.positionCS);
                 LunaClip(LunaBase(input.uv).a);
                 return input.positionCS.z;
             }
@@ -257,6 +271,7 @@ Shader "NamgungLuna/Toon URP"
             {
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+                LunaFadeClip(input.positionCS);
                 LunaClip(LunaBase(input.uv).a);
                 half3 normalWS = LunaNormal(input, IS_FRONT_VFACE(facing, true, false));
                 #if defined(_GBUFFER_NORMALS_OCT)

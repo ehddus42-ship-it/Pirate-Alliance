@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using MagicaCloth2;
 using NamgungLuna.Magica;
+using NamgungLuna.Motion;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -42,38 +43,41 @@ namespace NamgungLuna.Editor
             public string mutualCollisionWith;                // Magica sync partner (outer skirt -> underskirt)
             public string[] colliders;
             public string[] followers;                        // small attached parts driven by LunaClothFollower
+            public float movingWind;                          // wind from her own movement: hair and hems stream behind
         }
 
         static readonly string[] HairColliders = { "Head", "Neck", "Torso_L", "Torso_R", "Shoulders" };
-        static readonly string[] LegColliders = { "Leg_L", "Leg_R" };
+        // The Leg_L / Leg_R specs become thigh, shin and foot capsules on the moon-gait leg bones (LunaLocomotionSetup),
+        // so the skirt is kicked from inside as the hidden legs swing.
+        static readonly string[] LegColliders = { "Leg_L", "Leg_R", "Shin_L", "Shin_R", "Foot_L", "Foot_R" };
 
         // Magica stalls when the renderers of one cloth add up to more than 65,535 vertices, so the hair and the two
         // skirt layers are separate cloths. The hair cloths share parameters and fixed roots so they move together.
         static readonly ClothPlan[] Plans =
         {
             new ClothPlan { name = "Hair_Front", selection = "Hair", preset = "FrontHair", renderers = new[] { "Hair_Front" },
-                            simpleReduction = 0.02f, shapeReduction = 0.03f, particleRadius = 0.005f, maxDistance = 0.06f, gravityFalloff = 1.0f, colliders = HairColliders },
+                            simpleReduction = 0.02f, shapeReduction = 0.03f, particleRadius = 0.005f, maxDistance = 0.06f, gravityFalloff = 1.0f, colliders = HairColliders, movingWind = 1.5f },
             new ClothPlan { name = "Hair_Back_L", selection = "Hair", preset = "LongHair", renderers = new[] { "Hair_Back_L" },
-                            simpleReduction = 0.012f, shapeReduction = 0.018f, particleRadius = 0.012f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = HairColliders },
+                            simpleReduction = 0.012f, shapeReduction = 0.018f, particleRadius = 0.012f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = HairColliders, movingWind = 2.0f },
             new ClothPlan { name = "Hair_Back_R", selection = "Hair", preset = "LongHair", renderers = new[] { "Hair_Back_R" },
-                            simpleReduction = 0.012f, shapeReduction = 0.018f, particleRadius = 0.012f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = HairColliders },
+                            simpleReduction = 0.012f, shapeReduction = 0.018f, particleRadius = 0.012f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = HairColliders, movingWind = 2.0f },
             new ClothPlan { name = "Hair_Locks", selection = "Hair", preset = "LongHair",
                             renderers = Enumerable.Range(1, 7).Select(i => $"Hair_BackFill_Lock_{i:00}").ToArray(),
                             // locks collapse to a centre line in the proxy, so a wider particle keeps their edges off the body
-                            simpleReduction = 0.02f, shapeReduction = 0.03f, particleRadius = 0.012f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = HairColliders },
+                            simpleReduction = 0.02f, shapeReduction = 0.03f, particleRadius = 0.012f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = HairColliders, movingWind = 1.2f },
             new ClothPlan { name = "Skirt_Ivory", selection = "Skirt", preset = "Skirt", renderers = new[] { "Skirt_Ivory" },
-                            simpleReduction = 0.015f, shapeReduction = 0.025f, particleRadius = 0.01f, maxDistance = 0.25f, gravityFalloff = 1.0f, colliders = LegColliders },
+                            simpleReduction = 0.015f, shapeReduction = 0.025f, particleRadius = 0.01f, maxDistance = 0.3f, gravityFalloff = 1.0f, colliders = LegColliders, movingWind = 1.2f },
             // The gold hem pieces sit up to 1.5 cm off the skirt, too far for Magica's reduction to merge them reliably,
             // so they follow the simulated skirt surface instead of being cloth themselves.
             new ClothPlan { name = "Skirt_Navy", selection = "Skirt", preset = "Skirt", renderers = new[] { "Skirt_Navy" },
-                            simpleReduction = 0.015f, shapeReduction = 0.025f, particleRadius = 0.01f, maxDistance = 0.25f, gravityFalloff = 1.0f,
+                            simpleReduction = 0.015f, shapeReduction = 0.025f, particleRadius = 0.01f, maxDistance = 0.3f, gravityFalloff = 1.0f, movingWind = 1.2f,
                             mutualCollisionWith = "Skirt_Ivory", colliders = LegColliders, followers = new[] { "Gold_Hem_Trim", "Gold_Hem_Charms_L", "Gold_Hem_Charms_R" } },
             new ClothPlan { name = "Sleeve_L", selection = "Sleeve_L", preset = "Skirt", renderers = new[] { "BellSleeve_L", "Sleeve_Band_L" },
-                            simpleReduction = 0.025f, shapeReduction = 0.035f, particleRadius = 0.008f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = new[] { "Forearm_L" } },
+                            simpleReduction = 0.025f, shapeReduction = 0.035f, particleRadius = 0.008f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = new[] { "Forearm_L" }, movingWind = 1.5f },
             new ClothPlan { name = "Sleeve_R", selection = "Sleeve_R", preset = "Skirt", renderers = new[] { "BellSleeve_R", "Sleeve_Band_R" },
-                            simpleReduction = 0.025f, shapeReduction = 0.035f, particleRadius = 0.008f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = new[] { "Forearm_R" } },
+                            simpleReduction = 0.025f, shapeReduction = 0.035f, particleRadius = 0.008f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = new[] { "Forearm_R" }, movingWind = 1.5f },
             new ClothPlan { name = "CollarRibbon", selection = "CollarRibbon", preset = "Accessory", renderers = new[] { "Collar_Ribbons_Ivory" },
-                            simpleReduction = 0.015f, shapeReduction = 0.025f, particleRadius = 0.006f, maxDistance = 0.08f, gravityFalloff = 1.0f, colliders = new[] { "Neck", "Torso_L", "Torso_R" } },
+                            simpleReduction = 0.015f, shapeReduction = 0.025f, particleRadius = 0.006f, maxDistance = 0.08f, gravityFalloff = 1.0f, colliders = new[] { "Neck", "Torso_L", "Torso_R" }, movingWind = 1.5f },
         };
 
         [MenuItem("Tools/Namgung Luna/Setup Magica Cloth")]
@@ -126,16 +130,23 @@ namespace NamgungLuna.Editor
             GameObject model = (GameObject)PrefabUtility.InstantiatePrefab(toon, scene);
             PrefabUtility.UnpackPrefabInstance(model, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
             model.transform.SetParent(character.transform, false);
+            // Moon gait rig: Visual pivot (hover / lean), hidden leg chains carrying the boots, lantern and moon pivots.
+            LunaLocomotionSetup.Rig rig = LunaLocomotionSetup.BuildRig(character, model);
             var renderers = character.GetComponentsInChildren<Renderer>(true).GroupBy(r => r.name).ToDictionary(g => g.Key, g => g.First());
 
             Func<float[], Vector3> toUnity = FindAxisMapping(specs, renderers, report);
 
             // Colliders
             var colliderRoot = new GameObject("Magica_Colliders").transform;
-            colliderRoot.SetParent(character.transform, false);
+            colliderRoot.SetParent(rig.visual, false);
             var colliders = new Dictionary<string, ColliderComponent>();
             foreach (var c in specs.colliders)
             {
+                if (c.type != "sphere" && (c.name == "Leg_L" || c.name == "Leg_R"))
+                {
+                    AddLegColliders(c, c.name.Substring(4), rig, toUnity, colliders);
+                    continue;
+                }
                 var go = new GameObject("Collider_" + c.name);
                 go.transform.SetParent(colliderRoot, false);
                 if (c.type == "sphere")
@@ -163,7 +174,7 @@ namespace NamgungLuna.Editor
 
             // Cloth
             var clothRoot = new GameObject("Magica_Cloth").transform;
-            clothRoot.SetParent(character.transform, false);
+            clothRoot.SetParent(rig.visual, false);
             var selections = new Dictionary<string, Selection>();
             var cloths = new Dictionary<string, MagicaCloth>();
             foreach (var plan in Plans)
@@ -196,6 +207,7 @@ namespace NamgungLuna.Editor
                 sdata.gravityFalloff = plan.gravityFalloff;
                 // FrontHair/Accessory presets react to wind 5x more than the others; the split hair cloths must sway together.
                 sdata.wind.influence = 0.2f;
+                sdata.wind.movingWind = plan.movingWind;
                 sdata.radius = new CurveSerializeData(plan.particleRadius);
                 sdata.motionConstraint.useMaxDistance = true;
                 sdata.motionConstraint.maxDistance = new CurveSerializeData(plan.maxDistance);
@@ -240,11 +252,18 @@ namespace NamgungLuna.Editor
                                   (plan.followers != null ? $", followers {string.Join("/", plan.followers)}" : ""));
             }
 
+            LunaLocomotionSetup.AttachGait(character, rig);
+            report.AppendLine($"Moon gait: Visual pivot, legs Hip/Knee/Ankle_L/R, sole outline {rig.left.solePoints.Length} points, " +
+                              $"lantern {(rig.lantern != null ? "yes" : "no")}, moon {(rig.moon != null ? "yes" : "no")}");
+
             EnsureFolder(DataFolder);
             GameObject prefab = PrefabUtility.SaveAsPrefabAssetAndConnect(character, PrefabPath, InteractionMode.AutomatedAction, out bool saved);
             if (!saved || prefab == null) throw new InvalidOperationException("Prefab save failed: " + PrefabPath);
 
-            // Demo scene: camera, light, wind and whole-body motion (the prefab itself stays clean).
+            // Cloth demo scene: camera, light, wind and whole-body motion (the prefab itself stays clean). The moon gait is
+            // off here so the cloth validation keeps measuring the authored pose; NamgungLuna_MoonGaitDemo shows the gait.
+            character.GetComponent<LunaMoonGait>().enabled = false;
+            character.GetComponent<LunaMoonFx>().enabled = false;
             var motion = character.AddComponent<LunaMagicaDemoMotion>();
             motion.target = character.transform;
             var wind = new GameObject("Magica_Wind").AddComponent<MagicaWindZone>();
@@ -268,12 +287,49 @@ namespace NamgungLuna.Editor
             RenderSettings.ambientLight = new Color(0.55f, 0.56f, 0.62f);
             if (!EditorSceneManager.SaveScene(scene, ScenePath)) throw new InvalidOperationException("Scene save failed: " + ScenePath);
 
+            // Playable moon gait demo with a light breeze.
+            LunaLocomotionSetup.BuildDemoScene(prefab, (gaitScene, luna) =>
+            {
+                var breeze = new GameObject("Magica_Wind").AddComponent<MagicaWindZone>();
+                breeze.mode = MagicaWindZone.Mode.GlobalDirection;
+                breeze.main = 0.8f;
+                breeze.turbulence = 1.0f;
+                breeze.directionAngleY = 160.0f;
+            });
+
             report.AppendLine("Prefab: " + PrefabPath);
             report.AppendLine("Scene: " + ScenePath + " (LunaMagicaDemoMotion + MagicaWindZone; 재생하면 캐릭터 전체가 걷고 회전합니다)");
+            report.AppendLine("Scene: " + LunaLocomotionSetup.ScenePath + " (콜롬비나식 이동: WASD / Shift 질주 / Space 점프 / Ctrl 걷기, 손을 떼면 자동 시연)");
             File.WriteAllText(DataFolder + "/MagicaSetupReport.txt", report.ToString(), new UTF8Encoding(false));
             AssetDatabase.ImportAsset(DataFolder + "/MagicaSetupReport.txt");
             AssetDatabase.SaveAssets();
             return report.ToString();
+        }
+
+        /// <summary>Thigh, shin and foot capsules on the leg bones in place of the single authored leg capsule.</summary>
+        static void AddLegColliders(ColliderSpec spec, string side, LunaLocomotionSetup.Rig rig, Func<float[], Vector3> toUnity, Dictionary<string, ColliderComponent> colliders)
+        {
+            LunaLeg leg = rig.Leg(side);
+            Vector3 hip = toUnity(spec.start), knee = leg.knee.position, ankle = leg.ankle.position;
+            float mid = Mathf.Lerp(spec.r0, spec.r1, 0.5f);
+            colliders["Leg_" + side] = AddCapsule("Leg_" + side, leg.hip, hip, knee, spec.r0, mid);
+            colliders["Shin_" + side] = AddCapsule("Shin_" + side, leg.knee, knee, ankle, mid, spec.r1);
+            colliders["Foot_" + side] = AddCapsule("Foot_" + side, leg.ankle, ankle, rig.Toe(side) + Vector3.up * 0.02f, spec.r1 * 0.9f, spec.r1 * 0.7f);
+        }
+
+        /// <summary>Capsule along local +Y from <paramref name="a"/> (radius r0) to <paramref name="b"/> (radius r1), world positions.</summary>
+        static MagicaCapsuleCollider AddCapsule(string name, Transform parent, Vector3 a, Vector3 b, float r0, float r1)
+        {
+            var go = new GameObject("Collider_" + name);
+            go.transform.SetParent(parent, false);
+            Vector3 dir = (a - b).normalized;
+            float length = Vector3.Distance(a, b) + r0 + r1;
+            go.transform.SetPositionAndRotation(a - dir * (length * 0.5f - r0), Quaternion.FromToRotation(Vector3.up, dir));
+            var capsule = go.AddComponent<MagicaCapsuleCollider>();
+            capsule.direction = MagicaCapsuleCollider.Direction.Y;
+            capsule.alignedOnCenter = true;
+            capsule.SetSize(r0, r1, length);
+            return capsule;
         }
 
         static GameObject FindToonPrefab()
