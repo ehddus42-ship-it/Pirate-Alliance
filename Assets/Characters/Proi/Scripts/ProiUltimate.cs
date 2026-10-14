@@ -207,6 +207,12 @@ public class ProiUltimate : MonoBehaviour
     public float ChargeFull => chargeFull;
     public float DashStart => dashStart;
     public float SlamTime => slamTime;
+    public float ClashTime => clashTime;
+    public float ApexTime => apexTime;
+    public float DiveTime => diveTime;
+    public float EndTime => endTime;
+    /// <summary>Proi 자신의 시계 배속 (게임 안: 연출 배속이 Proi 동작에만 걸림). 게임 배속 자체를 바꾸는 방식이면 1.</summary>
+    public float OwnTimeScale => cinematicTime ? 1f : localWarp;
     /// <summary>바라보는 방향 (수평).</summary>
     public Vector3 Forward => forward;
     /// <summary>균열 / 그을음이 사라지기 시작하는 시각 (Time.time).</summary>

@@ -43,7 +43,16 @@ public sealed class ProiHunterProfile : HunterProfile
     {
         visual.AddComponent<ProiFist>();          // 주먹 쥐기 (블렌드셰이프)
         visual.AddComponent<ProiBlink>();         // 눈 깜빡임
-        visual.AddComponent<ProiTailSpring>();    // 트윈테일 흔들림
+#if MAGICACLOTH2
+        // Proi_Magica 프리팹은 머리카락 / 옷을 Magica Cloth 로 움직이므로 스프링이 겹치지 않게 합니다.
+        if (visual.GetComponentInChildren<MagicaCloth2.MagicaCloth>(true) == null)
+#endif
+            visual.AddComponent<ProiTailSpring>();    // 트윈테일 흔들림
+#if MAGICACLOTH2
+        else
+            visual.AddComponent<ProiHairFlutter>();   // 궁극기 동안 머리카락 / 옷 휘날림 + Proi 시계에 맞춘 물리 속도
+#endif
+        visual.AddComponent<ProiRunPosture>();    // 달리기 / 걷기 상체 굽힘 + 걸음 리듬
         visual.AddComponent<ProiFireFx>();        // 대쉬 화염
         visual.AddComponent<ProiHunterKit>();     // 콤보 이동량 / 재생 속도 / 대쉬
         visual.AddComponent<ProiBlazeCombo>();    // 주먹 / 발 화염 콤보

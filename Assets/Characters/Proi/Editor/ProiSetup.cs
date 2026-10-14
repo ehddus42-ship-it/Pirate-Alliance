@@ -17,6 +17,8 @@ public static class ProiSetup
 {
     const string Root = "Assets/Characters/Proi";
     const string Fbx = Root + "/Models/Proi_Character.fbx";
+    // Tools > Proi > Setup Magica Cloth 로 만든 머리카락 / 옷 물리 프리팹 (있으면 이것을 씀)
+    const string MagicaPrefab = Root + "/Magica/Proi_Magica.prefab";
     const string TexDir = Root + "/Textures";
     const string MatDir = Root + "/Materials";
     const string ControllerPath = Root + "/Animations/Proi.controller";
@@ -25,6 +27,10 @@ public static class ProiSetup
     // Blender 에서 측정한 Run 클립의 지면 속도(m/s). 이동 속도에 맞춰 재생 속도를 조절해 발 미끄러짐을 줄입니다.
     const float RunClipGroundSpeed = 2.67f;
     const float MoveSpeed = 3.2f;
+    // 게임의 걷기(Ctrl, PlayerMotor.walkSpeed 2.1 / moveSpeed 4.2 → Speed 0.5): Idle(가드 자세)과 Run 을 반반 섞으면 상체가
+    // 옆으로 비틀리므로, 0.5 에는 Run 을 걷는 속도로 느리게 재생한 동작을 둡니다.
+    const float WalkThreshold = 0.5f;
+    const float WalkSpeed = 2.1f;
     static readonly string[] ClipNames = { "Idle", "Run", "WW_Motion", "Attack1", "Attack2", "Attack3", "Recover2" };
 
     [MenuItem("Tools/Proi/Setup Playground Scene")]
@@ -165,9 +171,11 @@ public static class ProiSetup
         };
         AssetDatabase.AddObjectToAsset(tree, controller);
         tree.AddChild(LoadClip("Idle"), 0f);
+        tree.AddChild(LoadClip("Run"), WalkThreshold);
         tree.AddChild(LoadClip("Run"), 1f);
         ChildMotion[] children = tree.children;
-        children[1].timeScale = MoveSpeed / RunClipGroundSpeed;
+        children[1].timeScale = WalkSpeed / RunClipGroundSpeed;
+        children[2].timeScale = MoveSpeed / RunClipGroundSpeed;
         tree.children = children;
         locomotion.motion = tree;
         sm.defaultState = locomotion;
@@ -197,7 +205,7 @@ public static class ProiSetup
         }
 
         var player = new GameObject("Player");
-        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Fbx);
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(MagicaPrefab) ?? AssetDatabase.LoadAssetAtPath<GameObject>(Fbx);
         var model = (GameObject)PrefabUtility.InstantiatePrefab(prefab, player.transform);
         model.name = "Proi";
         model.transform.localRotation = Quaternion.Euler(0f, DetectModelYaw(model), 0f);
@@ -230,8 +238,16 @@ public static class ProiSetup
         so = new SerializedObject(blink);
         so.FindProperty("face").objectReferenceValue = smr;
         so.ApplyModifiedPropertiesWithoutUndo();
-        model.AddComponent<ProiTailSpring>();
+#if MAGICACLOTH2
+        if (model.GetComponentInChildren<MagicaCloth2.MagicaCloth>(true) == null)
+#endif
+            model.AddComponent<ProiTailSpring>();
+#if MAGICACLOTH2
+        else
+            model.AddComponent<ProiHairFlutter>();   // 궁극기 머리 휘날림
+#endif
         model.AddComponent<ProiFist>();
+        model.AddComponent<ProiRunPosture>();          // 달리기 / 걷기 상체 굽힘 + 걸음 리듬
 
         Camera cam = Camera.main;
         if (cam != null)
