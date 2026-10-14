@@ -74,6 +74,10 @@ namespace AcRoguelike
         public float katanaLength = 1.05f;
         [Range(0, 1)] public float gripCurl = 1f;
         public GameObject katanaModel;
+        [Tooltip("Katana look: slash arcs, cut lines and petals. Unarmed hunters (HunterRoster) turn it off and bring their own hit effects; damage, crits and hit stop stay the same.")]
+        public bool bladeEffects = true;
+        /// <summary>Afterimage tint of unarmed swings (bladeEffects off).</summary>
+        public Color unarmedTint = new Color(1f, .42f, .12f);
 
         public int HitCount { get; private set; }
         /// <summary>Counter window after a just dodge: cuts deal more damage and land as heavy hits.</summary>
@@ -113,6 +117,9 @@ namespace AcRoguelike
             if (katana) katana.gameObject.SetActive(visible);
             if (!visible) { CancelSecondHit(); EndSwing(); }
         }
+
+        /// <summary>The body changed (HunterRoster swapped the visual): look the skinned meshes up again for afterimages.</summary>
+        public void ResetBodyCache() => skins = null;
 
         public void GrantCounter(float seconds) => counterUntil = Mathf.Max(counterUntil, Time.unscaledTime + seconds);
         public TrainingEnemy LastHitTarget { get; private set; }
@@ -220,12 +227,15 @@ namespace AcRoguelike
             if (counter) baseDamage = Mathf.RoundToInt(baseDamage * (hooks != null ? hooks.CounterMultiplier(counterMultiplier) : counterMultiplier));
             bool launch = swing.finisher && second;
             // The arc plays even on a miss, so every swing reads as a cut.
-            HitFeedback.SlashArc(chest, direction, from, to, swing.arcRadius, roll, heavy ? .95f : .62f,
-                heavy ? HitFeedback.Sakura * 2.6f : HitFeedback.Sakura * 1.9f,
-                heavy ? HitFeedback.Violet * 1.7f : HitFeedback.Crimson * 1.4f, heavy ? .09f : .06f, heavy ? .32f : .2f);
-            HitFeedback.SlashArc(chest, direction, from * .82f, to * .82f, swing.arcRadius * .78f, roll + 8, .3f,
-                Color.white * 1.7f, HitFeedback.Sakura, heavy ? .08f : .05f, .12f);
-            if (heavy)
+            if (bladeEffects)
+            {
+                HitFeedback.SlashArc(chest, direction, from, to, swing.arcRadius, roll, heavy ? .95f : .62f,
+                    heavy ? HitFeedback.Sakura * 2.6f : HitFeedback.Sakura * 1.9f,
+                    heavy ? HitFeedback.Violet * 1.7f : HitFeedback.Crimson * 1.4f, heavy ? .09f : .06f, heavy ? .32f : .2f);
+                HitFeedback.SlashArc(chest, direction, from * .82f, to * .82f, swing.arcRadius * .78f, roll + 8, .3f,
+                    Color.white * 1.7f, HitFeedback.Sakura, heavy ? .08f : .05f, .12f);
+            }
+            if (heavy && bladeEffects)
             {
                 HitFeedback.SlashArc(transform.position + Vector3.up * .08f, direction, -180, 180, swing.range, 0, .5f,
                     HitFeedback.Crimson * 1.6f, HitFeedback.Violet, .12f, .38f);
@@ -261,8 +271,11 @@ namespace AcRoguelike
                     hooks?.OnCrit(enemy);
                 }
                 // The cut itself, drawn across the target along the swing's screen tilt.
-                if (heavy) HitFeedback.CrossSlash(point, 1.1f);
-                else HitFeedback.SlashLine(point, ScreenAngle(direction, from, to, roll), 2.1f, .1f, HitFeedback.Sakura * 2.2f, .18f);
+                if (bladeEffects)
+                {
+                    if (heavy) HitFeedback.CrossSlash(point, 1.1f);
+                    else HitFeedback.SlashLine(point, ScreenAngle(direction, from, to, roll), 2.1f, .1f, HitFeedback.Sakura * 2.2f, .18f);
+                }
                 hitAny = true;
                 if (!first || enemy == preferred) first = enemy;
             }
@@ -353,7 +366,7 @@ namespace AcRoguelike
             {
                 swingClock += Time.deltaTime * (combat ? combat.AnimationSpeed : 1);
                 var swing = swings[Mathf.Clamp(swingIndex, 0, swings.Length - 1)];
-                float hit = HitTimes[Mathf.Clamp(swingIndex, 0, HitTimes.Length - 1)];
+                float hit = SwingHitTime(swingIndex);
                 float end = hit + Mathf.Max(.1f, swing.secondHitDelay + .08f);
                 // Afterimages: dense through the dash, the draw and any lunge; a faint trail on every other cut.
                 bool strong = swing.dash || lungeUntil > Time.time;
@@ -361,7 +374,8 @@ namespace AcRoguelike
                 {
                     nextGhost = Time.time + (strong ? .03f : .06f);
                     if (skins == null) skins = Body.GetComponentsInChildren<SkinnedMeshRenderer>();
-                    HitFeedback.Afterimage(skins, (swing.finisher ? HitFeedback.Violet : HitFeedback.Sakura) * (strong ? .55f : .28f), strong ? .28f : .18f);
+                    Color tint = !bladeEffects ? unarmedTint : swing.finisher ? HitFeedback.Violet : HitFeedback.Sakura;
+                    HitFeedback.Afterimage(skins, tint * (strong ? .55f : .28f), strong ? .28f : .18f);
                 }
             }
             if (lungeUntil > Time.time && body && body.enabled)
@@ -372,6 +386,13 @@ namespace AcRoguelike
                 else MoveBody(delta.normalized * step + Vector3.down * .02f);
             }
             if (drawn && !(combat && combat.IsAttacking) && secondHit == null && Time.time > sheatheAt) Draw(false);
+        }
+
+        /// <summary>The swing's hit time as PlayerCombat runs it (the hunter's own timing), else the katana's.</summary>
+        float SwingHitTime(int index)
+        {
+            if (combat && combat.hitTimes != null && index >= 0 && index < combat.hitTimes.Length) return combat.hitTimes[index];
+            return HitTimes[Mathf.Clamp(index, 0, HitTimes.Length - 1)];
         }
 
         void MoveBody(Vector3 displacement)
@@ -444,7 +465,7 @@ namespace AcRoguelike
         {
             if (draw == drawn) return;
             drawn = draw;
-            if (draw && katana) HitFeedback.Petals(katana.position, 5);
+            if (draw && katana && bladeEffects && !weaponHidden) HitFeedback.Petals(katana.position, 5);
         }
 
         void EnsureKatana()

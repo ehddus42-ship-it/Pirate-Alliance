@@ -11,7 +11,7 @@ namespace AcRoguelike.Liminal
     /// <summary>
     /// Run overlay in the "Hunter Association system window" style (<see cref="HunterUi"/>). Play-time
     /// sentences (toasts, objectives, control hints, skill callouts) are gone. What remains:
-    /// - the hunter status window (health, dash charge, counter state);
+    /// - the hunter status window (name of the worn hunter, her own skill's cooldown, health, dash charge, counter state);
     /// - the gate indicator (stage and room);
     /// - the remaining-enemy count;
     /// - the boss bar;
@@ -26,7 +26,7 @@ namespace AcRoguelike.Liminal
         Font ownedSourceFont;
         GameObject canvasObject, modal, combatGroup, lobbyGroup, bossGroup;
         RectTransform modalContent, promptRoot, stamp;
-        TextMeshProUGUI gateLabel, roomLabel, healthLabel, enemyLabel, bossName, bossValue, counterLabel, currencyLabel, lobbyTitle, promptLabel, promptKey;
+        TextMeshProUGUI gateLabel, roomLabel, healthLabel, enemyLabel, bossName, bossValue, counterLabel, currencyLabel, lobbyTitle, promptLabel, promptKey, hunterName, skillLabel;
         Image healthFill, healthGhost, bossFill;
         RectTransform dashTrack;
         // One pip per stamina point: a dark slot and the fill that grows back as it recovers.
@@ -66,7 +66,8 @@ namespace AcRoguelike.Liminal
             Stretch(combatGroup.GetComponent<RectTransform>());
             var status = HunterUi.Window("HunterStatus", combatGroup.transform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(22, -20), new Vector2(330, 96), font);
             HunterUi.Text("Rank", status, font, "HUNTER", 12, HunterUi.Gold, new Vector2(16, -10), new Vector2(120, 18), FontStyles.Bold);
-            HunterUi.Text("Name", status, font, "아스트라이아", 19, HunterUi.Cream, new Vector2(16, -26), new Vector2(200, 28), FontStyles.Bold);
+            hunterName = HunterUi.Text("Name", status, font, HunterRoster.FirstHunterName, 19, HunterUi.Cream, new Vector2(16, -26), new Vector2(200, 28), FontStyles.Bold);
+            skillLabel = HunterUi.Text("Skill", status, font, "", 12, HunterUi.Gold, new Vector2(220, -32), new Vector2(96, 18), FontStyles.Bold, TextAlignmentOptions.TopRight);
             counterLabel = HunterUi.Text("Counter", status, font, "", 13, HunterUi.Gate, new Vector2(200, -12), new Vector2(116, 20), FontStyles.Bold, TextAlignmentOptions.TopRight);
             var track = HunterUi.Fill("HealthTrack", status, new Vector2(0, 1), new Vector2(0, 1), new Vector2(16, -60), new Vector2(232, 10), new Color(.05f, .07f, .14f, 1));
             healthGhost = HunterUi.Fill("HealthGhost", track.rectTransform, new Vector2(0, .5f), new Vector2(0, .5f), Vector2.zero, new Vector2(232, 10), new Color(1, .9f, .75f, .55f));
@@ -165,6 +166,8 @@ namespace AcRoguelike.Liminal
                 : $"GATE  {run.StageIndex + 1:00}";
             roomLabel.text = $"{run.CurrentStage.title}   {Mathf.Max(0, run.ActiveRoomIndex + 1):00} / {run.Rooms.Count:00}";
             enemyLabel.text = run.LivingEnemyCount.ToString();
+            if (run.Roster) hunterName.text = run.Roster.CurrentName;
+            UpdateSkill(run.Roster ? run.Roster.CurrentSkill : null);
             if (run.PlayerHealth)
             {
                 float h = run.PlayerHealth.maximumHealth > 0 ? (float)run.PlayerHealth.Health / run.PlayerHealth.maximumHealth : 0;
@@ -216,6 +219,16 @@ namespace AcRoguelike.Liminal
                 else if (Keyboard.current.digit2Key.wasPressedThisFrame) run.SelectAugment(1);
                 else if (Keyboard.current.digit3Key.wasPressedThisFrame) run.SelectAugment(2);
             }
+        }
+
+        /// <summary>The worn hunter's own skill: gold when ready, dim with the seconds left while it recharges.</summary>
+        void UpdateSkill(IHunterSkill skill)
+        {
+            skillLabel.gameObject.SetActive(skill != null);
+            if (skill == null) return;
+            float wait = skill.CooldownRemaining;
+            skillLabel.text = wait > 0 ? $"{skill.Label}  {Mathf.CeilToInt(wait)}" : skill.Label;
+            skillLabel.color = wait > 0 ? HunterUi.Muted : HunterUi.Gold;
         }
 
         void UpdateStamina()

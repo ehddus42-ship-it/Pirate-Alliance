@@ -97,7 +97,6 @@ namespace AcRoguelike.Liminal
         LiminalPlayerHealth health;
         PlayerMotor motor;
         MeleeSlash melee;
-        SkinnedMeshRenderer[] skins;
 
         void Awake()
         {
@@ -118,7 +117,8 @@ namespace AcRoguelike.Liminal
             Vector3 p = transform.position + Vector3.up * .05f;
             HitFeedback.Dust(p, 1.5f);
             HitFeedback.Sparks(transform.position + Vector3.up * 1f, Vector3.up, 14, 1.1f);
-            if (skins == null) skins = (motor && motor.visual ? motor.visual : transform).GetComponentsInChildren<SkinnedMeshRenderer>();
+            // Looked up each time: HunterRoster can swap the body between dodges.
+            var skins = (motor && motor.visual ? motor.visual : transform).GetComponentsInChildren<SkinnedMeshRenderer>();
             HitFeedback.Afterimage(skins, Violet * .8f, .6f);
             if (motor) motor.ResetDashCooldown();
             if (melee) melee.GrantCounter(counterSeconds);

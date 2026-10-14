@@ -38,6 +38,8 @@ namespace AcRoguelike.Liminal
         public LiminalRunPhase Phase { get; private set; }
         public IReadOnlyList<LiminalRoom> Rooms => rooms;
         public LiminalPlayerHealth PlayerHealth => health;
+        /// <summary>F swaps hunters in a gate (HunterRoster on the player).</summary>
+        public HunterRoster Roster => roster;
         public LiminalStageDefinition CurrentStage => stages != null && StageIndex >= 0 && StageIndex < stages.Length ? stages[StageIndex] : null;
         public string CurrentRoomName => ActiveRoomIndex >= 0 && ActiveRoomIndex < rooms.Count ? rooms[ActiveRoomIndex].displayName : "";
         public int ClearedRoomCount { get; private set; }
@@ -66,6 +68,7 @@ namespace AcRoguelike.Liminal
         LiminalLobby lobby;
         PlayerCombat combat;
         HunterAugments augments;
+        HunterRoster roster;
         readonly List<AugmentDefinition> augmentOffers = new List<AugmentDefinition>();
         static readonly Vector3 LobbyOffset = new Vector3(0, 0, -420);
         float originalMoveSpeed, originalWalkSpeed, originalCooldown;
@@ -93,6 +96,9 @@ namespace AcRoguelike.Liminal
                 if (!player.GetComponent<HunterCharacter>()) player.gameObject.AddComponent<HunterCharacter>();
                 if (!player.TryGetComponent(out augments)) augments = player.gameObject.AddComponent<HunterAugments>();
                 augments.Initialize(this);
+                // More hunters (Resources/Hunters) share this body: F swaps them inside a gate.
+                if (motor && !player.TryGetComponent(out roster)) roster = player.gameObject.AddComponent<HunterRoster>();
+                if (roster) roster.Bind(this);
             }
             if (motor) { originalMoveSpeed = motor.moveSpeed; originalWalkSpeed = motor.walkSpeed; }
             if (caster) { originalCooldown = caster.cooldown; originalFlames = caster.flameCount; caster.holdToCast = true; caster.requireLineOfSight = true; }
@@ -617,6 +623,8 @@ namespace AcRoguelike.Liminal
             if (health) health.ResetHealth();
             if (!lobby) lobby = LiminalLobby.Build(this, transform.position + LobbyOffset, hud);
             SetPhase(LiminalRunPhase.Lobby);
+            // The lobby dresses the first hunter in everyday clothes; the picked hunter returns at the gate.
+            if (roster) roster.EnterLobby();
             lobby.Enter(player);
             RoomChanged?.Invoke();
         }
@@ -674,6 +682,7 @@ namespace AcRoguelike.Liminal
         void BeginDungeonRun()
         {
             if (lobby) lobby.Leave(player);
+            if (roster) roster.LeaveLobby();
             if (player) HunterProgress.Apply(player.gameObject);
             StartNewRun(CreateRunSeed());
         }
