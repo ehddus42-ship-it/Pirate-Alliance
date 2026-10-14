@@ -17,6 +17,12 @@ namespace AcRoguelike
         float shakeAmplitude, shakeUntil, shakeDuration;
         float zoomAmount, zoomStart, zoomAttack, zoomHold, zoomRelease, zoomFrom;
 
+        void Awake()
+        {
+            // Keeps the player visible through walls and overhead structures in every scene using this rig.
+            if (TryGetComponent<Camera>(out _) && !TryGetComponent<OccluderCutout>(out _)) gameObject.AddComponent<OccluderCutout>();
+        }
+
         /// <summary>Short camera shake for hit feedback; stronger calls replace weaker ones.</summary>
         public void AddShake(float amplitude, float duration)
         {
