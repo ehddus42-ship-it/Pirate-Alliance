@@ -264,11 +264,16 @@ public static class ProiHunterValidation
         Check(!roster.CanSwap && !roster.TrySwap(), "no swapping while the ultimate plays");
         Check(!ultimate.TryActivate(), "a second R does nothing while it plays");
         float ultAt = Time.time, firstHitAt = -1;
-        bool ultShot = false, dashedDuring = false;
+        bool ultShot = false, dashedDuring = false, frontShot = false, jumpShot = false, cinematic = false;
         int dashesBefore = motor.DashCount;
+        var follow = Object.FindFirstObjectByType<IsometricFollowCamera>();
+        float baseFov = Camera.main ? Camera.main.fieldOfView : 0;
         while (ultCore.Active && Time.time - ultAt < 10)
         {
             yield return null;
+            if (follow && follow.InCinematic) cinematic = true;
+            if (!frontShot && ultCore.SkillTime > 1.2f) { frontShot = true; Capture("proi_ingame_ultimate_front.png", report); }
+            if (!jumpShot && ultCore.SkillTime > ultCore.DashStart + .35f) { jumpShot = true; Capture("proi_ingame_ultimate_jump.png", report); }
             if (motor.DashCount != dashesBefore) dashedDuring = true;
             if (firstHitAt < 0 && ultimate.HitCount > ultHits) firstHitAt = Time.time;
             if (!ultShot && firstHitAt > 0 && Time.time - firstHitAt > .45f) { ultShot = true; Capture("proi_ingame_ultimate.png", report); }
@@ -279,6 +284,9 @@ public static class ProiHunterValidation
             $"slam and pillars hit the enemy (hits {ultimate.HitCount - ultHits}, damage {ultEnemy.maxHealth - ultEnemy.Health})");
         Check(travelled > 2.5f, $"the arch jump carried her forward ({travelled:F2} m)");
         Check(!dashedDuring, "no dash input during the ultimate");
+        Check(cinematic, "the game camera takes the ultimate's cinematic shots (front, jump, dive, pillars)");
+        yield return Until(() => !follow.InCinematic, 4, "camera back to the follow view");
+        Check(Mathf.Abs(Camera.main.fieldOfView - baseFov) < .01f, "the follow view and its field of view come back after the ultimate");
         Check(ultimate.CooldownRemaining > 0 && !ultimate.TryActivate(), $"cooldown after use ({ultimate.CooldownRemaining:F1} s left)");
         yield return Seconds(.4f);
         Check(Mathf.Approximately(Time.timeScale, 1f), $"game speed untouched afterwards (timeScale {Time.timeScale:F2})");

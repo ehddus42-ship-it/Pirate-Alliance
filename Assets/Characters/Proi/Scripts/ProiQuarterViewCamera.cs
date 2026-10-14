@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 /// 마우스 휠 = 줌, E = 시점 회전 (Q 는 궁극기). Shake() = 타격 시 카메라 흔들림 (실제 시간 기준이라 히트스톱 중에도 흔들림).
 /// SetCinematic / ClearCinematic = 연출용 고정 시점(궁극기 정면샷 등)으로 부드럽게 옮겼다가 기본 구도로 돌아옴.
 /// </summary>
-public class ProiQuarterViewCamera : MonoBehaviour
+public class ProiQuarterViewCamera : MonoBehaviour, IProiCamera
 {
     [SerializeField] Transform target;
 
@@ -81,6 +81,8 @@ public class ProiQuarterViewCamera : MonoBehaviour
         float dist = qcam != null ? qcam.distance : DefaultDistance, look = qcam != null ? qcam.lookHeight : DefaultLookHeight;
         pos = target + Vector3.up * look - rot * Vector3.forward * dist;
     }
+
+    void IProiCamera.BasePose(Vector3 target, out Vector3 pos, out Quaternion rot, out float fov) => BasePose(this, target, out pos, out rot, out fov);
 
     /// <summary>기본 쿼터뷰 구도로 blendTime(초, 실제 시간) 동안 부드럽게 복귀.</summary>
     public void ClearCinematic(float blendTime)

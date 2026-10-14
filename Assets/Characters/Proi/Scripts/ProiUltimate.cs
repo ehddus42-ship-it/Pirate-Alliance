@@ -23,7 +23,7 @@ using UnityEngine.Timeline;
 ///  그 시간에 맞춰 이동 / 타격감 / 이펙트 이벤트를 냅니다. 비워 두면 아래 코드 값(정면 카메라, 연출 배속 ...)으로 재생합니다.
 /// [게임(헌터 교체) 안] ProiHunterUltimate 가 externalInput / cinematicTime 을 끄고 TryBegin 으로 시작합니다:
 ///  게임 배속(Time.timeScale)은 건드리지 않고(일시정지 / 적 / 히트스톱은 게임 것), 연출 배속은 Proi 의 동작에만 걸리며,
-///  카메라는 ProiQuarterViewCamera 가 없으면 게임 카메라 그대로입니다. 캐릭터 기준은 이 컴포넌트가 붙은 Transform 입니다.
+///  카메라 연출(정면샷 / 푸시인 / 도약 / 다이브 / 불기둥 와이드 / 복귀)은 게임 카메라에도 그대로 얹습니다 (IProiCamera, ProiGameCamera). 캐릭터 기준은 이 컴포넌트가 붙은 Transform 입니다.
 /// </summary>
 public class ProiUltimate : MonoBehaviour
 {
@@ -176,7 +176,7 @@ public class ProiUltimate : MonoBehaviour
     ProiThrow skill;
     ProiDash dash;
     ProiPlayerController mover;
-    ProiQuarterViewCamera qcam;
+    IProiCamera qcam;
     CharacterController controller;
     Camera viewCam;
     Transform lHand, rHand, rForearm;
@@ -242,7 +242,7 @@ public class ProiUltimate : MonoBehaviour
         lHand = FindDeep(root, "LeftHand");
         rHand = FindDeep(root, "RightHand");
         rForearm = FindDeep(root, "RightLowerArm");
-        qcam = Camera.main != null ? Camera.main.GetComponent<ProiQuarterViewCamera>() : null;
+        qcam = ProiCinematicCamera.Find();
         viewCam = Camera.main;
     }
 
@@ -487,7 +487,8 @@ public class ProiUltimate : MonoBehaviour
                 pos = look - rot * Vector3.forward * s.distance;
                 return;
             default:
-                ProiQuarterViewCamera.BasePose(qcam, transform.position, out pos, out rot, out fov);
+                if (qcam != null) qcam.BasePose(transform.position, out pos, out rot, out fov);
+                else ProiQuarterViewCamera.BasePose(null, transform.position, out pos, out rot, out fov);
                 return;
         }
         rot = Quaternion.LookRotation(look - pos, up);

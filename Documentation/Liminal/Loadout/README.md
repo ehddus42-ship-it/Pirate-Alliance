@@ -46,7 +46,7 @@
 | --- | --- | --- |
 | 좌클릭 | 3타 콤보 (왼쪽 잽 → 오른쪽 잽 → 왼발 회축). 타격마다 카메라 5% 줌인, 마무리 타에서 흔들림 | `ProiHunterKit` / `ProiBlazeCombo` |
 | 우클릭 · K · 패드 R3 | 기본 스킬: 잡아 던지기 / 화염공 | `ProiHunterThrow` (신규) |
-| R · 패드 X | 궁극기: 땅 폭발 (불기둥 3갈래) | `ProiHunterUltimate` |
+| R · 패드 X | 궁극기: 땅 폭발 (불기둥 3갈래). 플레이그라운드의 카메라 연출(정면샷 → 주먹 푸시인 → 도약 → 다이브 → 불기둥 와이드 → 복귀)을 게임 카메라에서도 그대로 재생 | `ProiHunterUltimate` / `ProiCinematicCamera` |
 | SPACE | 화염 대시 (무적, 불꽃 잔상) | `ProiHunterKit` |
 
 ### 기본 스킬 (ProiHunterThrow)
