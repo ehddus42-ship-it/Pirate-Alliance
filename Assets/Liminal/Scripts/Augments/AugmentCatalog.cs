@@ -32,7 +32,7 @@ namespace AcRoguelike.Liminal
                 maxStacks: 99, canOffer: a => a.ComboSwingsAfterNextTrim > 0, onAcquire: a => a.ApplyCombo()),
             new AugmentDefinition(AutoSupport, "알아하쇼",
                 $"지원스킬을 직접 쓸 수 없다.\n대신 공격 {HunterAugments.AutoSupportHits}타마다 지원스킬이 자동 발동한다.",
-                onAcquire: a => a.ApplySupportLock()),
+                canOffer: a => a.HasActiveSupport, onAcquire: a => a.ApplySupportLock()),
             new AugmentDefinition(CountingStar, "Counting Star",
                 $"치명타 적중 시 별똥별이 떨어진다.\n(재사용 대기 {HunterAugments.StarCooldown:0}초)"),
             new AugmentDefinition(Steadfast, "우직하게",

@@ -15,6 +15,10 @@ namespace AcRoguelike.Liminal
         public string displayName = "헌터";
         [Tooltip("Roster order after the scene's own hunter.")]
         public int order;
+        [Tooltip("Two short lines for the lobby loadout card: role, then how the hunter plays.")]
+        [TextArea] public string summary = "";
+        [Tooltip("Resources path of the loadout card illustration (Texture2D). Empty: a name plate instead.")]
+        public string portraitResource = "";
         [Tooltip("Rigged model (feet at the origin, facing +Z). Spawned under the player and switched on by the roster.")]
         public GameObject model;
         public RuntimeAnimatorController controller;

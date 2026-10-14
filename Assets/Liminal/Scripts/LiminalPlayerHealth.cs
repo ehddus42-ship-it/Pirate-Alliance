@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace AcRoguelike.Liminal
@@ -21,6 +22,14 @@ namespace AcRoguelike.Liminal
         public event Action<int> Hurt;
         float invulnerableUntil;
         int lastJustDash = -1;
+        readonly List<Func<int, bool>> guards = new List<Func<int, bool>>();
+
+        /// <summary>
+        /// A shield (an augment) looks at every hit that would land; returning true absorbs it. Guards are asked in
+        /// the order they were added and the first one that absorbs ends the hit.
+        /// </summary>
+        public void AddGuard(Func<int, bool> guard) { if (guard != null && !guards.Contains(guard)) guards.Add(guard); }
+        public void RemoveGuard(Func<int, bool> guard) => guards.Remove(guard);
         PlayerMotor motor;
 
         void Awake()
@@ -37,6 +46,13 @@ namespace AcRoguelike.Liminal
             if (!IsAlive || amount <= 0) return false;
             if (Dodging) { NotifyDodged(); return false; }
             if (Time.time < invulnerableUntil) return false;
+            for (int i = 0; i < guards.Count; i++)
+                if (guards[i](amount))
+                {
+                    // A blocked hit still costs the attacker its swing: the usual short grace follows.
+                    invulnerableUntil = Time.time + .5f;
+                    return false;
+                }
             Health = Mathf.Max(0, Health - amount);
             invulnerableUntil = Time.time + .8f;
             // Taking a hit has weight too: a hard stop, a red flash on the body and the screen, a shake.
@@ -75,6 +91,16 @@ namespace AcRoguelike.Liminal
 
         public void SetMaximum(int value, bool refill)
         { maximumHealth = Mathf.Max(1, value); Health = refill ? maximumHealth : Mathf.Min(Health, maximumHealth); Changed?.Invoke(); }
+
+        /// <summary>Restores health up to the maximum. Returns the amount actually restored.</summary>
+        public int Heal(int amount)
+        {
+            if (!IsAlive || amount <= 0) return 0;
+            int before = Health;
+            Health = Mathf.Min(maximumHealth, Health + amount);
+            if (Health != before) Changed?.Invoke();
+            return Health - before;
+        }
 
         public void IncreaseMaximum(int amount)
         { maximumHealth += amount; Health = Mathf.Min(maximumHealth, Health + amount); Changed?.Invoke(); }

@@ -142,6 +142,8 @@ public sealed class ProiHunterKit : MonoBehaviour, IProiComboSource
             lastAttackCount = combat.AttackCount;
             step = combat.AttackIndex;
             clipTime = 0f;
+            // 기본 공격 시 카메라 5% 줌인 (마무리 타의 흔들림은 swings 의 shake).
+            HitFeedback.Zoom(.05f, .08f, ClipSeconds(step) / Mathf.Max(.1f, AttackSpeed) * .5f, .3f);
             lastTravel = Vector2.zero;
             Vector3 aim = Vector3.ProjectOnPlane(combat.AttackDirection, Vector3.up);
             forward = aim.sqrMagnitude > .01f ? aim.normalized : Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;

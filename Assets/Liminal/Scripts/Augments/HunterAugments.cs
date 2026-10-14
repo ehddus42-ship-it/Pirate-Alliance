@@ -122,6 +122,9 @@ namespace AcRoguelike.Liminal
             }
         }
 
+        /// <summary>The party's support has a skill to cast (유니). 꼬끼오 is passive, so 알아하쇼 has nothing to take over.</summary>
+        public bool HasActiveSupport => SupportCharacterCatalog.Selected?.active ?? true;
+
         // ---- IMeleeHitHooks -------------------------------------------------------------------------------
         public float CritChance(float baseChance)
         {
@@ -162,7 +165,7 @@ namespace AcRoguelike.Liminal
                 {
                     SupportHitProgress -= AutoSupportHits;
                     var skill = Support;
-                    if (skill && skill.ForceActivate()) AutoSupportCasts++;
+                    if (skill && skill.Selected && skill.ForceActivate()) AutoSupportCasts++;
                 }
             }
             if (comboFinal && Has(AugmentCatalog.Yarara)) LaunchNearest();

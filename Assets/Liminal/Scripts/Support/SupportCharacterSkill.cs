@@ -13,10 +13,13 @@ namespace AcRoguelike.Liminal
     /// brief invulnerability (support skills work like a bomb). The bottom-left HUD card shows her illustration, the
     /// skill cooldown, the key and the 1UP time left. Models come from Resources/SupportSkill (Meshy voxel GLBs) with
     /// procedural voxel fallbacks, so the skill works even before the models are imported.
+    /// She only acts (and shows her card) while she is the party's support (HunterLoadout.SupportId).
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class SupportCharacterSkill : MonoBehaviour
     {
+        public const string Id = SupportCharacterCatalog.Yuni;
+
         [Header("Skill")]
         public string characterName = "유니";
         public string skillName = "보너스 스테이지!";
@@ -38,6 +41,8 @@ namespace AcRoguelike.Liminal
         public bool OneUpActive => OneUpRemaining > 0;
         public int Activations { get; private set; }
         public int ChompersFired { get; private set; }
+        /// <summary>In the party: picked as the support with the lobby's loadout officer.</summary>
+        public bool Selected => HunterLoadout.SupportId == Id;
 
         LiminalRunDirector run;
         TalismanCaster caster;
@@ -85,6 +90,14 @@ namespace AcRoguelike.Liminal
         void Update()
         {
             if (!panel) TryBuildHud();
+            bool selected = Selected;
+            if (panel && panel.gameObject.activeSelf != selected) panel.gameObject.SetActive(selected);
+            if (!selected)
+            {
+                if (activeOneUp) Destroy(activeOneUp.gameObject);
+                oneUpUntil = 0;
+                return;
+            }
             var player = run ? run.player : null;
             if (player && (!caster || caster.transform != player))
             {
@@ -125,7 +138,7 @@ namespace AcRoguelike.Liminal
 
         bool Activate(bool ignoreCooldown)
         {
-            if (!run || !run.player || (!ignoreCooldown && CooldownRemaining > 0)) return false;
+            if (!run || !run.player || !Selected || (!ignoreCooldown && CooldownRemaining > 0)) return false;
             Activations++;
             readyAt = Time.time + cooldown;
             portraitPulse = 1;

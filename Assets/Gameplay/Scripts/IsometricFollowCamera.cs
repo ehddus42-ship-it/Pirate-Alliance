@@ -15,6 +15,7 @@ namespace AcRoguelike
         Vector3 focus, damping;
         bool initialized;
         float shakeAmplitude, shakeUntil, shakeDuration;
+        float zoomAmount, zoomStart, zoomAttack, zoomHold, zoomRelease, zoomFrom;
 
         /// <summary>Short camera shake for hit feedback; stronger calls replace weaker ones.</summary>
         public void AddShake(float amplitude, float duration)
@@ -25,6 +26,29 @@ namespace AcRoguelike
             shakeAmplitude = amplitude;
             shakeDuration = Mathf.Max(.01f, duration);
             shakeUntil = Time.unscaledTime + shakeDuration;
+        }
+
+        /// <summary>
+        /// Skill framing: moves the camera `amount` of its distance closer (negative: farther), eased in over
+        /// `attack`, held, then eased back over `release`. A new call takes over from the current push smoothly.
+        /// </summary>
+        public void AddZoom(float amount, float attack, float hold, float release)
+        {
+            zoomFrom = ZoomNow();
+            zoomAmount = amount;
+            zoomStart = Time.unscaledTime;
+            zoomAttack = Mathf.Max(.001f, attack);
+            zoomHold = Mathf.Max(0, hold);
+            zoomRelease = Mathf.Max(.001f, release);
+        }
+
+        float ZoomNow()
+        {
+            float t = Time.unscaledTime - zoomStart;
+            if (t < zoomAttack) return Mathf.Lerp(zoomFrom, zoomAmount, Mathf.SmoothStep(0, 1, t / zoomAttack));
+            t -= zoomAttack + zoomHold;
+            if (t < 0) return zoomAmount;
+            return t < zoomRelease ? Mathf.Lerp(zoomAmount, 0, Mathf.SmoothStep(0, 1, t / zoomRelease)) : 0;
         }
         void LateUpdate()
         {
@@ -42,7 +66,8 @@ namespace AcRoguelike
                 float t = Time.unscaledTime * 63f;
                 shake = rotation * new Vector3(Mathf.Sin(t) * k, Mathf.Sin(t * 1.37f + 1.1f) * k, 0);
             }
-            transform.SetPositionAndRotation(focus + rotation * Vector3.back * distance + shake, rotation);
+            float framed = distance * (1 - Mathf.Clamp(ZoomNow(), -.5f, .5f));
+            transform.SetPositionAndRotation(focus + rotation * Vector3.back * framed + shake, rotation);
         }
         public void Snap()
         {

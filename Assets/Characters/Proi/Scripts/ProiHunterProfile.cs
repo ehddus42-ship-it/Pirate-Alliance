@@ -5,7 +5,9 @@ using UnityEngine;
 /// <summary>
 /// 플레이 가능한 헌터 Proi (게이트 안에서 F 로 교체). 에셋은 Resources/Hunters 에 있어야 HunterRoster 가 찾습니다.
 /// 맨손 3타 콤보: 1) 왼주먹 잽  2) 오른주먹  3) 뒤돌아 왼발 옆차기 (넓게 휘두르는 마무리).
+/// 기본 스킬 (우클릭 / K): 가까운 적을 잡아 던지기, 없으면 화염공 (ProiHunterThrow).
 /// 궁극기 (R): 화염 차징 → 아치 점프 → 땅 찍기 → 세 갈래 불기둥 (ProiHunterUltimate).
+/// 전용 증강 6종은 ProiAugments.
 /// 콤보 타이밍은 클립에서 계산 (ProiHunterKit), 데미지 / 사거리 / 히트스톱은 아래 swings 로 조절합니다.
 /// </summary>
 [CreateAssetMenu(menuName = "Pirate Alliance/Hunters/Proi", fileName = "Proi")]
@@ -16,6 +18,8 @@ public sealed class ProiHunterProfile : HunterProfile
         characterId = "proi";
         displayName = "프로이";
         order = 10;
+        summary = "화염 배틀메이지 · 건틀릿 인파이터\n3타 콤보 · 우클릭 잡아 던지기 · R 땅 폭발";
+        portraitResource = "Loadout/hunter_proi";
         headBone = "Head";
         attackDurations = ProiHunterKit.AttackDurations();
         hitTimes = ProiHunterKit.HitTimes();
@@ -49,6 +53,10 @@ public sealed class ProiHunterProfile : HunterProfile
         ultimate.cinematicTime = false;
         visual.AddComponent<ProiBlazeUltimate>();
         visual.AddComponent<ProiHunterUltimate>();
+        // 기본 스킬 (우클릭): 잡아 던지기 / 화염공, 맹화돌진 증강 시 화염 돌진. 궁극기 뒤에 붙여 HUD 는 궁극기를 보여 줌.
+        visual.AddComponent<ProiHunterThrow>();
+        // 전용 증강 중 몸에 붙는 효과 (화염질주 / 불씨수호 / 반사의화염)
+        visual.AddComponent<ProiAugmentKit>();
     }
 
     /// <summary>각 타의 판정 기준점: 1타 왼손, 2타 오른손, 3타 왼발.</summary>

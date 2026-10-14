@@ -12,7 +12,7 @@ using Object = UnityEngine.Object;
 /// <summary>
 /// 게임 안 Proi (헌터 교체) 배치 검증: LiminalRun 씬을 실제로 재생해서
 /// 교체(F) → 몸 / 애니메이터 / 콤보 설정 → 3타 콤보가 적에게 데미지 → 대쉬 후 이동 동작 복귀 → 궁극기(R) 피해 / 입력 잠금 / 배속 →
-/// 다시 교체 → 로비 왕복(로비는 아스트라이아, 게이트에서 선택 복원)
+/// 다시 교체 → 로비 왕복(로비와 다음 게이트 모두 고른 헌터, 저장된 편성은 검증 뒤 원래대로)
 /// 을 확인하고 Documentation/Proi/ 에 보고서와 화면을 남깁니다.
 /// Unity -batchmode -projectPath . -executeMethod ProiHunterValidation.RunBatch -logFile Logs/proi-hunter.log
 /// </summary>
@@ -39,6 +39,7 @@ public static class ProiHunterValidation
     }
 
     static Report report;
+    static string savedHunter;
     static IEnumerator routine;
     static Wait waiting;
     static double deadline, started;
@@ -118,6 +119,7 @@ public static class ProiHunterValidation
     static IEnumerator Run()
     {
         LiminalRunDirector.SuppressAugmentOffers = true;
+        savedHunter = HunterLoadout.HunterId;
         LiminalRunDirector director = null;
         yield return Until(() => (director = Object.FindFirstObjectByType<LiminalRunDirector>()) && director.Roster && director.Phase == LiminalRunPhase.Lobby, 30, "director in lobby");
         var roster = director.Roster;
@@ -127,6 +129,8 @@ public static class ProiHunterValidation
         var hunter = roster.GetComponent<HunterCharacter>();
         var health = roster.GetComponent<LiminalPlayerHealth>();
         Check(roster.Count >= 2, $"roster has the scene hunter and Proi (count={roster.Count})");
+        // The saved lobby loadout may have Proi picked; this check starts the gate with the scene's own hunter.
+        if (roster.SelectedIndex != 0) roster.Choose(0);
         var astraia = motor.visual.gameObject;
         int astraiaCombo = combat.ComboLength;
 
@@ -291,13 +295,13 @@ public static class ProiHunterValidation
         var fxRoot = GameObject.Find("ProiBlazeFX");
         Check(!fxRoot || !fxRoot.activeInHierarchy, "Proi's fire effects are hidden with her");
 
-        // ---- lobby: always Astraia, the pick returns in the next gate
+        // ---- lobby: the picked hunter walks the plaza (the loadout keeps her), and the next gate starts with her
         roster.Select(1);
         Object.Destroy(arena);
         director.enabled = true;
         director.ReturnToLobby();
         yield return Until(() => director.Phase == LiminalRunPhase.Lobby, 10, "back in the lobby");
-        Check(roster.CurrentIndex == 0 && astraia.activeSelf && !proi.activeSelf && roster.SelectedIndex == 1, "lobby shows Astraia, Proi stays picked");
+        Check(roster.CurrentIndex == 1 && proi.activeSelf && !astraia.activeSelf && roster.SelectedIndex == 1, "lobby shows the picked Proi");
         Check(!roster.CanSwap && !roster.TrySwap(), "no swapping in the lobby");
         director.EnterDungeon();
         yield return Until(() => director.Phase == LiminalRunPhase.Exploring, 20, "gate entered again");
@@ -352,6 +356,8 @@ public static class ProiHunterValidation
         File.WriteAllText(Path.Combine(Folder, "ingame-validation.json"), JsonUtility.ToJson(report, true));
         Debug.Log("[ProiHunterValidation] " + report.status + "\n" + string.Join("\n", report.checks) + (error != null ? "\n" + error : ""));
         LiminalRunDirector.SuppressAugmentOffers = false;
+        // Swapping saved the loadout; the player's own pick comes back.
+        if (savedHunter != null) HunterLoadout.HunterId = savedHunter;
         SessionState.SetInt(Active + ".exit", report.errors.Count == 0 ? 0 : 1);
         EditorApplication.ExitPlaymode();
     }

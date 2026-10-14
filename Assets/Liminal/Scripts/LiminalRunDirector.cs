@@ -55,6 +55,8 @@ namespace AcRoguelike.Liminal
         public const int AugmentChoices = 3;
         public event Action StageChanged;
         public event Action RoomChanged;
+        /// <summary>A room enemy just lost its last health point (raised where it stood at that moment).</summary>
+        public event Action<TrainingEnemy> EnemyKilled;
 
         readonly List<LiminalRoom> rooms = new List<LiminalRoom>();
         readonly HashSet<TrainingEnemy> living = new HashSet<TrainingEnemy>();
@@ -102,6 +104,8 @@ namespace AcRoguelike.Liminal
             }
             if (motor) { originalMoveSpeed = motor.moveSpeed; originalWalkSpeed = motor.walkSpeed; }
             if (caster) { originalCooldown = caster.cooldown; originalFlames = caster.flameCount; caster.holdToCast = true; caster.requireLineOfSight = true; }
+            // The second support character (꼬끼오). 유니 (SupportCharacterSkill) is placed in the scene; the loadout picks one.
+            if (!GetComponent<KokkioSupport>()) gameObject.AddComponent<KokkioSupport>();
             hud = gameObject.AddComponent<LiminalHud>();
             hud.Initialize(this, hudFont);
             initialized = true;
@@ -504,6 +508,7 @@ namespace AcRoguelike.Liminal
         {
             enemy.Defeated -= EnemyDefeated;
             living.Remove(enemy);
+            EnemyKilled?.Invoke(enemy);
             if (living.Count == 0 && ActiveRoomIndex >= 0)
             {
                 MarkRoomCleared(ActiveRoomIndex);

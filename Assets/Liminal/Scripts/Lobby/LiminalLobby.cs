@@ -15,6 +15,7 @@ namespace AcRoguelike.Liminal
     /// gate. Association staff and visiting hunters (<see cref="LobbyNpc"/>) consult the medic, check equipment,
     /// prepare for expeditions and take breaks while guards keep watch. The hunter walks it in everyday clothes:
     /// - talk to the association agent to buy permanent upgrades with magic stones;
+    /// - talk to the loadout officer at the blue LCD terminal to pick the hunter and the support character;
     /// - walk into the gate to start a run.
     /// There are no menu buttons until the player interacts with something.
     /// </summary>
@@ -34,11 +35,16 @@ namespace AcRoguelike.Liminal
         public const string EngineerCharacter = "gate_engineer";
         public const string RookieCharacter = "rookie_hunter";
         public const string VeteranCharacter = "veteran_hunter";
+        // The loadout officer runs the party terminal: a gate engineer on comms duty, like an operator.
+        public static readonly Vector3 LoadoutOfficerPosition = new Vector3(-10.3f, 0, 8.2f);
+        public static readonly Vector3 LoadoutTerminalPosition = new Vector3(-11.6f, 0, 9.4f);
 
         public Vector3 SpawnPoint => transform.TransformPoint(new Vector3(0, .05f, -9));
         public bool WindowOpen => window;
         public Interactable Nearest { get; private set; }
         public LobbyNpc Agent => agent;
+        public LobbyNpc LoadoutOfficer => loadoutOfficer;
+        public bool LoadoutOpen => loadoutOpen;
         public IReadOnlyList<LobbyNpc> Officials => officials;
         public BlueFireGate GateFire { get; private set; }
 
@@ -54,8 +60,12 @@ namespace AcRoguelike.Liminal
         LiminalHud hud;
         readonly List<Interactable> interactables = new List<Interactable>();
         readonly List<UnityEngine.Object> owned = new List<UnityEngine.Object>();
-        LobbyNpc agent;
+        LobbyNpc agent, loadoutOfficer;
         readonly List<LobbyNpc> officials = new List<LobbyNpc>();
+        bool loadoutOpen, casualWorn, officerGreeted;
+        readonly List<LoadoutCard> hunterCards = new List<LoadoutCard>();
+        readonly List<LoadoutCard> supportCards = new List<LoadoutCard>();
+        TextMeshProUGUI loadoutCurrent;
         bool greeted;
         GameObject window;
         GateFade fade;
@@ -79,6 +89,16 @@ namespace AcRoguelike.Liminal
             public TextMeshProUGUI price;
             public UnityEngine.UI.Button button;
             public UnityEngine.UI.Image[] pips;
+        }
+
+        sealed class LoadoutCard
+        {
+            public string id;
+            public int index;
+            public RectTransform root;
+            public UnityEngine.UI.Image background, accent;
+            public GameObject tag;
+            public UnityEngine.UI.Button button;
         }
 
         sealed class MissionCard
@@ -208,6 +228,11 @@ namespace AcRoguelike.Liminal
             var clipMat = Mat(null, new Color(.72f, .66f, .5f), .6f, default, .8f);
             HeldBoard.Attach(agent, true, new Vector3(.23f, .31f, .012f), boardMat, clipMat, Decal(LobbyTextures.Emblem()), owned);
             interactables.Add(new Interactable { label = "대화", anchor = agent.transform, radius = 2.6f, use = OpenUpgrades });
+
+            // The loadout officer at the party terminal (upper left of the plaza): picks the hunter and the support.
+            BuildLoadoutTerminal(LoadoutTerminalPosition, white, metal);
+            loadoutOfficer = Official(EngineerCharacter, new[] { "idle", "talk", "greet" }, LoadoutOfficerPosition, 135, 1.79f, "LoadoutOfficer");
+            interactables.Add(new Interactable { label = "헌터 편성", anchor = loadoutOfficer.transform, radius = 2.6f, use = OpenLoadout });
 
             // Ambient staff: a senior official briefing a junior by the rest corner, and a clerk walking his rounds
             // around the emblem, clear of the lamps and of the spawn point (he stops for the player and takes calls).
@@ -345,6 +370,9 @@ namespace AcRoguelike.Liminal
             if (agent) agent.LookAt(atAgent ? run.player.position : (Vector3?)null);
             // The agent greets the hunter with a formal bow the first time they walk up in this visit.
             if (atAgent && !greeted) { greeted = true; agent.PlayOnce("bow", null, LobbyRoutine.GreetSeconds); }
+            bool atOfficer = loadoutOfficer && Nearest != null && Nearest.anchor == loadoutOfficer.transform && run.player;
+            if (loadoutOfficer) loadoutOfficer.LookAt(atOfficer ? run.player.position : (Vector3?)null);
+            if (atOfficer && !officerGreeted) { officerGreeted = true; loadoutOfficer.PlayOnce("greet", null, LobbyRoutine.GreetSeconds); }
             if (interact && Nearest != null) Nearest.use();
         }
 
@@ -353,12 +381,14 @@ namespace AcRoguelike.Liminal
         {
             gameObject.SetActive(true);
             entering = false;
-            greeted = false;
+            greeted = officerGreeted = false;
             CloseWindow();
             previousAmbient = RenderSettings.ambientLight;
             RenderSettings.ambientLight = new Color(.62f, .66f, .76f);
             motor = player ? player.GetComponent<PlayerMotor>() : null;
-            SetOutfit(player, true);
+            // The first hunter walks the plaza in everyday clothes; another picked hunter keeps her gate outfit.
+            var roster = run ? run.Roster : null;
+            if (!roster || roster.CurrentIndex == 0) SetOutfit(player, true);
             if (motor)
             {
                 motor.ResetAt(SpawnPoint);
@@ -372,7 +402,7 @@ namespace AcRoguelike.Liminal
         {
             CloseWindow();
             if (hud) hud.ShowPrompt(null, null);
-            SetOutfit(player, false);
+            if (casualWorn) SetOutfit(player, false);
             RenderSettings.ambientLight = previousAmbient;
             gameObject.SetActive(false);
         }
@@ -420,6 +450,7 @@ namespace AcRoguelike.Liminal
                 // Animator (it would write combat parameters and torso twist into it).
                 m.animator = casual ? (casualModel.GetComponent<CasualLocomotion>() ? null : casualModel.GetComponent<Animator>()) : combatAnimator;
             }
+            casualWorn = casual;
         }
 
         GameObject CreateCasual(PlayerMotor m)
@@ -589,6 +620,226 @@ namespace AcRoguelike.Liminal
                 selectOnUp = currentCard?.button, selectOnDown = missionCancel, selectOnRight = missionCancel };
         }
 
+        // ---- loadout (헌터 · 지원 캐릭터 편성) -----------------------------------------------------------------
+        void OpenLoadout()
+        {
+            if (!hud || !hud.Canvas) return;
+            if (loadoutOfficer) loadoutOfficer.Talk(true);
+            ShowWindow(new Vector2(1040, 640));
+            loadoutOpen = true;
+            var content = window.transform.Find("Window") as RectTransform;
+            var font = hud.Font;
+            HunterUi.Text("Org", content, font, "헌터 협회 · 편성 관리부", 13, HunterUi.Gold, new Vector2(30, -20), new Vector2(430, 26), FontStyles.Bold);
+            HunterUi.Title(content, font, "헌터 · 지원 캐릭터 편성", new Vector2(30, -51), 980, 26);
+            HunterUi.Text("Hint", content, font, "카드를 고르면 바로 편성돼. 다음 게이트부터 함께 출동해.", 14, HunterUi.Muted, new Vector2(30, -100), new Vector2(980, 26));
+            HunterUi.Text("HunterHeader", content, font, "HUNTER  ·  플레이 캐릭터", 14, HunterUi.Gold, new Vector2(30, -134), new Vector2(470, 24), FontStyles.Bold);
+            HunterUi.Text("SupportHeader", content, font, "SUPPORT  ·  지원 캐릭터", 14, HunterUi.Gold, new Vector2(540, -134), new Vector2(470, 24), FontStyles.Bold);
+            HunterUi.Fill("Divider", content, new Vector2(0, 1), new Vector2(0, 1), new Vector2(519, -134), new Vector2(1.2f, 432), HunterUi.GoldDim);
+
+            var roster = run.Roster;
+            int hunters = roster ? roster.Count : 0;
+            float hunterWidth = CardWidth(Mathf.Max(1, hunters));
+            for (int i = 0; i < hunters; i++)
+            {
+                int index = i;
+                string role = i == 0 ? "플레이어블 · 기본 헌터" : "플레이어블";
+                var card = LoadoutCardView("Hunter_" + roster.IdAt(i), content, font, new Vector2(30 + i * (hunterWidth + 15), -166), hunterWidth,
+                    roster.NameAt(i), role, roster.SummaryAt(i), roster.PortraitAt(i), .5f, () => ChangeHunter(index));
+                card.id = roster.IdAt(i);
+                card.index = i;
+                hunterCards.Add(card);
+            }
+            var supports = SupportCharacterCatalog.All;
+            float supportWidth = CardWidth(supports.Count);
+            for (int i = 0; i < supports.Count; i++)
+            {
+                var info = supports[i];
+                string id = info.id;
+                var card = LoadoutCardView("Support_" + id, content, font, new Vector2(540 + i * (supportWidth + 15), -166), supportWidth,
+                    info.name, info.kind + "  ·  " + info.skillName, info.summary, info.Portrait, id == SupportCharacterCatalog.Kokkio ? .39f : .5f,
+                    () => ChangeSupport(id));
+                card.id = id;
+                card.index = i;
+                supportCards.Add(card);
+            }
+            loadoutCurrent = HunterUi.Text("Current", content, font, "", 15, HunterUi.Cream, new Vector2(30, -588), new Vector2(700, 30), FontStyles.Bold);
+            var close = HunterUi.Button("Close", content, font, "편성 완료  [ESC]", new Vector2(810, -578), new Vector2(200, 44), CloseWindow, 16);
+            RefreshLoadout();
+            LoadoutCard focus = null;
+            foreach (var card in hunterCards) if (roster && card.index == roster.SelectedIndex) focus = card;
+            if (focus == null && hunterCards.Count > 0) focus = hunterCards[0];
+            if (EventSystem.current) EventSystem.current.SetSelectedGameObject(focus != null ? focus.root.gameObject : close.gameObject);
+        }
+
+        static float CardWidth(int count) => Mathf.Min(225, (470 - (count - 1) * 15f) / count);
+
+        LoadoutCard LoadoutCardView(string name, RectTransform parent, TMP_FontAsset font, Vector2 position, float width, string title,
+            string role, string summary, Texture2D portrait, float focusX, Action pick)
+        {
+            const float height = 400, art = 250;
+            var root = HunterUi.Button(name, parent, font, "", position, new Vector2(width, height), pick);
+            var view = new LoadoutCard { root = root, button = root.GetComponent<UnityEngine.UI.Button>(), background = root.GetComponent<UnityEngine.UI.Image>() };
+            var frame = HunterUi.Fill("Art", root, new Vector2(0, 1), new Vector2(0, 1), new Vector2(8, -8), new Vector2(width - 16, art), new Color(.04f, .06f, .13f, 1)).rectTransform;
+            frame.gameObject.AddComponent<RectMask2D>();
+            if (portrait)
+            {
+                var image = HunterUi.Rect("Illustration", frame, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, new Vector2(width - 16, art)).gameObject.AddComponent<RawImage>();
+                image.texture = portrait;
+                image.raycastTarget = false;
+                image.uvRect = PortraitWindow(portrait, (width - 16) / art, focusX);
+            }
+            else
+            {
+                // No illustration yet: the hunter's initial as a name plate.
+                HunterUi.Text("Initial", frame, font, string.IsNullOrEmpty(title) ? "?" : title.Substring(0, 1), 96, HunterUi.GoldDim,
+                    new Vector2(0, -50), new Vector2(width - 16, 130), FontStyles.Bold, TextAlignmentOptions.Center);
+                HunterUi.Text("Pending", frame, font, "일러스트 준비 중", 12, HunterUi.Muted, new Vector2(0, -200), new Vector2(width - 16, 24), FontStyles.Normal, TextAlignmentOptions.Center);
+            }
+            view.accent = HunterUi.Fill("Selection", root, new Vector2(0, 1), new Vector2(0, 1), Vector2.zero, new Vector2(width, 4), HunterUi.Gold);
+            var tag = HunterUi.Fill("InParty", root, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-14, -14), new Vector2(70, 24), HunterUi.Gold).rectTransform;
+            HunterUi.Text("InPartyLabel", tag, font, "편성 중", 12, HunterUi.NavyDeep, Vector2.zero, new Vector2(70, 24), FontStyles.Bold, TextAlignmentOptions.Center);
+            view.tag = tag.gameObject;
+            HunterUi.Text("Name", root, font, title, 22, HunterUi.Cream, new Vector2(14, -266), new Vector2(width - 28, 32), FontStyles.Bold);
+            HunterUi.Text("Role", root, font, role, 12, HunterUi.Gold, new Vector2(14, -300), new Vector2(width - 28, 22), FontStyles.Bold);
+            HunterUi.Text("Summary", root, font, summary ?? "", 13, HunterUi.Muted, new Vector2(14, -324), new Vector2(width - 28, 68));
+            return view;
+        }
+
+        /// <summary>UV window over the illustration's upper part (head to hips) with the card's aspect.</summary>
+        static Rect PortraitWindow(Texture texture, float aspect, float focusX)
+        {
+            float h = .64f;
+            float w = h * texture.height * aspect / Mathf.Max(1, texture.width);
+            if (w > 1) { h /= w; w = 1; }
+            return new Rect(Mathf.Clamp(focusX - w * .5f, 0, 1 - w), 1 - h, w, h);
+        }
+
+        void RefreshLoadout()
+        {
+            var roster = run ? run.Roster : null;
+            foreach (var card in hunterCards) Highlight(card, roster && card.index == roster.SelectedIndex);
+            string support = HunterLoadout.SupportId;
+            foreach (var card in supportCards) Highlight(card, card.id == support);
+            if (loadoutCurrent)
+            {
+                string hunterName = roster ? roster.NameAt(roster.SelectedIndex) : HunterRoster.FirstHunterName;
+                var supportInfo = SupportCharacterCatalog.Selected;
+                loadoutCurrent.text = "현재 편성   " + hunterName + "  +  " + (supportInfo != null ? supportInfo.name : "-");
+            }
+        }
+
+        static void Highlight(LoadoutCard card, bool active)
+        {
+            card.accent.color = active ? HunterUi.Gold : Color.clear;
+            card.background.color = active ? new Color(.22f, .27f, .46f, 1) : new Color(.10f, .14f, .28f, 1);
+            card.tag.SetActive(active);
+        }
+
+        void ChangeHunter(int index)
+        {
+            var roster = run ? run.Roster : null;
+            if (!loadoutOpen || !roster || !run.player || index == roster.SelectedIndex) { RefreshLoadout(); return; }
+            // Everyday clothes belong to the first hunter: take them off before another hunter steps in, and put
+            // them back on when she returns.
+            if (casualWorn) SetOutfit(run.player, false);
+            roster.Choose(index);
+            if (roster.CurrentIndex == 0) SetOutfit(run.player, true);
+            HitFeedback.ScreenFlash(new Color(HunterUi.Gold.r, HunterUi.Gold.g, HunterUi.Gold.b, .14f), .25f);
+            RefreshLoadout();
+        }
+
+        void ChangeSupport(string id)
+        {
+            if (!loadoutOpen) return;
+            if (id != HunterLoadout.SupportId)
+            {
+                HunterLoadout.SupportId = id;
+                HitFeedback.Play(HitFeedback.Sfx.JustDodge, .45f, 1.5f);
+                HitFeedback.ScreenFlash(new Color(HunterUi.Gold.r, HunterUi.Gold.g, HunterUi.Gold.b, .14f), .25f);
+            }
+            RefreshLoadout();
+        }
+
+        /// <summary>A console desk with two blue LCD monitors, like an operator's comms station, screens facing the plaza.</summary>
+        void BuildLoadoutTerminal(Vector3 c, Material white, Material metal)
+        {
+            var dark = Mat(null, new Color(.06f, .07f, .1f), .5f);
+            var top = Mat(null, new Color(.12f, .17f, .33f), .5f);
+            Block("TerminalDesk", c + new Vector3(0, .42f, 0), new Vector3(2.1f, .84f, .7f), white, true);
+            Block("TerminalTop", c + new Vector3(0, .865f, 0), new Vector3(2.2f, .05f, .8f), top, false);
+            Block("TerminalKeyboard", c + new Vector3(0, .9f, -.18f), new Vector3(.7f, .025f, .22f), dark, false);
+            for (int i = 0; i < 2; i++)
+            {
+                float x = i == 0 ? -.52f : .52f;
+                Block("MonitorStand", c + new Vector3(x, 1.05f, .16f), new Vector3(.07f, .36f, .07f), metal, false);
+                Block("MonitorBezel", c + new Vector3(x, 1.47f, .16f), new Vector3(.94f, .58f, .06f), dark, false);
+                Quad("MonitorScreen", c + new Vector3(x, 1.47f, .125f), new Vector3(.86f, .5f, 1), Lcd(LcdTexture(i)));
+            }
+            // A blue status strip over the station, readable from across the plaza.
+            Block("TerminalSign", c + new Vector3(0, 1.98f, .2f), new Vector3(2f, .2f, .05f), Lcd(LcdTexture(2)), false);
+            Block("SignPost", c + new Vector3(-1.02f, 1.2f, .25f), new Vector3(.06f, 1.7f, .06f), metal, false);
+            Block("SignPost", c + new Vector3(1.02f, 1.2f, .25f), new Vector3(.06f, 1.7f, .06f), metal, false);
+        }
+
+        Material Lcd(Texture texture)
+        {
+            var m = Mat(texture, Color.white, .7f);
+            if (m.HasProperty("_EmissionColor"))
+            {
+                m.EnableKeyword("_EMISSION");
+                m.SetTexture("_EmissionMap", texture);
+                m.SetColor("_EmissionColor", new Color(1.3f, 1.4f, 1.6f));
+            }
+            return m;
+        }
+
+        /// <summary>Blue LCD screens: 0 = hunter roster, 1 = support link, 2 = the status strip.</summary>
+        Texture2D LcdTexture(int variant)
+        {
+            int w = variant == 2 ? 80 : 64, h = variant == 2 ? 8 : 40;
+            var t = new Texture2D(w, h, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+            owned.Add(t);
+            var back = new Color(.02f, .08f, .2f);
+            var line = new Color(.25f, .65f, 1f);
+            var bright = new Color(.6f, .9f, 1f);
+            var random = new System.Random(17 + variant);
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                    t.SetPixel(x, y, y % 2 == 0 ? back : back * 1.25f);
+            if (variant == 2)
+            {
+                for (int x = 2; x < w - 5; x += 6)
+                    for (int y = 2; y < 6; y++)
+                        for (int k = 0; k < 4; k++) t.SetPixel(x + k, y, random.Next(3) == 0 ? bright : line);
+            }
+            else
+            {
+                for (int x = 0; x < w; x++) for (int y = h - 5; y < h - 2; y++) t.SetPixel(x, y, line);
+                int cards = variant == 0 ? 2 : 1;
+                for (int c = 0; c < cards; c++)
+                {
+                    int x0 = 3 + c * 15;
+                    for (int x = x0; x < x0 + 12; x++)
+                        for (int y = 5; y < 31; y++)
+                        {
+                            bool edge = x == x0 || x == x0 + 11 || y == 5 || y == 30;
+                            float dx = (x - (x0 + 5.5f)) / 3.2f, dy = (y - 22f) / 3.6f;
+                            bool head = dx * dx + dy * dy <= 1;
+                            bool body = y < 18 && Mathf.Abs(x - (x0 + 5.5f)) < 4.5f - (18 - y) * .1f;
+                            if (edge) t.SetPixel(x, y, line);
+                            else if (head || body) t.SetPixel(x, y, bright * .8f);
+                        }
+                }
+                for (int row = 0; row < 5; row++)
+                {
+                    int x0 = 6 + cards * 15, length = 8 + random.Next(w - x0 - 12);
+                    for (int x = x0; x < x0 + length; x++) t.SetPixel(x, 27 - row * 5, row == 0 ? bright : line);
+                }
+            }
+            t.Apply();
+            return t;
+        }
+
         void ShowWindow(Vector2 size)
         {
             CloseWindow(keepTalking: true);
@@ -621,9 +872,13 @@ namespace AcRoguelike.Liminal
             if (window) { window.SetActive(false); Destroy(window); }
             window = null;
             missionBoardOpen = false;
+            loadoutOpen = false;
             upgradeRows.Clear();
             missionCards.Clear();
+            hunterCards.Clear();
+            supportCards.Clear();
             if (!keepTalking && agent) agent.Talk(false);
+            if (!keepTalking && loadoutOfficer) loadoutOfficer.Talk(false);
             if (motor && run && run.Phase == LiminalRunPhase.Lobby && !entering) motor.enabled = true;
         }
 

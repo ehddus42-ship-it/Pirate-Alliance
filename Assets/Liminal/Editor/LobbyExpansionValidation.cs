@@ -148,7 +148,7 @@ namespace AcRoguelike.Liminal.Editor
             motor.SetAutomationInput(Vector2.zero, run.player.position + Vector3.forward, false);
             cast = run.Lobby.Officials.ToArray();
             routines = run.Lobby.GetComponentsInChildren<LobbyRoutine>();
-            Check(cast.Length == 13 && cast.All(n => n), "The live lobby contains all 13 officials and hunters.");
+            Check(cast.Length == 14 && cast.All(n => n), "The live lobby contains all 14 officials and hunters (with the loadout officer).");
             var ground = run.Lobby.GetComponentInChildren<LobbyRecoveryGround>();
             var streets = run.Lobby.GetComponentInChildren<LobbyRestoredStreets>();
             var symbols = run.Lobby.GetComponentInChildren<LobbySymbolFixtures>();
@@ -289,10 +289,10 @@ namespace AcRoguelike.Liminal.Editor
             run.ReturnToLobby();
             yield return Until(() => run.Phase == LiminalRunPhase.Lobby && run.Lobby.gameObject.activeSelf, 8, "Return to lobby");
             Check(cast.Select(n => n.GetInstanceID()).SequenceEqual(ids) && cast.All(n => n.AnimationReady && n.isActiveAndEnabled),
-                "Returning reuses and resumes all 13 NPCs without duplicate graphs or cast objects.");
+                "Returning reuses and resumes all 14 NPCs without duplicate graphs or cast objects.");
             var returnPoses = roles.Select(Pose.Take).ToArray(); yield return Seconds(.75f);
             Check(returnPoses.All(p => p.Changed()), "All four new roles animate again after the lobby is re-enabled.");
-            Check(run.Lobby.Officials.Count == 13 && run.Lobby.GetComponentsInChildren<LobbyNpc>().Length == 13,
+            Check(run.Lobby.Officials.Count == 14 && run.Lobby.GetComponentsInChildren<LobbyNpc>().Length == 14,
                 "Repeated lobby entry does not duplicate the expanded cast.");
         }
 

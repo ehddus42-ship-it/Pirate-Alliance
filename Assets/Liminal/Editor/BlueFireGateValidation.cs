@@ -154,7 +154,7 @@ namespace AcRoguelike.Liminal.Editor
             Check(gates.Length == 1, "Exactly one blue fire gate exists in the live lobby."); gate = gates[0];
             Check(gate.isActiveAndEnabled && gate.transform.parent && gate.transform.parent.name == "Gate", "Blue flames run under the existing gate structure.");
             Check(gate.GetComponentsInChildren<Collider>(true).Length == 0, "The fire effect adds no colliders.");
-            Check(run.Lobby.Officials.Count == 13, "All 13 existing lobby characters remain intact.");
+            Check(run.Lobby.Officials.Count == 14, "All 14 existing lobby characters remain intact.");
             var shader = Resources.Load<Shader>("LiminalLobby/BlueFireGate");
             Check(shader && shader.name == "PirateAlliance/BlueFireGate" && shader.isSupported, "The dedicated blue flame shader is included and supported.");
             var filters = gate.GetComponentsInChildren<MeshFilter>(true);

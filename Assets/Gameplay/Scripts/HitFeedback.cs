@@ -139,6 +139,17 @@ namespace AcRoguelike
             if (follow) follow.AddShake(amplitude, duration);
         }
 
+        /// <summary>
+        /// Camera push: `amount` of the follow distance (0.05 = 5 % closer, negative pulls back), eased in over
+        /// `attack`, held for `hold`, eased back over `release` (unscaled seconds).
+        /// </summary>
+        public static void Zoom(float amount, float attack, float hold, float release)
+        {
+            var camera = Camera.main;
+            var follow = camera ? camera.GetComponent<IsometricFollowCamera>() : null;
+            if (follow) follow.AddZoom(amount, attack, hold, release);
+        }
+
         // ---- slash arcs ----------------------------------------------------------------------------------
         /// <summary>
         /// Crescent slash: a ring segment around `center` facing `forward`, swept from angle `from` to `to`

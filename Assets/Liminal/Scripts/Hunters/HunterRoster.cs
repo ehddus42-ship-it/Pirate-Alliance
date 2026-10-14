@@ -9,8 +9,8 @@ namespace AcRoguelike.Liminal
     /// F (gamepad Y) swaps the playable hunter inside a gate. Every hunter shares the one player: PlayerMotor, health,
     /// augments, lobby upgrades and the just-dodge counter stay; a swap changes the body (model + Animator), the combo
     /// timing and the melee swings. The scene's own model is the first hunter; HunterProfile assets under
-    /// Resources/Hunters add the others. The lobby always shows the first hunter (her everyday clothes are hers), and
-    /// the picked hunter comes back when the gate opens.
+    /// Resources/Hunters add the others. The pick is the party's hunter (HunterLoadout): the lobby's loadout officer
+    /// changes it with Choose, and the lobby shows the picked hunter (the first one in her everyday clothes).
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(PlayerMotor))]
@@ -18,12 +18,14 @@ namespace AcRoguelike.Liminal
     {
         public const string FirstHunterName = "아스트라이아";
         public const string ProfileFolder = "Hunters";
+        public const string FirstHunterSummary = "검과 부적을 쓰는 기본 헌터\n6타 검술 콤보 · 좌클릭 유지 부적 시전";
+        public const string FirstHunterPortrait = "Loadout/hunter_astraia";
         [Tooltip("Seconds between two swaps.")]
         public float swapCooldown = .6f;
 
         sealed class Hunter
         {
-            public string id, name;
+            public string id, name, summary, portrait;
             public GameObject visual;
             public Animator animator;
             public float[] durations, hitTimes;
@@ -33,6 +35,7 @@ namespace AcRoguelike.Liminal
             public Transform[] origins;
             public Transform castOrigin;
             public IHunterSkill skill;
+            public IHunterSkill[] skills;
         }
 
         readonly List<Hunter> hunters = new List<Hunter>();
@@ -58,6 +61,13 @@ namespace AcRoguelike.Liminal
         /// <summary>The worn hunter's own skill (an ultimate on R), or null.</summary>
         public IHunterSkill CurrentSkill => current < hunters.Count ? hunters[current].skill : null;
         public int SwapCount { get; private set; }
+        public bool InLobby => inLobby;
+        public string NameAt(int index) => index >= 0 && index < Count ? hunters[index].name : null;
+        public string IdAt(int index) => index >= 0 && index < Count ? hunters[index].id : null;
+        public string SummaryAt(int index) => index >= 0 && index < Count ? hunters[index].summary : null;
+        /// <summary>The hunter's loadout illustration, or null when it has none yet.</summary>
+        public Texture2D PortraitAt(int index)
+            => index >= 0 && index < Count && !string.IsNullOrEmpty(hunters[index].portrait) ? Resources.Load<Texture2D>(hunters[index].portrait) : null;
         public float CooldownRemaining => Mathf.Max(0, readyAt - Time.time);
         public InputAction SwapAction => swap;
         public event Action Swapped;
@@ -70,8 +80,8 @@ namespace AcRoguelike.Liminal
                 if (!initialized || hunters.Count < 2 || inLobby || Time.time < readyAt || Time.timeScale <= 0) return false;
                 if (director && director.Phase != LiminalRunPhase.Exploring) return false;
                 if (!motor.isActiveAndEnabled || motor.IsDashing || motor.IsHeld || motor.IsLaunched) return false;
-                var skill = CurrentSkill;
-                if (skill != null && skill.Busy) return false;
+                if (current < hunters.Count && hunters[current].skills != null)
+                    foreach (var skill in hunters[current].skills) if (skill != null && skill.Busy) return false;
                 return !health || health.IsAlive;
             }
         }
@@ -112,17 +122,33 @@ namespace AcRoguelike.Liminal
             EnsureInitialized();
             if (inLobby || index < 0 || index >= hunters.Count || index == selected) return false;
             selected = index;
+            HunterLoadout.HunterId = hunters[index].id;
             Wear(index, true);
             readyAt = Time.time + swapCooldown;
             return true;
         }
 
-        /// <summary>Before the lobby dresses the body: back to the first hunter, whose everyday clothes the lobby shows.</summary>
+        /// <summary>
+        /// The loadout officer's pick: changes the party's hunter and puts it on at once, in the lobby too (the lobby
+        /// changes the clothes around this call). Saved for the next session.
+        /// </summary>
+        public bool Choose(int index)
+        {
+            EnsureInitialized();
+            if (index < 0 || index >= hunters.Count || index == selected) return false;
+            if (!inLobby) return Select(index);
+            selected = index;
+            HunterLoadout.HunterId = hunters[index].id;
+            Wear(index, true);
+            return true;
+        }
+
+        /// <summary>Before the lobby dresses the body: the picked hunter (the lobby puts the first one in everyday clothes).</summary>
         public void EnterLobby()
         {
             EnsureInitialized();
             inLobby = true;
-            Wear(0, false);
+            Wear(selected, false);
         }
 
         /// <summary>After the lobby restores the combat outfit: the picked hunter comes back.</summary>
@@ -151,6 +177,8 @@ namespace AcRoguelike.Liminal
             {
                 id = character.characterId,
                 name = FirstHunterName,
+                summary = FirstHunterSummary,
+                portrait = FirstHunterPortrait,
                 visual = motor.visual.gameObject,
                 animator = motor.animator,
                 durations = combat ? combat.attackDurations : null,
@@ -164,6 +192,7 @@ namespace AcRoguelike.Liminal
                 origins = combat ? combat.attackOrigins : null,
                 castOrigin = caster ? caster.castOrigin : null,
             };
+            first.skills = first.visual.GetComponents<IHunterSkill>();
             hunters.Add(first);
             var profiles = Resources.LoadAll<HunterProfile>(ProfileFolder);
             Array.Sort(profiles, (a, b) => a.order != b.order ? a.order.CompareTo(b.order) : string.CompareOrdinal(a.name, b.name));
@@ -174,6 +203,10 @@ namespace AcRoguelike.Liminal
             }
             selected = current = 0;
             character.displayName = FirstHunterName;
+            // The party saved last session (HunterLoadout); an unknown id keeps the first hunter.
+            string saved = HunterLoadout.HunterId;
+            for (int i = 1; i < hunters.Count; i++)
+                if (hunters[i].id == saved) { selected = i; Wear(i, false); break; }
         }
 
         Hunter Spawn(HunterProfile profile, Hunter first)
@@ -209,6 +242,8 @@ namespace AcRoguelike.Liminal
             {
                 id = profile.characterId,
                 name = profile.displayName,
+                summary = profile.summary,
+                portrait = profile.portraitResource,
                 visual = visual,
                 animator = animator,
                 durations = (float[])profile.attackDurations.Clone(),
@@ -222,6 +257,7 @@ namespace AcRoguelike.Liminal
                 origins = origins ?? new Transform[0],
                 castOrigin = castOrigin,
                 skill = visual.GetComponent<IHunterSkill>(),
+                skills = visual.GetComponents<IHunterSkill>(),
             };
         }
 

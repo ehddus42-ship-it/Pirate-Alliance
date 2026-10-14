@@ -10,6 +10,7 @@ using UnityEngine.InputSystem;
 ///  - 쓰는 동안 이동 / 대쉬 / 평타 입력을 막고 무적 (끝 자세부터 다시 움직임), 헌터 교체도 막힘 (IHunterSkill.Busy).
 ///  - 피해: 땅 찍기 둘레 + 솟는 불기둥마다 (로비 영구 강화의 공격 배율 적용).
 ///  - 타격감은 게임 HitFeedback (히트스톱 / 슬로모션 / 흔들림 / 섬광). 게임 배속은 일시정지와 같이 게임이 관리합니다.
+///  - 전용 증강 업화해방: 판정 범위 ×1.5, 피해 ×1.4 (ProiAugments).
 /// Proi 모델에 붙어 있어 Proi 를 입고 있을 때만 동작합니다.
 /// </summary>
 [DisallowMultipleComponent]
@@ -37,6 +38,7 @@ public sealed class ProiHunterUltimate : MonoBehaviour, IHunterSkill
     MeleeSlash melee;
     LiminalPlayerHealth health;
     LiminalRunDirector director;
+    HunterAugments augments;
     InputAction action;
     float readyAt;
     bool holding;
@@ -63,6 +65,7 @@ public sealed class ProiHunterUltimate : MonoBehaviour, IHunterSkill
         combat = GetComponentInParent<PlayerCombat>();
         melee = GetComponentInParent<MeleeSlash>();
         health = GetComponentInParent<LiminalPlayerHealth>();
+        augments = GetComponentInParent<HunterAugments>();
         director = FindFirstObjectByType<LiminalRunDirector>();
         action = new InputAction("ProiUltimate", InputActionType.Button);
         action.AddBinding("<Keyboard>/r");
@@ -154,18 +157,32 @@ public sealed class ProiHunterUltimate : MonoBehaviour, IHunterSkill
         HitFeedback.Shake(.17f, .45f);
         HitFeedback.ScreenFlash(new Color(Ember.r, Ember.g, Ember.b, .3f), .3f);
         HitFeedback.Play(HitFeedback.Sfx.HeavyHit, 1f, .8f);
-        Damage(at, slamRadius, slamDamage, 1.6f);
+        float reach = slamRadius * RadiusScale;
+        if (RadiusScale > 1f) HitFeedback.Ring(at + Vector3.up * .1f, Vector3.up, reach);
+        Damage(at, reach, slamDamage, 1.6f);
     }
+
+    /// <summary>업화해방: 궁극기 범위 / 피해 배율.</summary>
+    bool Empowered
+    {
+        get
+        {
+            if (!augments) augments = GetComponentInParent<HunterAugments>();
+            return ProiAugments.Has(augments, ProiAugments.Hellfire);
+        }
+    }
+
+    float RadiusScale => Empowered ? ProiAugments.HellfireRadius : 1f;
 
     void Jet(Vector3 foot, float height, float radius)
     {
         HitFeedback.Shake(.05f, .18f);
-        Damage(foot, radius + pillarReach, pillarDamage, 1.25f);
+        Damage(foot, (radius + pillarReach) * RadiusScale, pillarDamage, 1.25f);
     }
 
     void Damage(Vector3 center, float radius, int amount, float impact)
     {
-        float multiplier = melee ? Mathf.Max(.1f, melee.damageMultiplier) : 1f;
+        float multiplier = (melee ? Mathf.Max(.1f, melee.damageMultiplier) : 1f) * (Empowered ? ProiAugments.HellfireDamage : 1f);
         foreach (var enemy in FindObjectsByType<TrainingEnemy>(FindObjectsSortMode.None))
         {
             if (!enemy.IsAlive || !enemy.CanBeTargeted) continue;
