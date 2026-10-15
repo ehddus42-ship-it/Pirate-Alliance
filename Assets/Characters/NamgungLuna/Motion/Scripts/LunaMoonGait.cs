@@ -9,7 +9,10 @@ namespace NamgungLuna.Motion
         /// <summary>World velocity (m/s), vertical included.</summary>
         Vector3 Velocity { get; }
         bool IsGrounded { get; }
+        /// <summary>Running at full pace: the gait uses its fast (sprint) motion.</summary>
         bool IsSprinting { get; }
+        /// <summary>0..1 through a dash (dodge), negative otherwise. The gait plays its floating leap meanwhile.</summary>
+        float DashProgress { get; }
     }
 
     /// <summary>Hip → knee → ankle chain. The boots hang under the ankle; the legs themselves are hidden by the dress.</summary>
@@ -21,7 +24,7 @@ namespace NamgungLuna.Motion
         public Vector3[] solePoints = new Vector3[0];
     }
 
-    public enum LunaGaitEventKind { Step, Settle, Jump, Land, SprintStart }
+    public enum LunaGaitEventKind { Step, Settle, Jump, Land, SprintStart, Dash }
 
     public struct LunaGaitEvent
     {
@@ -66,13 +69,15 @@ namespace NamgungLuna.Motion
 
     /// <summary>
     /// 원신 콜롬비나식 이동 모션. 발끝을 세운 채 살짝 떠 있는 대기, 한 번 발끝을 대면 달 표면처럼 길게 떠서 나아가는 걸음,
-    /// 발끝이 닿을 때마다 달빛 물결, 크게 숙이는 질주, 천천히 내려오는 점프를 리깅 없는 남궁루나 모델에 절차적으로 입힙니다.
+    /// 발끝이 닿을 때마다 달빛 물결, 크게 숙이는 질주(기본 이동), 다리를 접고 떠올랐다 내려오는 도약(대쉬)을
+    /// 리깅 없는 남궁루나 모델에 절차적으로 입힙니다.
     /// Columbina-style (Genshin Impact) locomotion for the unrigged Namgung Luna model:
     /// - idle: hovers a few centimetres up on pointed toes with a slow bob,
     /// - walk/run: low-gravity bounds; one toe touches, the body floats forward on a long arc with the legs held in a split
     ///   (lead leg reaching, trailing knee folded) and the next toe touches,
     /// - sprint: deep forward lean, longer and flatter bounds, a burst when it starts,
-    /// - jump: tucked legs on the way up, slow descent with the legs reaching down.
+    /// - dash (dodge): while the root slides along the floor the body floats up on an arc, dives forward, tucks the legs
+    ///   and reaches them down to land (the old jump leap; falls off ledges use the same air pose).
     /// The whole body (Visual) carries the hover, lean and banking; the hidden leg chain swings the boots and the Magica
     /// leg colliders so the skirt is kicked from inside. The lantern swings as a pendulum and the full moon trails behind.
     /// Reads movement from an <see cref="ILunaMotionSource"/> on the same object, or from the transform's own motion.
@@ -126,8 +131,16 @@ namespace NamgungLuna.Motion
         public float accelLean = 1.1f;
         public float swayRoll = 2f;
         public float swayYaw = 2.5f;
-        [Tooltip("질주 시작 때 앞으로 쏠리는 양 (도/s 충격)")]
-        public float sprintLunge = 70f;
+        [Tooltip("달리기 시작 때 앞으로 쏠리는 양 (도/s 충격)")]
+        public float sprintLunge = 30f;
+
+        [Header("Dash (dodge)")]
+        [Tooltip("대쉬 중 몸이 떠오르는 최고 높이 (m). 실제 위치(루트)는 바닥에 있고 몸만 뜹니다")]
+        public float dashLift = 0.32f;
+        [Tooltip("대쉬 중 앞으로 엎드리는 각도 (도)")]
+        public float dashDive = 14f;
+        [Tooltip("대쉬 시작 때 앞으로 쏠리는 양 (도/s 충격)")]
+        public float dashLunge = 60f;
 
         [Header("Moon / lantern")]
         [Tooltip("달이 따라오는 빠르기 (Hz)")]
@@ -147,6 +160,9 @@ namespace NamgungLuna.Motion
         public float MoveWeight => moveW;
         public float RunWeight => runW;
         public float SprintWeight => sprintW;
+        public bool IsDashing => dashProgress >= 0f;
+        /// <summary>Current dash lift of the body (m).</summary>
+        public float DashLiftNow { get; private set; }
         public float AirWeight => airW;
         public float Phase => psi;
         public float BodyPitch { get; private set; }
@@ -172,7 +188,7 @@ namespace NamgungLuna.Motion
         // Idle: legs together on pointed toes, the left knee eased forward (Columbina's resting float).
         static readonly LegPose IdleL = new LegPose(5f, 11f, 40f, 1f);
         static readonly LegPose IdleR = new LegPose(-3f, 4f, 35f, 1f);
-        // Jump: tucked on the way up, reaching down on the way down.
+        // Dash leap (and falls): tucked on the way up, reaching down on the way down.
         // (kept modest: the dress is narrow in front, a higher knee would push through the underskirt)
         static readonly LegPose RiseL = new LegPose(20f, 52f, 44f, 3f);
         static readonly LegPose RiseR = new LegPose(8f, 32f, 40f, 3f);
@@ -184,7 +200,9 @@ namespace NamgungLuna.Motion
         float speed, lastYaw, yawRate, verticalVelocity;
         float psi;                       // gait phase, two bounds per cycle: the left toe touches at 0, the right at 1
         float moveW, runW, sprintW, airW, riseW;
-        bool grounded = true, wasGrounded = true, sprinting, wasSprinting, moving;
+        // grounded: the root stands on the floor; contact: the feet do (not during a dash leap)
+        bool grounded = true, contact = true, wasContact = true, sprinting, wasSprinting, moving;
+        float dashProgress = -1f;
         float airTime, airOffset, lastOffset, fallSpeed;
         float dip, dipVelocity, lunge, lungeVelocity, clock;
         int pendingStepFoot = -1;
@@ -261,6 +279,8 @@ namespace NamgungLuna.Motion
                 velocity = initialized ? (position - lastPosition) / dt : Vector3.zero;
                 grounded = true;
             }
+            dashProgress = source != null ? source.DashProgress : -1f;
+            contact = grounded && dashProgress < 0f;
             lastPosition = position;
             verticalVelocity = velocity.y;
             if (!grounded) fallSpeed = Mathf.Max(fallSpeed, -velocity.y);
@@ -288,22 +308,31 @@ namespace NamgungLuna.Motion
             runW = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(walkSpeed * 0.9f, runSpeed * 0.92f, speed));
             float sprintTarget = sprinting && speed > walkSpeed ? 1f : 0f;
             sprintW = Mathf.MoveTowards(sprintW, sprintTarget, dt * (sprintTarget > sprintW ? 5f : 2.5f));
-            airW = Mathf.MoveTowards(airW, grounded ? 0f : 1f, dt * (grounded ? 6f : 9f));
-            riseW = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(-1.5f, 1.5f, verticalVelocity));
+            bool dashing = dashProgress >= 0f;
+            airW = Mathf.MoveTowards(airW, contact ? 0f : 1f, dt * (contact ? 6f : dashing ? 14f : 9f));
+            // a dash leap tucks the legs for its first third, then reaches them down to land
+            riseW = dashing
+                ? 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.3f, 0.65f, dashProgress))
+                : Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(-1.5f, 1.5f, verticalVelocity));
 
             // events from state changes
-            if (wasGrounded && !grounded)
+            if (wasContact && !contact)
             {
                 airTime = 0f;
                 fallSpeed = 0f;
                 airOffset = lastOffset;
-                if (verticalVelocity > 1f) Emit(LunaGaitEventKind.Jump, FeetCenter(), 0.9f);
+                if (dashing)
+                {
+                    lungeVelocity += dashLunge;
+                    Emit(LunaGaitEventKind.Dash, FeetCenter(), 1.3f);
+                }
+                else if (verticalVelocity > 1f) Emit(LunaGaitEventKind.Jump, FeetCenter(), 0.9f);
             }
-            if (!grounded) airTime += dt;
-            if (!wasGrounded && grounded && airTime > 0.25f)
+            if (!contact) airTime += dt;
+            if (!wasContact && contact && airTime > 0.15f)
             {
-                float strength = Mathf.Clamp(fallSpeed / 6f, 0.6f, 1.5f);
-                dipVelocity -= 0.55f * strength;
+                float strength = Mathf.Clamp(Mathf.Max(fallSpeed / 6f, 0.8f), 0.6f, 1.5f);
+                dipVelocity -= 0.4f * strength;
                 Emit(LunaGaitEventKind.Land, FeetCenter(), strength);
                 psi = 0f;   // the left toe has just touched
             }
@@ -312,7 +341,7 @@ namespace NamgungLuna.Motion
                 lungeVelocity += sprintLunge;
                 Emit(LunaGaitEventKind.SprintStart, FeetCenter(), 1.2f);
             }
-            if (!moving && moveW > 0.25f && grounded)
+            if (!moving && moveW > 0.25f && contact)
             {
                 moving = true;
                 psi = 0f;   // first push from the left toe; the right leg leads the first glide
@@ -321,9 +350,9 @@ namespace NamgungLuna.Motion
             else if (moving && moveW < 0.2f)
             {
                 moving = false;
-                if (grounded) Emit(LunaGaitEventKind.Settle, FeetCenter(), 0.45f);
+                if (contact) Emit(LunaGaitEventKind.Settle, FeetCenter(), 0.45f);
             }
-            wasGrounded = grounded;
+            wasContact = contact;
             wasSprinting = sprinting;
         }
 
@@ -343,7 +372,7 @@ namespace NamgungLuna.Motion
             if (Mathf.FloorToInt(psi) != Mathf.FloorToInt(before))
             {
                 int foot = Mathf.FloorToInt(psi) % 2 == 0 ? 0 : 1;   // the left toe touches at even counts
-                if (moveW > 0.4f && grounded) pendingStepFoot = foot;
+                if (moveW > 0.4f && contact) pendingStepFoot = foot;
             }
             if (psi >= 2f) psi -= 2f;
         }
@@ -413,7 +442,8 @@ namespace NamgungLuna.Motion
                         + Mathf.Clamp(forwardAccel * accelLean, -7f, 9f) * (1f - airW)
                         - 2f * Mathf.Sin(2f * Mathf.PI * bound) * glide * runW
                         + lunge
-                        + airW * (sprintW * 12f - 5f * riseW);
+                        + airW * (sprintW * 12f - 5f * riseW)
+                        + (dashProgress >= 0f ? dashDive * Mathf.Sin(Mathf.PI * dashProgress) : 0f);
             float roll = Mathf.Clamp(-yawRate * speed * bankGain, -maxBank, maxBank) * (1f - 0.5f * airW)
                        + swayRoll * Mathf.Sin(Mathf.PI * psi) * glide
                        + 0.8f * Mathf.Sin(clock * 2f * Mathf.PI * 0.37f) * (1f - moveW);
@@ -432,10 +462,12 @@ namespace NamgungLuna.Motion
             float bob = hoverBob * Mathf.Sin(clock * 2f * Mathf.PI * hoverBobRate);
             float gap = Mathf.Lerp(hoverHeight + bob, p.contactGap + p.arc * hang, moveW);
             float offset = gap - (lowest - groundLevel);
-            if (!grounded || airW > 0f) offset = Mathf.Lerp(offset, airOffset, airW);
+            if (!contact || airW > 0f) offset = Mathf.Lerp(offset, airOffset, airW);
             lastOffset = offset;
+            // the dash leap: the root slides along the floor, the body floats over it
+            DashLiftNow = dashProgress >= 0f ? dashLift * Mathf.Sin(Mathf.PI * dashProgress) : 0f;
             // A landing dip or the end of the air blend may bring the toe down to the floor, never through it.
-            float lifted = offset + dip;
+            float lifted = offset + dip + DashLiftNow;
             if (grounded) lifted = Mathf.Max(lifted, groundLevel - lowest);
             visual.localPosition = basePosition + Vector3.up * lifted;
             LowestSoleHeight = lowest + lifted - groundLevel;

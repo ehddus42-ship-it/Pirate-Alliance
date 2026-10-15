@@ -4,14 +4,14 @@ using UnityEngine;
 namespace NamgungLuna.Motion
 {
     /// <summary>
-    /// 자동 시연: 키보드를 몇 초 동안 만지지 않으면 대기 → 걷기 → 달리기(곡선) → 미끄러지듯 멈춤 → 질주 → 질주 점프 →
-    /// 달리기 점프 순서로 남궁루나를 움직입니다. 키를 누르면 바로 조작이 넘어옵니다.
-    /// Scripted tour of every gait for the demo scene and the play-mode tests. Hands control back on any key press.
+    /// 자동 시연: 키보드를 몇 초 동안 만지지 않으면 대기 → 걷기 → 달리기(곡선) 중 대쉬 → 미끄러지듯 멈춤 →
+    /// 연속 대쉬 → 제자리 대쉬 → 달리기 순서로 남궁루나를 움직입니다. 키를 누르면 바로 조작이 넘어옵니다.
+    /// Scripted tour of every gait and the dash for the demo scene and the play-mode tests. Hands control back on any key press.
     /// </summary>
     [DefaultExecutionOrder(-20)]
     public class LunaMoonShowcase : MonoBehaviour
     {
-        public enum Mode { Idle, Walk, Run, Sprint }
+        public enum Mode { Idle, Walk, Run }
 
         [Serializable]
         public struct Beat
@@ -22,8 +22,8 @@ namespace NamgungLuna.Motion
             public float heading;
             [Tooltip("구간 동안 방향이 바뀌는 양 (도)")]
             public float turn;
-            [Tooltip("이 구간 시작 후 점프할 시각 (s, 음수면 없음)")]
-            public float jumpAt;
+            [Tooltip("이 구간 시작 후 대쉬할 시각 (s, 음수면 없음)")]
+            public float dashAt;
         }
 
         public LunaMoonMotor motor;
@@ -32,17 +32,18 @@ namespace NamgungLuna.Motion
         public bool loop = true;
         public Beat[] beats =
         {
-            new Beat { duration = 2.5f, mode = Mode.Idle, jumpAt = -1f },
-            new Beat { duration = 3.5f, mode = Mode.Walk, heading = 0f, turn = 25f, jumpAt = -1f },
-            new Beat { duration = 1.2f, mode = Mode.Idle, jumpAt = -1f },
-            new Beat { duration = 4.5f, mode = Mode.Run, heading = 30f, turn = 110f, jumpAt = -1f },
-            new Beat { duration = 1.6f, mode = Mode.Idle, jumpAt = -1f },
-            new Beat { duration = 4.0f, mode = Mode.Sprint, heading = 200f, turn = -60f, jumpAt = 2.2f },
-            new Beat { duration = 1.6f, mode = Mode.Idle, jumpAt = -1f },
-            new Beat { duration = 3.0f, mode = Mode.Run, heading = 60f, turn = 40f, jumpAt = 1.2f },
-            new Beat { duration = 2.0f, mode = Mode.Idle, jumpAt = -1f },
-            new Beat { duration = 3.0f, mode = Mode.Sprint, heading = 300f, turn = 90f, jumpAt = -1f },
-            new Beat { duration = 2.5f, mode = Mode.Idle, jumpAt = -1f },
+            new Beat { duration = 2.5f, mode = Mode.Idle, dashAt = -1f },
+            new Beat { duration = 3.5f, mode = Mode.Walk, heading = 0f, turn = 25f, dashAt = -1f },
+            new Beat { duration = 1.2f, mode = Mode.Idle, dashAt = -1f },
+            new Beat { duration = 4.5f, mode = Mode.Run, heading = 30f, turn = 110f, dashAt = 2.4f },
+            new Beat { duration = 1.6f, mode = Mode.Idle, dashAt = -1f },
+            new Beat { duration = 2.2f, mode = Mode.Run, heading = 200f, turn = -40f, dashAt = 1.2f },
+            new Beat { duration = 1.4f, mode = Mode.Run, heading = 160f, turn = 0f, dashAt = 0.3f },   // chained second dash
+            new Beat { duration = 1.6f, mode = Mode.Idle, dashAt = -1f },
+            new Beat { duration = 1.6f, mode = Mode.Idle, dashAt = 0.4f },                             // from a standstill
+            new Beat { duration = 1.4f, mode = Mode.Idle, dashAt = -1f },
+            new Beat { duration = 3.0f, mode = Mode.Run, heading = 300f, turn = 90f, dashAt = -1f },
+            new Beat { duration = 2.5f, mode = Mode.Idle, dashAt = -1f },
         };
 
         public bool Playing { get; private set; }
@@ -51,7 +52,7 @@ namespace NamgungLuna.Motion
         public float TotalDuration { get { float t = 0f; foreach (var b in beats) t += b.duration; return t; } }
 
         float quiet, beatTime;
-        bool jumped;
+        bool dashed;
 
         void Awake()
         {
@@ -64,7 +65,7 @@ namespace NamgungLuna.Motion
             Playing = true;
             Clock = beatTime = 0f;
             BeatIndex = 0;
-            jumped = false;
+            dashed = false;
         }
 
         void Update()
@@ -85,11 +86,10 @@ namespace NamgungLuna.Motion
             float heading = beat.heading + beat.turn * t;
             motor.scriptedMove = beat.mode == Mode.Idle ? Vector3.zero : Quaternion.Euler(0f, heading, 0f) * Vector3.forward;
             motor.scriptedWalk = beat.mode == Mode.Walk;
-            motor.scriptedSprint = beat.mode == Mode.Sprint;
-            if (!jumped && beat.jumpAt >= 0f && beatTime >= beat.jumpAt)
+            if (!dashed && beat.dashAt >= 0f && beatTime >= beat.dashAt)
             {
-                motor.Jump();
-                jumped = true;
+                motor.Dash();
+                dashed = true;
             }
 
             beatTime += Time.deltaTime;
@@ -97,7 +97,7 @@ namespace NamgungLuna.Motion
             if (beatTime >= beat.duration)
             {
                 beatTime = 0f;
-                jumped = false;
+                dashed = false;
                 BeatIndex++;
                 if (BeatIndex >= beats.Length)
                 {
@@ -111,7 +111,7 @@ namespace NamgungLuna.Motion
         {
             Playing = false;
             motor.scriptedMove = Vector3.zero;
-            motor.scriptedSprint = motor.scriptedWalk = false;
+            motor.scriptedWalk = false;
         }
     }
 }

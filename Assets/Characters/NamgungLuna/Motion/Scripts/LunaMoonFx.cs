@@ -5,11 +5,11 @@ using UnityEngine.Rendering;
 namespace NamgungLuna.Motion
 {
     /// <summary>
-    /// 이동 연출: 발끝이 닿을 때 바닥에 퍼지는 달빛 물결, 발밑의 은은한 빛, 질주 시작의 빛 폭발과 반짝임,
-    /// 질주 중 뒤로 남는 빛의 꼬리.
+    /// 이동 연출: 발끝이 닿을 때 바닥에 퍼지는 달빛 물결, 발밑의 은은한 빛, 대쉬(회피) 시작의 빛 폭발과 반짝임,
+    /// 달리기·대쉬 중 뒤로 남는 빛의 꼬리.
     /// Moonlight effects driven by <see cref="LunaMoonGait"/> events: a ripple ring on the ground at every toe touch,
-    /// a soft glow under the hovering feet, a sparkle burst and light flash when a sprint starts, and a light trail
-    /// plus sparkles while sprinting. Objects are built at runtime from the assigned materials.
+    /// a soft glow under the hovering feet, a sparkle burst and light flash when a dash (dodge) starts, a lighter one when
+    /// she sets off running, and a light trail plus sparkles while running fast. Objects are built at runtime.
     /// </summary>
     [DefaultExecutionOrder(210)]
     [DisallowMultipleComponent]
@@ -108,6 +108,13 @@ namespace NamgungLuna.Motion
                     flashLevel = Mathf.Max(flashLevel, 0.6f);
                     break;
                 case LunaGaitEventKind.SprintStart:
+                    // every time she sets off: a light touch of moonlight
+                    SpawnRipple(e.position, rippleRadius * 1.3f, 0.9f);
+                    Burst(transform.position + Vector3.up * 0.5f, 10, 0.3f, 1.6f);
+                    flashLevel = Mathf.Max(flashLevel, 0.35f);
+                    break;
+                case LunaGaitEventKind.Dash:
+                    // the dodge: a burst of light where she leaves the ground
                     SpawnRipple(e.position, rippleRadius * 2.0f, 1.3f);
                     Burst(transform.position + Vector3.up * 0.8f, 30, 0.45f, 3.0f);
                     flashLevel = 1f;
@@ -152,7 +159,7 @@ namespace NamgungLuna.Motion
                 glowRenderer.enabled = glowLevel > 0.01f;
             }
 
-            if (trail != null) trail.emitting = gait.SprintWeight > 0.35f && gait.Speed > 3f;
+            if (trail != null) trail.emitting = gait.IsDashing || (gait.SprintWeight > 0.35f && gait.Speed > 3f);
             if (sparkles != null)
             {
                 var emission = sparkles.emission;

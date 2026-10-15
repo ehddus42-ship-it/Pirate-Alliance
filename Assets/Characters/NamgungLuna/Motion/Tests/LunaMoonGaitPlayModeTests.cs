@@ -15,9 +15,10 @@ using UnityEditor.SceneManagement;
 namespace NamgungLuna.Motion.Tests
 {
     /// <summary>
-    /// Runs the moon gait demo's scripted tour (idle, walk, curved run, glide stop, sprint with a jump, run jump, sprint)
-    /// and checks the Columbina-style motion: the boots never sink into the floor, she hovers at rest, every bound ends in
-    /// a toe touch with a ripple, sprinting leans her well forward and jumps hang long. Report: Recordings/LunaMoonGait/.
+    /// Runs the moon gait demo's scripted tour (idle, walk, curved run with a dash, glide stop, chained dashes, a dash from a
+    /// standstill, run) and checks the Columbina-style motion: the boots never sink into the floor, she hovers at rest,
+    /// every bound ends in a toe touch with a ripple, running uses the fast motion (deep lean), and each dash covers its
+    /// distance while the body floats over the floor and lands with a ripple. Report: Recordings/LunaMoonGait/.
     /// </summary>
     public class LunaMoonGaitPlayModeTests
     {
@@ -74,7 +75,12 @@ namespace NamgungLuna.Motion.Tests
             int ripplesBefore = rig.fx != null ? rig.fx.RipplesSpawned : 0;
             int stepsBefore = gait.StepCount;
 
-            float lowestGrounded = float.MaxValue, maxSprintPitch = 0f, maxAir = 0f, air = 0f, maxSpeed = 0f;
+            float lowestGrounded = float.MaxValue, maxSprintPitch = 0f, maxSpeed = 0f, maxLift = 0f;
+            var dashDistances = new List<float>();
+            var dashSeconds = new List<float>();
+            Vector3 dashStart = Vector3.zero, previousPosition = rig.motor.transform.position;
+            float dashClock = 0f;
+            bool wasDashing = false;
             var hover = new List<float>();
             var contactGaps = new List<float>();
             bool nan = false;
@@ -95,7 +101,19 @@ namespace NamgungLuna.Motion.Tests
                 if (gait.MoveWeight > 0.95f && gait.RunWeight > 0.95f && Mathf.FloorToInt(gait.Phase) != Mathf.FloorToInt(previousPhase))
                     contactGaps.Add(gait.LowestSoleHeight);
                 previousPhase = gait.Phase;
-                if (!rig.motor.IsGrounded) { air += Step; maxAir = Mathf.Max(maxAir, air); } else air = 0f;
+                maxLift = Mathf.Max(maxLift, gait.DashLiftNow);
+                bool dashing = rig.motor.IsDashing;
+                // the dash has already moved one frame when IsDashing first reads true: measure from the frame before
+                if (dashing && !wasDashing) { dashStart = previousPosition; dashClock = 0f; }
+                if (dashing) dashClock += Step;
+                previousPosition = rig.motor.transform.position;
+                if (!dashing && wasDashing)
+                {
+                    // the frame that ends the dash still moves by the dash curve
+                    dashDistances.Add(Vector3.ProjectOnPlane(rig.motor.transform.position - dashStart, Vector3.up).magnitude);
+                    dashSeconds.Add(dashClock);
+                }
+                wasDashing = dashing;
                 if (f % 30 == 0)
                 {
                     foreach (var c in rig.cloths)
@@ -142,7 +160,10 @@ namespace NamgungLuna.Motion.Tests
             report.AppendLine($"  \"ripples\": {ripples},");
             report.AppendLine($"  \"events\": {{{string.Join(", ", events.Select(kv => $"\"{kv.Key}\": {kv.Value}"))}}},");
             report.AppendLine($"  \"max_sprint_pitch_deg\": {maxSprintPitch:F1},");
-            report.AppendLine($"  \"max_air_seconds\": {maxAir:F2},");
+            report.AppendLine($"  \"dashes\": {dashDistances.Count},");
+            report.AppendLine($"  \"dash_distance_m\": [{string.Join(", ", dashDistances.Select(d => d.ToString("F2")))}],");
+            report.AppendLine($"  \"dash_seconds\": [{string.Join(", ", dashSeconds.Select(d => d.ToString("F2")))}],");
+            report.AppendLine($"  \"max_dash_lift_m\": {maxLift:F3},");
             report.AppendLine($"  \"worst_cloth_center_distance_m\": {worstClothDistance:F2},");
             report.AppendLine($"  \"moon_fade_behind\": {fadedBehind:F2},");
             report.AppendLine($"  \"moon_fade_front\": {solidInFront:F2},");
@@ -157,11 +178,14 @@ namespace NamgungLuna.Motion.Tests
             Assert.That(contactMean, Is.InRange(-0.01f, 0.03f), "running bounds should end with the toe just touching");
             Assert.GreaterOrEqual(steps, 12, "too few toe touches");
             Assert.GreaterOrEqual(ripples, steps, "every touch should leave a ripple");
-            Assert.GreaterOrEqual(events.TryGetValue(LunaGaitEventKind.SprintStart, out int sprints) ? sprints : 0, 2, "sprint bursts");
-            Assert.GreaterOrEqual(events.TryGetValue(LunaGaitEventKind.Jump, out int jumps) ? jumps : 0, 2, "jumps");
-            Assert.GreaterOrEqual(events.TryGetValue(LunaGaitEventKind.Land, out int lands) ? lands : 0, 2, "landings");
-            Assert.GreaterOrEqual(maxSprintPitch, 15f, "sprint lean");
-            Assert.GreaterOrEqual(maxAir, 0.9f, "low-gravity jump should hang");
+            Assert.GreaterOrEqual(events.TryGetValue(LunaGaitEventKind.SprintStart, out int sprints) ? sprints : 0, 2, "setting off into the fast run");
+            Assert.GreaterOrEqual(events.TryGetValue(LunaGaitEventKind.Dash, out int dashes) ? dashes : 0, 4, "dash bursts");
+            Assert.GreaterOrEqual(events.TryGetValue(LunaGaitEventKind.Land, out int lands) ? lands : 0, 4, "every dash should land with a ripple");
+            Assert.IsFalse(events.ContainsKey(LunaGaitEventKind.Jump), "there is no jump any more");
+            Assert.GreaterOrEqual(maxSprintPitch, 15f, "the default run is the fast, deeply leaning motion");
+            Assert.AreEqual(4, dashDistances.Count, "dashes in the tour");
+            foreach (float d in dashDistances) Assert.That(d, Is.InRange(rig.motor.dashDistance * 0.95f, rig.motor.dashDistance * 1.05f), "dash distance");
+            Assert.GreaterOrEqual(maxLift, 0.25f, "the body should float up during a dash");
             Assert.Less(worstClothDistance, 1.5f, "cloth blew away from the body");
             Assert.NotNull(moonFade, "LunaOcclusionFade missing");
             Assert.Less(fadedBehind, 0.4f, "the moon should fade while it hides her");
