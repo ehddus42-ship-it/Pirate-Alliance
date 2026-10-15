@@ -297,8 +297,13 @@ public static class ProiHunterValidation
         motor.SetAutomationInput(Vector2.zero, Arena + Vector3.forward * 5);
 
         // ---- swap back
-        yield return Until(() => roster.CanSwap, 3, "swap cooldown over");
-        Check(roster.TrySwap() && motor.visual.gameObject == astraia && !proi.activeSelf, "F again: Astraia is back");
+        // Additional hunters can follow Proi; cycle the complete roster rather than assuming exactly two.
+        while (roster.CurrentIndex != 0)
+        {
+            yield return Until(() => roster.CanSwap, 3, "swap cooldown over");
+            Check(roster.TrySwap(), "F advances to the next hunter");
+        }
+        Check(motor.visual.gameObject == astraia && !proi.activeSelf, "F cycle: Astraia is back");
         Check(combat.ComboLength == astraiaCombo && melee.bladeEffects, "katana combo restored");
         var fxRoot = GameObject.Find("ProiBlazeFX");
         Check(!fxRoot || !fxRoot.activeInHierarchy, "Proi's fire effects are hidden with her");

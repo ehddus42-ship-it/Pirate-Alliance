@@ -2,6 +2,20 @@
 
 URP Toon 캐릭터 + Magica Cloth 2 옷·머리 물리 설정.
 
+## stage_capture 통합 (2026-10-15)
+
+- `Assets/Liminal/Scenes/LiminalRun.unity`를 재생하고 로비 편성에서 **남궁루나 · 평시 / 남궁루나 · 전시**를 선택합니다. 게이트 안에서는 기존 **F** 캐릭터 교체에도 두 상태가 포함됩니다.
+- 두 상태 모두 공격·부적·헌터 스킬·지원 스킬이 없는 **이동 전용**입니다. WASD / 게임패드 왼쪽 스틱으로 이동하고 Ctrl로 천천히 걷습니다. 기존 캐릭터로 교체하면 원래 기능이 돌아옵니다.
+- **전시는 게임 대시(Space / 왼쪽 Shift)를 그대로 씁니다**(프로필 `keepDash`). 공용 `PlayerMotor`의 대시(13 m/s × 0.19 s, 스태미나 3칸)로 실제 이동하고, 몸은 콜롬비나의 도약 모션으로 0.3초 동안 떠서 날았다가 착지 물결과 함께 내려옵니다(`LunaMoonGait.dashLeapSeconds`). 대시 칸 HUD도 보입니다. 평시는 대시도 막습니다.
+- 평시는 과거 `남궁루나_일상.png` 일러스트에서 Meshy로 모델과 리그를 만들고, 새로 생성한 단정한 걷기를 제자리 순환 모션으로 편집했습니다. 대기 자세도 포함합니다. `Peaceful/`에 모델·모션 원본, `Stage/`에 게임용 프리팹·클립·컨트롤러가 있습니다.
+- 평시 기본 이동은 0.65 m/s, Ctrl 걷기는 0.4 m/s입니다. 공용 모터의 정규화 속도에 맞춰 걷기 재생률도 함께 낮춥니다. 전시는 기존 부유 이동 속도 4.2 / 2.1 m/s를 사용합니다.
+- 실제 평시 프리팹은 `LunaPeaceful_Game.fbx`, `LunaPeacefulWalk_Game.fbx`, `LunaPeacefulIdle_Game.fbx`를 사용합니다. 자동 리깅의 얼굴·베일·치마 가중치를 보정하고 신발 제어 뼈 두 개를 추가했습니다. 보정 재현은 `Tools/NamgungLuna/build_peaceful_game_rig.py`, 결과는 `Documentation/NamgungLuna/DeformationQA/game_export_validation.json`에 있습니다.
+- 전시는 `feature/namgungluna-character`의 `a088201` 자산과 GUID를 유지하여 가져왔습니다. `Stage/NamgungLuna_Battle.prefab`은 기존 부유 모션을 게임의 공용 이동 모터에 연결합니다.
+- 프로필은 `Assets/Liminal/Resources/Hunters/NamgungLunaPeaceful.asset`와 `NamgungLunaBattle.asset`입니다. 기존 씬이 이 프로필들을 자동으로 불러옵니다.
+- 재설치는 `Tools > Namgung Luna > Stage Capture`, 실제 플레이 검증은 같은 메뉴의 `Validate Both Forms`를 사용합니다. 검증 결과와 화면은 `Documentation/NamgungLuna/Validation/`에 저장됩니다. 기존 선택 캐릭터와 편집 씬은 검증 종료 후 복원됩니다.
+- 생성 이력은 `Documentation/NamgungLuna/peaceful_*_meshy.json`과 `peaceful_walk_retarget.json`에 기록했습니다. 모델·리깅·걷기·리타깃 생성에 Meshy 48크레딧을 사용했습니다. `Tools/NamgungLuna/`의 요청 스크립트는 저장된 작업 ID를 재사용하며 API 키와 다운로드 서명 URL은 문서에 저장하지 않습니다.
+- 아래의 대시 수치(0.3초 · 3 m)와 자동 시연은 전시 **단독 데모 씬**(`LunaMoonMotor`) 기준입니다. 게임 안에서는 위의 공용 대시를 따릅니다.
+
 ## 필요한 것
 - **Magica Cloth 2** (유료 에셋, 저장소에 포함하지 않음). 각자 Asset Store 계정으로
   Package Manager > My Assets > Magica Cloth 2 > Download > Import 하세요. Example 폴더는 없어도 됩니다.

@@ -22,6 +22,14 @@ namespace AcRoguelike.Liminal
         [Tooltip("Rigged model (feet at the origin, facing +Z). Spawned under the player and switched on by the roster.")]
         public GameObject model;
         public RuntimeAnimatorController controller;
+        [Tooltip("Movement preview only: no dash, attack, hunter skill or support skill. A controller is optional for procedural animation.")]
+        public bool movementOnly;
+        [Tooltip("Keep the dash on a movement-only hunter, for a body with its own dash motion (Namgung Luna's battle form leaps).")]
+        public bool keepDash;
+        [Min(0), Tooltip("Movement speed for this hunter. Zero keeps the shared player's speed.")]
+        public float moveSpeedOverride;
+        [Min(0), Tooltip("Slow walk speed for this hunter. Zero keeps the shared player's walk speed.")]
+        public float walkSpeedOverride;
         [Tooltip("Bone whose rest height is matched to the first hunter's head, so every hunter fills the same body. Empty keeps the model's own size.")]
         public string headBone = "Head";
 

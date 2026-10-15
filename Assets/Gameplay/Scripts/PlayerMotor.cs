@@ -14,6 +14,8 @@ namespace AcRoguelike
         public Transform aimMarker;
         public float moveSpeed = 4.2f;
         public float walkSpeed = 2.1f;
+        [Tooltip("Allow dash input. Movement-only hunter previews turn this off.")]
+        public bool allowDash = true;
         public float dashSpeed = 13f;
         public float dashDuration = .19f;
         [Tooltip("Seconds to recover one stamina pip (one dash).")]
@@ -36,6 +38,8 @@ namespace AcRoguelike
         [Tooltip("Face the movement direction while exploring, then face the aim point during attacks.")]
         public bool faceMovementDirection;
         public bool IsDashing => dashRemaining > 0 || dashMovedThisFrame;
+        /// <summary>0..1 through the current dash, negative when not dashing. Procedural bodies (Namgung Luna) play their dash pose from it.</summary>
+        public float DashPhase => dashRemaining > 0 ? 1f - dashRemaining / Mathf.Max(.01f, dashDuration) : dashMovedThisFrame ? 1f : -1f;
         /// <summary>Burst at the start, most of the distance by 60%, and an end speed that matches the run (4.2 m/s at 12.5 m/s).</summary>
         public static AnimationCurve DefaultDashSpeedCurve() => new AnimationCurve(
             new Keyframe(0f, 1.4f, -.0894f, -.0894f),
@@ -190,7 +194,8 @@ namespace AcRoguelike
             float dt = Time.deltaTime;
             if (dt <= 0) return;
             Vector2 input = automated ? automatedMove : move.ReadValue<Vector2>();
-            bool wantsDash = automated ? automatedDash : dash.WasPressedThisFrame();
+            bool wantsDash = allowDash && (automated ? automatedDash : dash.WasPressedThisFrame());
+            if (!allowDash) dashRemaining = 0;
             bool walking = automated ? automatedWalk : walk.IsPressed();
             automatedDash = false;
             if (automated) AimPoint = automatedAim;

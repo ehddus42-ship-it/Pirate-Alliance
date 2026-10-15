@@ -141,6 +141,8 @@ namespace NamgungLuna.Motion
         public float dashDive = 14f;
         [Tooltip("대쉬 시작 때 앞으로 쏠리는 양 (도/s 충격)")]
         public float dashLunge = 60f;
+        [Tooltip("도약 모션 길이 (s). 실제 대쉬가 더 짧아도(게임 기본 0.19 s) 몸은 이만큼 떠서 납니다")]
+        public float dashLeapSeconds = 0.3f;
 
         [Header("Moon / lantern")]
         [Tooltip("달이 따라오는 빠르기 (Hz)")]
@@ -202,7 +204,8 @@ namespace NamgungLuna.Motion
         float moveW, runW, sprintW, airW, riseW;
         // grounded: the root stands on the floor; contact: the feet do (not during a dash leap)
         bool grounded = true, contact = true, wasContact = true, sprinting, wasSprinting, moving;
-        float dashProgress = -1f;
+        float dashProgress = -1f, leapTime;
+        bool sourceDashing, leaping;
         float airTime, airOffset, lastOffset, fallSpeed;
         float dip, dipVelocity, lunge, lungeVelocity, clock;
         int pendingStepFoot = -1;
@@ -279,7 +282,16 @@ namespace NamgungLuna.Motion
                 velocity = initialized ? (position - lastPosition) / dt : Vector3.zero;
                 grounded = true;
             }
-            dashProgress = source != null ? source.DashProgress : -1f;
+            // The leap runs on its own clock from the moment a dash starts, so a short gameplay dash still reads as a leap.
+            bool dashNow = source != null && source.DashProgress >= 0f;
+            if (dashNow && !sourceDashing) { leaping = true; leapTime = 0f; }
+            sourceDashing = dashNow;
+            if (leaping)
+            {
+                leapTime += dt;
+                if (leapTime >= dashLeapSeconds && !dashNow) leaping = false;
+            }
+            dashProgress = leaping ? Mathf.Clamp01(leapTime / Mathf.Max(0.05f, dashLeapSeconds)) : -1f;
             contact = grounded && dashProgress < 0f;
             lastPosition = position;
             verticalVelocity = velocity.y;

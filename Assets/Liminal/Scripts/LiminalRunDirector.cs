@@ -102,7 +102,11 @@ namespace AcRoguelike.Liminal
                 if (motor && !player.TryGetComponent(out roster)) roster = player.gameObject.AddComponent<HunterRoster>();
                 if (roster) roster.Bind(this);
             }
-            if (motor) { originalMoveSpeed = motor.moveSpeed; originalWalkSpeed = motor.walkSpeed; }
+            if (motor)
+            {
+                originalMoveSpeed = roster ? roster.SharedMoveSpeed : motor.moveSpeed;
+                originalWalkSpeed = roster ? roster.SharedWalkSpeed : motor.walkSpeed;
+            }
             if (caster) { originalCooldown = caster.cooldown; originalFlames = caster.flameCount; caster.holdToCast = true; caster.requireLineOfSight = true; }
             // The second support character (꼬끼오). 유니 (SupportCharacterSkill) is placed in the scene; the loadout picks one.
             if (!GetComponent<KokkioSupport>()) gameObject.AddComponent<KokkioSupport>();
@@ -122,7 +126,8 @@ namespace AcRoguelike.Liminal
             AugmentHistory = "증강 없음";
             augmentOffers.Clear();
             if (augments) augments.ResetRun();
-            if (motor) { motor.moveSpeed = originalMoveSpeed; motor.walkSpeed = originalWalkSpeed; }
+            if (roster) roster.ResetMovementSpeeds(originalMoveSpeed, originalWalkSpeed);
+            else if (motor) { motor.moveSpeed = originalMoveSpeed; motor.walkSpeed = originalWalkSpeed; }
             if (caster) { caster.cooldown = originalCooldown; caster.flameCount = originalFlames; }
             if (health) health.ResetHealth();
             LoadStage(0);
@@ -604,11 +609,13 @@ namespace AcRoguelike.Liminal
         {
             Phase = phase;
             bool exploring = phase == LiminalRunPhase.Exploring, inLobby = phase == LiminalRunPhase.Lobby;
+            bool combatAllowed = exploring && (!roster || !roster.CurrentMovementOnly);
             Time.timeScale = exploring || inLobby ? 1 : 0;
             if (motor) motor.enabled = exploring || inLobby;
-            if (caster) caster.enabled = exploring;
             // No sword swings in the lobby: everyday clothes, everyday walk.
-            if (combat) { if (!exploring) combat.CancelAttack(); combat.enabled = exploring; }
+            if (combat) { if (!combatAllowed) combat.CancelAttack(); combat.enabled = combatAllowed; }
+            if (caster) caster.enabled = combatAllowed;
+            if (roster) roster.RefreshGameplayAvailability();
             if (hud) hud.RefreshPhase();
         }
 

@@ -253,6 +253,7 @@ namespace AcRoguelike.Liminal
         void Update()
         {
             if (landed) return;
+            if (!owner || !owner.Selected) { Destroy(gameObject); return; }
             age += Time.deltaTime;
             float t = Mathf.Clamp01(age / fallTime);
             transform.position = Vector3.Lerp(start, target + Vector3.up * .9f, t * t);
@@ -384,6 +385,7 @@ namespace AcRoguelike.Liminal
     /// <summary>Voxel chomper fired with each talisman while 1UP is active: homes on the target, chomps, deals bonus damage.</summary>
     sealed class SupportChomper : MonoBehaviour
     {
+        SupportCharacterSkill owner;
         TrainingEnemy target;
         Vector3 direction;
         int damage;
@@ -392,8 +394,9 @@ namespace AcRoguelike.Liminal
         const float Speed = 12.5f, Lifetime = 2.4f;
         static readonly Color Yellow = new Color(1f, .86f, .16f);
 
-        public void Launch(Vector3 origin, Vector3 forward, TrainingEnemy enemy, int bonusDamage, GameObject source)
+        public void Launch(SupportCharacterSkill skill, Vector3 origin, Vector3 forward, TrainingEnemy enemy, int bonusDamage, GameObject source)
         {
+            owner = skill;
             transform.position = origin;
             direction = Vector3.ProjectOnPlane(forward, Vector3.up).normalized;
             if (direction.sqrMagnitude < .01f) direction = Vector3.forward;
@@ -407,6 +410,7 @@ namespace AcRoguelike.Liminal
 
         void Update()
         {
+            if (!owner || !owner.Selected) { Destroy(gameObject); return; }
             float dt = Time.deltaTime;
             age += dt;
             if (target && target.IsAlive)

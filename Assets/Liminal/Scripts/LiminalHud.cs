@@ -26,7 +26,7 @@ namespace AcRoguelike.Liminal
         Font ownedSourceFont;
         GameObject canvasObject, modal, combatGroup, lobbyGroup, bossGroup;
         RectTransform modalContent, promptRoot, stamp;
-        TextMeshProUGUI gateLabel, roomLabel, healthLabel, enemyLabel, bossName, bossValue, counterLabel, currencyLabel, lobbyTitle, promptLabel, promptKey, hunterName, skillLabel;
+        TextMeshProUGUI gateLabel, roomLabel, healthLabel, enemyLabel, bossName, bossValue, counterLabel, currencyLabel, lobbyTitle, promptLabel, promptKey, hunterName, skillLabel, dashLabel, lobbyMovementLabel;
         Image healthFill, healthGhost, bossFill;
         RectTransform dashTrack;
         // One pip per stamina point: a dark slot and the fill that grows back as it recovers.
@@ -74,7 +74,7 @@ namespace AcRoguelike.Liminal
             healthFill = HunterUi.Fill("HealthFill", track.rectTransform, new Vector2(0, .5f), new Vector2(0, .5f), Vector2.zero, new Vector2(232, 10), HunterUi.Gold);
             for (int i = 1; i < 10; i++) HunterUi.Fill("Notch", track.rectTransform, new Vector2(i / 10f, .5f), new Vector2(.5f, .5f), Vector2.zero, new Vector2(1.5f, 10), new Color(.07f, .1f, .21f, .9f));
             healthLabel = HunterUi.Text("Health", status, font, "", 15, HunterUi.Cream, new Vector2(254, -55), new Vector2(66, 22), FontStyles.Bold, TextAlignmentOptions.TopRight);
-            HunterUi.Text("DashLabel", status, font, "DASH", 11, HunterUi.Muted, new Vector2(16, -76), new Vector2(40, 16), FontStyles.Bold);
+            dashLabel = HunterUi.Text("DashLabel", status, font, "DASH", 11, HunterUi.Muted, new Vector2(16, -76), new Vector2(40, 16), FontStyles.Bold);
             dashTrack = HunterUi.Rect("DashTrack", status, new Vector2(0, 1), new Vector2(0, 1), new Vector2(56, -80), new Vector2(110, 5));
 
             // Gate indicator (top centre) and remaining enemies (top right).
@@ -100,6 +100,8 @@ namespace AcRoguelike.Liminal
             var place = HunterUi.Window("Place", lobbyGroup.transform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(22, -20), new Vector2(330, 74), font);
             HunterUi.Text("Org", place, font, "KOREA HUNTER ASSOCIATION", 11, HunterUi.Gold, new Vector2(16, -10), new Vector2(300, 16), FontStyles.Bold);
             lobbyTitle = HunterUi.Text("PlaceName", place, font, "게이트 관리 구역", 19, HunterUi.Cream, new Vector2(16, -28), new Vector2(300, 28), FontStyles.Bold);
+            lobbyMovementLabel = HunterUi.Text("MovementOnly", place, font, "이동 전용", 11, HunterUi.Muted, new Vector2(16, -55), new Vector2(300, 16), FontStyles.Bold);
+            lobbyMovementLabel.gameObject.SetActive(false);
             var wallet = HunterUi.Window("Wallet", lobbyGroup.transform, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-22, -20), new Vector2(170, 52), font, null, true);
             HunterUi.Text("CurrencyTag", wallet, font, "마석", 12, HunterUi.Gate, new Vector2(14, -8), new Vector2(60, 16), FontStyles.Bold);
             currencyLabel = HunterUi.Text("Currency", wallet, font, "", 22, HunterUi.Cream, new Vector2(14, -22), new Vector2(142, 28), FontStyles.Bold, TextAlignmentOptions.TopRight);
@@ -154,6 +156,8 @@ namespace AcRoguelike.Liminal
             if (!run) return;
             Bind();
             bool lobby = run.Phase == LiminalRunPhase.Lobby;
+            bool movementOnly = run.Roster && run.Roster.CurrentMovementOnly;
+            if (lobbyMovementLabel) lobbyMovementLabel.gameObject.SetActive(movementOnly);
             if (combatGroup) combatGroup.SetActive(!lobby && run.CurrentStage);
             if (lobbyGroup) lobbyGroup.SetActive(lobby && !(run.Lobby && run.Lobby.WindowOpen));
             if (currencyLabel) currencyLabel.text = HunterProgress.Currency.ToString("N0");
@@ -179,7 +183,10 @@ namespace AcRoguelike.Liminal
                 healthLabel.text = $"{run.PlayerHealth.Health}";
             }
             if (motor) UpdateStamina();
-            counterLabel.text = melee && melee.CounterActive ? "COUNTER" : "";
+            bool dashAvailable = motor && motor.allowDash;
+            if (dashLabel) dashLabel.gameObject.SetActive(dashAvailable);
+            if (dashTrack) dashTrack.gameObject.SetActive(dashAvailable);
+            counterLabel.text = !movementOnly && melee && melee.isActiveAndEnabled && melee.CounterActive ? "COUNTER" : "";
             bossGroup.SetActive(false);
             if (run.CurrentStage.isBossStage && run.LivingEnemyCount > 0)
                 foreach (var signal in FindObjectsByType<TrafficLightBoss>(FindObjectsSortMode.None))
@@ -224,7 +231,14 @@ namespace AcRoguelike.Liminal
         /// <summary>The worn hunter's own skill: gold when ready, dim with the seconds left while it recharges.</summary>
         void UpdateSkill(IHunterSkill skill)
         {
-            skillLabel.gameObject.SetActive(skill != null);
+            bool movementOnly = run.Roster && run.Roster.CurrentMovementOnly;
+            skillLabel.gameObject.SetActive(movementOnly || skill != null);
+            if (movementOnly)
+            {
+                skillLabel.text = "이동 전용";
+                skillLabel.color = HunterUi.Muted;
+                return;
+            }
             if (skill == null) return;
             float wait = skill.CooldownRemaining;
             skillLabel.text = wait > 0 ? $"{skill.Label}  {Mathf.CeilToInt(wait)}" : skill.Label;
@@ -271,6 +285,7 @@ namespace AcRoguelike.Liminal
 
         void UpdateStamp()
         {
+            if (run.Roster && run.Roster.CurrentMovementOnly) { stampGroup.alpha = 0; return; }
             float t = Time.unscaledTime - stampAt;
             if (t > .9f) { stampGroup.alpha = 0; return; }
             // Slams in big, settles, holds, fades.

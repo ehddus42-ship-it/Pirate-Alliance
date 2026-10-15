@@ -26,7 +26,8 @@ namespace AcRoguelike.Liminal
         public float pickupRadius = 1.05f;
         public Texture2D portrait;
 
-        public bool Selected => HunterLoadout.SupportId == Id;
+        public bool Selected => HunterLoadout.SupportId == Id
+            && (!run || !run.Roster || !run.Roster.CurrentMovementOnly);
         public int Drops { get; private set; }
         public int Pickups { get; private set; }
         public int HealthRestored { get; private set; }

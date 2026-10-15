@@ -1,0 +1,35 @@
+{
+  "character_name": "남궁루나",
+  "weights_modified": {
+    "head": 7658,
+    "veil": 5609,
+    "skirt": 17698,
+    "boots": 743
+  },
+  "removed_touching_sole_bridge_faces": 8,
+  "helper_bones": [
+    "LunaLeftBoot",
+    "LunaRightBoot"
+  ],
+  "reason": "Auto skin mixed opposite feet and arm weights into the face/veil; original ankle pivots were behind the actual boots.",
+  "method": "Preserved original skeleton and body gait. Reweighted head/veil and long skirt. Added two boot-only controls using measured original Meshy ankle trajectories; boots remain rigid and do not share opposite-leg weights.",
+  "stride_multiplier": 1.48,
+  "source_model_speed_mps": 0.2923365021,
+  "playback_rate": 1.5,
+  "recommended_speed_mps": 0.648987034662,
+  "walk_duration_seconds": 1.6666666666666667,
+  "reproduction_inputs": [
+    "Assets/Characters/NamgungLuna/Peaceful/Models/LunaPeaceful_Rig.fbx",
+    "Assets/Characters/NamgungLuna/Peaceful/Models/LunaPeaceful_Albedo_0.png",
+    "Assets/Characters/NamgungLuna/Peaceful/Animations/LunaPeacefulWalk_Loop.fbx",
+    "Assets/Characters/NamgungLuna/Peaceful/Animations/LunaPeacefulIdle.fbx",
+    "Documentation/NamgungLuna/peaceful_walk_foot_trajectory.json"
+  ],
+  "maximum_skin_influences": 4,
+  "outputs": [
+    "Assets/Characters/NamgungLuna/Peaceful/Models/LunaPeaceful_Game.fbx",
+    "Assets/Characters/NamgungLuna/Peaceful/Animations/LunaPeacefulWalk_Game.fbx",
+    "Assets/Characters/NamgungLuna/Peaceful/Animations/LunaPeacefulIdle_Game.fbx"
+  ],
+  "published": true
+}

@@ -638,13 +638,17 @@ namespace AcRoguelike.Liminal
 
             var roster = run.Roster;
             int hunters = roster ? roster.Count : 0;
-            float hunterWidth = CardWidth(Mathf.Max(1, hunters));
+            bool compactHunters = hunters > 2;
+            int hunterColumns = compactHunters ? 2 : Mathf.Max(1, hunters);
+            float hunterWidth = CardWidth(hunterColumns);
             for (int i = 0; i < hunters; i++)
             {
                 int index = i;
                 string role = i == 0 ? "플레이어블 · 기본 헌터" : "플레이어블";
-                var card = LoadoutCardView("Hunter_" + roster.IdAt(i), content, font, new Vector2(30 + i * (hunterWidth + 15), -166), hunterWidth,
-                    roster.NameAt(i), role, roster.SummaryAt(i), roster.PortraitAt(i), .5f, () => ChangeHunter(index));
+                var position = new Vector2(30 + (i % hunterColumns) * (hunterWidth + 15),
+                    -166 - (i / hunterColumns) * (CompactLoadoutCardHeight + 10));
+                var card = LoadoutCardView("Hunter_" + roster.IdAt(i), content, font, position, hunterWidth,
+                    roster.NameAt(i), role, roster.SummaryAt(i), roster.PortraitAt(i), .5f, () => ChangeHunter(index), compactHunters);
                 card.id = roster.IdAt(i);
                 card.index = i;
                 hunterCards.Add(card);
@@ -671,12 +675,15 @@ namespace AcRoguelike.Liminal
             if (EventSystem.current) EventSystem.current.SetSelectedGameObject(focus != null ? focus.root.gameObject : close.gameObject);
         }
 
+        const float CompactLoadoutCardHeight = 195;
+
         static float CardWidth(int count) => Mathf.Min(225, (470 - (count - 1) * 15f) / count);
 
         LoadoutCard LoadoutCardView(string name, RectTransform parent, TMP_FontAsset font, Vector2 position, float width, string title,
-            string role, string summary, Texture2D portrait, float focusX, Action pick)
+            string role, string summary, Texture2D portrait, float focusX, Action pick, bool compact = false)
         {
-            const float height = 400, art = 250;
+            float height = compact ? CompactLoadoutCardHeight : 400;
+            float art = compact ? 90 : 250;
             var root = HunterUi.Button(name, parent, font, "", position, new Vector2(width, height), pick);
             var view = new LoadoutCard { root = root, button = root.GetComponent<UnityEngine.UI.Button>(), background = root.GetComponent<UnityEngine.UI.Image>() };
             var frame = HunterUi.Fill("Art", root, new Vector2(0, 1), new Vector2(0, 1), new Vector2(8, -8), new Vector2(width - 16, art), new Color(.04f, .06f, .13f, 1)).rectTransform;
@@ -691,17 +698,21 @@ namespace AcRoguelike.Liminal
             else
             {
                 // No illustration yet: the hunter's initial as a name plate.
-                HunterUi.Text("Initial", frame, font, string.IsNullOrEmpty(title) ? "?" : title.Substring(0, 1), 96, HunterUi.GoldDim,
-                    new Vector2(0, -50), new Vector2(width - 16, 130), FontStyles.Bold, TextAlignmentOptions.Center);
-                HunterUi.Text("Pending", frame, font, "일러스트 준비 중", 12, HunterUi.Muted, new Vector2(0, -200), new Vector2(width - 16, 24), FontStyles.Normal, TextAlignmentOptions.Center);
+                HunterUi.Text("Initial", frame, font, string.IsNullOrEmpty(title) ? "?" : title.Substring(0, 1), compact ? 36 : 96, HunterUi.GoldDim,
+                    new Vector2(0, compact ? -4 : -50), new Vector2(width - 16, compact ? 56 : 130), FontStyles.Bold, TextAlignmentOptions.Center);
+                HunterUi.Text("Pending", frame, font, "일러스트 준비 중", compact ? 10 : 12, HunterUi.Muted,
+                    new Vector2(0, compact ? -62 : -200), new Vector2(width - 16, compact ? 20 : 24), FontStyles.Normal, TextAlignmentOptions.Center);
             }
             view.accent = HunterUi.Fill("Selection", root, new Vector2(0, 1), new Vector2(0, 1), Vector2.zero, new Vector2(width, 4), HunterUi.Gold);
             var tag = HunterUi.Fill("InParty", root, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-14, -14), new Vector2(70, 24), HunterUi.Gold).rectTransform;
             HunterUi.Text("InPartyLabel", tag, font, "편성 중", 12, HunterUi.NavyDeep, Vector2.zero, new Vector2(70, 24), FontStyles.Bold, TextAlignmentOptions.Center);
             view.tag = tag.gameObject;
-            HunterUi.Text("Name", root, font, title, 22, HunterUi.Cream, new Vector2(14, -266), new Vector2(width - 28, 32), FontStyles.Bold);
-            HunterUi.Text("Role", root, font, role, 12, HunterUi.Gold, new Vector2(14, -300), new Vector2(width - 28, 22), FontStyles.Bold);
-            HunterUi.Text("Summary", root, font, summary ?? "", 13, HunterUi.Muted, new Vector2(14, -324), new Vector2(width - 28, 68));
+            HunterUi.Text("Name", root, font, title, compact ? 17 : 22, HunterUi.Cream,
+                new Vector2(14, compact ? -102 : -266), new Vector2(width - 28, compact ? 28 : 32), FontStyles.Bold);
+            HunterUi.Text("Role", root, font, role, compact ? 11 : 12, HunterUi.Gold,
+                new Vector2(14, compact ? -130 : -300), new Vector2(width - 28, compact ? 18 : 22), FontStyles.Bold);
+            HunterUi.Text("Summary", root, font, summary ?? "", compact ? 12 : 13, HunterUi.Muted,
+                new Vector2(14, compact ? -151 : -324), new Vector2(width - 28, compact ? 38 : 68));
             return view;
         }
 

@@ -42,7 +42,8 @@ namespace AcRoguelike.Liminal
         public int Activations { get; private set; }
         public int ChompersFired { get; private set; }
         /// <summary>In the party: picked as the support with the lobby's loadout officer.</summary>
-        public bool Selected => HunterLoadout.SupportId == Id;
+        public bool Selected => HunterLoadout.SupportId == Id
+            && (!run || !run.Roster || !run.Roster.CurrentMovementOnly);
 
         LiminalRunDirector run;
         TalismanCaster caster;
@@ -153,7 +154,7 @@ namespace AcRoguelike.Liminal
 
         internal void OnMeteorLanded()
         {
-            if (!run || !run.player) return;
+            if (!run || !run.player || !Selected) return;
             oneUpUntil = Time.time + oneUpDuration;
             if (activeOneUp) Destroy(activeOneUp.gameObject);
             activeOneUp = new GameObject("Support Skill / Voxel 1UP").AddComponent<SupportOneUp>();
@@ -191,7 +192,7 @@ namespace AcRoguelike.Liminal
             Vector3 facing = Facing(player);
             Vector3 side = Vector3.Cross(Vector3.up, facing).normalized;
             var chomper = new GameObject("Support Skill / Voxel Chomper").AddComponent<SupportChomper>();
-            chomper.Launch(origin + side * (ChompersFired % 2 == 0 ? .45f : -.45f), facing, target, chomperDamage, chomperModel);
+            chomper.Launch(this, origin + side * (ChompersFired % 2 == 0 ? .45f : -.45f), facing, target, chomperDamage, chomperModel);
             ChompersFired++;
         }
 
