@@ -31,10 +31,54 @@ namespace NamgungLuna.Editor
             public LunaLeg left, right;
             /// <summary>Toe tips in world space at bind (for the foot colliders).</summary>
             public Vector3 toeLeft, toeRight;
+            /// <summary>Mean leg radius after fitting inside the skirt (for the Magica colliders).</summary>
+            public LegFit fitLeft, fitRight;
+            /// <summary>Widest hip section (world centre, half width, smaller of front/back depth).</summary>
+            public Vector3 hipsCenter;
+            public float hipsHalfWidth, hipsDepth;
+            public string lowerBodyReport;
 
             public LunaLeg Leg(string side) => side == "L" ? left : right;
             public Vector3 Toe(string side) => side == "L" ? toeLeft : toeRight;
+            public LegFit Fit(string side) => side == "L" ? fitLeft : fitRight;
         }
+
+        public sealed class LegFit
+        {
+            public float thighTop, aboveKnee, knee, kneeMax, calf, ankle;
+        }
+
+        // Slender anime proportions that fit the authored dress. s = 0 at the hip joint, 1 at the ankle (negative = up into
+        // the pelvis). Radii in metres: front, back, outer, inner.
+        static readonly float[,] LegProfile =
+        {
+            { -0.14f, 0.050f, 0.056f, 0.052f, 0.040f },
+            { -0.06f, 0.054f, 0.060f, 0.056f, 0.046f },
+            {  0.00f, 0.054f, 0.058f, 0.055f, 0.048f },
+            {  0.15f, 0.050f, 0.053f, 0.051f, 0.047f },
+            {  0.30f, 0.045f, 0.047f, 0.045f, 0.042f },
+            {  0.42f, 0.040f, 0.040f, 0.039f, 0.037f },
+            {  0.49f, 0.042f, 0.034f, 0.036f, 0.035f },   // knee: the kneecap in front
+            {  0.56f, 0.034f, 0.038f, 0.035f, 0.034f },
+            {  0.65f, 0.032f, 0.045f, 0.038f, 0.039f },   // calf
+            {  0.76f, 0.029f, 0.039f, 0.033f, 0.033f },
+            {  0.87f, 0.027f, 0.030f, 0.028f, 0.028f },
+            {  0.97f, 0.025f, 0.027f, 0.026f, 0.026f },   // ends inside the boot cuff, above the ankle pivot
+        };
+        // Height (m), half width, front, back. Centred front-to-back inside the underskirt.
+        static readonly float[,] PelvisProfile =
+        {
+            { 1.06f, 0.080f, 0.070f, 0.040f },
+            { 1.01f, 0.090f, 0.075f, 0.045f },
+            { 0.96f, 0.105f, 0.075f, 0.058f },
+            { 0.91f, 0.115f, 0.072f, 0.070f },
+            { 0.86f, 0.118f, 0.068f, 0.076f },
+            { 0.81f, 0.112f, 0.062f, 0.072f },
+            { 0.77f, 0.095f, 0.052f, 0.058f },
+            { 0.74f, 0.065f, 0.038f, 0.040f },
+        };
+        const int RingSides = 20;
+        const float GarmentMargin = 0.008f;   // keep this far inside the skirt at rest
 
         public sealed class Materials
         {
@@ -53,8 +97,10 @@ namespace NamgungLuna.Editor
             var renderers = model.GetComponentsInChildren<Renderer>(true).GroupBy(r => r.name).ToDictionary(g => g.Key, g => g.First());
 
             var rig = new Rig { visual = visual };
+            Material stocking = renderers["Boot_Shaft_Underlap_L"].sharedMaterial;
             rig.left = BuildLeg(visual, renderers, "L", out rig.toeLeft);
             rig.right = BuildLeg(visual, renderers, "R", out rig.toeRight);
+            BuildLowerBody(rig, renderers, stocking);
 
             if (renderers.TryGetValue("Lantern_Frame", out Renderer frame))
             {
@@ -79,7 +125,7 @@ namespace NamgungLuna.Editor
             Renderer boot = renderers["Boot_" + side], shaft = renderers["Boot_Shaft_Underlap_" + side];
             Bounds b = boot.bounds, s = shaft.bounds;
             var ankle = new Vector3(s.center.x, b.min.y + b.size.y * 0.52f, s.center.z);
-            var hip = new Vector3(s.center.x * 0.55f, HipHeight, s.center.z);
+            var hip = new Vector3(s.center.x * 0.6f, HipHeight, s.center.z);
             var knee = Vector3.Lerp(hip, ankle, 0.5f) + Vector3.forward * 0.012f;
             Transform hipBone = Bone("Hip_" + side, visual, hip);
             Transform kneeBone = Bone("Knee_" + side, hipBone, knee);
@@ -87,13 +133,6 @@ namespace NamgungLuna.Editor
             // the shaft lining follows the shin; the boot bends at the ankle
             shaft.transform.SetParent(kneeBone, true);
             Vector3[] world = boot.GetComponent<MeshFilter>().sharedMesh.vertices.Select(v => boot.transform.TransformPoint(v)).ToArray();
-
-            // The dress hides the legs, so the model has none: slim stocking legs (the shaft lining's material) fill the
-            // gap between hem and boot when the skirt lifts or a knee folds. Same radii as the Magica leg colliders.
-            Material stocking = shaft.sharedMaterial;
-            float shaftRadius = Mathf.Min(s.extents.x, s.extents.z);
-            AddLimb("Thigh_" + side, hipBone, hip + Vector3.up * 0.02f, knee, 0.045f, 0.041f, stocking);
-            AddLimb("Shin_" + side, kneeBone, knee, new Vector3(ankle.x, s.center.y, ankle.z), 0.04f, shaftRadius * 0.95f, stocking);
             SkinBoot(boot, kneeBone, ankleBone, ankle.y, side);
 
             // Outline of the foot in the side plane: whatever the toe angle, its lowest point is one of these.
@@ -171,58 +210,302 @@ namespace NamgungLuna.Editor
             UnityEngine.Object.DestroyImmediate(boot.gameObject);
         }
 
-        /// <summary>A tapered capsule from <paramref name="top"/> to <paramref name="bottom"/> (world), parented to a bone.</summary>
-        static void AddLimb(string name, Transform bone, Vector3 top, Vector3 bottom, float topRadius, float bottomRadius, Material material)
+        /// <summary>
+        /// The model has no body under the dress, so the skirt had nothing to fall against. This builds a skinned lower
+        /// body: a pelvis and two legs with anatomical cross-sections (thigh, kneecap, calf, ankle) in the boot lining's
+        /// stocking material. Every section is shrunk where needed to stay just inside the authored underskirt and waist,
+        /// so nothing pokes through at rest. The pelvis follows Visual, the thighs blend from the pelvis into the hip bones
+        /// and the shins into the knee bones; the legs end inside the boot cuffs.
+        /// </summary>
+        static void BuildLowerBody(Rig rig, Dictionary<string, Renderer> renderers, Material stocking)
         {
-            float length = Vector3.Distance(top, bottom);
-            var go = new GameObject(name);
-            go.transform.SetParent(bone, false);
-            go.transform.SetPositionAndRotation(top, Quaternion.FromToRotation(Vector3.down, (bottom - top).normalized));
-            go.AddComponent<MeshFilter>().sharedMesh = SaveMesh(TaperedCapsule("LunaLeg_" + name, length, topRadius, bottomRadius));
-            go.AddComponent<MeshRenderer>().sharedMaterial = material;
+            var garments = new Clearance(new[] { "Skirt_Ivory", "Skirt_Navy", "Waist_Navy_Inset", "Bodice_Navy" }
+                .Where(renderers.ContainsKey).Select(n => renderers[n]));
+            var bones = new[] { rig.visual, rig.left.hip, rig.left.knee, rig.right.hip, rig.right.knee };
+            var vertices = new List<Vector3>();
+            var weights = new List<BoneWeight>();
+            var triangles = new List<int>();
+            var report = new System.Text.StringBuilder();
+
+            // pelvis
+            var pelvisRings = new List<Ring>();
+            float widest = 0f;
+            for (int i = 0; i < PelvisProfile.GetLength(0); i++)
+            {
+                float y = PelvisProfile[i, 0];
+                float centreZ = garments.DepthCentre(y, 0.06f, -0.0175f);
+                var ring = new Ring { centre = new Vector3(0f, y, centreZ), u = Vector3.right, v = Vector3.forward, weight = Single(0) };
+                for (int k = 0; k < RingSides; k++)
+                {
+                    float a = 2f * Mathf.PI * k / RingSides;
+                    float r = Ellipse(a, PelvisProfile[i, 1], PelvisProfile[i, 1], PelvisProfile[i, 2], PelvisProfile[i, 3]);
+                    ring.radius[k] = Fit(garments, ring, k, r, out bool clamped);
+                    ring.clamped |= clamped;
+                }
+                pelvisRings.Add(ring);
+            }
+            Smooth(pelvisRings, garments);
+            foreach (var ring in pelvisRings)
+            {
+                float halfWidth = (ring.radius[0] + ring.radius[RingSides / 2]) * 0.5f;
+                float depth = Mathf.Min(ring.radius[RingSides / 4], ring.radius[3 * RingSides / 4]);
+                if (ring.centre.y < 0.95f && halfWidth > widest)
+                {
+                    widest = halfWidth;
+                    rig.hipsCenter = ring.centre;
+                    rig.hipsHalfWidth = halfWidth;
+                    rig.hipsDepth = depth;
+                }
+            }
+            AddTube(pelvisRings, vertices, weights, triangles);
+            report.Append($"pelvis {pelvisRings.Count} rings, hips {rig.hipsHalfWidth * 2f:F3} m wide, {pelvisRings.Count(r => r.clamped)} fitted to the dress");
+
+            // legs
+            foreach (string side in new[] { "L", "R" })
+            {
+                LunaLeg leg = rig.Leg(side);
+                int hipIndex = side == "L" ? 1 : 3, kneeIndex = hipIndex + 1;
+                Vector3 hip = leg.hip.position, knee = leg.knee.position, ankle = leg.ankle.position;
+                float thigh = Vector3.Distance(hip, knee), shin = Vector3.Distance(knee, ankle), length = thigh + shin;
+                Vector3 outward = side == "L" ? Vector3.left : Vector3.right;
+                var rings = new List<Ring>();
+                float first = LegProfile[0, 0], last = LegProfile[LegProfile.GetLength(0) - 1, 0];
+                int count = Mathf.CeilToInt((last - first) * length / 0.018f);
+                for (int i = 0; i <= count; i++)
+                {
+                    float s = Mathf.Lerp(first, last, (float)i / count);
+                    float along = s * length;
+                    Vector3 centre, tangent;
+                    if (along < thigh) { tangent = (knee - hip).normalized; centre = hip + tangent * along; }
+                    else { tangent = (ankle - knee).normalized; centre = knee + tangent * (along - thigh); }
+                    Vector3 v = Vector3.ProjectOnPlane(Vector3.forward, tangent).normalized;
+                    Vector3 u = Vector3.Cross(v, tangent).normalized;
+                    if (Vector3.Dot(u, outward) < 0f) u = -u;
+                    var ring = new Ring { centre = centre, u = u, v = v, s = s };
+                    float wTop = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(-0.12f, 0.03f, s));
+                    float wKnee = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.43f, 0.55f, s));
+                    ring.weight = wKnee > 0f ? Pair(kneeIndex, wKnee, hipIndex) : Pair(hipIndex, wTop, 0);
+                    Profile(s, out float front, out float back, out float outer, out float inner);
+                    for (int k = 0; k < RingSides; k++)
+                    {
+                        float a = 2f * Mathf.PI * k / RingSides;
+                        ring.radius[k] = Fit(garments, ring, k, Ellipse(a, outer, inner, front, back), out bool clamped);
+                        ring.clamped |= clamped;
+                    }
+                    rings.Add(ring);
+                }
+                Smooth(rings, garments);
+                AddTube(rings, vertices, weights, triangles);
+                var fit = new LegFit
+                {
+                    thighTop = MeanRadius(rings, 0.03f), aboveKnee = MeanRadius(rings, 0.42f), knee = MeanRadius(rings, 0.5f),
+                    kneeMax = rings.OrderBy(r => Mathf.Abs(r.s - 0.49f)).First().radius.Max(),
+                    calf = MeanRadius(rings, 0.65f), ankle = MeanRadius(rings, 0.93f),
+                };
+                if (side == "L") rig.fitLeft = fit; else rig.fitRight = fit;
+                report.Append($"; leg {side} {rings.Count} rings ({rings.Count(r => r.clamped)} fitted), thigh {fit.thighTop * 2f:F3} / knee {fit.knee * 2f:F3} / calf {fit.calf * 2f:F3} / ankle {fit.ankle * 2f:F3} m");
+            }
+
+            Transform visual = rig.visual;
+            var mesh = new Mesh { name = "LunaLowerBody_Skinned" };
+            mesh.SetVertices(vertices.Select(p => visual.InverseTransformPoint(p)).ToList());
+            mesh.SetTriangles(triangles, 0);
+            mesh.SetUVs(0, Enumerable.Repeat(Vector2.zero, vertices.Count).ToList());
+            mesh.boneWeights = weights.ToArray();
+            mesh.bindposes = bones.Select(b => b.worldToLocalMatrix * visual.localToWorldMatrix).ToArray();
+            mesh.RecalculateNormals();
+            mesh.RecalculateTangents();
+            mesh.RecalculateBounds();
+            mesh = SaveMesh(mesh);
+
+            var go = new GameObject("LowerBody");
+            go.transform.SetParent(visual, false);
+            var skinned = go.AddComponent<SkinnedMeshRenderer>();
+            skinned.sharedMesh = mesh;
+            skinned.sharedMaterial = stocking;
+            skinned.bones = bones;
+            skinned.rootBone = visual;
+            skinned.localBounds = new Bounds(mesh.bounds.center, mesh.bounds.size + Vector3.one * 0.6f);
+            rig.lowerBodyReport = report.ToString() + $"; {vertices.Count} vertices";
         }
 
-        /// <summary>Capsule along local -Y: a hemisphere of <paramref name="r0"/> at the origin, one of <paramref name="r1"/> at -length.</summary>
-        static Mesh TaperedCapsule(string name, float length, float r0, float r1, int segments = 16, int capRings = 5)
+        sealed class Ring
         {
-            var profile = new List<(float y, float radius, Vector2 normal)>();
-            for (int i = 0; i <= capRings; i++)
+            public Vector3 centre, u, v;
+            public float s;
+            public readonly float[] radius = new float[RingSides];
+            public readonly float[] limit = Enumerable.Repeat(float.PositiveInfinity, RingSides).ToArray();
+            public BoneWeight weight;
+            public bool clamped;
+        }
+
+        /// <summary>Garment vertices bucketed by height, for "how far is the dress in this direction" queries.</summary>
+        sealed class Clearance
+        {
+            const float Slab = 0.01f;
+            readonly Dictionary<int, List<Vector3>> slabs = new Dictionary<int, List<Vector3>>();
+
+            public Clearance(IEnumerable<Renderer> renderers)
             {
-                float phi = Mathf.PI * 0.5f * (1f - (float)i / capRings);   // top pole -> equator
-                profile.Add((r0 * Mathf.Sin(phi), r0 * Mathf.Cos(phi), new Vector2(Mathf.Cos(phi), Mathf.Sin(phi))));
+                foreach (Renderer r in renderers)
+                {
+                    var filter = r.GetComponent<MeshFilter>();
+                    if (filter == null) continue;
+                    Matrix4x4 m = r.transform.localToWorldMatrix;
+                    foreach (Vector3 v in filter.sharedMesh.vertices)
+                    {
+                        Vector3 w = m.MultiplyPoint3x4(v);
+                        int key = Mathf.FloorToInt(w.y / Slab);
+                        if (!slabs.TryGetValue(key, out var list)) slabs[key] = list = new List<Vector3>();
+                        list.Add(w);
+                    }
+                }
             }
-            for (int i = 0; i <= capRings; i++)
+
+            IEnumerable<Vector3> Near(float y, float halfHeight)
             {
-                float phi = -Mathf.PI * 0.5f * i / capRings;                 // equator -> bottom pole
-                profile.Add((-length + r1 * Mathf.Sin(phi), r1 * Mathf.Cos(phi), new Vector2(Mathf.Cos(phi), Mathf.Sin(phi))));
+                for (int key = Mathf.FloorToInt((y - halfHeight) / Slab); key <= Mathf.FloorToInt((y + halfHeight) / Slab); key++)
+                    if (slabs.TryGetValue(key, out var list))
+                        foreach (Vector3 p in list)
+                            if (Mathf.Abs(p.y - y) <= halfHeight) yield return p;
             }
-            var vertices = new List<Vector3>();
-            var normals = new List<Vector3>();
-            var uvs = new List<Vector2>();
-            for (int r = 0; r < profile.Count; r++)
-                for (int s = 0; s <= segments; s++)
+
+            /// <summary>Horizontal distance to the nearest garment point within a narrow cone around <paramref name="dir"/>.</summary>
+            public float Distance(Vector3 centre, Vector3 dir)
+            {
+                dir.y = 0f;
+                if (dir.sqrMagnitude < 1e-8f) return float.PositiveInfinity;
+                dir.Normalize();
+                const float cone = 0.97f;   // cos 14 deg
+                float best = float.PositiveInfinity;
+                foreach (Vector3 p in Near(centre.y, 0.012f))
                 {
-                    float a = 2f * Mathf.PI * s / segments;
-                    var radial = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
-                    vertices.Add(radial * profile[r].radius + Vector3.up * profile[r].y);
-                    normals.Add((radial * profile[r].normal.x + Vector3.up * profile[r].normal.y).normalized);
-                    uvs.Add(new Vector2((float)s / segments, (float)r / (profile.Count - 1)));
+                    float dx = p.x - centre.x, dz = p.z - centre.z;
+                    float d = Mathf.Sqrt(dx * dx + dz * dz);
+                    if (d < 1e-4f || (dx * dir.x + dz * dir.z) / d < cone) continue;
+                    if (d < best) best = d;
                 }
-            var triangles = new List<int>();
-            for (int r = 0; r < profile.Count - 1; r++)
-                for (int s = 0; s < segments; s++)
+                return best;
+            }
+
+            /// <summary>Middle of the dress front-to-back near the centre line, or <paramref name="fallback"/> if none.</summary>
+            public float DepthCentre(float y, float halfWidth, float fallback)
+            {
+                float min = float.PositiveInfinity, max = float.NegativeInfinity;
+                foreach (Vector3 p in Near(y, 0.012f))
                 {
-                    int i0 = r * (segments + 1) + s, i1 = i0 + 1, i2 = i0 + segments + 1, i3 = i2 + 1;
-                    triangles.AddRange(new[] { i0, i1, i2, i1, i3, i2 });
+                    if (Mathf.Abs(p.x) > halfWidth) continue;
+                    min = Mathf.Min(min, p.z);
+                    max = Mathf.Max(max, p.z);
                 }
-            var mesh = new Mesh { name = name };
-            mesh.SetVertices(vertices);
-            mesh.SetNormals(normals);
-            mesh.SetUVs(0, uvs);
-            mesh.SetTriangles(triangles, 0);
-            mesh.RecalculateBounds();
-            mesh.RecalculateTangents();
-            return mesh;
+                return min < max ? (min + max) * 0.5f : fallback;
+            }
+        }
+
+        static float Fit(Clearance garments, Ring ring, int k, float radius, out bool clamped)
+        {
+            float angle = 2f * Mathf.PI * k / RingSides;
+            Vector3 dir = Mathf.Cos(angle) * ring.u + Mathf.Sin(angle) * ring.v;
+            ring.limit[k] = garments.Distance(ring.centre, dir) - GarmentMargin;
+            // never thinner than 60 %: where the dress is that tight it may rest on her
+            float fitted = Mathf.Max(Mathf.Min(radius, ring.limit[k]), radius * 0.6f);
+            clamped = fitted < radius - 1e-4f;
+            return fitted;
+        }
+
+        /// <summary>Soften the fitted outline around and along the tube, without growing back past the dress.</summary>
+        static void Smooth(List<Ring> rings, Clearance garments)
+        {
+            for (int pass = 0; pass < 3; pass++)
+            {
+                var next = rings.Select(r => (float[])r.radius.Clone()).ToList();
+                for (int i = 0; i < rings.Count; i++)
+                    for (int k = 0; k < RingSides; k++)
+                    {
+                        float around = (rings[i].radius[(k + RingSides - 1) % RingSides] + 2f * rings[i].radius[k] + rings[i].radius[(k + 1) % RingSides]) * 0.25f;
+                        float alongPrev = i > 0 ? rings[i - 1].radius[k] : rings[i].radius[k];
+                        float alongNext = i < rings.Count - 1 ? rings[i + 1].radius[k] : rings[i].radius[k];
+                        float along = (alongPrev + 2f * rings[i].radius[k] + alongNext) * 0.25f;
+                        next[i][k] = Mathf.Min((around + along) * 0.5f, Mathf.Max(rings[i].limit[k], rings[i].radius[k]));
+                    }
+                for (int i = 0; i < rings.Count; i++) next[i].CopyTo(rings[i].radius, 0);
+            }
+        }
+
+        /// <summary>Closed tube through the rings, capped at both ends; outward-facing triangles.</summary>
+        static void AddTube(List<Ring> rings, List<Vector3> vertices, List<BoneWeight> weights, List<int> triangles)
+        {
+            int start = vertices.Count;
+            foreach (Ring ring in rings)
+                for (int k = 0; k < RingSides; k++)
+                {
+                    float a = 2f * Mathf.PI * k / RingSides;
+                    vertices.Add(ring.centre + (Mathf.Cos(a) * ring.u + Mathf.Sin(a) * ring.v) * ring.radius[k]);
+                    weights.Add(ring.weight);
+                }
+            int top = vertices.Count;
+            vertices.Add(rings[0].centre); weights.Add(rings[0].weight);
+            int bottom = vertices.Count;
+            vertices.Add(rings[rings.Count - 1].centre); weights.Add(rings[rings.Count - 1].weight);
+
+            var tube = new List<int>();
+            for (int i = 0; i < rings.Count - 1; i++)
+                for (int k = 0; k < RingSides; k++)
+                {
+                    int a = start + i * RingSides + k, b = start + i * RingSides + (k + 1) % RingSides;
+                    int c = a + RingSides, d = b + RingSides;
+                    tube.AddRange(new[] { a, b, c, b, d, c });
+                }
+            for (int k = 0; k < RingSides; k++)
+            {
+                tube.AddRange(new[] { top, start + (k + 1) % RingSides, start + k });
+                int lastRing = start + (rings.Count - 1) * RingSides;
+                tube.AddRange(new[] { bottom, lastRing + k, lastRing + (k + 1) % RingSides });
+            }
+            // Unity treats Cross(b - a, c - a) as the face normal: make the side faces point away from the axis.
+            Vector3 p0 = vertices[tube[0]], p1 = vertices[tube[1]], p2 = vertices[tube[2]];
+            Vector3 n = Vector3.Cross(p1 - p0, p2 - p0);
+            if (Vector3.Dot(n, p0 - rings[0].centre) < 0f)
+                for (int t = 0; t < tube.Count; t += 3) (tube[t + 1], tube[t + 2]) = (tube[t + 2], tube[t + 1]);
+            triangles.AddRange(tube);
+        }
+
+        static float Ellipse(float angle, float outer, float inner, float front, float back)
+        {
+            float c = Mathf.Cos(angle), s = Mathf.Sin(angle);
+            float a = c >= 0f ? outer : inner, b = s >= 0f ? front : back;
+            return 1f / Mathf.Sqrt(c * c / (a * a) + s * s / (b * b));
+        }
+
+        static void Profile(float s, out float front, out float back, out float outer, out float inner)
+        {
+            int last = LegProfile.GetLength(0) - 1;
+            int i = 0;
+            while (i < last - 1 && s > LegProfile[i + 1, 0]) i++;
+            float t = Mathf.Clamp01(Mathf.InverseLerp(LegProfile[i, 0], LegProfile[i + 1, 0], s));
+            t = t * t * (3f - 2f * t);
+            front = Mathf.Lerp(LegProfile[i, 1], LegProfile[i + 1, 1], t);
+            back = Mathf.Lerp(LegProfile[i, 2], LegProfile[i + 1, 2], t);
+            outer = Mathf.Lerp(LegProfile[i, 3], LegProfile[i + 1, 3], t);
+            inner = Mathf.Lerp(LegProfile[i, 4], LegProfile[i + 1, 4], t);
+        }
+
+        static float MeanRadius(List<Ring> rings, float s)
+        {
+            Ring best = rings.OrderBy(r => Mathf.Abs(r.s - s)).First();
+            return best.radius.Average();
+        }
+
+        static BoneWeight Single(int bone) => new BoneWeight { boneIndex0 = bone, weight0 = 1f };
+
+        /// <summary>Two-bone weight: <paramref name="w"/> on <paramref name="a"/>, the rest on <paramref name="b"/>, largest first.</summary>
+        static BoneWeight Pair(int a, float w, int b)
+        {
+            if (w >= 1f - 1e-4f) return Single(a);
+            if (w <= 1e-4f) return Single(b);
+            return w >= 0.5f
+                ? new BoneWeight { boneIndex0 = a, weight0 = w, boneIndex1 = b, weight1 = 1f - w }
+                : new BoneWeight { boneIndex0 = b, weight0 = 1f - w, boneIndex1 = a, weight1 = w };
         }
 
         /// <summary>Store a generated mesh as an asset (prefabs cannot keep scene-only meshes), reusing the existing asset.</summary>

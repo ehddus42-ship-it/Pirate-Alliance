@@ -47,9 +47,9 @@ namespace NamgungLuna.Editor
         }
 
         static readonly string[] HairColliders = { "Head", "Neck", "Torso_L", "Torso_R", "Shoulders" };
-        // The Leg_L / Leg_R specs become thigh, shin and foot capsules on the moon-gait leg bones (LunaLocomotionSetup),
-        // so the skirt is kicked from inside as the hidden legs swing.
-        static readonly string[] LegColliders = { "Leg_L", "Leg_R", "Shin_L", "Shin_R", "Foot_L", "Foot_R" };
+        // The Leg_L / Leg_R specs become thigh, shin and foot capsules on the leg bones, sized to the lower body that
+        // LunaLocomotionSetup builds, plus a hip capsule: the skirt rests on her hips and is kicked from inside by the legs.
+        static readonly string[] LegColliders = { "Hips", "Leg_L", "Leg_R", "Shin_L", "Shin_R", "Foot_L", "Foot_R" };
 
         // Magica stalls when the renderers of one cloth add up to more than 65,535 vertices, so the hair and the two
         // skirt layers are separate cloths. The hair cloths share parameters and fixed roots so they move together.
@@ -170,7 +170,9 @@ namespace NamgungLuna.Editor
                     colliders[c.name] = capsule;
                 }
             }
+            colliders["Hips"] = AddHipsCollider(rig, colliderRoot);
             report.AppendLine("Colliders: " + string.Join(", ", colliders.Keys));
+            report.AppendLine("Rest clearance to the skirts (mm, + = gap): " + string.Join(", ", RestClearance(renderers, "Hips", "Leg_L", "Leg_R", "Shin_L", "Shin_R")));
 
             // Cloth
             var clothRoot = new GameObject("Magica_Cloth").transform;
@@ -253,6 +255,7 @@ namespace NamgungLuna.Editor
             }
 
             LunaLocomotionSetup.AttachGait(character, rig);
+            report.AppendLine("Lower body: " + rig.lowerBodyReport);
             report.AppendLine($"Moon gait: Visual pivot, legs Hip/Knee/Ankle_L/R, sole outline {rig.left.solePoints.Length} points, " +
                               $"lantern {(rig.lantern != null ? "yes" : "no")}, moon {(rig.moon != null ? "yes" : "no")}");
 
@@ -306,20 +309,54 @@ namespace NamgungLuna.Editor
             return report.ToString();
         }
 
-        /// <summary>Thigh, shin and foot capsules on the leg bones in place of the single authored leg capsule.</summary>
+        /// <summary>Thigh, shin and foot capsules on the leg bones in place of the single authored leg capsule, as thick as the
+        /// built legs (the kneecap included) so the cloth particles stay outside their surface.</summary>
         static void AddLegColliders(ColliderSpec spec, string side, LunaLocomotionSetup.Rig rig, Func<float[], Vector3> toUnity, Dictionary<string, ColliderComponent> colliders)
         {
             LunaLeg leg = rig.Leg(side);
-            Vector3 hip = toUnity(spec.start), knee = leg.knee.position, ankle = leg.ankle.position;
-            float mid = Mathf.Lerp(spec.r0, spec.r1, 0.5f);
-            colliders["Leg_" + side] = AddCapsule("Leg_" + side, leg.hip, hip, knee, spec.r0, mid);
-            colliders["Shin_" + side] = AddCapsule("Shin_" + side, leg.knee, knee, ankle, mid, spec.r1);
+            LunaLocomotionSetup.LegFit fit = rig.Fit(side);
+            Vector3 hip = leg.hip.position, knee = leg.knee.position, ankle = leg.ankle.position;
+            colliders["Leg_" + side] = AddCapsule("Leg_" + side, leg.hip, hip, knee, fit.thighTop, Mathf.Max(fit.aboveKnee, fit.kneeMax));
+            colliders["Shin_" + side] = AddCapsule("Shin_" + side, leg.knee, knee, ankle, Mathf.Max(fit.kneeMax, fit.calf), fit.ankle);
             colliders["Foot_" + side] = AddCapsule("Foot_" + side, leg.ankle, ankle, rig.Toe(side) + Vector3.up * 0.02f, spec.r1 * 0.9f, spec.r1 * 0.7f);
         }
 
+        /// <summary>Side-to-side capsule through the widest part of her hips, inside the built pelvis.</summary>
+        static MagicaCapsuleCollider AddHipsCollider(LunaLocomotionSetup.Rig rig, Transform parent)
+        {
+            float radius = Mathf.Min(rig.hipsDepth, rig.hipsHalfWidth) * 0.9f;
+            float half = Mathf.Max(0.005f, rig.hipsHalfWidth * 0.95f - radius);
+            return AddCapsule("Hips", parent, rig.hipsCenter + Vector3.left * half, rig.hipsCenter + Vector3.right * half, radius, radius);
+        }
+
         /// <summary>Capsule along local +Y from <paramref name="a"/> (radius r0) to <paramref name="b"/> (radius r1), world positions.</summary>
+        static readonly Dictionary<string, (Vector3 a, Vector3 b, float r0, float r1)> capsuleShapes = new Dictionary<string, (Vector3, Vector3, float, float)>();
+
+        /// <summary>Smallest gap between the authored skirts and each capsule, before any simulation.</summary>
+        static IEnumerable<string> RestClearance(Dictionary<string, Renderer> renderers, params string[] names)
+        {
+            var skirt = new[] { "Skirt_Ivory", "Skirt_Navy" }.Select(n => renderers[n]).SelectMany(r =>
+            {
+                Matrix4x4 m = r.transform.localToWorldMatrix;
+                return r.GetComponent<MeshFilter>().sharedMesh.vertices.Select(v => m.MultiplyPoint3x4(v));
+            }).ToArray();
+            foreach (string name in names)
+            {
+                if (!capsuleShapes.TryGetValue(name, out var c)) continue;
+                float best = float.MaxValue;
+                foreach (Vector3 p in skirt)
+                {
+                    Vector3 ab = c.b - c.a;
+                    float t = Mathf.Clamp01(Vector3.Dot(p - c.a, ab) / ab.sqrMagnitude);
+                    best = Mathf.Min(best, Vector3.Distance(p, c.a + ab * t) - Mathf.Lerp(c.r0, c.r1, t));
+                }
+                yield return $"{name} {best * 1000f:F0}";
+            }
+        }
+
         static MagicaCapsuleCollider AddCapsule(string name, Transform parent, Vector3 a, Vector3 b, float r0, float r1)
         {
+            capsuleShapes[name] = (a, b, r0, r1);
             var go = new GameObject("Collider_" + name);
             go.transform.SetParent(parent, false);
             Vector3 dir = (a - b).normalized;

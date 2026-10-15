@@ -173,8 +173,9 @@ namespace NamgungLuna.Motion
         static readonly LegPose IdleL = new LegPose(5f, 11f, 40f, 1f);
         static readonly LegPose IdleR = new LegPose(-3f, 4f, 35f, 1f);
         // Jump: tucked on the way up, reaching down on the way down.
-        static readonly LegPose RiseL = new LegPose(30f, 62f, 44f, 3f);
-        static readonly LegPose RiseR = new LegPose(12f, 36f, 40f, 3f);
+        // (kept modest: the dress is narrow in front, a higher knee would push through the underskirt)
+        static readonly LegPose RiseL = new LegPose(20f, 52f, 44f, 3f);
+        static readonly LegPose RiseR = new LegPose(8f, 32f, 40f, 3f);
         static readonly LegPose FallL = new LegPose(9f, 8f, 36f, 1f);
         static readonly LegPose FallR = new LegPose(-3f, 18f, 42f, 1f);
 
