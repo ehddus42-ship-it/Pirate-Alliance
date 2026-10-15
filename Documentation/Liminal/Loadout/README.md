@@ -14,7 +14,9 @@
 | 저장 | `HunterLoadout` (PlayerPrefs `Hunter.Loadout.Hunter` / `Hunter.Loadout.Support`) |
 
 - 단말기는 오퍼레이터 통신 화면 느낌(기획 메모의 "파란색 LCD")으로 화면 두 개와 상태 띠를 절차 텍스처로 그려.
-- 헌터를 바꾸면 그 자리에서 몸이 바뀌어. 아스트라이아는 로비에서 평상복, 다른 헌터는 게이트 복장 그대로 다녀.
+- 헌터를 바꾸면 그 자리에서 몸이 바뀌어. 아스트라이아는 로비에서 평상복, 프로이와 남궁루나도 로비 전용 평시복(프로필의 `lobbyForm`, 이동만)을
+  입고 게이트에 들어가면 전투복으로 바뀌어. 로비 평시복이 없는 헌터는 게이트 복장 그대로 다녀. G(테스트용)는 그 자리와 반대 옷으로.
+- 고른 지원 캐릭터 카드는 로비에서 늘 보여 (로비 평시복은 이동만 하는 몸이라도). 게이트 안에서 이동만 하는 몸을 입으면 지원은 쉬어.
 - 게이트 안의 F 교체는 그대로 남아 있고, F로 바꾼 헌터도 편성에 저장돼.
 - 헌터 카드 일러스트는 `HunterProfile.portraitResource`(프로이: `Resources/Loadout/hunter_proi`)에서 읽어. 일러스트가 없는 헌터(아스트라이아)는 이름 첫 글자 판으로 보여.
 
@@ -85,6 +87,8 @@
 ```
 Unity -batchmode -projectPath . -executeMethod AcRoguelike.Liminal.Editor.LoadoutValidation.RunBatch -logFile Logs/loadout.log
 ```
+
+열린 에디터에서는 **Tools > Liminal > Validate Loadout In Game** (에디터는 닫히지 않아).
 
 결과(`loadout-validation.json`)와 화면이 이 폴더에 남아.
 

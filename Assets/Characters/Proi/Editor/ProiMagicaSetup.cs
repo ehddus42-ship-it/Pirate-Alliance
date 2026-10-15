@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using AcRoguelike.Liminal;
 using MagicaCloth2;
 using Unity.Mathematics;
 using UnityEditor;
@@ -11,31 +12,47 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 
 /// <summary>
-/// Proi 의 머리카락과 옷을 Magica Cloth 2 로 움직이는 프리팹 변형(Magica/Proi_Magica.prefab)을 만들고
-/// 헌터 프로필(Resources/Hunters/Proi.asset)이 그 프리팹을 쓰게 합니다.
+/// Proi 의 머리카락과 옷을 Magica Cloth 2 로 움직이는 프리팹 변형을 만들고 헌터 프로필이 그 프리팹을 쓰게 합니다.
+/// 전투복 (Magica/Proi_Magica.prefab → Resources/Hunters/Proi.asset 의 model):
 /// - Hair    : 긴 트윈테일. 두피와 묶은 곳은 고정, 뿌리부터 끝까지 같은 무게로 출렁이고 움직이는 반대쪽으로 날리며
 ///             머리 / 목 / 가슴 / 허리 / 팔 / 허벅지에 부딪힙니다.
 /// - Tatters : 벨트에 매달린 찢어진 천 띠. 가볍게 펄럭이고 다리를 뚫지 않습니다.
 /// - Pants   : 통 넓은 바지의 무릎 아래 풍선 부분 (무릎 스트랩 ~ 발목 커프). 넓은 천이 다리를 따라 크게 흔들리고 부풀며 날립니다.
-/// 고정/이동 페인트와 콜라이더는 Magica/ProiMagicaData.json (Tools/Proi/proi_magica_data.py 로 생성) 에서 읽고,
-/// 프리팹은 Magica PreBuild 로 미리 빌드해 스폰 순간의 자세와 상관없이 바로 동작합니다.
-/// 메뉴: Tools > Proi > Setup Magica Cloth     배치: Unity -batchmode -executeMethod ProiMagicaSetup.RunBatch
+/// 평시복 (Magica/Proi_General_Magica.prefab → Profiles/ProiEveryday.asset → Proi.asset 의 lobbyForm, 로비에서 입음):
+/// - Hair    : 등 중간까지 오는 웨이브 생머리. 두피와 안경 앞 앞머리는 고정, 아래는 전투복 트윈테일과 같은 무게 · 규모로 출렁이고 날림.
+/// - Hem     : 오버사이즈 후드 집업의 가슴 아래 옆 · 뒤 몸판 ~ 밑단 고무단. 조금 흔들리고 달리면 살짝 뒤로 날림 (지퍼 앞판 · 후드 · 소매 · 끈은 고정).
+/// - Pants   : 통 넓은 트레이닝 바지의 허벅지 중간 ~ 신발 위 커프. 다리를 따라 흔들림.
+/// 고정/이동 페인트와 콜라이더는 Magica/*MagicaData.json (Tools/Proi/proi_magica_data.py, proi_general_magica_data.py 로 생성)
+/// 에서 읽고, 프리팹은 Magica PreBuild 로 미리 빌드해 스폰 순간의 자세와 상관없이 바로 동작합니다.
+/// 메뉴: Tools > Proi > Setup Magica Cloth (Battle / Everyday)
+/// 배치: Unity -batchmode -executeMethod ProiMagicaSetup.RunBatch (전투복) / ProiMagicaSetup.RunBatchEveryday (평시복)
 /// </summary>
 public static class ProiMagicaSetup
 {
     const string Root = "Assets/Characters/Proi";
-    const string Fbx = Root + "/Models/Proi_Character.fbx";
-    public const string PrefabPath = Root + "/Magica/Proi_Magica.prefab";
-    const string DataPath = Root + "/Magica/ProiMagicaData.json";
-    const string PreBuildFolder = Root + "/Magica/PreBuild";
-    const string MeshBundlePath = Root + "/Magica/Proi_MagicaMeshes.asset";
     const string ProfilePath = Root + "/Resources/Hunters/Proi.asset";
     const string PresetFolder = "Assets/MagicaCloth2/Res/Preset/";
+    public const string PrefabPath = Root + "/Magica/Proi_Magica.prefab";
+    public const string EverydayPrefabPath = Root + "/Magica/Proi_General_Magica.prefab";
+    public const string EverydayProfilePath = Root + "/Profiles/ProiEveryday.asset";
+    const string EverydayController = Root + "/Animations/Proi_General.controller";
 
     [Serializable] class Group { public string name; public float[] points; }
     [Serializable] class ColliderSpec { public string name, bone, type; public float[] start, end; public float r0, r1; }
     [Serializable] class Piece { public string group; public int count; public float[] centroid; }
-    [Serializable] class Data { public Group[] groups; public ColliderSpec[] colliders; public Piece[] split; public float[] bounds_min, bounds_max; }
+    [Serializable] class MaterialSplit { public string group; public string[] materials; }
+    [Serializable] class Data { public Group[] groups; public ColliderSpec[] colliders; public Piece[] split; public MaterialSplit[] split_materials; public float[] bounds_min, bounds_max; }
+
+    /// <summary>One outfit: its model, data and outputs, the cloths, and what happens around the prefab save.</summary>
+    sealed class Target
+    {
+        public string label, fbx, dataPath, preBuildFolder, meshBundlePath, prefabPath;
+        public string prefix;                     // split renderers / meshes / PreBuild assets: {prefix}_Hair ...
+        public string[] renderers;                // split renderers in hierarchy order; "Body" keeps the original renderer
+        public Plan[] plans;
+        public Action<GameObject, StringBuilder> beforeSave;   // on the model, before it becomes the prefab
+        public Action<GameObject, StringBuilder> afterSave;    // with the saved prefab asset
+    }
 
     /// <summary>Material-specific motion layered over a Magica preset.</summary>
     class Plan
@@ -52,7 +69,7 @@ public static class ProiMagicaSetup
         public string[] colliders;
     }
 
-    static readonly Plan[] Plans =
+    static readonly Plan[] BattlePlans =
     {
         // long, thick twin tails: one even weight from the tie to the tips (no stiff root / floppy tip curves, no speed cap that
         // holds the tips back), streaming back from the way she moves; three quarters of the gravity stays on at rest and the
@@ -75,28 +92,94 @@ public static class ProiMagicaSetup
                    colliders = new[] { "LeftLowerLeg", "RightLowerLeg" } },
     };
 
-    [MenuItem("Tools/Proi/Setup Magica Cloth")]
-    public static void SetupFromMenu() => Debug.Log(Setup());
-
-    public static void RunBatch()
+    static readonly Plan[] EverydayPlans =
     {
-        try { Debug.Log(Setup()); EditorApplication.Exit(0); }
+        // long loose waves down to the middle of the back: the same weight and reach as the battle twin tails (it is the same
+        // hair, worn open), lying on the hood folded behind the neck, the shoulders and the back of the hoodie; a firmer shape
+        // than the tails keeps the full, wide waves from collapsing or flipping over the shoulders when she stops, and a
+        // stronger moving wind (it stops with her, unlike inertia) streams them back as far as the tails
+        new Plan { group = "Hair", preset = "LongHair", renderer = "Hair", simpleReduction = 0.012f, shapeReduction = 0.02f, particleRadius = 0.014f, maxDistance = 0.3f,
+                   gravityFalloff = 0.25f, damping = 0.08f, angleRestoration = 0.25f, restorationTip = 1f, angleLimit = 60f, wind = 1f, movingWind = 1.1f, turbulence = 0.4f,
+                   particleSpeedLimit = 5f, movementSpeedLimit = 12f,
+                   colliders = new[] { "Head", "Neck", "Hood", "BackLeft", "BackRight", "LeftShoulder", "RightShoulder", "LeftUpperArm", "LeftLowerArm", "RightUpperArm", "RightLowerArm" } },
+        // the loose sides and back of the oversized hoodie (the zipped front stays): soft fleece that sways a little after the
+        // hips and blows back a touch when she runs; the ribbed band rests on the pants' waist (no leg colliders: the thighs
+        // would sweep through the band)
+        new Plan { group = "Hem", preset = "Skirt", renderer = "Jacket", simpleReduction = 0.012f, shapeReduction = 0.02f, particleRadius = 0.01f, maxDistance = 0.04f,
+                   gravityFalloff = 0.8f, damping = 0.08f, angleRestoration = 0.4f, restorationTip = 1f, wind = 0.5f, movingWind = 0.25f,
+                   particleSpeedLimit = 4f, movementSpeedLimit = 10f,
+                   colliders = new[] { "Spine", "Waist" } },
+        // wide track pants: the legs from mid-thigh down swing after each step and flap a little; the cuffs gathered on the
+        // shoes follow the feet
+        new Plan { group = "Pants", preset = "Skirt", renderer = "Pants", simpleReduction = 0.015f, shapeReduction = 0.025f, particleRadius = 0.01f, maxDistance = 0.07f,
+                   gravityFalloff = 0.7f, damping = 0.07f, angleRestoration = 0.2f, restorationTip = 1f, wind = 0.5f, movingWind = 0.4f,
+                   particleSpeedLimit = 5f, movementSpeedLimit = 10f,
+                   colliders = new[] { "LeftUpperLeg", "RightUpperLeg", "LeftLowerLeg", "RightLowerLeg" } },
+    };
+
+    static readonly Target Battle = new Target
+    {
+        label = "battle", fbx = Root + "/Models/Proi_Character.fbx", dataPath = Root + "/Magica/ProiMagicaData.json",
+        preBuildFolder = Root + "/Magica/PreBuild", meshBundlePath = Root + "/Magica/Proi_MagicaMeshes.asset", prefabPath = PrefabPath,
+        prefix = "Proi", renderers = new[] { "Hair", "Lower", "Body" }, plans = BattlePlans,
+        afterSave = (prefab, log) =>
+        {
+            SetProfileReference(prefab, "model", 3, log);
+            log.AppendLine("Hunter profile model -> " + PrefabPath);
+        },
+    };
+
+    static readonly Target Everyday = new Target
+    {
+        label = "everyday", fbx = Root + "/Models/Proi_General.fbx", dataPath = Root + "/Magica/ProiGeneralMagicaData.json",
+        preBuildFolder = Root + "/Magica/PreBuild", meshBundlePath = Root + "/Magica/Proi_General_MagicaMeshes.asset", prefabPath = EverydayPrefabPath,
+        prefix = "ProiG", renderers = new[] { "Hair", "Jacket", "Pants", "Body" }, plans = EverydayPlans,
+        beforeSave = (model, log) =>
+        {
+            // the everyday body only moves: hands curl / make fists with the speed, the Run clip keeps pace with PlayerMotor
+            model.AddComponent<ProiGeneralHands>();
+            model.AddComponent<ProiGeneralHunterKit>();
+            var animator = model.GetComponent<Animator>();
+            if (animator) animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(EverydayController);
+        },
+        afterSave = (prefab, log) =>
+        {
+            var profile = EverydayProfile(prefab);
+            SetProfileReference(profile, "lobbyForm", 2, log);
+            log.AppendLine($"Everyday profile {EverydayProfilePath} -> {EverydayPrefabPath}; Proi.asset lobbyForm -> {EverydayProfilePath}");
+        },
+    };
+
+    [MenuItem("Tools/Proi/Setup Magica Cloth (Battle)")]
+    public static void SetupFromMenu() => Debug.Log(Setup(Battle));
+
+    [MenuItem("Tools/Proi/Setup Magica Cloth (Everyday)")]
+    public static void SetupEverydayFromMenu() => Debug.Log(Setup(Everyday));
+
+    public static void RunBatch() => RunAndExit(Battle);
+    public static void RunBatchEveryday() => RunAndExit(Everyday);
+    public static string Setup() => Setup(Battle);
+    public static string SetupEveryday() => Setup(Everyday);
+
+    static void RunAndExit(Target target)
+    {
+        try { Debug.Log(Setup(target)); EditorApplication.Exit(0); }
         catch (Exception e) { Debug.LogException(e); EditorApplication.Exit(1); }
     }
 
-    public static string Setup()
+    static string Setup(Target target)
     {
-        var log = new StringBuilder("[ProiMagicaSetup]\n");
+        var log = new StringBuilder($"[ProiMagicaSetup] {target.label}\n");
         Unity.Burst.BurstCompiler.Options.EnableBurstCompileSynchronously = true;   // PreBuild runs Magica's jobs right away
-        var importer = (ModelImporter)AssetImporter.GetAtPath(Fbx);
+        var importer = (ModelImporter)AssetImporter.GetAtPath(target.fbx);
         if (!importer.isReadable)
         {
             importer.isReadable = true;   // MeshCloth reads the mesh on the CPU
             importer.SaveAndReimport();
-            log.AppendLine("Proi_Character.fbx: Read/Write enabled");
+            log.AppendLine(Path.GetFileName(target.fbx) + ": Read/Write enabled");
         }
-        var data = JsonUtility.FromJson<Data>(File.ReadAllText(DataPath));
-        var fbx = AssetDatabase.LoadAssetAtPath<GameObject>(Fbx);
+        var data = JsonUtility.FromJson<Data>(File.ReadAllText(target.dataPath));
+        var fbx = AssetDatabase.LoadAssetAtPath<GameObject>(target.fbx);
 
         var scene = EditorSceneManager.NewPreviewScene();
         try
@@ -113,15 +196,16 @@ public static class ProiMagicaSetup
             Vector3[] posedVerts = baked.vertices;
             Func<float[], Vector3> toMesh = MeshSpaceMapping(data, mesh.bounds, out float meshScale, log);
             var nearest = new NearestVertex(bindVerts, 0.02f * meshScale);   // 2 cm cells
-            // a paint point moves with its nearest vertex from the bind pose into the prefab's default pose
+            // a paint point moves with its nearest vertex from the bind pose into the prefab's default pose; the bake is in the
+            // renderer's space without its scale (everyday Proi's rig carries a x100 scale that the mesh units undo)
             Func<float[], Vector3> toPosedWorld = p =>
             {
                 Vector3 q = toMesh(p);
                 int i = nearest.Find(q);
-                return skin.transform.TransformPoint(posedVerts[i] + (q - bindVerts[i]));
+                return skin.transform.position + skin.transform.rotation * posedVerts[i] + skin.transform.TransformVector(q - bindVerts[i]);
             };
-            // Magica needs at most 65,535 vertices per renderer: hair and lower outfit get their own renderers.
-            var renderers = SplitRenderer(skin, data, toMesh, meshScale, log);
+            // Magica needs at most 65,535 vertices per renderer: the cloth pieces get their own renderers.
+            var renderers = SplitRenderer(skin, data, toMesh, meshScale, target, log);
 
             var boneIndex = new Dictionary<string, int>();
             for (int i = 0; i < skin.bones.Length; i++) boneIndex[skin.bones[i].name] = i;
@@ -161,8 +245,8 @@ public static class ProiMagicaSetup
 
             var clothRoot = new GameObject("Magica_Cloth").transform;
             clothRoot.SetParent(model.transform, false);
-            Directory.CreateDirectory(PreBuildFolder);
-            foreach (var plan in Plans)
+            Directory.CreateDirectory(target.preBuildFolder);
+            foreach (var plan in target.plans)
             {
                 var group = data.groups.First(g => g.name == plan.group);
                 var go = new GameObject("Cloth_" + plan.group);
@@ -216,34 +300,30 @@ public static class ProiMagicaSetup
                 cloth.GetSerializeData2().selectionData = selection;
 
                 // PreBuild: bake the proxy in the bind pose so spawning mid-animation cannot shift the paint
-                string assetPath = $"{PreBuildFolder}/MagicaPreBuild_Proi_{plan.group}.asset";
+                string assetPath = $"{target.preBuildFolder}/MagicaPreBuild_{target.prefix}_{plan.group}.asset";
                 // a fresh asset each run: Magica appends one entry per build id, so reusing it would keep stale builds
                 AssetDatabase.DeleteAsset(assetPath);
                 var asset = ScriptableObject.CreateInstance<PreBuildScriptableObject>();
-                AssetDatabase.CreateAsset(asset, assetPath);
                 var preBuild = cloth.GetSerializeData2().preBuildData;
                 preBuild.preBuildScriptableObject = asset;
                 ResultCode result = PreBuildDataCreation.CreatePreBuildData(cloth, false);
                 if (result.IsError()) throw new InvalidOperationException($"Magica PreBuild {plan.group}: {result.GetResultString()}");
+                // the asset file is written only now, with the data in it: in an open editor the AssetDatabase.Refresh() inside
+                // CreatePreBuildData reloads a freshly created, still empty asset file over the data
+                AssetDatabase.CreateAsset(asset, assetPath);
+                if (asset.sharePreBuildDataList.Count == 0 || new FileInfo(assetPath).Length < 4096)
+                    throw new InvalidOperationException($"Magica PreBuild {plan.group}: {assetPath} was not written");
                 preBuild.enabled = true;
                 log.AppendLine($"Cloth_{plan.group}: preset {plan.preset}, paint points {count} (fixed {fixedCount}), colliders {string.Join("/", plan.colliders)}, prebuild {assetPath}");
                 log.AppendLine($"  restoration {plan.angleRestoration} (tip x{plan.restorationTip}), damping {plan.damping}, max distance {plan.maxDistance} m, " +
                                $"moving wind {plan.movingWind}, particle speed limit {plan.particleSpeedLimit} m/s");
             }
 
-            var prefab = PrefabUtility.SaveAsPrefabAsset(model, PrefabPath, out bool saved);
-            if (!saved) throw new InvalidOperationException("Prefab save failed: " + PrefabPath);
-            log.AppendLine("Prefab variant: " + PrefabPath);
-
-            // Edit the one YAML line: saving through SerializedObject would write every field and freeze the
-            // constructor defaults ProiHunterProfile sets in code.
-            AssetDatabase.TryGetGUIDAndLocalFileIdentifier(prefab, out string guid, out long fileId);
-            string yaml = File.ReadAllText(ProfilePath);
-            string updated = System.Text.RegularExpressions.Regex.Replace(yaml, @"(?m)^  model: \{[^}]*\}", $"  model: {{fileID: {fileId}, guid: {guid}, type: 3}}");
-            if (updated == yaml && !yaml.Contains(guid)) throw new InvalidOperationException("model line not found in " + ProfilePath);
-            File.WriteAllText(ProfilePath, updated);
-            AssetDatabase.ImportAsset(ProfilePath);
-            log.AppendLine("Hunter profile model -> " + PrefabPath);
+            target.beforeSave?.Invoke(model, log);
+            var prefab = PrefabUtility.SaveAsPrefabAsset(model, target.prefabPath, out bool saved);
+            if (!saved) throw new InvalidOperationException("Prefab save failed: " + target.prefabPath);
+            log.AppendLine("Prefab variant: " + target.prefabPath);
+            target.afterSave?.Invoke(prefab, log);
             AssetDatabase.SaveAssets();
         }
         finally
@@ -254,12 +334,76 @@ public static class ProiMagicaSetup
     }
 
     /// <summary>
-    /// Splits Proi_Body into Body (keeps the original renderer, its blend shapes and its place first in the hierarchy so
-    /// ProiBlink / ProiFist still find it), Hair and Lower. Same bones, bind poses, weights, UVs and materials.
+    /// Splits the model's one renderer into Body (keeps the original renderer, its blend shapes and its place first in the
+    /// hierarchy so ProiBlink / ProiFist / ProiGeneralHands still find it) and the target's cloth renderers. A cloth piece is
+    /// either every triangle of the listed materials (data.split_materials) or a connected island matched with the Blender
+    /// data (data.split). Same bones, bind poses, weights, UVs and materials.
     /// </summary>
-    static Dictionary<string, SkinnedMeshRenderer> SplitRenderer(SkinnedMeshRenderer skin, Data data, Func<float[], Vector3> toMesh, float meshScale, StringBuilder log)
+    static Dictionary<string, SkinnedMeshRenderer> SplitRenderer(SkinnedMeshRenderer skin, Data data, Func<float[], Vector3> toMesh, float meshScale,
+                                                                 Target target, StringBuilder log)
     {
         Mesh src = skin.sharedMesh;
+        var triangles = Enumerable.Range(0, src.subMeshCount).Select(sm => src.GetTriangles(sm)).ToArray();
+        var materials = skin.sharedMaterials;
+        Func<int, int, string> groupOf = data.split_materials != null && data.split_materials.Length > 0
+            ? MaterialGroups(materials, data.split_materials)
+            : IslandGroups(src, triangles, data, toMesh, meshScale);
+
+        var bundle = AssetDatabase.LoadAssetAtPath<ProiMeshBundle>(target.meshBundlePath);
+        if (bundle == null)
+        {
+            bundle = ScriptableObject.CreateInstance<ProiMeshBundle>();
+            AssetDatabase.CreateAsset(bundle, target.meshBundlePath);
+        }
+        var result = new Dictionary<string, SkinnedMeshRenderer>();
+        foreach (string name in target.renderers)
+        {
+            var keep = triangles.Select((tris, sm) => Enumerable.Range(0, tris.Length / 3).Where(t => groupOf(sm, tris[t * 3]) == name)
+                                                                .SelectMany(t => new[] { tris[t * 3], tris[t * 3 + 1], tris[t * 3 + 2] }).ToArray()).ToArray();
+            int[] used = Enumerable.Range(0, keep.Length).Where(sm => keep[sm].Length > 0).ToArray();
+            string rendererName = target.prefix + "_" + name;
+            Mesh mesh = Subset(src, used.Select(sm => keep[sm]).ToArray(), rendererName + "_Magica", keepAllBlendShapes: name == "Body", blendShapeReach: 0.02f * meshScale);
+            if (name != "Body" && mesh.vertexCount > 65535) throw new InvalidOperationException($"{rendererName}: {mesh.vertexCount} vertices (> 65,535)");
+            mesh = SaveMesh(mesh, bundle, target.meshBundlePath);
+            var mats = used.Select(sm => materials[Mathf.Min(sm, materials.Length - 1)]).ToArray();
+            SkinnedMeshRenderer renderer = skin;
+            if (name != "Body")
+            {
+                var go = new GameObject(rendererName);
+                go.layer = skin.gameObject.layer;
+                go.transform.SetParent(skin.transform.parent, false);
+                go.transform.localPosition = skin.transform.localPosition;
+                go.transform.localRotation = skin.transform.localRotation;
+                go.transform.localScale = skin.transform.localScale;
+                renderer = go.AddComponent<SkinnedMeshRenderer>();
+                renderer.bones = skin.bones;
+                renderer.rootBone = skin.rootBone;
+                renderer.quality = skin.quality;
+                renderer.updateWhenOffscreen = skin.updateWhenOffscreen;
+                renderer.shadowCastingMode = skin.shadowCastingMode;
+                renderer.receiveShadows = skin.receiveShadows;
+                renderer.localBounds = skin.localBounds;
+            }
+            renderer.sharedMesh = mesh;
+            renderer.sharedMaterials = mats;
+            result[name] = renderer;
+            log.AppendLine($"Split {rendererName}: {mesh.vertexCount} vertices, {mesh.blendShapeCount} blend shapes, materials {string.Join("/", mats.Select(m => m ? m.name : "none"))}");
+        }
+        return result;
+    }
+
+    /// <summary>(submesh, vertex) -> group: every triangle of a listed material belongs to its group, the rest to Body.</summary>
+    static Func<int, int, string> MaterialGroups(Material[] materials, MaterialSplit[] split)
+    {
+        var bySubmesh = materials.Select(m => split.FirstOrDefault(s => m && s.materials.Contains(m.name))?.group ?? "Body").ToArray();
+        foreach (var s in split)
+            if (!bySubmesh.Contains(s.group)) throw new InvalidOperationException($"No material of {s.group} ({string.Join("/", s.materials)}) on the model.");
+        return (sm, vertex) => bySubmesh[Mathf.Min(sm, bySubmesh.Length - 1)];
+    }
+
+    /// <summary>(submesh, vertex) -> group: the connected island matched with a Blender piece by size and centroid, else Body.</summary>
+    static Func<int, int, string> IslandGroups(Mesh src, int[][] triangles, Data data, Func<float[], Vector3> toMesh, float meshScale)
+    {
         Vector3[] v = src.vertices;
         int n = v.Length;
         // weld by position: Unity splits FBX control points at UV seams
@@ -273,7 +417,6 @@ public static class ProiMagicaSetup
         }
         int[] parent = Enumerable.Range(0, weldIds.Count).ToArray();
         int Find(int a) { while (parent[a] != a) { parent[a] = parent[parent[a]]; a = parent[a]; } return a; }
-        var triangles = Enumerable.Range(0, src.subMeshCount).Select(sm => src.GetTriangles(sm)).ToArray();
         foreach (var tris in triangles)
             for (int t = 0; t < tris.Length; t += 3)
                 for (int k = 1; k < 3; k++)
@@ -303,49 +446,7 @@ public static class ProiMagicaSetup
                     string.Join(", ", pieceCount.Keys.OrderByDescending(r => pieceCount[r]).Take(8).Select(r => $"{pieceCount[r]} @ {Vector3.Distance(pieceSum[r] / pieceCount[r], centroid) / meshScale:F3} m")));
             group[match] = piece.group;
         }
-        string GroupOf(int vertex) => group.TryGetValue(Find(weld[vertex]), out string g) ? g : "Body";
-
-        var bundle = AssetDatabase.LoadAssetAtPath<ProiMeshBundle>(MeshBundlePath);
-        if (bundle == null)
-        {
-            bundle = ScriptableObject.CreateInstance<ProiMeshBundle>();
-            AssetDatabase.CreateAsset(bundle, MeshBundlePath);
-        }
-        var result = new Dictionary<string, SkinnedMeshRenderer>();
-        var materials = skin.sharedMaterials;
-        foreach (string name in new[] { "Hair", "Lower", "Body" })
-        {
-            var keep = triangles.Select(tris => Enumerable.Range(0, tris.Length / 3).Where(t => GroupOf(tris[t * 3]) == name)
-                                                          .SelectMany(t => new[] { tris[t * 3], tris[t * 3 + 1], tris[t * 3 + 2] }).ToArray()).ToArray();
-            int[] used = Enumerable.Range(0, keep.Length).Where(sm => keep[sm].Length > 0).ToArray();
-            Mesh mesh = Subset(src, used.Select(sm => keep[sm]).ToArray(), "Proi_" + name + "_Magica", keepAllBlendShapes: name == "Body", blendShapeReach: 0.02f * meshScale);
-            if (name != "Body" && mesh.vertexCount > 65535) throw new InvalidOperationException($"Proi_{name}: {mesh.vertexCount} vertices (> 65,535)");
-            mesh = SaveMesh(mesh, bundle);
-            var mats = used.Select(sm => materials[Mathf.Min(sm, materials.Length - 1)]).ToArray();
-            SkinnedMeshRenderer target = skin;
-            if (name != "Body")
-            {
-                var go = new GameObject("Proi_" + name);
-                go.layer = skin.gameObject.layer;
-                go.transform.SetParent(skin.transform.parent, false);
-                go.transform.localPosition = skin.transform.localPosition;
-                go.transform.localRotation = skin.transform.localRotation;
-                go.transform.localScale = skin.transform.localScale;
-                target = go.AddComponent<SkinnedMeshRenderer>();
-                target.bones = skin.bones;
-                target.rootBone = skin.rootBone;
-                target.quality = skin.quality;
-                target.updateWhenOffscreen = skin.updateWhenOffscreen;
-                target.shadowCastingMode = skin.shadowCastingMode;
-                target.receiveShadows = skin.receiveShadows;
-                target.localBounds = skin.localBounds;
-            }
-            target.sharedMesh = mesh;
-            target.sharedMaterials = mats;
-            result[name] = target;
-            log.AppendLine($"Split Proi_{name}: {mesh.vertexCount} vertices, {mesh.blendShapeCount} blend shapes, materials {string.Join("/", mats.Select(m => m ? m.name : "none"))}");
-        }
-        return result;
+        return (sm, vertex) => group.TryGetValue(Find(weld[vertex]), out string g) ? g : "Body";
     }
 
     /// <summary>A mesh holding only the given triangles (per submesh), with every vertex channel, bone weights and blend shapes.</summary>
@@ -432,12 +533,63 @@ public static class ProiMagicaSetup
     }
 
     /// <summary>Stores the mesh in the binary bundle, reusing the sub-asset of the same name on a re-run.</summary>
-    static Mesh SaveMesh(Mesh mesh, ProiMeshBundle bundle)
+    static Mesh SaveMesh(Mesh mesh, ProiMeshBundle bundle, string bundlePath)
     {
-        var existing = AssetDatabase.LoadAllAssetsAtPath(MeshBundlePath).OfType<Mesh>().FirstOrDefault(m => m.name == mesh.name);
+        var existing = AssetDatabase.LoadAllAssetsAtPath(bundlePath).OfType<Mesh>().FirstOrDefault(m => m.name == mesh.name);
         if (existing == null) { AssetDatabase.AddObjectToAsset(mesh, bundle); return mesh; }
         EditorUtility.CopySerialized(mesh, existing);
         return existing;
+    }
+
+    /// <summary>
+    /// Points one reference field of Proi.asset at the asset. Edits that one YAML line (adding it when missing): saving
+    /// through SerializedObject would write every field and freeze the constructor defaults ProiHunterProfile sets in code.
+    /// </summary>
+    static void SetProfileReference(UnityEngine.Object asset, string field, int type, StringBuilder log)
+    {
+        AssetDatabase.TryGetGUIDAndLocalFileIdentifier(asset, out string guid, out long fileId);
+        string line = $"  {field}: {{fileID: {fileId}, guid: {guid}, type: {type}}}";
+        string yaml = File.ReadAllText(ProfilePath);
+        var pattern = new System.Text.RegularExpressions.Regex($@"(?m)^  {field}: \{{[^}}]*\}}");
+        string updated = pattern.IsMatch(yaml) ? pattern.Replace(yaml, line) : yaml.TrimEnd('\n') + "\n" + line + "\n";
+        if (updated != yaml)
+        {
+            File.WriteAllText(ProfilePath, updated);
+            AssetDatabase.ImportAsset(ProfilePath);
+        }
+    }
+
+    /// <summary>
+    /// The everyday outfit as its own movement-only profile (kept out of Resources/Hunters, so it is not another pick in
+    /// the roster): Proi wears it in the lobby (HunterProfile.lobbyForm), G switches it in and out for testing.
+    /// </summary>
+    static HunterProfile EverydayProfile(GameObject prefab)
+    {
+        var profile = AssetDatabase.LoadAssetAtPath<HunterProfile>(EverydayProfilePath);
+        if (profile == null)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(EverydayProfilePath));
+            profile = ScriptableObject.CreateInstance<HunterProfile>();
+            AssetDatabase.CreateAsset(profile, EverydayProfilePath);
+        }
+        profile.characterId = "proi_everyday";
+        profile.displayName = "프로이 · 평시";
+        profile.order = 10;
+        profile.summary = "후드 집업 평시 차림\n이동만 · 소심한 달리기";
+        profile.portraitResource = "Loadout/hunter_proi";
+        profile.model = prefab;
+        profile.controller = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(EverydayController);
+        profile.lobbyForm = null;
+        profile.movementOnly = true;
+        profile.keepDash = false;
+        profile.headBone = "Head";
+        profile.attackDurations = Array.Empty<float>();
+        profile.hitTimes = Array.Empty<float>();
+        profile.swings = Array.Empty<AcRoguelike.MeleeSlash.Swing>();
+        profile.blade = false;
+        EditorUtility.SetDirty(profile);
+        AssetDatabase.SaveAssets();
+        return profile;
     }
 
     /// <summary>Blender bind-pose coordinates -> mesh space: the axis permutation, scale and offset that make the bounds agree.</summary>

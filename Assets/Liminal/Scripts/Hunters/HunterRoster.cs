@@ -11,6 +11,8 @@ namespace AcRoguelike.Liminal
     /// timing and the melee swings. The scene's own model is the first hunter; HunterProfile assets under
     /// Resources/Hunters add the others. The pick is the party's hunter (HunterLoadout): the lobby's loadout officer
     /// changes it with Choose. A hunter may have a separate lobby body without becoming another selection.
+    /// G (gamepad d-pad up), for testing: the worn hunter puts on her other body (the lobby form in the gate, the dungeon
+    /// body in the lobby) until G again; the lobby, the gate and a swap dress her for where she is again.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(PlayerMotor))]
@@ -51,14 +53,16 @@ namespace AcRoguelike.Liminal
         HunterCharacter character;
         LiminalPlayerHealth health;
         LiminalRunDirector director;
-        InputAction swap;
+        InputAction swap, outfit;
         // Selection is a character identity; worn is that character's body for the current environment.
         int selected, current;
         bool initialized, inLobby;
+        // G (testing): wear the other body than this environment's (the dungeon body in the lobby, the lobby form outside)
+        bool outfitFlipped;
         bool defaultAllowDash, defaultFaceMovementDirection, defaultMeleeEnabled;
         bool moveSpeedOverridden, walkSpeedOverridden;
         float sharedMoveSpeed, sharedWalkSpeed;
-        float readyAt;
+        float readyAt, outfitReadyAt;
 
         public int Count { get { EnsureInitialized(); return hunters.Count; } }
         public int SelectedIndex => selected;
@@ -81,6 +85,11 @@ namespace AcRoguelike.Liminal
             => index >= 0 && index < Count && !string.IsNullOrEmpty(hunters[index].portrait) ? Resources.Load<Texture2D>(hunters[index].portrait) : null;
         public float CooldownRemaining => Mathf.Max(0, readyAt - Time.time);
         public InputAction SwapAction => swap;
+        public InputAction OutfitAction => outfit;
+        /// <summary>The worn hunter has a lobby form, so G has another body to put on.</summary>
+        public bool HasOtherOutfit => initialized && current < hunters.Count && hunters[current].lobbyForm != null;
+        /// <summary>The worn body is the hunter's lobby form (in the lobby, or put on with G).</summary>
+        public bool WearsLobbyForm => initialized && current < hunters.Count && worn != null && worn == hunters[current].lobbyForm;
         public event Action Swapped;
 
         /// <summary>A swap needs a gate in progress and a free body: not dashing, grabbed, thrown or down.</summary>
@@ -97,16 +106,34 @@ namespace AcRoguelike.Liminal
             }
         }
 
+        /// <summary>G needs a hunter with a lobby form, the lobby or a gate in progress, and a free body.</summary>
+        public bool CanChangeOutfit
+        {
+            get
+            {
+                if (!HasOtherOutfit || Time.time < outfitReadyAt || Time.timeScale <= 0) return false;
+                if (director && director.Phase != LiminalRunPhase.Exploring && director.Phase != LiminalRunPhase.Lobby) return false;
+                if (!motor.isActiveAndEnabled || motor.IsDashing || motor.IsHeld || motor.IsLaunched) return false;
+                if (combat && combat.isActiveAndEnabled && combat.IsAttacking) return false;
+                if (worn?.skills != null)
+                    foreach (var skill in worn.skills) if (skill != null && skill.Busy) return false;
+                return !health || health.IsAlive;
+            }
+        }
+
         void Awake()
         {
             swap = new InputAction("SwapHunter", InputActionType.Button);
             swap.AddBinding("<Keyboard>/f");
             swap.AddBinding("<Gamepad>/buttonNorth");
+            outfit = new InputAction("ChangeOutfit", InputActionType.Button);
+            outfit.AddBinding("<Keyboard>/g");
+            outfit.AddBinding("<Gamepad>/dpad/up");
         }
 
-        void OnEnable() => swap?.Enable();
-        void OnDisable() => swap?.Disable();
-        void OnDestroy() => swap?.Dispose();
+        void OnEnable() { swap?.Enable(); outfit?.Enable(); }
+        void OnDisable() { swap?.Disable(); outfit?.Disable(); }
+        void OnDestroy() { swap?.Dispose(); outfit?.Dispose(); }
         void Start() => EnsureInitialized();
 
         public void Bind(LiminalRunDirector run)
@@ -118,6 +145,18 @@ namespace AcRoguelike.Liminal
         void Update()
         {
             if (initialized && Application.isFocused && swap.WasPressedThisFrame()) TrySwap();
+            if (initialized && Application.isFocused && outfit.WasPressedThisFrame()) TryChangeOutfit();
+        }
+
+        /// <summary>G (testing): the worn hunter's other body, when CanChangeOutfit allows it.</summary>
+        public bool TryChangeOutfit()
+        {
+            EnsureInitialized();
+            if (!CanChangeOutfit) return false;
+            outfitFlipped = !outfitFlipped;
+            Wear(selected, true);
+            outfitReadyAt = Time.time + swapCooldown;
+            return true;
         }
 
         /// <summary>The next hunter in the roster, when CanSwap allows it.</summary>
@@ -134,6 +173,7 @@ namespace AcRoguelike.Liminal
             if (inLobby || index < 0 || index >= hunters.Count || index == selected) return false;
             selected = index;
             HunterLoadout.HunterId = hunters[index].id;
+            outfitFlipped = false;
             Wear(index, true);
             readyAt = Time.time + swapCooldown;
             return true;
@@ -150,6 +190,7 @@ namespace AcRoguelike.Liminal
             if (!inLobby) return Select(index);
             selected = index;
             HunterLoadout.HunterId = hunters[index].id;
+            outfitFlipped = false;
             Wear(index, true);
             return true;
         }
@@ -159,6 +200,7 @@ namespace AcRoguelike.Liminal
         {
             EnsureInitialized();
             inLobby = true;
+            outfitFlipped = false;
             Wear(selected, false);
         }
 
@@ -167,6 +209,7 @@ namespace AcRoguelike.Liminal
         {
             EnsureInitialized();
             inLobby = false;
+            outfitFlipped = false;
             Wear(selected, false);
         }
 
@@ -301,7 +344,7 @@ namespace AcRoguelike.Liminal
         {
             if (index < 0 || index >= hunters.Count) return;
             var identity = hunters[index];
-            var to = inLobby && identity.lobbyForm != null ? identity.lobbyForm : identity;
+            var to = inLobby != outfitFlipped && identity.lobbyForm != null ? identity.lobbyForm : identity;
             bool changed = to != worn;
             bool changedHunter = index != current;
             if (changed)

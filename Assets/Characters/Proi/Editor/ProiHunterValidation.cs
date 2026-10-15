@@ -12,9 +12,11 @@ using Object = UnityEngine.Object;
 /// <summary>
 /// 게임 안 Proi (헌터 교체) 배치 검증: LiminalRun 씬을 실제로 재생해서
 /// 교체(F) → 몸 / 애니메이터 / 콤보 설정 → 3타 콤보가 적에게 데미지 → 대쉬 후 이동 동작 복귀 → 궁극기(R) 피해 / 입력 잠금 / 배속 →
-/// 다시 교체 → 로비 왕복(로비와 다음 게이트 모두 고른 헌터, 저장된 편성은 검증 뒤 원래대로)
+/// 다시 교체 → 로비 왕복(로비에서는 고른 프로이가 평시복, 다음 게이트에서는 전투복. 저장된 편성은 검증 뒤 원래대로) →
+/// G 전환(테스트: 로비에서 전투복 ↔ 평시복, 게이트에서 평시복은 이동만)
 /// 을 확인하고 Documentation/Proi/ 에 보고서와 화면을 남깁니다.
 /// Unity -batchmode -projectPath . -executeMethod ProiHunterValidation.RunBatch -logFile Logs/proi-hunter.log
+/// 열린 에디터에서: Tools > Proi > Validate Hunter In Game (에디터를 닫지 않음)
 /// </summary>
 [InitializeOnLoad]
 public static class ProiHunterValidation
@@ -65,7 +67,9 @@ public static class ProiHunterValidation
             if (state == PlayModeStateChange.EnteredEditMode)
             {
                 SessionState.SetBool(Active, false);
-                EditorApplication.Exit(SessionState.GetInt(Active + ".exit", 1));
+                // a run in the open editor (RunInEditor) leaves it open
+                if (SessionState.GetBool(Active + ".live", false)) SessionState.SetBool(Active + ".live", false);
+                else EditorApplication.Exit(SessionState.GetInt(Active + ".exit", 1));
             }
         };
     }
@@ -73,7 +77,22 @@ public static class ProiHunterValidation
     public static void RunBatch()
     {
         if (!Application.isBatchMode) throw new InvalidOperationException("RunBatch is for an isolated batch editor.");
+        Begin(false);
+    }
+
+    /// <summary>The same check in the open editor: plays LiminalRun, writes the report and leaves the editor open.</summary>
+    [MenuItem("Tools/Proi/Validate Hunter In Game")]
+    public static void RunInEditor()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Stop play mode first.");
+        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        Begin(true);
+    }
+
+    static void Begin(bool live)
+    {
         EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        SessionState.SetBool(Active + ".live", live);
         SessionState.SetBool(Active, true);
         EditorApplication.EnterPlaymode();
     }
@@ -308,19 +327,67 @@ public static class ProiHunterValidation
         var fxRoot = GameObject.Find("ProiBlazeFX");
         Check(!fxRoot || !fxRoot.activeInHierarchy, "Proi's fire effects are hidden with her");
 
-        // ---- lobby: the picked hunter walks the plaza (the loadout keeps her), and the next gate starts with her
+        // ---- lobby: the picked hunter walks the plaza in her everyday clothes (the loadout keeps her), and the next gate
+        // dresses her for battle
         roster.Select(1);
         Object.Destroy(arena);
         director.enabled = true;
         director.ReturnToLobby();
         yield return Until(() => director.Phase == LiminalRunPhase.Lobby, 10, "back in the lobby");
-        Check(roster.CurrentIndex == 1 && proi.activeSelf && !astraia.activeSelf && roster.SelectedIndex == 1, "lobby shows the picked Proi");
+        var everyday = motor.visual.gameObject;
+        Check(roster.CurrentIndex == 1 && roster.SelectedIndex == 1 && roster.WearsLobbyForm && everyday != proi && everyday.activeInHierarchy
+              && !proi.activeSelf && !astraia.activeSelf, $"lobby shows the picked Proi in her everyday clothes ({everyday.name})");
+        Check(motor.animator && motor.animator.runtimeAnimatorController && motor.animator.runtimeAnimatorController.name == "Proi_General",
+              "PlayerMotor drives the everyday Animator (Proi_General.controller)");
+        Check(everyday.GetComponent<ProiGeneralHands>() && everyday.GetComponent<ProiGeneralHunterKit>(), "everyday hands and run pacing are on the body");
+        int cloths = 0;
+        foreach (var behaviour in everyday.GetComponentsInChildren<MonoBehaviour>(true)) if (behaviour && behaviour.GetType().Name == "MagicaCloth") cloths++;
+#if MAGICACLOTH2
+        Check(cloths == 3, $"everyday hair, hoodie hem and track pants move with Magica Cloth ({cloths} cloths)");
+#else
+        report.checks.Add($"INFO Magica Cloth 2 not imported: everyday clothes without cloth physics ({cloths} cloths)");
+#endif
         Check(!roster.CanSwap && !roster.TrySwap(), "no swapping in the lobby");
+        motor.SetAutomationInput(Vector2.zero, motor.transform.position + motor.visual.forward * 5);
+        yield return Seconds(.5f);
+        Capture("proi_ingame_lobby_everyday.png", report);
+        motor.SetAutomationInput(Vector2.up, motor.transform.position + Vector3.forward * 8);
+        yield return Seconds(.7f);
+        Check(motor.PlanarVelocity.magnitude > motor.moveSpeed * .8f && motor.animator.GetFloat("Speed") > .6f,
+              $"runs through the lobby in everyday clothes ({motor.PlanarVelocity.magnitude:F2} m/s, Speed {motor.animator.GetFloat("Speed"):F2})");
+        Capture("proi_ingame_lobby_everyday_run.png", report);
+        motor.SetAutomationInput(Vector2.zero, motor.transform.position + motor.visual.forward * 5);
+        yield return Seconds(.3f);
+
+        // ---- G (testing): her battle clothes in the lobby, still without attacks, and back
+        yield return Until(() => roster.CanChangeOutfit, 3, "G allowed in the lobby");
+        Check(roster.TryChangeOutfit() && motor.visual.gameObject == proi && proi.activeSelf && !everyday.activeSelf && !roster.WearsLobbyForm,
+              "G in the lobby: battle clothes");
+        Check(!combat.enabled, "still no attacks in the lobby");
+        yield return Until(() => roster.CanChangeOutfit, 3, "G cooldown over");
+        Check(roster.TryChangeOutfit() && motor.visual.gameObject == everyday && roster.WearsLobbyForm, "G again: everyday clothes");
+
         director.EnterDungeon();
         yield return Until(() => director.Phase == LiminalRunPhase.Exploring, 20, "gate entered again");
-        Check(roster.CurrentIndex == 1 && motor.visual.gameObject == proi && !melee.bladeEffects, "next gate starts with the picked Proi");
+        Check(roster.CurrentIndex == 1 && motor.visual.gameObject == proi && !everyday.activeSelf && !roster.WearsLobbyForm && !melee.bladeEffects,
+              "next gate dresses the picked Proi for battle");
+        Check(combat.enabled && motor.allowDash, "attacks and dash are back in the gate");
         yield return Seconds(.5f);
         Capture("proi_ingame_gate.png", report);
+
+        // ---- G (testing) in the gate: everyday clothes only move, G again is battle Proi
+        yield return Until(() => roster.CanChangeOutfit, 3, "G allowed in the gate");
+        Check(roster.TryChangeOutfit() && motor.visual.gameObject == everyday && everyday.activeSelf && !proi.activeSelf && roster.WearsLobbyForm,
+              "G in the gate: everyday clothes");
+        Check(!combat.enabled && !motor.allowDash && roster.CurrentSkill == null, "everyday clothes only move (no attacks, dash or skill)");
+        motor.SetAutomationInput(Vector2.up, motor.transform.position + Vector3.forward * 8);
+        yield return Seconds(.7f);
+        Check(motor.PlanarVelocity.magnitude > motor.moveSpeed * .8f, $"runs in everyday clothes in the gate ({motor.PlanarVelocity.magnitude:F2} m/s)");
+        Capture("proi_ingame_everyday_gate.png", report);
+        motor.SetAutomationInput(Vector2.zero, motor.transform.position + motor.visual.forward * 5);
+        yield return Until(() => roster.CanChangeOutfit, 3, "G cooldown over in the gate");
+        Check(roster.TryChangeOutfit() && motor.visual.gameObject == proi && combat.enabled && motor.allowDash && roster.CurrentSkill != null,
+              "G again: battle clothes with attacks, dash and her skill");
     }
 
     static void Observe(Animator animator, HashSet<int> states)

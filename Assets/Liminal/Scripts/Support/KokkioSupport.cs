@@ -26,8 +26,12 @@ namespace AcRoguelike.Liminal
         public float pickupRadius = 1.05f;
         public Texture2D portrait;
 
+        /// <summary>
+        /// Picked as the support. A movement-only body has no support inside a gate; the lobby (where supports never act)
+        /// still shows the pick, also while the hunter wears a movement-only lobby form.
+        /// </summary>
         public bool Selected => HunterLoadout.SupportId == Id
-            && (!run || !run.Roster || !run.Roster.CurrentMovementOnly);
+            && (!run || !run.Roster || !run.Roster.CurrentMovementOnly || run.Roster.InLobby);
         public int Drops { get; private set; }
         public int Pickups { get; private set; }
         public int HealthRestored { get; private set; }

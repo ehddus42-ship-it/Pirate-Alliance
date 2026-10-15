@@ -15,11 +15,12 @@ namespace AcRoguelike.Liminal.Editor
     /// <summary>
     /// Batch play-mode check of the lobby loadout, the support character 꼬끼오, Proi's basic skill and her six
     /// augments, on the real LiminalRun scene:
-    /// loadout officer and terminal → loadout window cards → pick Proi (worn in the lobby) and 꼬끼오 (HUD card) →
-    /// back to Astraia's everyday clothes and to Proi → gate keeps Proi → 꼬끼오 drop / pickup heal / stage clear →
+    /// loadout officer and terminal → loadout window cards → pick Proi (worn in the lobby, in her everyday clothes) and 꼬끼오
+    /// (HUD card) → back to Astraia's everyday clothes and to Proi → gate keeps Proi (battle clothes) → 꼬끼오 drop / pickup heal / stage clear →
     /// throw, fireball, 맹화돌진 + 폭발확장 → 화염질주, 불씨수호, 반사의화염, 업화해방 offer rules.
     /// The player's saved loadout is restored afterwards. Report and captures go to Documentation/Liminal/Loadout.
     /// Unity -batchmode -projectPath . -executeMethod AcRoguelike.Liminal.Editor.LoadoutValidation.RunBatch -logFile Logs/loadout.log
+    /// In the open editor: Tools > Liminal > Validate Loadout In Game (leaves the editor open).
     /// </summary>
     [InitializeOnLoad]
     public static class LoadoutValidation
@@ -62,7 +63,9 @@ namespace AcRoguelike.Liminal.Editor
                 if (state == PlayModeStateChange.EnteredEditMode)
                 {
                     SessionState.SetBool(Active, false);
-                    EditorApplication.Exit(SessionState.GetInt(Active + ".exit", 1));
+                    // a run in the open editor (RunInEditor) leaves it open
+                    if (SessionState.GetBool(Active + ".live", false)) SessionState.SetBool(Active + ".live", false);
+                    else EditorApplication.Exit(SessionState.GetInt(Active + ".exit", 1));
                 }
             };
         }
@@ -70,6 +73,20 @@ namespace AcRoguelike.Liminal.Editor
         public static void RunBatch()
         {
             if (!Application.isBatchMode) throw new InvalidOperationException("RunBatch is for an isolated batch editor.");
+            Begin(false);
+        }
+
+        /// <summary>The same check in the open editor: plays LiminalRun, writes the report and leaves the editor open.</summary>
+        [MenuItem("Tools/Liminal/Validate Loadout In Game")]
+        public static void RunInEditor()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Stop play mode first.");
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            Begin(true);
+        }
+
+        static void Begin(bool live)
+        {
             // Start from the default party (Astraia + 유니); the player's own pick is put back at the end.
             hadHunter = PlayerPrefs.HasKey(HunterKey); savedHunter = PlayerPrefs.GetString(HunterKey, "");
             hadSupport = PlayerPrefs.HasKey(SupportKey); savedSupport = PlayerPrefs.GetString(SupportKey, "");
@@ -79,6 +96,7 @@ namespace AcRoguelike.Liminal.Editor
             PlayerPrefs.DeleteKey(SupportKey);
             PlayerPrefs.Save();
             EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+            SessionState.SetBool(Active + ".live", live);
             SessionState.SetBool(Active, true);
             EditorApplication.EnterPlaymode();
         }
@@ -162,9 +180,11 @@ namespace AcRoguelike.Liminal.Editor
             Card("Hunter_proi").onClick.Invoke();
             Card("Support_kokkio").onClick.Invoke();
             yield return Seconds(.3f);
-            var proi = motor.visual.gameObject;
-            Check(roster.SelectedIndex == 1 && proi != astraia && proi.activeInHierarchy && !astraia.activeSelf, "picking Proi puts her on in the lobby");
-            Check(motor.animator && motor.animator.runtimeAnimatorController && motor.animator.runtimeAnimatorController.name == "Proi", "the motor drives Proi's animator");
+            var lobbyProi = motor.visual.gameObject;
+            Check(roster.SelectedIndex == 1 && lobbyProi != astraia && lobbyProi.activeInHierarchy && !astraia.activeSelf && roster.WearsLobbyForm,
+                "picking Proi puts her on in the lobby, in her everyday clothes");
+            Check(motor.animator && motor.animator.runtimeAnimatorController && motor.animator.runtimeAnimatorController.name == "Proi_General",
+                "the motor drives Proi's everyday animator");
             Check(PlayerPrefs.GetString(HunterKey) == "proi" && PlayerPrefs.GetString(SupportKey) == SupportCharacterCatalog.Kokkio, "the party is saved (proi + kokkio)");
             var kokkioCard = run.GetComponent<LiminalHud>().Canvas.Find("KokkioSupportCard");
             var yuniCard = GameObject.Find("SupportSkillCard");
@@ -188,7 +208,10 @@ namespace AcRoguelike.Liminal.Editor
             // ---- the gate keeps the pick
             run.EnterDungeon();
             yield return Until(() => run.Phase == LiminalRunPhase.Exploring, 20, "gate entered");
-            Check(roster.CurrentIndex == 1 && motor.visual.gameObject == proi, "the gate starts with the picked hunter (Proi)");
+            var proi = motor.visual.gameObject;
+            Check(roster.CurrentIndex == 1 && proi != lobbyProi && !lobbyProi.activeSelf && !roster.WearsLobbyForm,
+                "the gate starts with the picked hunter (Proi), in her battle clothes");
+            Check(motor.animator && motor.animator.runtimeAnimatorController && motor.animator.runtimeAnimatorController.name == "Proi", "the motor drives Proi's battle animator");
             Check(!AugmentCatalog.IsOfferable(AugmentCatalog.Find(AugmentCatalog.AutoSupport), augments, "proi"), "알아하쇼 stays out of the pool while the support is passive (꼬끼오)");
 
             // ---- arena far from the route (no attackers: the validation enemies are bare TrainingEnemy targets)
@@ -254,6 +277,8 @@ namespace AcRoguelike.Liminal.Editor
             var far = Enemy(arena.transform, Arena + Vector3.forward * 6f, 100000);
             int farHealth = far.Health;
             motor.ResetAt(Arena + Vector3.up * .05f);
+            // the throw handed control back (ReleaseAutomation): aim again, or an open editor's mouse would steer the fireball
+            motor.SetAutomationInput(Vector2.zero, Arena + Vector3.forward * 5);
             Physics.SyncTransforms();
             yield return Seconds(.2f);
             Check(skill.TryActivate() && skill.FireballCount == 0, "with nobody in reach the skill forms a fireball");

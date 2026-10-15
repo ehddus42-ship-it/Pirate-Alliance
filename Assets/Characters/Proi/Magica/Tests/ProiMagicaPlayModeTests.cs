@@ -11,18 +11,23 @@ using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
 /// <summary>
-/// Proi_Magica 프리팹을 실제 애니메이터로 대기 → 걷기(2.1 m/s, 직선) → 달리기(4.2 m/s, 직선) → 선회 → 3타 콤보 → 대쉬 →
+/// 전투복 Proi_Magica 프리팹을 실제 애니메이터로 대기 → 걷기(2.1 m/s, 직선) → 달리기(4.2 m/s, 직선) → 선회 → 3타 콤보 → 대쉬 →
 /// 정지 → 궁극기 시키며 클로스 빌드 / NaN / 폭주 / 콜라이더 관통(구간별), 머리카락이 진행 반대로 날리는 양, 뿌리~끝 움직임,
 /// 상체 자세를 재고 앞 · 옆 · 뒤 화면을 프레임으로 남깁니다. 게임과 같은 컴포넌트(ProiRunPosture / ProiUltimate /
-/// ProiHairFlutter)를 붙입니다.
-/// 결과: Documentation/Proi/Magica/report.json, Logs/ProiMagicaFrames/f_0000.png… (ffmpeg -framerate 30 로 영상화)
-/// 환경 변수: PROI_MAGICA_LABEL=x → report_x.json, PROI_BASELINE=spring → 예전 방식(FBX + ProiTailSpring, 자세 보정 없음)으로 재기.
+/// ProiHairFlutter)를 붙입니다. 평시복 Proi_General_Magica 는 이동만 하므로 대기 → 걷기 → 달리기 → 선회 → 정지 → 가라앉기.
+/// 결과: Documentation/Proi/Magica/report.json (평시복 report_everyday.json), Logs/ProiMagicaFrames/f_0000.png…
+/// (ffmpeg -framerate 30 로 영상화)
+/// 환경 변수: PROI_MAGICA_LABEL=x → report_x.json / report_everyday_x.json,
+/// PROI_BASELINE=spring → 예전 방식(전투복: FBX + ProiTailSpring, 자세 보정 없음 / 평시복: 물리 없는 FBX)으로 재기.
 /// </summary>
 public class ProiMagicaPlayModeTests
 {
     const string PrefabPath = "Assets/Characters/Proi/Magica/Proi_Magica.prefab";
     const string FbxPath = "Assets/Characters/Proi/Models/Proi_Character.fbx";
     const string ControllerPath = "Assets/Characters/Proi/Animations/Proi.controller";
+    const string EverydayPrefabPath = "Assets/Characters/Proi/Magica/Proi_General_Magica.prefab";
+    const string EverydayFbxPath = "Assets/Characters/Proi/Models/Proi_General.fbx";
+    const string EverydayControllerPath = "Assets/Characters/Proi/Animations/Proi_General.controller";
     const int Fps = 30;
     const float RunSpeed = 4.2f, WalkSpeed = 2.1f;   // PlayerMotor.moveSpeed / walkSpeed
     static string OutDir => Path.GetFullPath(Path.Combine(Application.dataPath, "..", "Documentation", "Proi", "Magica"));
@@ -33,18 +38,25 @@ public class ProiMagicaPlayModeTests
     class Stat
     {
         public int n;
-        public double trail, rise, lean, waist, neck;
+        public double trail, rise, spread, lean, waist, neck;
         public double[] bandSpeed = new double[5];
         public List<float> twist = new List<float>();
         public List<float> ahead = new List<float>();
     }
 
     [UnityTest, Timeout(1800000)]
-    public IEnumerator ProiClothFollowsCombatMotion()
+    public IEnumerator ProiClothFollowsCombatMotion() => Measure(false);
+
+    /// <summary>The everyday outfit (lobby): hair, hoodie hem and track pants while she walks, runs, turns and stops.</summary>
+    [UnityTest, Timeout(1800000)]
+    public IEnumerator ProiEverydayClothFollowsMovement() => Measure(true);
+
+    IEnumerator Measure(bool everyday)
     {
         LogAssert.ignoreFailingMessages = true;   // animation events of the combat clips have no receivers here
         Unity.Burst.BurstCompiler.Options.EnableBurstCompileSynchronously = true;
         string label = Environment.GetEnvironmentVariable("PROI_MAGICA_LABEL");
+        // baseline: the battle outfit with the old tail spring / the everyday outfit with no physics at all
         bool spring = Environment.GetEnvironmentVariable("PROI_BASELINE") == "spring";
         // video frames are scratch output (Logs/ is not tracked); the report goes to Documentation/Proi/Magica
         string frames = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "Logs", "ProiMagicaFrames"));
@@ -53,8 +65,8 @@ public class ProiMagicaPlayModeTests
         foreach (var f in Directory.GetFiles(frames, "f_*.png")) File.Delete(f);
         GameObject prefab = null; RuntimeAnimatorController controller = null;
 #if UNITY_EDITOR
-        prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(spring ? FbxPath : PrefabPath);
-        controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(ControllerPath);
+        prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(everyday ? (spring ? EverydayFbxPath : EverydayPrefabPath) : spring ? FbxPath : PrefabPath);
+        controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(everyday ? EverydayControllerPath : ControllerPath);
 #endif
         Assert.NotNull(prefab); Assert.NotNull(controller);
         Time.captureDeltaTime = 1f / Fps;
@@ -80,24 +92,34 @@ public class ProiMagicaPlayModeTests
         Transform hips = Bone("Hips"), spine = Bone("Spine"), chest = Bone("UpperChest"), neck = Bone("Neck"), head = Bone("Head");
         Transform lHip = Bone("LeftUpperLeg"), rHip = Bone("RightUpperLeg"), lFoot = Bone("LeftFoot"), rFoot = Bone("RightFoot");
         float legLength = Vector3.Distance(lHip.position, lFoot.position);
-        Transform[] ties = { Bone("LeftTail1"), Bone("RightTail1") };
         // facing from the hips (Unity: right = toward the right leg, forward = right x up)
         visual.transform.localRotation = Quaternion.FromToRotation(Vector3.Cross(Flat(rHip.position - lHip.position), Vector3.up), Vector3.forward);
+        // hair bands by distance from the twin-tail ties, or (loose everyday hair) from the crown
+        Transform[] ties = everyday ? new[] { Crown(head) } : new[] { Bone("LeftTail1"), Bone("RightTail1") };
 
         // the game's components (they live in Assembly-CSharp, which a test assembly cannot reference)
-        if (spring) visual.AddComponent(GameType("ProiTailSpring"));
-        else visual.AddComponent(GameType("ProiRunPosture"));
-        var ultimate = visual.AddComponent(GameType("ProiUltimate"));
-        GameType("ProiUltimate").GetField("externalInput").SetValue(ultimate, true);
-        GameType("ProiUltimate").GetField("cinematicTime").SetValue(ultimate, false);   // in the game the warp is on her own clock
-        var flutter = spring ? null : visual.AddComponent(GameType("ProiHairFlutter"));
-        bool UltimateActive() => (bool)GameType("ProiUltimate").GetProperty("Active").GetValue(ultimate);
+        Component ultimate = null, flutter = null;
+        if (everyday)
+        {
+            if (!visual.GetComponent(GameType("ProiGeneralHands"))) visual.AddComponent(GameType("ProiGeneralHands"));
+        }
+        else
+        {
+            if (spring) visual.AddComponent(GameType("ProiTailSpring"));
+            else visual.AddComponent(GameType("ProiRunPosture"));
+            ultimate = visual.AddComponent(GameType("ProiUltimate"));
+            GameType("ProiUltimate").GetField("externalInput").SetValue(ultimate, true);
+            GameType("ProiUltimate").GetField("cinematicTime").SetValue(ultimate, false);   // in the game the warp is on her own clock
+            flutter = spring ? null : visual.AddComponent(GameType("ProiHairFlutter"));
+        }
+        bool UltimateActive() => ultimate != null && (bool)GameType("ProiUltimate").GetProperty("Active").GetValue(ultimate);
         float WindNow() => flutter == null ? 0f : (float)GameType("ProiHairFlutter").GetProperty("WindSpeed").GetValue(flutter);
 
         float start = Time.realtimeSinceStartup;
         while (cloths.Any(c => !c.Process.IsRunning() && !c.Process.Result.IsError()) && Time.realtimeSinceStartup - start < 120f) yield return null;
         var report = new StringBuilder("{\n");
-        report.AppendLine($"  \"label\": \"{label ?? ""}\", \"version\": \"{(spring ? "tail spring (before)" : "Magica Cloth 2")}\",");
+        string version = everyday ? (spring ? "everyday, no physics (before)" : "everyday, Magica Cloth 2") : spring ? "tail spring (before)" : "Magica Cloth 2";
+        report.AppendLine($"  \"label\": \"{label ?? ""}\", \"version\": \"{version}\",");
         report.AppendLine($"  \"build_seconds\": {Time.realtimeSinceStartup - start:F2},");
         report.AppendLine("  \"cloth\": [" + string.Join(", ", cloths.Select(c =>
             $"{{\"name\": \"{c.name}\", \"running\": {c.Process.IsRunning().ToString().ToLower()}, \"prebuild\": {c.GetSerializeData2().preBuildData.UsePreBuild().ToString().ToLower()}, \"result\": \"{c.Process.Result.GetResultString().Replace("\"", "'")}\"}}")) + "],");
@@ -106,7 +128,7 @@ public class ProiMagicaPlayModeTests
         var skins = spring ? visual.GetComponentsInChildren<SkinnedMeshRenderer>()
                            : cloths.SelectMany(c => c.SerializeData.sourceRenderers).OfType<SkinnedMeshRenderer>().Distinct().ToArray();
         var hairSkin = spring ? skins[0] : skins.First(s => s.name.Contains("Hair"));
-        bool[] hairMask = HairMask(hairSkin, spring);
+        bool[] hairMask = HairMask(hairSkin, spring, everyday);
         var bake = new Mesh();
         var cams = new[] { MakeCamera("Front"), MakeCamera("Side"), MakeCamera("Back") };
         const int W = 560, H = 800;
@@ -122,11 +144,13 @@ public class ProiMagicaPlayModeTests
         float t = 0f, turn = 0f, focusY = 1f;
         Vector3 heading = Vector3.forward;
         // straight walk and run (moving wind alone), then a turn (inertia sideways)
-        var phases = new (float until, string label)[]
-        {
-            (1.5f, "idle"), (5.5f, "walk"), (9.5f, "run"), (11.5f, "turn"), (12.2f, "Attack1"), (12.9f, "Attack2"), (13.9f, "Attack3"),
-            (14.5f, "Dash"), (16f, "stop"), (23.5f, "ultimate"), (25f, "settle"),
-        };
+        var phases = everyday
+            ? new (float until, string label)[] { (1.5f, "idle"), (5.5f, "walk"), (9.5f, "run"), (11.5f, "turn"), (13f, "stop"), (15f, "settle") }
+            : new (float until, string label)[]
+            {
+                (1.5f, "idle"), (5.5f, "walk"), (9.5f, "run"), (11.5f, "turn"), (12.2f, "Attack1"), (12.9f, "Attack2"), (13.9f, "Attack3"),
+                (14.5f, "Dash"), (16f, "stop"), (23.5f, "ultimate"), (25f, "settle"),
+            };
         string current = "";
         float phaseStart = 0f;
         while (t < phases[phases.Length - 1].until)
@@ -141,7 +165,7 @@ public class ProiMagicaPlayModeTests
                     Physics.SyncTransforms();
                     Assert.IsTrue((bool)GameType("ProiUltimate").GetMethod("TryBegin").Invoke(ultimate, null), "ultimate did not start");
                 }
-                else if (phase != "settle") animator.CrossFade("Locomotion", 0.15f);
+                else if (phase != "settle" || everyday) animator.CrossFade("Locomotion", 0.15f);
             }
             float speed = phase == "walk" ? WalkSpeed : phase == "run" || phase == "turn" ? RunSpeed : phase == "Dash" ? 7f : 0f;
             animator.SetFloat("Speed", speed > 0f && phase != "Dash" ? speed / RunSpeed : 0f, 0.08f, 1f / Fps);
@@ -160,7 +184,8 @@ public class ProiMagicaPlayModeTests
                 foreach (var s in skins)
                 {
                     s.BakeMesh(bake);
-                    var m = s.transform.localToWorldMatrix;
+                    // the bake leaves out the renderer's own scale (everyday Proi's rig carries x100)
+                    var m = Matrix4x4.TRS(s.transform.position, s.transform.rotation, Vector3.one);
                     verts[s.name] = bake.vertices.Select(v => m.MultiplyPoint3x4(v)).ToArray();
                     if (verts[s.name].Any(v => float.IsNaN(v.x))) nan = true;
                     maxReach = Mathf.Max(maxReach, verts[s.name].Max(v => Vector3.Distance(Flat(v), Flat(hips.position))));
@@ -194,9 +219,10 @@ public class ProiMagicaPlayModeTests
                 }
                 var rel = hv.Select(v => v - head.position).ToArray();
                 Vector3 fwd = Flat(visual.transform.forward).normalized;
-                Vector3 tipMean = Vector3.zero; int tipN = 0;
-                for (int i = 0; i < hv.Length; i++) if (band[i] == 4) { tipMean += rel[i]; tipN++; }
+                Vector3 tipMean = Vector3.zero; int tipN = 0; float spread = 0f;
+                for (int i = 0; i < hv.Length; i++) if (band[i] == 4) { tipMean += rel[i]; spread += Flat(rel[i]).magnitude; tipN++; }
                 tipMean /= Mathf.Max(tipN, 1);
+                spread /= Mathf.Max(tipN, 1);   // how far out from the head's vertical axis the tips hang: the hair's volume
                 float trail = -Vector3.Dot(Flat(tipMean), fwd);   // how far behind the head the tips are
                 float rise = tipMean.y;
                 if (phase == "idle") { idleTrail = trail; idleRise = rise; }
@@ -212,7 +238,7 @@ public class ProiMagicaPlayModeTests
                 // skip the first half second of a phase: the blend / acceleration
                 if (t - phaseStart > 0.5f)
                 {
-                    st.n++; st.trail += trail - idleTrail; st.rise += rise - idleRise; st.lean += lean; st.waist += waist; st.neck += neckLean; st.twist.Add(twist);
+                    st.n++; st.trail += trail - idleTrail; st.rise += rise - idleRise; st.spread += spread; st.lean += lean; st.waist += waist; st.neck += neckLean; st.twist.Add(twist);
                     st.ahead.Add(Vector3.Dot(lFoot.position - rFoot.position, fwd) / legLength);
                     if (prevRel != null)
                     {
@@ -248,7 +274,7 @@ public class ProiMagicaPlayModeTests
             // hair speed relative to the head per band, divided by the band's distance from the tie
             var ang = s.bandSpeed.Select((x, b) => x / Math.Max(n - 1, 1) / bandDist[b]).ToArray();
             return $"    \"{kv.Key}\": {{\"hair_tips_behind_head_m\": {s.trail / n:F3}, \"hair_tips_rise_m\": {s.rise / n:F3}, " +
-                   $"\"hair_speed_per_m_by_band\": [{string.Join(", ", ang.Select(x => x.ToString("F2")))}], " +
+                   $"\"hair_tips_spread_m\": {s.spread / n:F3}, \"hair_speed_per_m_by_band\": [{string.Join(", ", ang.Select(x => x.ToString("F2")))}], " +
                    $"\"torso_lean_deg\": {s.lean / n:F1}, \"waist_bend_deg\": {s.waist / n:F1}, \"neck_lean_deg\": {s.neck / n:F1}, \"shoulder_twist_rms_deg\": {amp.ToString("F1")}, \"counter_rotation\": {corr.ToString("F2")}}}";
         })));
         report.AppendLine("  },");
@@ -257,17 +283,29 @@ public class ProiMagicaPlayModeTests
         report.AppendLine("  },");
         report.AppendLine($"  \"checked_vertices\": {{{string.Join(", ", skins.Select(s => $"\"{s.name}\": {s.sharedMesh.vertexCount}"))}}}");
         report.AppendLine("}");
-        string name = string.IsNullOrEmpty(label) ? "report.json" : $"report_{label}.json";
+        string stem = everyday ? "report_everyday" : "report";
+        string name = string.IsNullOrEmpty(label) ? stem + ".json" : $"{stem}_{label}.json";
         File.WriteAllText(Path.Combine(OutDir, name), report.ToString(), new UTF8Encoding(false));
         Assert.IsFalse(nan, "NaN in Proi cloth");
         Assert.Less(maxReach, 1.6f, "cloth blew up");
     }
 
-    /// <summary>Hair vertices: the whole hair renderer, or (old single mesh) the vertices skinned to the tail bones.</summary>
-    static bool[] HairMask(SkinnedMeshRenderer skin, bool singleMesh)
+    /// <summary>
+    /// Hair vertices: the whole hair renderer, or on the unsplit model the vertices skinned to the tail bones (battle) /
+    /// of the hair material (everyday).
+    /// </summary>
+    static bool[] HairMask(SkinnedMeshRenderer skin, bool singleMesh, bool everyday)
     {
         var mesh = skin.sharedMesh;
         if (!singleMesh) return Enumerable.Repeat(true, mesh.vertexCount).ToArray();
+        if (everyday)
+        {
+            var hair = new bool[mesh.vertexCount];
+            for (int sm = 0; sm < mesh.subMeshCount && sm < skin.sharedMaterials.Length; sm++)
+                if (skin.sharedMaterials[sm] && skin.sharedMaterials[sm].name.Contains("Hair"))
+                    foreach (int i in mesh.GetTriangles(sm)) hair[i] = true;
+            return hair;
+        }
         var perVertex = mesh.GetBonesPerVertex(); var weights = mesh.GetAllBoneWeights();
         var mask = new bool[mesh.vertexCount];
         for (int i = 0, k = 0; i < mask.Length; i++)
@@ -277,6 +315,15 @@ public class ProiMagicaPlayModeTests
             mask[i] = tail > 0.5f;
         }
         return mask;
+    }
+
+    /// <summary>A point on top of the skull that turns with the head: loose hair hangs from around it.</summary>
+    static Transform Crown(Transform head)
+    {
+        var crown = new GameObject("Crown").transform;
+        crown.SetParent(head, false);
+        crown.position = head.position + Vector3.up * 0.24f;
+        return crown;
     }
 
     static Type GameType(string name)

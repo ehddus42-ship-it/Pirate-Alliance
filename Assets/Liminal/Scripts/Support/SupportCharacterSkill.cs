@@ -41,9 +41,12 @@ namespace AcRoguelike.Liminal
         public bool OneUpActive => OneUpRemaining > 0;
         public int Activations { get; private set; }
         public int ChompersFired { get; private set; }
-        /// <summary>In the party: picked as the support with the lobby's loadout officer.</summary>
+        /// <summary>
+        /// In the party: picked as the support with the lobby's loadout officer. A movement-only body has no support inside a
+        /// gate; the lobby (where supports never act) still shows the pick, also while the hunter wears a movement-only lobby form.
+        /// </summary>
         public bool Selected => HunterLoadout.SupportId == Id
-            && (!run || !run.Roster || !run.Roster.CurrentMovementOnly);
+            && (!run || !run.Roster || !run.Roster.CurrentMovementOnly || run.Roster.InLobby);
 
         LiminalRunDirector run;
         TalismanCaster caster;
