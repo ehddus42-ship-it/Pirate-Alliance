@@ -24,7 +24,7 @@ namespace NamgungLuna.Editor
         /// <summary>
         /// Battle-form renderers that skip the shadow passes. They sit inside the silhouette of a larger part (hair fill under
         /// the back hair, boot underlaps, chest ornaments, inset, facings, sleeve joins, lantern core) or are thin hem charms,
-        /// so the cast shadow is unchanged in practice while about 228k of her 775k triangles leave every shadow cascade.
+        /// so the cast shadow is unchanged in practice while about 111k of her 359k triangles leave every shadow cascade.
         /// They still render and receive shadows. Docs: Documentation/NamgungLuna/Performance/battle_form_lag.md
         /// </summary>
         public static readonly string[] BattleShadowlessParts =
