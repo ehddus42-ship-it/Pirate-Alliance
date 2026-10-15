@@ -10,7 +10,8 @@ using UnityEngine.Timeline;
 /// 지금 씬의 Player(ProiUltimate) 값으로 Assets/Characters/Proi/Timeline/ProiUltimate.playable 을 만들고 Player 에 PlayableDirector 를 붙여 연결합니다.
 ///  - 몸 동작: Ultimate.anim (Animator)
 ///  - 궁극기: 비트 마커(주먹 마주침 / 차징 / 도약 / 정점 / 내려꽂기 / 꽂힘 / 불기둥 1~3열 / 이동 가능) + 전진 이동 미리보기 구간
-///  - 카메라: 샷 클립 (시작 순간 그 구도로 컷 / 이동)
+///  - 카메라: 샷 클립 (시작 순간 그 구도로 컷 / 이동, 움직이는 샷은 클립 동안 오빗 / 달리 / 줌)
+///  - 배경 블러: 차징 동안 캐릭터에 초점, 주변 흐림 (심도)
 ///  - 배속: 게임 배속 커브
 /// 이미 있으면 다시 만들지 물어봅니다 (Timeline 에서 고친 내용은 사라짐).
 /// </summary>
@@ -27,6 +28,15 @@ public static class ProiUltimateTimelineBuilder
             !EditorUtility.DisplayDialog("Proi 궁극기 Timeline", AssetPath + " 이(가) 이미 있습니다.\n지금 ProiUltimate 값으로 다시 만들까요? (Timeline 에서 고친 내용은 사라집니다)", "다시 만들기", "취소"))
             return;
         Debug.Log("[ProiUltimateTimelineBuilder] " + Build());
+    }
+
+    static ProiShot Moving(ProiShot s, ProiEase ease, System.Action<ProiShot> end)
+    {   // a shot that keeps moving over its clip: start from its own values, then change only what moves
+        s.moving = true;
+        s.moveEase = ease;
+        s.WithEnd();
+        end(s);
+        return s;
     }
 
     public static string Build()
@@ -84,21 +94,22 @@ public static class ProiUltimateTimelineBuilder
         Beat(ProiBeat.Row3, slam + rows.z, "불기둥 3열");
         Beat(ProiBeat.End, end, "이동 가능");
 
-        // ---- camera shots (the same beats the code version used)
+        // ---- camera shots (the moves glide with a smooth ease unless set otherwise)
         Vector3 open = V3("openShot"), closeUp = V3("clashCloseUp"), diveCam = V3("diveCamera");
-        Vector2 push = V2("clashPush"), pull = V2("clashPullOut"), charge = V2("chargeCloseUp"), jumpCut = V2("jumpCut");
+        Vector2 push = V2("clashPush"), pull = V2("clashPullOut"), jumpCut = V2("jumpCut");
         float yaw = F("frontYaw"), fov = F("frontFov");
-        float chargeAt = cStart + 0.3f;
         var shots = new List<(double t, string name, ProiShot s)>
         {
-            (0, "정면 상반신 (컷)", new ProiShot { type = ProiShotType.Front, blend = F("cameraBlendIn"), distance = open.x, height = open.y, lookHeight = open.z, yaw = yaw, fov = fov }),
-            (push.x, "주먹 크래시 줌", new ProiShot { type = ProiShotType.Fists, blend = push.y, distance = closeUp.x, height = closeUp.y, lookHeight = 1.33f, yaw = yaw, fov = closeUp.z }),
-            (pull.x, "전신 줌아웃", new ProiShot { type = ProiShotType.Front, blend = pull.y, distance = F("frontDistance"), height = F("frontHeight"), lookHeight = F("frontLookHeight"), yaw = yaw, fov = fov }),
-            (chargeAt, "차징 클로즈업", new ProiShot { type = ProiShotType.ChargeAngle, blend = Mathf.Max(cEnd - chargeAt - 0.05f, 0f), distance = charge.x, height = charge.y, lookHeight = 1.1f, yaw = F("chargeCloseUpYaw"), fov = fov - 2f }),
-            (jumpCut.x, "도약 와이드 (컷)", new ProiShot { type = ProiShotType.ArcWide, blend = jumpCut.y, distance = F("jumpCameraDistance") }),
-            (apex, "착지점 당김", new ProiShot { type = ProiShotType.Landing, blend = diveCam.z, distance = diveCam.x, fovOffset = -diveCam.y }),
-            (slam + F("wideShotDelay"), "불기둥 와이드", new ProiShot { type = ProiShotType.PillarWide, blend = 0.6f, distance = F("pillarCameraDistance") }),
-            (slam + rows.z + F("pillarLife") * 0.6f, "기본 카메라 복귀", new ProiShot { type = ProiShotType.Gameplay, blend = 0.8f }),
+            (0, "정면 상반신 (컷)", new ProiShot { type = ProiShotType.Front, blend = F("cameraBlendIn"), ease = ProiEase.Smooth, distance = open.x, height = open.y, lookHeight = open.z, yaw = yaw, fov = fov }),
+            (push.x, "주먹 크래시 줌", new ProiShot { type = ProiShotType.Fists, blend = push.y, ease = ProiEase.Smooth, distance = closeUp.x, height = closeUp.y, lookHeight = 1.33f, yaw = yaw, fov = closeUp.z }),
+            // fists met -> straight onto the fist (a strong accelerate / decelerate), arriving before the fire starts to
+            // gather, then a slow push-in for the whole charge: the fire gathering in the fist is the subject, her face over it
+            (pull.x, "차징 주먹 (불꽃 모임)", Moving(new ProiShot { type = ProiShotType.ChargeFist, blend = 0.3f, ease = ProiEase.EaseInOut, distance = 2.2f, height = 0.05f, lookHeight = 0f, yaw = 48f, fov = 32f },
+                                     ProiEase.Smooth, s => { s.endDistance = 1.6f; s.endYaw = 40f; s.endFov = 30f; })),
+            (jumpCut.x, "도약 와이드 (컷)", new ProiShot { type = ProiShotType.ArcWide, blend = jumpCut.y, ease = ProiEase.Smooth, distance = F("jumpCameraDistance") }),
+            (apex, "착지점 당김", new ProiShot { type = ProiShotType.Landing, blend = diveCam.z, ease = ProiEase.Smooth, distance = diveCam.x, fovOffset = -diveCam.y }),
+            (slam + F("wideShotDelay"), "불기둥 와이드", new ProiShot { type = ProiShotType.PillarWide, blend = 0.6f, ease = ProiEase.Smooth, distance = F("pillarCameraDistance") }),
+            (slam + rows.z + F("pillarLife") * 0.6f, "기본 카메라 복귀", new ProiShot { type = ProiShotType.Gameplay, blend = 0.8f, ease = ProiEase.Smooth }),
         };
         var camTrack = tl.CreateTrack<ProiCameraShotTrack>(null, "카메라");
         for (int i = 0; i < shots.Count; i++)
@@ -109,6 +120,16 @@ public static class ProiUltimateTimelineBuilder
             c.displayName = shots[i].name;
             ((ProiCameraShotClip)c.asset).shot = shots[i].s;
         }
+
+        // ---- background blur while she charges (fills in / drains with the clip's ease)
+        var blurTrack = tl.CreateTrack<ProiBlurTrack>(null, "배경 블러");
+        var blur = blurTrack.CreateClip<ProiBlurClip>();
+        blur.displayName = "차징 배경 블러";
+        blur.start = pull.x;
+        blur.duration = jumpCut.x - pull.x;
+        blur.easeInDuration = 0.5;
+        blur.easeOutDuration = 0.12;
+        ((ProiBlurClip)blur.asset).fistFocus = 0.7f;           // sharp on the gathering fire, the face just soft
 
         // ---- game speed
         var warpProp = so.FindProperty("timeWarp");

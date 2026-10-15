@@ -13,6 +13,7 @@ Shader "Proi/Toon"
         _AmbientStrength ("Ambient Strength", Range(0, 1)) = 0.35
         _RimColor ("Rim Color", Color) = (1, 0.9, 0.9, 1)
         _RimStrength ("Rim Strength", Range(0, 1)) = 0.15
+        [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull (Off = double-sided cloth, e.g. sleeve insides)", Float) = 2
         [Header(Hair Highlight)]
         _HairRectA ("Hair UV Rect A (xMin yMin xMax yMax)", Vector) = (0, 0, 0, 0)
         _HairRectB ("Hair UV Rect B (xMin yMin xMax yMax)", Vector) = (0, 0, 0, 0)
@@ -62,7 +63,7 @@ Shader "Proi/Toon"
         {
             Name "ForwardLit"
             Tags { "LightMode" = "UniversalForward" }
-            Cull Back
+            Cull [_Cull]
 
             HLSLPROGRAM
             #pragma vertex vert
@@ -104,9 +105,11 @@ Shader "Proi/Toon"
                 return o;
             }
 
-            half4 frag(Varyings i) : SV_Target
+            half4 frag(Varyings i, bool frontFace : SV_IsFrontFace) : SV_Target
             {
                 half4 albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, i.uv) * _BaseColor;
+                // back faces (only drawn with Cull Off, e.g. the inside of a sleeve): flip the normal, keep them in shade
+                if (!frontFace) i.normalWS = -i.normalWS;
                 half3 nTS = UnpackNormalScale(SAMPLE_TEXTURE2D(_BumpMap, sampler_BumpMap, i.uv), _BumpScale);
                 float3 bitangent = i.tangentWS.w * cross(i.normalWS, i.tangentWS.xyz);
                 float3 n = normalize(TransformTangentToWorld(nTS, half3x3(i.tangentWS.xyz, bitangent, i.normalWS)));
@@ -115,6 +118,7 @@ Shader "Proi/Toon"
                 half ndl = dot(n, light.direction) * 0.5h + 0.5h;
                 half lit = smoothstep(_ShadeThreshold - _ShadeSoftness, _ShadeThreshold + _ShadeSoftness, ndl);
                 lit *= smoothstep(0.3h, 0.7h, light.shadowAttenuation);
+                if (!frontFace) lit = 0.0h;
 
                 half3 col = albedo.rgb * lerp(_ShadeColor.rgb, 1.0h, lit) * light.color;
                 col += albedo.rgb * SampleSH(n) * _AmbientStrength;
@@ -206,7 +210,7 @@ Shader "Proi/Toon"
             ZWrite On
             ZTest LEqual
             ColorMask 0
-            Cull Back
+            Cull [_Cull]
 
             HLSLPROGRAM
             #pragma vertex vert
@@ -265,7 +269,7 @@ Shader "Proi/Toon"
             Tags { "LightMode" = "DepthOnly" }
             ZWrite On
             ColorMask R
-            Cull Back
+            Cull [_Cull]
 
             HLSLPROGRAM
             #pragma vertex vert
@@ -285,7 +289,7 @@ Shader "Proi/Toon"
             Name "DepthNormals"
             Tags { "LightMode" = "DepthNormals" }
             ZWrite On
-            Cull Back
+            Cull [_Cull]
 
             HLSLPROGRAM
             #pragma vertex vert

@@ -129,6 +129,10 @@ public class ProiUltimate : MonoBehaviour
     [SerializeField] Vector2 pulseZoom = new Vector2(0.6f, 1.8f);
     [Tooltip("풀차지 순간 흔들림 (m) / 줌 펀치 (도)")]
     [SerializeField] Vector2 chargedShake = new Vector2(0.07f, 2.5f);
+    [Tooltip("풀차지 순간 히트스톱 (초, 실제 시간, 0 = 끔)")]
+    [SerializeField] float chargedHitStop = 0f;
+    [Tooltip("차징 맥박마다 발밑에서 뻗는 용암 균열: 개수 (0 = 끔) / 처음 길이 / 풀차지 길이 (m). 풀차지 때는 사방으로 한 바퀴")]
+    [SerializeField] Vector3 chargeCracks = new Vector3(0f, 0.45f, 1.4f);
 
     [Header("불기둥: 세 갈래(왼쪽 / 가운데 / 오른쪽) x 3줄 (가까운 줄 / 가운데 줄 / 바깥 줄)")]
     [Tooltip("땅을 찍은 뒤 각 줄이 솟는 시간 (초): 세 갈래가 한꺼번에")]
@@ -179,7 +183,8 @@ public class ProiUltimate : MonoBehaviour
     ProiQuarterViewCamera qcam;
     CharacterController controller;
     Camera viewCam;
-    Transform lHand, rHand, rForearm;
+    Transform lHand, rHand, rForearm, chestBone, headBone;
+    float crackAngle;
     bool active, ending;
     float time, readyAt;
     bool clashed, charged, cameraReturned, slammed, wideShot, closeUp, pushedIn, pulledOut, diveShot, wideShotDone, jumpCutDone;
@@ -238,12 +243,39 @@ public class ProiUltimate : MonoBehaviour
             return;
         }
 
+        FindBones();
+        qcam = Camera.main != null ? Camera.main.GetComponent<ProiQuarterViewCamera>() : null;
+        viewCam = Camera.main;
+    }
+
+    void FindBones()
+    {   // also from the editor timeline preview, where Start has not run
+        if (rHand != null) return;
+        if (animator == null) animator = GetComponentInChildren<Animator>();
+        if (animator == null) return;
         Transform root = animator.transform;
         lHand = FindDeep(root, "LeftHand");
         rHand = FindDeep(root, "RightHand");
         rForearm = FindDeep(root, "RightLowerArm");
-        qcam = Camera.main != null ? Camera.main.GetComponent<ProiQuarterViewCamera>() : null;
-        viewCam = Camera.main;
+        chestBone = FindDeep(root, "UpperChest") ?? FindDeep(root, "Chest");
+        headBone = FindDeep(root, "Head");
+    }
+
+    /// <summary>오른주먹 (차징 불꽃이 모이는 곳, 실제 자세).</summary>
+    public Vector3 ChargeFistPoint
+    {
+        get { FindBones(); return FistPoint(rHand); }
+    }
+
+    /// <summary>상반신 구도 / 배경 블러 초점: 가슴과 얼굴 사이 (실제 자세).</summary>
+    public Vector3 FocusPoint
+    {
+        get
+        {
+            FindBones();
+            if (chestBone == null || headBone == null) return transform.position + Vector3.up * 1.3f;
+            return Vector3.Lerp(chestBone.position, headBone.position, 0.55f);
+        }
     }
 
     // ------------------------------------------------------------------ input + timeline
@@ -290,6 +322,7 @@ public class ProiUltimate : MonoBehaviour
         active = true; ending = false; time = 0f;
         clashed = charged = cameraReturned = slammed = wideShot = closeUp = pushedIn = pulledOut = diveShot = wideShotDone = jumpCutDone = false;
         dashDone = 0f; nextPulse = chargeStart + 0.35f; nextRumble = chargeStart; leapt = false;
+        crackAngle = Random.Range(0f, 360f);
         rowsSpawned = 0;
         animator.speed = 1f;
         if (UsesTimeline)
@@ -430,13 +463,17 @@ public class ProiUltimate : MonoBehaviour
         }
     }
 
-    /// <summary>카메라 샷 클립이 시작될 때 (Timeline 카메라 트랙이 부름): 그 구도로 컷 / 이동.</summary>
-    public void PlayShot(ProiShot shot)
+    /// <summary>카메라 샷 클립이 시작될 때 (Timeline 카메라 트랙이 부름): 그 구도로 컷 / 이동. 구도는 매 프레임 다시 계산해
+    /// 캐릭터 뼈를 따라가고, 움직이는 샷은 클립 진행도(start ~ start + duration)에 맞춰 끝 값으로 이어서 움직입니다.</summary>
+    public void PlayShot(ProiShot shot, double start, double duration)
     {
         if (qcam == null) return;
         if (shot.type == ProiShotType.Gameplay) { qcam.ClearCinematic(shot.blend); return; }
-        ShotPose(shot, out Vector3 pos, out Quaternion rot, out float fov);
-        qcam.SetCinematic(pos, rot, fov, shot.blend);
+        qcam.SetCinematic((out Vector3 pos, out Quaternion rot, out float fov) =>
+        {
+            float k = cutscene != null && duration > 1e-4 ? Mathf.Clamp01((float)((cutscene.time - start) / duration)) : 1f;
+            ShotPose(shot.At(k), out pos, out rot, out fov);
+        }, shot.blend, shot.ease);
     }
 
     /// <summary>샷 구도 계산 (플레이 중에는 실제 도약 / 찍은 지점, 에디터 미리보기에서는 시작 위치에서 추정).</summary>
@@ -453,7 +490,9 @@ public class ProiUltimate : MonoBehaviour
         Quaternion baseRot = qcam != null ? qcam.BaseRotation : ProiQuarterViewCamera.DefaultRotation;
         float baseFov = qcam != null ? qcam.BaseFieldOfView : ProiQuarterViewCamera.DefaultFieldOfView;
         Vector3 dir = Quaternion.AngleAxis(s.yaw, up) * fwd;
+        Quaternion roll = Quaternion.Euler(0f, 0f, s.roll);
         Vector3 look;
+        FindBones();
         switch (s.type)
         {
             case ProiShotType.Front:
@@ -468,14 +507,31 @@ public class ProiUltimate : MonoBehaviour
                 pos = here + dir * s.distance + up * s.height;
                 look = here + up * s.lookHeight + right * 0.2f - fwd * 0.08f;
                 break;
+            case ProiShotType.FistCloseUp:  // telephoto on the burning right fist, wherever the pose puts it
+                look = FistPoint(rHand);
+                pos = look + dir * s.distance + up * s.height;
+                break;
+            case ProiShotType.UpperBody:    // chest to face, wherever the pose puts them (the lunge drops her a lot)
+                look = FocusPoint + up * s.lookHeight;
+                pos = look + dir * s.distance + up * s.height;
+                break;
+            case ProiShotType.ChargeFist:   // the gathering fire in the fist as the subject, her face over it
+                look = Vector3.Lerp(ChargeFistPoint, FocusPoint, 0.35f) + up * s.lookHeight;
+                pos = look + dir * s.distance + up * s.height;
+                break;
+            case ProiShotType.DiveFollow:   // riding behind her chest, looking down at where she will hit
+                Vector3 chest = chestBone != null ? chestBone.position : here + up * 1.2f;
+                pos = chest + Quaternion.AngleAxis(s.yaw, up) * -fwd * s.distance + up * s.height;
+                look = slam + up * s.lookHeight;
+                break;
             case ProiShotType.ArcWide:
                 look = leap + fwd * (dashDistance * 0.5f + 0.4f) + up * 1.7f;
-                rot = baseRot; fov = baseFov + s.fovOffset;
+                rot = baseRot * roll; fov = baseFov + s.fovOffset;
                 pos = look - rot * Vector3.forward * s.distance;
                 return;
             case ProiShotType.Landing:
                 look = land + fwd * 0.3f + up * 0.9f;
-                rot = baseRot; fov = baseFov + s.fovOffset;
+                rot = baseRot * roll; fov = baseFov + s.fovOffset;
                 pos = look - rot * Vector3.forward * s.distance;
                 return;
             case ProiShotType.PillarWide:
@@ -483,14 +539,14 @@ public class ProiUltimate : MonoBehaviour
                 for (int b = -1; b <= 1; b++)
                     for (int r = 0; r < 3; r++) look += PillarPosFrom(slam, fwd, b, r);
                 look = look / 10f + up * rowHeights.z * 0.42f;
-                rot = baseRot; fov = baseFov + s.fovOffset;
+                rot = baseRot * roll; fov = baseFov + s.fovOffset;
                 pos = look - rot * Vector3.forward * s.distance;
                 return;
             default:
                 ProiQuarterViewCamera.BasePose(qcam, transform.position, out pos, out rot, out fov);
                 return;
         }
-        rot = Quaternion.LookRotation(look - pos, up);
+        rot = Quaternion.LookRotation(look - pos, up) * roll;
         fov = s.fov;
     }
 
@@ -595,7 +651,24 @@ public class ProiUltimate : MonoBehaviour
     {   // full charge: a flare at the fist
         Vector3 at = FistPoint(rHand);
         if (qcam != null) qcam.Shake(chargedShake.x, 0.3f, forward, chargedShake.y);
+        if (chargedHitStop > 0f && cinematicTime) ProiHitFeedback.HitStop(chargedHitStop);
         OnCharged?.Invoke(at);
+        if (chargeCracks.x > 0f) ChargeCracks(6, chargeCracks.z * 1.25f, 1f);
+    }
+
+    void ChargeCracks(int count, float length, float level)
+    {   // lava cracks splitting the ground round her feet, glowing until just after take-off
+        if (count <= 0 || length <= 0f) return;
+        fxFadeAt = Time.time + Mathf.Max(dashStart - time, 0f) + 0.3f;
+        Vector3 feet = transform.position;
+        for (int i = 0; i < count; i++)
+        {
+            crackAngle += count >= 6 ? 360f / count : 137.5f;           // spread round her (a full ring at full charge)
+            Vector3 dir = Quaternion.AngleAxis(crackAngle + Random.Range(-12f, 12f), Vector3.up) * forward;
+            float len = length * Random.Range(0.8f, 1.15f);
+            List<Vector3> path = JaggedPath(feet + dir * 0.25f, feet + dir * (0.25f + len), Random.Range(0f, 100f), feet.y);
+            OnCrack?.Invoke(path, crackWidth * Mathf.Lerp(0.45f, 0.8f, level), Time.time, 0.08f + 0.05f * len);
+        }
     }
 
     void Slam()
@@ -708,6 +781,7 @@ public class ProiUltimate : MonoBehaviour
         {
             nextPulse = time + chargePulseInterval * Mathf.Lerp(1.3f, 0.75f, level);
             OnChargePulse?.Invoke(FistPoint(rHand), level);
+            ChargeCracks((int)chargeCracks.x, Mathf.Lerp(chargeCracks.y, chargeCracks.z, level), level);
             if (qcam != null) qcam.Shake(Mathf.Lerp(pulseShake.x, pulseShake.y, level), 0.18f, Random.onUnitSphere,
                                          Mathf.Lerp(pulseZoom.x, pulseZoom.y, level));
         }

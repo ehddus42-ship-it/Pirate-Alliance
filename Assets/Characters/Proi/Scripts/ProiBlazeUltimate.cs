@@ -6,8 +6,9 @@ using static ProiBlazeKit;
 /// 궁극기(ProiUltimate)의 Blender 화염 VFX (D:/Blender_Test/VFX_Scripts/build_proi_ultimate_fire.py, 렌더
 /// Proi_Ultimate_FireVFX.mp4 를 게임으로 옮긴 것). 콤보 / 우클릭 기술과 같은 계열 (부품은 ProiBlazeKit).
 ///  - 두 주먹 마주침: 두 주먹에 화염이 붙고(팔뚝까지) 가운데서 섬광 + 충격파 고리.
-///  - 차징: 오른주먹 화염이 맥박마다 커지며 번쩍이고, 주먹을 도는 고리 2개, 팔뚝을 감는 나선, 빨려 드는 불씨,
-///    발밑에서 피어오르는 불꽃, 맥박마다 바닥에 퍼지는 고리.
+///  - 차징 (주인공은 주먹으로 모이는 불꽃): 사방에서 화염 줄기가 오른주먹으로 빨려 들고, 맥박마다 화염 고리가 주먹으로
+///    오므라들며, 왼주먹 불은 꺼져 오른주먹 하나에 모임. 오른주먹 화염이 맥박마다 커지며 번쩍이고, 주먹을 도는 고리 2개, 팔뚝을 감는 나선, 빨려 드는 불씨,
+///    발밑에서 피어오르는 불꽃, 맥박마다 바닥에 퍼지는 고리, 발 주변에서 떠오르는 돌 조각, 갈라지는 용암 균열(ProiUltimate 경로).
 ///  - 도약: 땅이 폭발하며 솟고, 몸 전체가 혜성처럼 불타며 오른주먹이 지나간 길에 화염 띠가 남음.
 ///    빠르게 내리꽂는 동안에는 몸을 따라 스피드라인이 뻗음.
 ///  - 땅 찍기: 가장 큰 폭발. 세 갈래 용암 균열(ProiUltimate 가 만든 경로 그대로)이 달려가 한동안 빛나다 타 사라지고,
@@ -30,6 +31,15 @@ public class ProiBlazeUltimate : MonoBehaviour
     [Tooltip("불기둥 높이 배율 (ProiUltimate 의 높이 대비)")]
     [SerializeField] float jetHeightScale = 1.1f;
     [SerializeField] float brightness = 1f;
+    [Header("차징: 불꽃이 주먹으로 모임")]
+    [Tooltip("사방에서 오른주먹으로 빨려 드는 화염 줄기: 초당 개수 (풀차지, 0 = 끔) / 출발 거리 (m) / 속도 (m/s)")]
+    [SerializeField] Vector3 gatherStreaks = new Vector3(450f, 0.85f, 3.4f);
+    [Tooltip("맥박마다 주먹으로 오므라드는 화염 고리: 시작 크기 (m, 0 = 끔) / 오므라드는 시간 (초)")]
+    [SerializeField] Vector2 implodeRing = new Vector2(0.42f, 0.24f);
+    [Tooltip("차징이 시작되면 왼주먹 불은 꺼지고 오른주먹 하나에 모임")]
+    [SerializeField] bool leftFistOutOnCharge = true;
+    [Tooltip("차징 중 발 주변에서 떠오르는 돌 조각: 초당 개수 (0 = 끔) / 최소 크기 / 최대 크기 (m)")]
+    [SerializeField] Vector3 chargeDebris = new Vector3(0f, 0.01f, 0.03f);
     [Header("빛")]
     [SerializeField] Color lightColor = new Color(1f, 0.42f, 0.1f);
     [SerializeField] float fistLight = 1.2f;
@@ -65,7 +75,11 @@ public class ProiBlazeUltimate : MonoBehaviour
     Transform[] orbitRings;
     Material[] orbitMats;
     Material spiralMat;
-    ParticleSystem suck;
+    ParticleSystem suck, gather;
+    Transform[] implode;
+    Material[] implodeMats;
+    float[] implodeT;
+    int nextImplode;
     Transform[] feetFires;
     Flame[] feetFlames;
     Vector3 feet;
@@ -74,6 +88,7 @@ public class ProiBlazeUltimate : MonoBehaviour
     readonly List<float> pulseTimes = new List<float>();
     readonly List<float> pulseLevels = new List<float>();
     Impact clash, charged;
+    ParticleSystem debris;
 
     // dive
     Transform bodyAnchor;
@@ -137,6 +152,16 @@ public class ProiBlazeUltimate : MonoBehaviour
         sh.radiusThickness = 0f;
         var sn = suck.noise;
         sn.enabled = false;
+        gather = MakeGather();
+        implode = new Transform[3];
+        implodeMats = new Material[3];
+        implodeT = new float[] { -99f, -99f, -99f };
+        for (int k = 0; k < implode.Length; k++)
+        {
+            implodeMats[k] = kit.FxMaterial("BlazeUltImplode" + k, "_MODE_RING", Row.Body, 4f);
+            implodeMats[k].SetFloat(IdSeed, 31f + k * 3f);
+            implode[k] = kit.Part("Implode" + k, "BZ_Ring", implodeMats[k], kit.Root);
+        }
         feetFires = new Transform[6];
         feetFlames = new Flame[6];
         for (int k = 0; k < 6; k++)
@@ -150,6 +175,7 @@ public class ProiBlazeUltimate : MonoBehaviour
         pulseGround = new[] { kit.MakeImpact("UltPulseGroundA", 1.5f, 0, 2.5f), kit.MakeImpact("UltPulseGroundB", 1.5f, 0, 2.5f) };
         clash = kit.MakeImpact("UltClash", 1.3f, 3, 2.5f);
         charged = kit.MakeImpact("UltCharged", 0.7f, 0, 2f);
+        debris = MakeDebris();
 
         bodyAnchor = kit.Anchor("BlazeUltBody", bodyFireScale);
         bodyWrap = kit.MakeWrap(bodyAnchor, 151f);
@@ -215,6 +241,7 @@ public class ProiBlazeUltimate : MonoBehaviour
     {
         float t = Time.time;
         pulseTimes.Add(t); pulseLevels.Add(level);
+        if (implodeRing.x > 0f) { implodeT[nextImplode] = t; nextImplode = (nextImplode + 1) % implodeT.Length; }
         Impact a = pulseFist[nextPulse], g = pulseGround[nextPulse];
         nextPulse = (nextPulse + 1) % pulseFist.Length;
         a.follow.localScale = Vector3.one * (0.25f + 0.25f * level); a.scale = 0.25f + 0.25f * level;
@@ -299,7 +326,7 @@ public class ProiBlazeUltimate : MonoBehaviour
         foreach (Ribbon r in new[] { c.a, c.b })
         {
             r.mat.SetFloat(IdRow, (int)row);
-            r.mat.SetFloat(IdHold, Mathf.Max(fadeAt - start, F) / c.reach);   // glow until the ultimate's fade time
+            r.mat.SetFloat(IdHold, Mathf.Max(ult.FxFadeAt - start, F) / c.reach);   // glow until the ultimate's fade time
             r.mat.SetFloat(IdLife, 10f * F / c.reach);                        // then burn away from the slam outward
             r.mat.SetFloat(IdHead, -1f);
         }
@@ -340,7 +367,7 @@ public class ProiBlazeUltimate : MonoBehaviour
 
         // ---- fists: both lit at the clash; the left goes out after take-off, the right carries the dive and the slam
         bool rLit = active && clashT > 0f && (slamT < 0f || t - slamT < 12f * F);
-        bool lLit = active && clashT > 0f && leapT < 0f;
+        bool lLit = active && clashT > 0f && leapT < 0f && !(leftFistOutOnCharge && st >= ult.ChargeStart + 3f * F);   // its fire goes to the right fist
         float slamBoost = slamT > 0f ? 1f - Seg(t - slamT, 0f, 8f * F) : 0f;
         float roarR = Mathf.Clamp01(level * 1.1f + kick * 0.6f + (slamT > 0f ? 1f - Smooth(Seg(t - slamT, 4f * F, 14f * F)) : 0f));
         UpdateFist(right, rLit, roarR, slamBoost, t, dt, f30, up, fwd);
@@ -372,6 +399,21 @@ public class ProiBlazeUltimate : MonoBehaviour
         suck.transform.position = fistR;
         var se = suck.emission;
         se.rateOverTime = charging && st < ult.DashStart - 4f * F ? 220f * (0.4f + 0.6f * level) : 0f;
+        gather.transform.position = fistR;                // fire streaming in from all round into the fist, thicker as it fills
+        var ge = gather.emission;
+        ge.rateOverTime = charging && st < ult.DashStart - 4f * F ? gatherStreaks.x * (0.3f + 0.7f * level) : 0f;
+        Camera view = Camera.main;
+        for (int k = 0; k < implode.Length; k++)
+        {   // a ring of fire closing in on the fist with each heartbeat, facing the camera
+            float e = (t - implodeT[k]) / Mathf.Max(implodeRing.y, 0.01f);
+            bool on = charging && e >= 0f && e < 1f;
+            implode[k].gameObject.SetActive(on);
+            if (!on) continue;
+            Vector3 n = view != null ? (view.transform.position - fistR).normalized : -fwd;
+            implode[k].SetPositionAndRotation(fistR, Quaternion.FromToRotation(Vector3.forward, n) * Quaternion.AngleAxis(k * 47f, Vector3.forward));
+            implode[k].localScale = Vector3.one * Mathf.Lerp(implodeRing.x * (0.7f + 0.3f * level), 0.04f, EaseIn(e, 2.2f));
+            implodeMats[k].SetFloat(IdFade, Smooth(Seg(e, 0f, 0.3f)) * (1f - Seg(e, 0.85f, 1f)));
+        }
         for (int k = 0; k < feetFires.Length; k++)
         {   // fire licking up round her feet: rises with the charge, dies down after take-off
             float h0 = ult.ChargeStart + k * 2f * F;
@@ -388,6 +430,9 @@ public class ProiBlazeUltimate : MonoBehaviour
             feetFlames[k].mat.SetFloat(IdIntensity, -0.9f + pk * upK - pk * down + 0.04f * Flick(t, 61f + k));
             feetFlames[k].smr.SetBlendShapeWeight(0, upK * 60f);
         }
+        debris.transform.position = feet;
+        var de = debris.emission;                       // stones lifting off the ground round her while the charge builds
+        de.rateOverTime = charging && st < ult.DashStart ? chargeDebris.x * (0.35f + 0.65f * level) : 0f;
         for (int i = 0; i < pulseFist.Length; i++)
         {
             kit.UpdateImpact(pulseFist[i], t, pulseFist[i].hitPos);
@@ -525,6 +570,99 @@ public class ProiBlazeUltimate : MonoBehaviour
     }
 
     // ================================================================ building
+
+    ParticleSystem MakeGather()
+    {   // streaks of fire from a shell round the fist, flying straight in and burning hotter as they arrive
+        ParticleSystem ps = kit.MakeEmbers("BlazeUltGather", new Color(1f, 0.5f, 0.12f), gatherStreaks.y);
+        var main = ps.main;
+        main.startSpeed = -gatherStreaks.z;
+        main.startLifetime = gatherStreaks.y / Mathf.Max(gatherStreaks.z, 0.1f) * 0.92f;   // gone just as it reaches the fist
+        main.startSize = new ParticleSystem.MinMaxCurve(0.025f, 0.05f);
+        main.gravityModifier = 0f;
+        main.maxParticles = 1500;
+        var shape = ps.shape;
+        shape.radiusThickness = 0.15f;
+        var noise = ps.noise;
+        noise.enabled = false;
+        var col = ps.colorOverLifetime;
+        var g = new Gradient();
+        g.SetKeys(new[] { new GradientColorKey(new Color(1f, 0.38f, 0.06f), 0f), new GradientColorKey(new Color(1f, 0.65f, 0.2f), 0.6f),
+                          new GradientColorKey(new Color(1f, 0.9f, 0.6f), 1f) },
+                  new[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(1f, 0.25f), new GradientAlphaKey(1f, 1f) });
+        col.color = new ParticleSystem.MinMaxGradient(g);
+        var size = ps.sizeOverLifetime;
+        size.enabled = true;
+        size.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(new Keyframe(0f, 0.5f), new Keyframe(1f, 1.2f)));
+        var r = ps.GetComponent<ParticleSystemRenderer>();
+        r.renderMode = ParticleSystemRenderMode.Stretch;               // streaks along their flight
+        r.lengthScale = 2.5f;
+        r.velocityScale = 0.07f;
+        return ps;
+    }
+
+    ParticleSystem MakeDebris()
+    {   // little rock chips floating up off the ground round her feet, tumbling, a few of them glowing hot
+        var go = new GameObject("BlazeUltDebris");
+        go.transform.SetParent(kit.Root, false);
+        var ps = go.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        var main = ps.main;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.playOnAwake = false;
+        main.maxParticles = 300;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(1.2f, 2.2f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(0.25f, 0.9f);
+        main.startSize3D = true;                                       // flat, uneven chips rather than cubes
+        main.startSizeX = new ParticleSystem.MinMaxCurve(chargeDebris.y, chargeDebris.z);
+        main.startSizeY = new ParticleSystem.MinMaxCurve(chargeDebris.y * 0.5f, chargeDebris.z * 0.6f);
+        main.startSizeZ = new ParticleSystem.MinMaxCurve(chargeDebris.y, chargeDebris.z * 0.8f);
+        main.startRotation3D = true;
+        main.startRotationX = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+        main.startRotationY = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+        main.startRotationZ = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+        main.gravityModifier = -0.03f;
+        var chips = new Gradient();                                    // mostly dark rock, a few glowing hot
+        chips.SetKeys(new[] { new GradientColorKey(new Color(0.16f, 0.11f, 0.09f), 0f), new GradientColorKey(new Color(0.3f, 0.2f, 0.15f), 0.7f),
+                              new GradientColorKey(new Color(1f, 0.42f, 0.1f), 0.72f), new GradientColorKey(new Color(1f, 0.6f, 0.2f), 1f) },
+                      new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) });
+        main.startColor = new ParticleSystem.MinMaxGradient(chips) { mode = ParticleSystemGradientMode.RandomColor };
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Circle;          // a ring on the ground round her
+        shape.radius = 1.6f;
+        shape.radiusThickness = 0.65f;
+        shape.rotation = new Vector3(-90f, 0f, 0f);
+        shape.randomDirectionAmount = 0.15f;
+        var vel = ps.velocityOverLifetime;                             // rise straight up, slowing near the top
+        vel.enabled = true;
+        vel.space = ParticleSystemSimulationSpace.World;
+        vel.x = new ParticleSystem.MinMaxCurve(0f, 0f);
+        vel.y = new ParticleSystem.MinMaxCurve(0.2f, 0.6f);
+        vel.z = new ParticleSystem.MinMaxCurve(0f, 0f);
+        var limit = ps.limitVelocityOverLifetime;
+        limit.enabled = true;
+        limit.limit = 0.9f;
+        limit.dampen = 0.08f;
+        var rot = ps.rotationOverLifetime;
+        rot.enabled = true;
+        rot.separateAxes = true;
+        rot.x = new ParticleSystem.MinMaxCurve(-3f, 3f);
+        rot.y = new ParticleSystem.MinMaxCurve(-3f, 3f);
+        rot.z = new ParticleSystem.MinMaxCurve(-3f, 3f);
+        var size = ps.sizeOverLifetime;
+        size.enabled = true;
+        size.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(0.12f, 1f),
+                                                                           new Keyframe(0.8f, 1f), new Keyframe(1f, 0f)));
+        var r = go.GetComponent<ParticleSystemRenderer>();
+        r.renderMode = ParticleSystemRenderMode.Mesh;
+        r.mesh = Resources.GetBuiltinResource<Mesh>("Cube.fbx");
+        r.alignment = ParticleSystemRenderSpace.World;
+        var mat = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit")) { name = "BlazeUltDebris" };
+        mat.enableInstancing = true;
+        r.sharedMaterial = kit.Owned(mat);
+        r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        ps.Play();
+        return ps;
+    }
 
     Fist MakeFist(string name, Transform hand, Transform forearm, float seed)
     {

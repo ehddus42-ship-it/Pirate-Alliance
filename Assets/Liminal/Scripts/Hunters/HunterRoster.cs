@@ -11,6 +11,9 @@ namespace AcRoguelike.Liminal
     /// timing and the melee swings. The scene's own model is the first hunter; HunterProfile assets under
     /// Resources/Hunters add the others. The lobby always shows the first hunter (her everyday clothes are hers), and
     /// the picked hunter comes back when the gate opens.
+    /// G (gamepad d-pad up) puts the worn hunter in her everyday clothes when her profile has them (everydayModel):
+    /// she only walks and runs (no attacks, talismans, dash or skill) until G again; a swap or the lobby dresses her
+    /// for battle again.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(PlayerMotor))]
@@ -33,6 +36,8 @@ namespace AcRoguelike.Liminal
             public Transform[] origins;
             public Transform castOrigin;
             public IHunterSkill skill;
+            public GameObject everyday;             // optional everyday outfit (same rig), worn with G
+            public Animator everydayAnimator;
         }
 
         readonly List<Hunter> hunters = new List<Hunter>();
@@ -43,24 +48,30 @@ namespace AcRoguelike.Liminal
         HunterCharacter character;
         LiminalPlayerHealth health;
         LiminalRunDirector director;
-        InputAction swap;
+        InputAction swap, outfit;
         // selected: the player's pick. current: the body on screen (the lobby always wears the first hunter).
         int selected, current;
-        bool initialized, inLobby;
-        float readyAt;
+        bool initialized, inLobby, everyday, combatLocked, casterLocked;
+        float readyAt, outfitReadyAt;
 
         public int Count { get { EnsureInitialized(); return hunters.Count; } }
         public int SelectedIndex => selected;
         public int CurrentIndex => current;
         public string CurrentName => current < hunters.Count ? hunters[current].name : FirstHunterName;
         public string CurrentId => current < hunters.Count ? hunters[current].id : null;
-        public GameObject CurrentVisual => current < hunters.Count ? hunters[current].visual : null;
-        /// <summary>The worn hunter's own skill (an ultimate on R), or null.</summary>
-        public IHunterSkill CurrentSkill => current < hunters.Count ? hunters[current].skill : null;
+        public GameObject CurrentVisual => current < hunters.Count ? (everyday ? hunters[current].everyday : hunters[current].visual) : null;
+        /// <summary>The worn hunter's own skill (an ultimate on R), or null. None in everyday clothes.</summary>
+        public IHunterSkill CurrentSkill => current < hunters.Count && !everyday ? hunters[current].skill : null;
+        /// <summary>The worn hunter has an everyday outfit (G).</summary>
+        public bool HasEveryday => current < hunters.Count && hunters[current].everyday;
+        /// <summary>In everyday clothes: moving only.</summary>
+        public bool WearsEveryday => everyday;
+        public InputAction OutfitAction => outfit;
         public int SwapCount { get; private set; }
         public float CooldownRemaining => Mathf.Max(0, readyAt - Time.time);
         public InputAction SwapAction => swap;
         public event Action Swapped;
+        public event Action OutfitChanged;
 
         /// <summary>A swap needs a gate in progress and a free body: not dashing, grabbed, thrown or down.</summary>
         public bool CanSwap
@@ -76,16 +87,34 @@ namespace AcRoguelike.Liminal
             }
         }
 
+        /// <summary>G needs a gate in progress, a hunter with everyday clothes and a free body (not attacking either).</summary>
+        public bool CanChangeOutfit
+        {
+            get
+            {
+                if (!initialized || !HasEveryday || inLobby || Time.time < outfitReadyAt || Time.timeScale <= 0) return false;
+                if (director && director.Phase != LiminalRunPhase.Exploring) return false;
+                if (!motor.isActiveAndEnabled || motor.IsDashing || motor.IsHeld || motor.IsLaunched) return false;
+                if (combat && combat.isActiveAndEnabled && combat.IsAttacking) return false;
+                var skill = CurrentSkill;
+                if (skill != null && skill.Busy) return false;
+                return !health || health.IsAlive;
+            }
+        }
+
         void Awake()
         {
             swap = new InputAction("SwapHunter", InputActionType.Button);
             swap.AddBinding("<Keyboard>/f");
             swap.AddBinding("<Gamepad>/buttonNorth");
+            outfit = new InputAction("ChangeOutfit", InputActionType.Button);
+            outfit.AddBinding("<Keyboard>/g");
+            outfit.AddBinding("<Gamepad>/dpad/up");
         }
 
-        void OnEnable() => swap?.Enable();
-        void OnDisable() => swap?.Disable();
-        void OnDestroy() => swap?.Dispose();
+        void OnEnable() { swap?.Enable(); outfit?.Enable(); }
+        void OnDisable() { swap?.Disable(); outfit?.Disable(); }
+        void OnDestroy() { swap?.Dispose(); outfit?.Dispose(); }
         void Start() => EnsureInitialized();
 
         public void Bind(LiminalRunDirector run)
@@ -97,6 +126,17 @@ namespace AcRoguelike.Liminal
         void Update()
         {
             if (initialized && Application.isFocused && swap.WasPressedThisFrame()) TrySwap();
+            if (initialized && Application.isFocused && outfit.WasPressedThisFrame()) TryChangeOutfit();
+        }
+
+        /// <summary>G: everyday clothes on / off for the worn hunter, when CanChangeOutfit allows it.</summary>
+        public bool TryChangeOutfit()
+        {
+            EnsureInitialized();
+            if (!CanChangeOutfit) return false;
+            SetEveryday(!everyday, true);
+            outfitReadyAt = Time.time + swapCooldown;
+            return true;
         }
 
         /// <summary>The next hunter in the roster, when CanSwap allows it.</summary>
@@ -201,6 +241,27 @@ namespace AcRoguelike.Liminal
             MatchHeight(visual.transform, profile.headBone, first);
             profile.Configure(visual, animator);
 
+            GameObject everydayVisual = null;
+            Animator everydayAnimator = null;
+            if (profile.everydayModel && profile.everydayController)
+            {
+                everydayVisual = Instantiate(profile.everydayModel, transform);
+                everydayVisual.SetActive(false);
+                everydayVisual.name = "Hunter_" + profile.characterId + "_Everyday";
+                everydayVisual.transform.localPosition = first.visual.transform.localPosition;
+                everydayVisual.transform.localRotation = Quaternion.identity;
+                SetLayer(everydayVisual.transform, first.visual.layer);
+                foreach (var collider in everydayVisual.GetComponentsInChildren<Collider>(true)) Destroy(collider);
+                everydayAnimator = everydayVisual.GetComponent<Animator>();
+                if (!everydayAnimator) everydayAnimator = everydayVisual.AddComponent<Animator>();
+                everydayAnimator.runtimeAnimatorController = profile.everydayController;
+                everydayAnimator.applyRootMotion = false;
+                everydayAnimator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+                foreach (var skin in everydayVisual.GetComponentsInChildren<SkinnedMeshRenderer>(true)) skin.updateWhenOffscreen = true;
+                MatchHeight(everydayVisual.transform, profile.headBone, first);
+                profile.ConfigureEveryday(everydayVisual, everydayAnimator);
+            }
+
             var castOrigin = new GameObject("Hunter Cast Origin").transform;
             castOrigin.SetParent(visual.transform, false);
             castOrigin.localPosition = new Vector3(0, 1.2f, .3f) / Mathf.Max(.01f, visual.transform.localScale.y);
@@ -222,6 +283,8 @@ namespace AcRoguelike.Liminal
                 origins = origins ?? new Transform[0],
                 castOrigin = castOrigin,
                 skill = visual.GetComponent<IHunterSkill>(),
+                everyday = everydayVisual,
+                everydayAnimator = everydayAnimator,
             };
         }
 
@@ -230,13 +293,20 @@ namespace AcRoguelike.Liminal
             if (index < 0 || index >= hunters.Count) return;
             var to = hunters[index];
             bool changed = index != current;
+            if (everyday && !changed) SetEveryday(false, false);
             if (changed)
             {
                 var from = hunters[current];
                 // Motor and combat turn the visual, not the root: the new body takes over the old facing.
                 Quaternion facing = motor.visual ? motor.visual.rotation : transform.rotation;
                 if (combat) combat.CancelAttack(false);
-                if (effects) SwapEffects(from);
+                if (effects) SwapEffects(everyday ? from.everyday : from.visual);
+                if (everyday)
+                {   // the leaving hunter was in her everyday clothes: those go, she is back in her battle body next time
+                    from.everyday.SetActive(false);
+                    everyday = false;
+                    ApplyActionLock();
+                }
                 from.visual.SetActive(false);
                 to.visual.transform.rotation = facing;
                 to.visual.SetActive(true);
@@ -249,6 +319,63 @@ namespace AcRoguelike.Liminal
             character.characterId = to.id;
             character.displayName = to.name;
             if (changed) Swapped?.Invoke();
+        }
+
+        /// <summary>Puts the worn hunter into (or out of) her everyday clothes: same place and facing, moving only.</summary>
+        void SetEveryday(bool on, bool effects)
+        {
+            var hunter = current < hunters.Count ? hunters[current] : null;
+            if (hunter == null || !hunter.everyday || on == everyday) return;
+            var from = on ? hunter.visual : hunter.everyday;
+            var to = on ? hunter.everyday : hunter.visual;
+            Quaternion facing = motor.visual ? motor.visual.rotation : transform.rotation;
+            if (combat) combat.CancelAttack(false);
+            if (effects) OutfitEffects(from);
+            float speed = motor.animator && HasFloat(motor.animator, SpeedParameter) ? motor.animator.GetFloat(SpeedParameter) : 0;
+            from.SetActive(false);
+            to.transform.rotation = facing;
+            to.SetActive(true);
+            motor.visual = to.transform;
+            motor.animator = on ? hunter.everydayAnimator : hunter.animator;
+            if (motor.animator && HasFloat(motor.animator, SpeedParameter)) motor.animator.SetFloat(SpeedParameter, speed);
+            everyday = on;
+            ApplyActionLock();
+            if (melee) melee.ResetBodyCache();
+            OutfitChanged?.Invoke();
+            Swapped?.Invoke();
+        }
+
+        /// <summary>Everyday clothes: no attacks (melee combo and talismans) and no dash; moving is untouched.</summary>
+        void ApplyActionLock()
+        {
+            if (combat)
+            {
+                if (everyday && combat.enabled) { combat.enabled = false; combatLocked = true; }
+                else if (!everyday && combatLocked) { combat.enabled = true; combatLocked = false; }
+            }
+            if (caster)
+            {
+                if (everyday && caster.enabled) { caster.enabled = false; casterLocked = true; }
+                else if (!everyday && casterLocked) { caster.enabled = true; casterLocked = false; }
+            }
+            motor.DashLocked = everyday;
+        }
+
+        static readonly int SpeedParameter = Animator.StringToHash("Speed");
+
+        static bool HasFloat(Animator animator, int id)
+        {
+            if (!animator.runtimeAnimatorController || !animator.isActiveAndEnabled) return false;
+            foreach (var parameter in animator.parameters)
+                if (parameter.nameHash == id && parameter.type == AnimatorControllerParameterType.Float) return true;
+            return false;
+        }
+
+        /// <summary>A quick change of clothes: a soft puff of dust and a pale afterimage of the old outfit.</summary>
+        void OutfitEffects(GameObject from)
+        {
+            HitFeedback.Afterimage(from.GetComponentsInChildren<SkinnedMeshRenderer>(), new Color(1, .95f, .9f, .5f), .3f);
+            HitFeedback.Dust(transform.position + Vector3.up * .05f, .8f);
         }
 
         void ApplyCombo(Hunter hunter)
@@ -274,9 +401,9 @@ namespace AcRoguelike.Liminal
         }
 
         /// <summary>The leaving hunter fades out as a violet afterimage while the new one steps in.</summary>
-        void SwapEffects(Hunter from)
+        void SwapEffects(GameObject leaving)
         {
-            HitFeedback.Afterimage(from.visual.GetComponentsInChildren<SkinnedMeshRenderer>(), HitFeedback.Violet * .75f, .4f);
+            HitFeedback.Afterimage(leaving.GetComponentsInChildren<SkinnedMeshRenderer>(), HitFeedback.Violet * .75f, .4f);
             Vector3 feet = transform.position + Vector3.up * .05f;
             HitFeedback.Dust(feet, 1.1f);
             HitFeedback.Sparks(transform.position + Vector3.up, Vector3.up, 12, .9f);

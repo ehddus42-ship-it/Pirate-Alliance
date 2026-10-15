@@ -58,6 +58,8 @@ namespace AcRoguelike
         public float Stamina { get; private set; } = 3;
         /// <summary>Out of combat dashes cost nothing (set by the run director) and the gauge stays full.</summary>
         public bool StaminaFree { get; set; }
+        /// <summary>No dashing at all (HunterRoster: a hunter in her everyday clothes only walks and runs).</summary>
+        public bool DashLocked { get; set; }
         public Vector3 AimPoint { get; private set; }
         public Vector3 PlanarVelocity { get; private set; }
         public int DashCount { get; private set; }
@@ -196,6 +198,7 @@ namespace AcRoguelike
             if (automated) AimPoint = automatedAim;
             else if (Application.isFocused) UpdateAim(input);
             if (!Application.isFocused && !automated) { input = Vector2.zero; wantsDash = false; }
+            if (DashLocked) wantsDash = false;
             Vector3 desired = CameraRelative(input, viewCamera ? viewCamera.transform : null);
             float targetSpeed = walking ? Mathf.Min(walkSpeed, moveSpeed) : moveSpeed;
             if (combat && combat.IsAttacking) targetSpeed *= combat.MovementMultiplier;

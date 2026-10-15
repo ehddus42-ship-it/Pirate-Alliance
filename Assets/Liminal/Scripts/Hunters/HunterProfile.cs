@@ -7,6 +7,7 @@ namespace AcRoguelike.Liminal
     /// every profile under Resources/Hunters adds one more. A hunter is a body and a combo on the one player:
     /// PlayerMotor, health, augments and lobby upgrades stay, only the model, its Animator and the melee combo change.
     /// The Animator controller needs Base Layer states Locomotion (float Speed 0..1), Attack1.. per swing and Dash.
+    /// An optional everyday outfit (everydayModel) is worn with G: the same hunter, moving only.
     /// </summary>
     public class HunterProfile : ScriptableObject
     {
@@ -31,8 +32,17 @@ namespace AcRoguelike.Liminal
         [Tooltip("Katana look (the sword, slash arcs and petals). Off for unarmed hunters.")]
         public bool blade;
 
+        [Header("Everyday outfit (G, optional)")]
+        [Tooltip("The same hunter in her everyday clothes (same rig). G switches to it inside a gate: she only walks and runs, no attacks, dash or skill.")]
+        public GameObject everydayModel;
+        [Tooltip("Locomotion (float Speed 0..1) for the everyday model.")]
+        public RuntimeAnimatorController everydayController;
+
         /// <summary>Adds the hunter's own components to the freshly spawned model (still inactive).</summary>
         public virtual void Configure(GameObject visual, Animator animator) { }
+
+        /// <summary>Adds the everyday outfit's own components to its freshly spawned model (still inactive).</summary>
+        public virtual void ConfigureEveryday(GameObject visual, Animator animator) { }
 
         /// <summary>Cast and line-of-sight origin per swing; null keeps a chest-height origin on the model.</summary>
         public virtual Transform[] AttackOrigins(GameObject visual, Animator animator) => null;

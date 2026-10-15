@@ -6,6 +6,7 @@ using UnityEngine;
 /// 플레이 가능한 헌터 Proi (게이트 안에서 F 로 교체). 에셋은 Resources/Hunters 에 있어야 HunterRoster 가 찾습니다.
 /// 맨손 3타 콤보: 1) 왼주먹 잽  2) 오른주먹  3) 뒤돌아 왼발 옆차기 (넓게 휘두르는 마무리).
 /// 궁극기 (R): 화염 차징 → 아치 점프 → 땅 찍기 → 세 갈래 불기둥 (ProiHunterUltimate).
+/// 일상복 (G): everydayModel = Proi_General (같은 리그) — 이동만 하고 서 있을 땐 손을 모은 자세, 달릴 땐 주먹 쥐고 소심하게.
 /// 콤보 타이밍은 클립에서 계산 (ProiHunterKit), 데미지 / 사거리 / 히트스톱은 아래 swings 로 조절합니다.
 /// </summary>
 [CreateAssetMenu(menuName = "Pirate Alliance/Hunters/Proi", fileName = "Proi")]
@@ -49,6 +50,12 @@ public sealed class ProiHunterProfile : HunterProfile
         ultimate.cinematicTime = false;
         visual.AddComponent<ProiBlazeUltimate>();
         visual.AddComponent<ProiHunterUltimate>();
+    }
+
+    public override void ConfigureEveryday(GameObject visual, Animator animator)
+    {
+        visual.AddComponent<ProiGeneralHands>();        // 손가락 구부림 / 달릴 때 주먹 (Fist 블렌드셰이프)
+        visual.AddComponent<ProiGeneralHunterKit>();    // Run 재생 속도를 이동 속도에 맞춤
     }
 
     /// <summary>각 타의 판정 기준점: 1타 왼손, 2타 오른손, 3타 왼발.</summary>

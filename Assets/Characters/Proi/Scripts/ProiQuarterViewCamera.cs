@@ -1,6 +1,10 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>카메라 이동 가감속: EaseOut = 빠르게 들어가 끝에서 멈추듯 (명조식 컷 무빙), Smooth = 천천히 출발 / 도착,
+/// EaseIn = 천천히 출발해 끝에서 빠르게 (임팩트 직전), Linear = 일정, EaseInOut = 확 가속했다가 확 감속 (Smooth 보다 강한 가감속).</summary>
+public enum ProiEase { EaseOut, Smooth, EaseIn, Linear, EaseInOut }
+
 /// <summary>
 /// 쿼터뷰 카메라: 대상을 비스듬한 위쪽에서 고정 각도로 내려다보며 부드럽게 따라갑니다.
 /// 마우스 휠 = 줌, E = 시점 회전 (Q 는 궁극기). Shake() = 타격 시 카메라 흔들림 (실제 시간 기준이라 히트스톱 중에도 흔들림).
@@ -41,11 +45,32 @@ public class ProiQuarterViewCamera : MonoBehaviour
     Vector3 cinePos, cineFromPos;
     Quaternion cineRot = Quaternion.identity, cineFromRot = Quaternion.identity;
     float cineFov, cineFromFov, cineWeight, cineTarget, cineBlend = 0.3f, cineMove = 1f, cineMoveTime = 0.3f;
+    ProiEase cineEase = ProiEase.Smooth;
+    PoseFn cineLive;
+
+    /// <summary>연출 시점을 매 프레임 계산하는 함수 (캐릭터 뼈를 따라가는 샷 / 클립 동안 움직이는 샷).</summary>
+    public delegate void PoseFn(out Vector3 position, out Quaternion rotation, out float fov);
+
+    /// <summary>0..1 진행도에 가감속을 적용합니다.</summary>
+    public static float Ease(ProiEase ease, float x)
+    {
+        x = Mathf.Clamp01(x);
+        switch (ease)
+        {
+            case ProiEase.EaseOut: return 1f - (1f - x) * (1f - x) * (1f - x);
+            case ProiEase.EaseIn: return x * x * x;
+            case ProiEase.Linear: return x;
+            case ProiEase.EaseInOut: return x < 0.5f ? 16f * x * x * x * x * x : 1f - Mathf.Pow(-2f * x + 2f, 5f) * 0.5f;
+            default: return Mathf.SmoothStep(0f, 1f, x);
+        }
+    }
 
     /// <summary>연출 시점으로 blendTime(초, 실제 시간) 동안 부드럽게 이동. 이미 연출 시점이면 그 시점에서 새 시점으로 이어서 이동
     /// (예: 정면샷 -> 주먹으로 천천히 다가가는 샷). 흔들림은 그대로 적용됩니다.</summary>
-    public void SetCinematic(Vector3 position, Quaternion rotation, float fov, float blendTime)
+    public void SetCinematic(Vector3 position, Quaternion rotation, float fov, float blendTime, ProiEase ease = ProiEase.Smooth)
     {
+        cineLive = null;
+        cineEase = ease;
         if (cineWeight > 0f)
         {   // already on a cinematic shot: move on from where the camera is now
             CinePose(out cineFromPos, out cineFromRot, out cineFromFov);
@@ -57,9 +82,17 @@ public class ProiQuarterViewCamera : MonoBehaviour
         cineTarget = 1f; cineBlend = Mathf.Max(blendTime, 0.01f);
     }
 
+    /// <summary>SetCinematic 과 같지만, 도착 구도를 live 가 매 프레임(LateUpdate, 애니메이션이 자세를 잡은 뒤) 계산합니다.</summary>
+    public void SetCinematic(PoseFn live, float blendTime, ProiEase ease = ProiEase.EaseOut)
+    {
+        live(out Vector3 pos, out Quaternion rot, out float fov);
+        SetCinematic(pos, rot, fov, blendTime, ease);
+        cineLive = live;
+    }
+
     void CinePose(out Vector3 pos, out Quaternion rot, out float fov)
     {
-        float m = Mathf.SmoothStep(0f, 1f, cineMove);
+        float m = Ease(cineEase, cineMove);
         pos = Vector3.Lerp(cineFromPos, cinePos, m);
         rot = Quaternion.Slerp(cineFromRot, cineRot, m);
         fov = Mathf.Lerp(cineFromFov, cineFov, m);
@@ -85,6 +118,7 @@ public class ProiQuarterViewCamera : MonoBehaviour
     /// <summary>기본 쿼터뷰 구도로 blendTime(초, 실제 시간) 동안 부드럽게 복귀.</summary>
     public void ClearCinematic(float blendTime)
     {
+        cineLive = null;
         cineTarget = 0f; cineBlend = Mathf.Max(blendTime, 0.01f);
     }
 
@@ -160,6 +194,7 @@ public class ProiQuarterViewCamera : MonoBehaviour
 
         cineWeight = Mathf.MoveTowards(cineWeight, cineTarget, ProiClock.Delta / cineBlend);
         cineMove = Mathf.MoveTowards(cineMove, 1f, ProiClock.Delta / cineMoveTime);
+        cineLive?.Invoke(out cinePos, out cineRot, out cineFov);
         CinePose(out Vector3 cPos, out Quaternion cRot, out float cFov);
         if (cam != null)
         {

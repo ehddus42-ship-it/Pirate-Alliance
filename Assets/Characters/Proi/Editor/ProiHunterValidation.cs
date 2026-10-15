@@ -11,8 +11,9 @@ using Object = UnityEngine.Object;
 
 /// <summary>
 /// 게임 안 Proi (헌터 교체) 배치 검증: LiminalRun 씬을 실제로 재생해서
-/// 교체(F) → 몸 / 애니메이터 / 콤보 설정 → 3타 콤보가 적에게 데미지 → 대쉬 후 이동 동작 복귀 → 궁극기(R) 피해 / 입력 잠금 / 배속 →
-/// 다시 교체 → 로비 왕복(로비는 아스트라이아, 게이트에서 선택 복원)
+/// 교체(F) → 몸 / 애니메이터 / 콤보 설정 → 3타 콤보가 적에게 데미지 → 대쉬 후 이동 동작 복귀 →
+/// 일상복(G): 몸 / 애니메이터 교체, 공격 / 대쉬 / R 잠금, 달리기 → 다시 G 로 전투복 → 궁극기(R) 피해 / 입력 잠금 / 배속 →
+/// 일상복 차림에서 다시 교체(F) → 로비 왕복(로비는 아스트라이아, 게이트에서 선택한 Proi 는 전투복)
 /// 을 확인하고 Documentation/Proi/ 에 보고서와 화면을 남깁니다.
 /// Unity -batchmode -projectPath . -executeMethod ProiHunterValidation.RunBatch -logFile Logs/proi-hunter.log
 /// </summary>
@@ -235,6 +236,45 @@ public static class ProiHunterValidation
         yield return Seconds(motor.dashDuration + .5f);
         Check(motor.DashCount == dashes + 1 && Current(animator) == LocomotionState, "dash plays and hands back to locomotion");
 
+        // ---- everyday clothes (G): the same Proi, moving only
+        Check(roster.HasEveryday && !roster.WearsEveryday, "Proi has everyday clothes (G)");
+        yield return Until(() => roster.CanChangeOutfit, 3, "outfit change allowed");
+        Check(roster.TryChangeOutfit(), "G puts on the everyday clothes");
+        var daily = motor.visual.gameObject;
+        var dailyAnimator = motor.animator;
+        Check(daily != proi && daily.activeInHierarchy && !proi.activeSelf && roster.WearsEveryday, $"everyday body worn ({daily.name}), battle body hidden");
+        Check(dailyAnimator && dailyAnimator.runtimeAnimatorController && dailyAnimator.runtimeAnimatorController.name == "Proi_General",
+            "PlayerMotor drives the everyday Animator (Proi_General.controller)");
+        Check(roster.CurrentSkill == null && !combat.enabled && motor.DashLocked, "no R skill, attacks or dash in everyday clothes");
+        Check(daily.GetComponent<ProiGeneralHands>() && daily.GetComponent<ProiGeneralHunterKit>(), "everyday hands and run kit are on the body");
+        Check(!roster.TryChangeOutfit(), "outfit cooldown blocks an immediate second change");
+        motor.ResetAt(Arena + Vector3.up * .05f);
+        motor.visual.rotation = Quaternion.LookRotation(Vector3.forward);
+        motor.SetAutomationInput(Vector2.zero, Arena + Vector3.forward * 5);
+        yield return Seconds(.6f);
+        var dailyHead = ProiBlazeKit.FindDeep(daily.transform, "Head");
+        float dailyRatio = dailyHead ? (dailyHead.position.y - Arena.y) / Mathf.Max(.01f, astraiaHead.position.y - Arena.y) : 0;
+        Check(dailyRatio > .85f && dailyRatio < 1.15f, $"everyday Proi's head sits at Astraia's height (ratio {dailyRatio:F2})");
+        Capture("proi_ingame_everyday_idle.png", report);
+        int dailyAttacks = combat.AttackCount, dailyDashes = motor.DashCount;
+        combat.SetAutomationInput(true, true);
+        motor.SetAutomationInput(Vector2.up, Arena + Vector3.forward * 8, true);
+        yield return null;
+        motor.SetAutomationInput(Vector2.up, Arena + Vector3.forward * 8, true);
+        yield return Seconds(.7f);
+        Check(combat.AttackCount == dailyAttacks && motor.DashCount == dailyDashes, "attack and dash presses do nothing in everyday clothes");
+        Check(motor.PlanarVelocity.magnitude > motor.moveSpeed * .8f && dailyAnimator.GetFloat("Speed") > .6f,
+            $"everyday Proi runs with the run blend (speed {motor.PlanarVelocity.magnitude:F2} m/s, Speed {dailyAnimator.GetFloat("Speed"):F2})");
+        Capture("proi_ingame_everyday_run.png", report);
+        combat.ReleaseAutomation();
+        motor.ResetAt(Arena + Vector3.up * .05f);
+        motor.SetAutomationInput(Vector2.zero, Arena + Vector3.forward * 5);
+        yield return Seconds(.3f);
+        yield return Until(() => roster.CanChangeOutfit, 3, "outfit change allowed again");
+        Check(roster.TryChangeOutfit() && motor.visual.gameObject == proi && motor.animator == animator && !daily.activeSelf && !roster.WearsEveryday,
+            "G again: battle clothes back");
+        Check(combat.enabled && !motor.DashLocked && roster.CurrentSkill != null, "attacks, dash and R skill are back");
+
         // ---- ultimate (R): charge, arch jump, slam, three branches of fire pillars
         var ultimate = proi.GetComponent<ProiHunterUltimate>();
         var ultCore = proi.GetComponent<ProiUltimate>();
@@ -284,9 +324,13 @@ public static class ProiHunterValidation
             $"control and locomotion come back ({motor.PlanarVelocity.magnitude:F2} m/s)");
         motor.SetAutomationInput(Vector2.zero, Arena + Vector3.forward * 5);
 
-        // ---- swap back
+        // ---- swap back from the everyday clothes
+        yield return Until(() => roster.CanChangeOutfit, 3, "outfit change allowed before swapping");
+        Check(roster.TryChangeOutfit() && roster.WearsEveryday, "G: everyday clothes before swapping out");
         yield return Until(() => roster.CanSwap, 3, "swap cooldown over");
-        Check(roster.TrySwap() && motor.visual.gameObject == astraia && !proi.activeSelf, "F again: Astraia is back");
+        Check(roster.TrySwap() && motor.visual.gameObject == astraia && !proi.activeSelf && !daily.activeSelf && !roster.WearsEveryday,
+            "F again: Astraia is back, both Proi outfits hidden");
+        Check(combat.enabled && !motor.DashLocked, "attacks and dash unlocked for Astraia");
         Check(combat.ComboLength == astraiaCombo && melee.bladeEffects, "katana combo restored");
         var fxRoot = GameObject.Find("ProiBlazeFX");
         Check(!fxRoot || !fxRoot.activeInHierarchy, "Proi's fire effects are hidden with her");

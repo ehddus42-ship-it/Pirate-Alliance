@@ -66,6 +66,9 @@ public class ProiPlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>이동 블렌드(Speed)를 받는 Animator. 캐릭터 전환(ProiCharacterSwitcher) 시 교체됩니다.</summary>
+    public Animator Animator { get => animator; set => animator = value; }
+
     /// <summary>카메라 기준 이동 입력 방향 (월드, 크기 0~1). 공격을 시작할 때 바라볼 방향으로 씁니다.</summary>
     public Vector3 MoveInputWorld { get; private set; }
 
