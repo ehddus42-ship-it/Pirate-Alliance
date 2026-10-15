@@ -22,6 +22,10 @@ namespace AcRoguelike.Liminal
         [Tooltip("Rigged model (feet at the origin, facing +Z). Spawned under the player and switched on by the roster.")]
         public GameObject model;
         public RuntimeAnimatorController controller;
+        [Tooltip("Optional lobby appearance. The hunter keeps this profile's identity and wears the referenced body only in the lobby. Store it outside Resources/Hunters.")]
+        public HunterProfile lobbyForm;
+        [Tooltip("Previous saved selection IDs that should migrate to this hunter's characterId.")]
+        public string[] previousCharacterIds = System.Array.Empty<string>();
         [Tooltip("Movement preview only: no dash, attack, hunter skill or support skill. A controller is optional for procedural animation.")]
         public bool movementOnly;
         [Tooltip("Keep the dash on a movement-only hunter, for a body with its own dash motion (Namgung Luna's battle form leaps).")]

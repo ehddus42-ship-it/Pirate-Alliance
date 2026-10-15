@@ -4,15 +4,16 @@ URP Toon 캐릭터 + Magica Cloth 2 옷·머리 물리 설정.
 
 ## stage_capture 통합 (2026-10-15)
 
-- `Assets/Liminal/Scenes/LiminalRun.unity`를 재생하고 로비 편성에서 **남궁루나 · 평시 / 남궁루나 · 전시**를 선택합니다. 게이트 안에서는 기존 **F** 캐릭터 교체에도 두 상태가 포함됩니다.
+- `Assets/Liminal/Scenes/LiminalRun.unity`를 재생하고 로비 편성에서 **남궁루나**를 선택합니다. 선택 목록과 **F** 캐릭터 교체에는 남궁루나 한 명만 포함됩니다. 로비에서는 평시 모습으로, 게이트에 들어가면 전시 모습으로 자동 전환하고 로비로 돌아오면 다시 평시가 됩니다.
 - 두 상태 모두 공격·부적·헌터 스킬·지원 스킬이 없는 **이동 전용**입니다. WASD / 게임패드 왼쪽 스틱으로 이동하고 Ctrl로 천천히 걷습니다. 기존 캐릭터로 교체하면 원래 기능이 돌아옵니다.
 - **전시는 게임 대시(Space / 왼쪽 Shift)를 그대로 씁니다**(프로필 `keepDash`). 공용 `PlayerMotor`의 대시(13 m/s × 0.19 s, 스태미나 3칸)로 실제 이동하고, 몸은 콜롬비나의 도약 모션으로 0.3초 동안 떠서 날았다가 착지 물결과 함께 내려옵니다(`LunaMoonGait.dashLeapSeconds`). 대시 칸 HUD도 보입니다. 평시는 대시도 막습니다.
 - 평시는 과거 `남궁루나_일상.png` 일러스트에서 Meshy로 모델과 리그를 만들고, 새로 생성한 단정한 걷기를 제자리 순환 모션으로 편집했습니다. 대기 자세도 포함합니다. `Peaceful/`에 모델·모션 원본, `Stage/`에 게임용 프리팹·클립·컨트롤러가 있습니다.
 - 평시 기본 이동은 0.65 m/s, Ctrl 걷기는 0.4 m/s입니다. 공용 모터의 정규화 속도에 맞춰 걷기 재생률도 함께 낮춥니다. 전시는 기존 부유 이동 속도 4.2 / 2.1 m/s를 사용합니다.
 - 실제 평시 프리팹은 `LunaPeaceful_Game.fbx`, `LunaPeacefulWalk_Game.fbx`, `LunaPeacefulIdle_Game.fbx`를 사용합니다. 자동 리깅의 얼굴·베일·치마 가중치를 보정하고 신발 제어 뼈 두 개를 추가했습니다. 보정 재현은 `Tools/NamgungLuna/build_peaceful_game_rig.py`, 결과는 `Documentation/NamgungLuna/DeformationQA/game_export_validation.json`에 있습니다.
 - 전시는 `feature/namgungluna-character`의 `a088201` 자산과 GUID를 유지하여 가져왔습니다. `Stage/NamgungLuna_Battle.prefab`은 기존 부유 모션을 게임의 공용 이동 모터에 연결합니다.
-- 프로필은 `Assets/Liminal/Resources/Hunters/NamgungLunaPeaceful.asset`와 `NamgungLunaBattle.asset`입니다. 기존 씬이 이 프로필들을 자동으로 불러옵니다.
-- 재설치는 `Tools > Namgung Luna > Stage Capture`, 실제 플레이 검증은 같은 메뉴의 `Validate Both Forms`를 사용합니다. 검증 결과와 화면은 `Documentation/NamgungLuna/Validation/`에 저장됩니다. 기존 선택 캐릭터와 편집 씬은 검증 종료 후 복원됩니다.
+- 선택용 프로필은 `Assets/Liminal/Resources/Hunters/NamgungLuna.asset` 하나이며 ID는 `namgung_luna`입니다. 평시 프로필은 `Stage/Profiles/NamgungLunaPeaceful.asset`에 두고 메인의 `lobbyForm`으로 연결합니다. 평시 내부 ID `namgung_luna_peace`는 유지하며, 이전 평시·전시 선택 저장값은 `previousCharacterIds`를 통해 남궁루나로 이어집니다.
+- 기존 두 프로필을 정리할 때는 `Tools > Namgung Luna > Stage Capture > Install Unified Hunter`를 사용합니다. 기존 파일을 이동해 GUID를 유지하고 모델·모션은 다시 생성하지 않습니다. `Install Battle Movement`와 `Install Peaceful Movement`를 다시 실행해도 같은 단일 선택 프로필과 평시 연결을 갱신합니다.
+- 실제 플레이 검증은 같은 메뉴의 `Validate Both Forms`를 사용합니다. 검증 결과와 화면은 `Documentation/NamgungLuna/Validation/`에 저장됩니다. 기존 선택 캐릭터와 편집 씬은 검증 종료 후 복원됩니다.
 - 생성 이력은 `Documentation/NamgungLuna/peaceful_*_meshy.json`과 `peaceful_walk_retarget.json`에 기록했습니다. 모델·리깅·걷기·리타깃 생성에 Meshy 48크레딧을 사용했습니다. `Tools/NamgungLuna/`의 요청 스크립트는 저장된 작업 ID를 재사용하며 API 키와 다운로드 서명 URL은 문서에 저장하지 않습니다.
 - 아래의 대시 수치(0.3초 · 3 m)와 자동 시연은 전시 **단독 데모 씬**(`LunaMoonMotor`) 기준입니다. 게임 안에서는 위의 공용 대시를 따릅니다.
 
@@ -53,7 +54,7 @@ URP Toon 캐릭터 + Magica Cloth 2 옷·머리 물리 설정.
 | 대쉬 (Space / 왼쪽 Shift) | 0.3초 동안 3 m. 몸이 최고 32 cm 떠올라 다리를 접고 앞으로 엎드리듯 날았다가 뻗으며 착지. 시작 때 큰 빛 폭발·반짝임, 착지 물결. 루트(충돌)는 바닥을 따라 이동 |
 | 대쉬 규칙 | 게임 회피(`PlayerMotor`)와 같음: 스태미나 3칸, 칸당 0.85초 회복(마지막 대쉬 0.3초 뒤부터), 대쉬 사이 최소 0.3초 |
 | 몸 | 회전 방향으로 기울기(뱅크), 가속·감속에 따라 앞뒤 기울기, 걸음마다 좌우 흔들림 |
-| 소품 | 랜턴은 손잡이에 매달린 진자처럼 흔들리고, 등 뒤 보름달은 조금 늦게 따라오며 천천히 자전 |
+| 소품 | 랜턴은 손잡이 기준 최대 14° 안에서 부드럽게 기울고 빠르게 안정됨. 급회전·대시에서 관성이 누적되지 않으며, 방 이동·재활성화 때 이력을 초기화. 등 뒤 보름달은 조금 늦게 따라오며 천천히 자전 |
 | 옷·머리 | 치마가 골반 위에 걸치고, 다리(허벅지·정강이·발) 콜라이더가 치마를 안쪽에서 참. 이동 풍(movingWind)으로 머리와 치맛단이 뒤로 날림 |
 
 - 구조: 프리팹 루트(이동) → `Visual`(부유·기울기) → 모델 / Magica 콜라이더·클로스. 랜턴(`LanternPivot`)과 달(`MoonPivot`)은 별도 피벗입니다.

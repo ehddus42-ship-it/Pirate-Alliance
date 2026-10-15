@@ -152,8 +152,10 @@ namespace NamgungLuna.Motion
         public float moonBob = 0.03f;
         [Tooltip("달 자전 (도/s)")]
         public float moonSpin = 7f;
-        public float lanternDamping = 0.985f;
-        public float lanternMaxAngle = 55f;
+        [Tooltip("랜턴 기울기가 안정되는 시간 (s). 손에 든 랜턴의 작은 관성만 유지합니다")]
+        [Min(0.05f)] public float lanternSmoothTime = 0.24f;
+        [Tooltip("손잡이 기준 랜턴의 최대 기울기 (도)")]
+        [Range(0f, 45f)] public float lanternMaxAngle = 14f;
 
         public event Action<LunaGaitEvent> GaitEvent;
 
@@ -210,7 +212,7 @@ namespace NamgungLuna.Motion
         float dip, dipVelocity, lunge, lungeVelocity, clock;
         int pendingStepFoot = -1;
         Quaternion hipRestL, kneeRestL, ankleRestL, hipRestR, kneeRestR, ankleRestR, lanternRest;
-        Vector3 lanternMass, lanternMassPrevious, lanternRestDir;
+        Vector3 lanternRestDir, lanternGravityRest, lanternTilt, lanternTiltVelocity, lanternLastPosition;
         bool lanternReady, initialized;
         Vector3 moonRestRoot, moonPosition, moonVelocity;
         Quaternion moonRestRotation;
@@ -226,6 +228,7 @@ namespace NamgungLuna.Motion
             {
                 lanternRest = lantern.localRotation;
                 lanternRestDir = (lanternRest * lanternCenterLocal).normalized;
+                lanternGravityRest = lantern.parent != null ? lantern.parent.InverseTransformDirection(Vector3.down) : Vector3.down;
             }
             if (moon != null)
             {
@@ -271,6 +274,13 @@ namespace NamgungLuna.Motion
         void ReadMotion(float dt)
         {
             Vector3 position = transform.position;
+            bool teleported = initialized && (position - lastPosition).sqrMagnitude > 9f;
+            if (teleported)
+            {
+                // Room changes are not acceleration. Discard the old movement and lantern history.
+                planarVelocity = smoothedAccel = Vector3.zero;
+                lanternReady = false;
+            }
             Vector3 velocity;
             if (source != null)
             {
@@ -279,7 +289,7 @@ namespace NamgungLuna.Motion
             }
             else
             {
-                velocity = initialized ? (position - lastPosition) / dt : Vector3.zero;
+                velocity = initialized && !teleported ? (position - lastPosition) / dt : Vector3.zero;
                 grounded = true;
             }
             // The leap runs on its own clock from the moment a dash starts, so a short gameplay dash still reads as a leap.
@@ -301,7 +311,7 @@ namespace NamgungLuna.Motion
             // Derived velocities are noisy (variable frame times); a motor's are already smooth.
             if (source == null) planar = Vector3.Lerp(planarVelocity, planar, 1f - Mathf.Exp(-14f * dt));
             Vector3 accel = (planar - planarVelocity) / dt;
-            smoothedAccel = Vector3.Lerp(smoothedAccel, accel, 1f - Mathf.Exp(-8f * dt));
+            smoothedAccel = teleported ? Vector3.zero : Vector3.Lerp(smoothedAccel, accel, 1f - Mathf.Exp(-8f * dt));
             planarVelocity = planar;
             speed = planar.magnitude;
 
@@ -533,36 +543,36 @@ namespace NamgungLuna.Motion
 
         void UpdateLantern(float dt)
         {
-            if (lantern == null || lantern.parent == null) return;
+            if (lantern == null || lantern.parent == null || dt <= 0f) return;
             Transform parent = lantern.parent;
-            Vector3 pivot = lantern.position;
-            float length = lanternCenterLocal.magnitude * lantern.lossyScale.y;
-            Vector3 restDown = parent.rotation * lanternRestDir;
-            if (!lanternReady)
+            if (!lanternReady || dt > 0.25f || (transform.position - lanternLastPosition).sqrMagnitude > 9f)
             {
-                lanternMass = lanternMassPrevious = pivot + restDown * length;
+                lanternTilt = lanternTiltVelocity = Vector3.zero;
+                lantern.localRotation = lanternRest;
+                lanternLastPosition = transform.position;
                 lanternReady = true;
+                return;
             }
-            // Verlet pendulum, in sub-steps so a long frame does not explode it.
-            int steps = Mathf.Clamp(Mathf.CeilToInt(dt / (1f / 120f)), 1, 8);
-            float h = dt / steps;
-            float damping = Mathf.Pow(lanternDamping, h * 60f);
-            for (int i = 0; i < steps; i++)
-            {
-                Vector3 velocity = (lanternMass - lanternMassPrevious) * damping;
-                lanternMassPrevious = lanternMass;
-                lanternMass += velocity + Physics.gravity * (h * h);
-                lanternMass = pivot + (lanternMass - pivot).normalized * length;
-            }
-            Vector3 dir = (lanternMass - pivot).normalized;
-            float angle = Vector3.Angle(restDown, dir);
-            if (angle > lanternMaxAngle)
-            {
-                dir = Vector3.Slerp(restDown, dir, lanternMaxAngle / angle);
-                lanternMass = pivot + dir * length;
-            }
-            Vector3 localDir = Quaternion.Inverse(parent.rotation) * dir;
-            lantern.localRotation = Quaternion.FromToRotation(lanternRestDir, localDir) * lanternRest;
+            lanternLastPosition = transform.position;
+
+            // A hand-held prop follows a bounded tilt, rather than a free world-space pendulum.
+            // Only the filtered motor acceleration contributes inertia; body bob and pivot jumps
+            // cannot inject energy. Preserve the authored hanging angle while countering body lean.
+            Vector3 down = Vector3.down - Vector3.ClampMagnitude(smoothedAccel, 10f) * 0.008f;
+            Vector3 localDown = parent.InverseTransformDirection(down.normalized);
+            Vector3 targetDirection = Quaternion.FromToRotation(lanternGravityRest, localDown) * lanternRestDir;
+            Quaternion tilt = Quaternion.FromToRotation(lanternRestDir, targetDirection);
+            tilt.ToAngleAxis(out float angle, out Vector3 axis);
+            if (angle > 180f) angle -= 360f;
+            float limit = Mathf.Clamp(lanternMaxAngle, 0f, 45f);
+            Vector3 target = Mathf.Abs(angle) > 0.001f ? axis * Mathf.Clamp(angle, -limit, limit) : Vector3.zero;
+            lanternTilt = Vector3.SmoothDamp(lanternTilt, target, ref lanternTiltVelocity,
+                Mathf.Max(0.05f, lanternSmoothTime), 90f, dt);
+            lanternTilt = Vector3.ClampMagnitude(lanternTilt, limit);
+            float magnitude = lanternTilt.magnitude;
+            lantern.localRotation = magnitude > 0.001f
+                ? Quaternion.AngleAxis(magnitude, lanternTilt / magnitude) * lanternRest
+                : lanternRest;
         }
 
         void UpdateMoon(float dt)

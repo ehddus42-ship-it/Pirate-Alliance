@@ -15,6 +15,8 @@ namespace NamgungLuna.Editor
         public const string Root = "Assets/Characters/NamgungLuna";
         public const string BattlePrefab = Root + "/Stage/NamgungLuna_Battle.prefab";
         public const string PeacePrefab = Root + "/Stage/NamgungLuna_Peaceful.prefab";
+        const string HunterFolder = "Assets/Liminal/Resources/Hunters";
+        const string FormFolder = Root + "/Stage/Profiles";
         const float PeaceMoveSpeed = .65f;
         const float PeaceSlowSpeed = .4f;
         const float PeaceWalkPlayback = 1.5f;
@@ -46,15 +48,14 @@ namespace NamgungLuna.Editor
                 var gait = instance.GetComponent<LunaMoonGait>();
                 if (!gait) throw new InvalidOperationException("The battle source prefab has no moon gait.");
                 gait.enabled = true;
+                gait.lanternSmoothTime = 0.24f;
+                gait.lanternMaxAngle = 14f;
                 var fx = instance.GetComponent<LunaMoonFx>();
                 if (fx) fx.enabled = true;
                 PrefabUtility.SaveAsPrefabAsset(instance, BattlePrefab);
             }
             finally { PrefabUtility.UnloadPrefabContents(instance); }
-            MakeProfile("NamgungLunaBattle", "namgung_luna_battle", "남궁루나 · 전시", 31,
-                "달의 힘을 두른 전시 상태\n부유 이동 · 도약 대시 · 공격 없음", BattlePrefab, null, 4.2f, 2.1f,
-                "Loadout/namgung_luna_battle", keepDash: true);
-            AssetDatabase.SaveAssets();
+            InstallUnifiedHunter();
         }
 
         [MenuItem("Tools/Namgung Luna/Stage Capture/Install Peaceful Movement")]
@@ -124,10 +125,44 @@ namespace NamgungLuna.Editor
                 PrefabUtility.SaveAsPrefabAsset(instance, PeacePrefab);
             }
             finally { UnityEngine.Object.DestroyImmediate(instance); }
-            MakeProfile("NamgungLunaPeaceful", "namgung_luna_peace", "남궁루나 · 평시", 30,
+            InstallUnifiedHunter();
+        }
+
+        [MenuItem("Tools/Namgung Luna/Stage Capture/Install Unified Hunter")]
+        public static void InstallUnifiedHunter()
+        {
+            if (!AssetDatabase.LoadAssetAtPath<GameObject>(BattlePrefab) ||
+                !AssetDatabase.LoadAssetAtPath<GameObject>(PeacePrefab))
+                throw new InvalidOperationException("Install the battle and peaceful movement prefabs before unifying their hunter profile.");
+            var controller = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(Root + "/Stage/LunaPeaceful.controller");
+            if (!controller) throw new InvalidOperationException("The peaceful locomotion controller is missing. Install Peaceful Movement first.");
+
+            // Moving preserves references while only the canonical hunter remains in Resources/Hunters.
+            MoveLegacyProfile(HunterFolder + "/NamgungLunaBattle.asset", HunterFolder + "/NamgungLuna.asset");
+            MoveLegacyProfile(HunterFolder + "/NamgungLunaPeaceful.asset", FormFolder + "/NamgungLunaPeaceful.asset");
+            var peaceful = MakeProfile("NamgungLunaPeaceful", "namgung_luna_peace", "남궁루나 · 평시", 30,
                 "베일을 쓴 평시 상태\n차분한 걸음 · 이동만 구현", PeacePrefab, controller, PeaceMoveSpeed, PeaceSlowSpeed,
-                "Loadout/namgung_luna_peace");
+                "Loadout/namgung_luna_peace", folder: FormFolder);
+            peaceful.lobbyForm = null;
+            peaceful.previousCharacterIds = Array.Empty<string>();
+            var hunter = MakeProfile("NamgungLuna", "namgung_luna", "남궁루나", 30,
+                "로비 평시 · 던전 전시\n이동 · 도약 대시 · 공격 없음", BattlePrefab, null, 4.2f, 2.1f,
+                "Loadout/namgung_luna_peace", keepDash: true);
+            hunter.lobbyForm = peaceful;
+            hunter.previousCharacterIds = new[] { "namgung_luna_peace", "namgung_luna_battle" };
+            EditorUtility.SetDirty(peaceful);
+            EditorUtility.SetDirty(hunter);
             AssetDatabase.SaveAssets();
+        }
+
+        static void MoveLegacyProfile(string source, string destination)
+        {
+            if (!AssetDatabase.LoadAssetAtPath<HunterProfile>(source)) return;
+            if (AssetDatabase.LoadMainAssetAtPath(destination))
+                throw new InvalidOperationException($"Both legacy and current profiles exist: {source} / {destination}. Resolve the duplicate before installing.");
+            Folder(Path.GetDirectoryName(destination).Replace('\\', '/'));
+            string error = AssetDatabase.MoveAsset(source, destination);
+            if (!string.IsNullOrEmpty(error)) throw new InvalidOperationException(error);
         }
 
         static AnimationClip ImportClip(string file, string clipName)
@@ -163,9 +198,8 @@ namespace NamgungLuna.Editor
 
         public static HunterProfile MakeProfile(string fileName, string id, string display, int order,
             string summary, string prefab, RuntimeAnimatorController controller, float speed, float walk, string portrait,
-            bool keepDash = false)
+            bool keepDash = false, string folder = HunterFolder)
         {
-            const string folder = "Assets/Liminal/Resources/Hunters";
             Folder(folder);
             string path = folder + "/" + fileName + ".asset";
             var profile = AssetDatabase.LoadAssetAtPath<HunterProfile>(path);

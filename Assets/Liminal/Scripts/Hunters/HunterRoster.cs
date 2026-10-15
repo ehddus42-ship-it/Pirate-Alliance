@@ -10,7 +10,7 @@ namespace AcRoguelike.Liminal
     /// augments, lobby upgrades and the just-dodge counter stay; a swap changes the body (model + Animator), the combo
     /// timing and the melee swings. The scene's own model is the first hunter; HunterProfile assets under
     /// Resources/Hunters add the others. The pick is the party's hunter (HunterLoadout): the lobby's loadout officer
-    /// changes it with Choose, and the lobby shows the picked hunter (the first one in her everyday clothes).
+    /// changes it with Choose. A hunter may have a separate lobby body without becoming another selection.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(PlayerMotor))]
@@ -26,6 +26,8 @@ namespace AcRoguelike.Liminal
         sealed class Hunter
         {
             public string id, name, summary, portrait;
+            public string[] previousCharacterIds;
+            public Hunter lobbyForm;
             public GameObject visual;
             public Animator animator;
             public float[] durations, hitTimes;
@@ -41,6 +43,7 @@ namespace AcRoguelike.Liminal
         }
 
         readonly List<Hunter> hunters = new List<Hunter>();
+        Hunter worn;
         PlayerMotor motor;
         PlayerCombat combat;
         MeleeSlash melee;
@@ -49,7 +52,7 @@ namespace AcRoguelike.Liminal
         LiminalPlayerHealth health;
         LiminalRunDirector director;
         InputAction swap;
-        // selected: the player's pick. current: the body on screen (the lobby always wears the first hunter).
+        // Selection is a character identity; worn is that character's body for the current environment.
         int selected, current;
         bool initialized, inLobby;
         bool defaultAllowDash, defaultFaceMovementDirection, defaultMeleeEnabled;
@@ -62,12 +65,12 @@ namespace AcRoguelike.Liminal
         public int CurrentIndex => current;
         public string CurrentName => current < hunters.Count ? hunters[current].name : FirstHunterName;
         public string CurrentId => current < hunters.Count ? hunters[current].id : null;
-        public GameObject CurrentVisual => current < hunters.Count ? hunters[current].visual : null;
-        public bool CurrentMovementOnly => current >= 0 && current < hunters.Count && hunters[current].movementOnly;
+        public GameObject CurrentVisual => worn?.visual;
+        public bool CurrentMovementOnly => worn != null && worn.movementOnly;
         public float SharedMoveSpeed => moveSpeedOverridden ? sharedMoveSpeed : motor ? motor.moveSpeed : 0;
         public float SharedWalkSpeed => walkSpeedOverridden ? sharedWalkSpeed : motor ? motor.walkSpeed : 0;
         /// <summary>The worn hunter's own skill (an ultimate on R), or null.</summary>
-        public IHunterSkill CurrentSkill => current < hunters.Count ? hunters[current].skill : null;
+        public IHunterSkill CurrentSkill => worn?.skill;
         public int SwapCount { get; private set; }
         public bool InLobby => inLobby;
         public string NameAt(int index) => index >= 0 && index < Count ? hunters[index].name : null;
@@ -88,8 +91,8 @@ namespace AcRoguelike.Liminal
                 if (!initialized || hunters.Count < 2 || inLobby || Time.time < readyAt || Time.timeScale <= 0) return false;
                 if (director && director.Phase != LiminalRunPhase.Exploring) return false;
                 if (!motor.isActiveAndEnabled || motor.IsDashing || motor.IsHeld || motor.IsLaunched) return false;
-                if (current < hunters.Count && hunters[current].skills != null)
-                    foreach (var skill in hunters[current].skills) if (skill != null && skill.Busy) return false;
+                if (worn?.skills != null)
+                    foreach (var skill in worn.skills) if (skill != null && skill.Busy) return false;
                 return !health || health.IsAlive;
             }
         }
@@ -151,7 +154,7 @@ namespace AcRoguelike.Liminal
             return true;
         }
 
-        /// <summary>Before the lobby dresses the body: the picked hunter (the lobby puts the first one in everyday clothes).</summary>
+        /// <summary>Wear the picked hunter's lobby form; the lobby separately dresses the scene's first hunter.</summary>
         public void EnterLobby()
         {
             EnsureInitialized();
@@ -159,7 +162,7 @@ namespace AcRoguelike.Liminal
             Wear(selected, false);
         }
 
-        /// <summary>After the lobby restores the combat outfit: the picked hunter comes back.</summary>
+        /// <summary>Wear the picked hunter's dungeon body, keeping the same selection and saved identity.</summary>
         public void LeaveLobby()
         {
             EnsureInitialized();
@@ -205,19 +208,30 @@ namespace AcRoguelike.Liminal
             };
             first.skills = first.visual.GetComponents<IHunterSkill>();
             hunters.Add(first);
+            worn = first;
             var profiles = Resources.LoadAll<HunterProfile>(ProfileFolder);
             Array.Sort(profiles, (a, b) => a.order != b.order ? a.order.CompareTo(b.order) : string.CompareOrdinal(a.name, b.name));
             foreach (var profile in profiles)
             {
                 var hunter = Spawn(profile, first);
-                if (hunter != null) hunters.Add(hunter);
+                if (hunter == null) continue;
+                if (profile.lobbyForm && profile.lobbyForm != profile)
+                    hunter.lobbyForm = Spawn(profile.lobbyForm, first);
+                hunters.Add(hunter);
             }
             selected = current = 0;
             character.displayName = FirstHunterName;
             // The party saved last session (HunterLoadout); an unknown id keeps the first hunter.
             string saved = HunterLoadout.HunterId;
             for (int i = 1; i < hunters.Count; i++)
-                if (hunters[i].id == saved) { selected = i; Wear(i, false); break; }
+                if (hunters[i].id == saved || (!string.IsNullOrEmpty(saved)
+                    && Array.IndexOf(hunters[i].previousCharacterIds ?? Array.Empty<string>(), saved) >= 0))
+                {
+                    selected = i;
+                    HunterLoadout.HunterId = hunters[i].id;
+                    Wear(i, false);
+                    break;
+                }
         }
 
         Hunter Spawn(HunterProfile profile, Hunter first)
@@ -258,6 +272,7 @@ namespace AcRoguelike.Liminal
             return new Hunter
             {
                 id = profile.characterId,
+                previousCharacterIds = profile.previousCharacterIds,
                 name = profile.displayName,
                 summary = profile.summary,
                 portrait = profile.portraitResource,
@@ -285,27 +300,30 @@ namespace AcRoguelike.Liminal
         void Wear(int index, bool effects)
         {
             if (index < 0 || index >= hunters.Count) return;
-            var to = hunters[index];
-            bool changed = index != current;
+            var identity = hunters[index];
+            var to = inLobby && identity.lobbyForm != null ? identity.lobbyForm : identity;
+            bool changed = to != worn;
+            bool changedHunter = index != current;
             if (changed)
             {
-                var from = hunters[current];
+                var from = worn;
                 // Motor and combat turn the visual, not the root: the new body takes over the old facing.
                 Quaternion facing = motor.visual ? motor.visual.rotation : transform.rotation;
                 if (combat) combat.CancelAttack(false);
                 if (effects) SwapEffects(from);
                 from.visual.SetActive(false);
                 to.visual.transform.rotation = facing;
-                to.visual.SetActive(true);
                 motor.visual = to.visual.transform;
                 motor.animator = to.animator;
                 current = index;
-                SwapCount++;
+                worn = to;
+                to.visual.SetActive(true);
+                if (changedHunter) SwapCount++;
             }
             ApplyCombo(to);
             RefreshGameplayAvailability();
-            character.characterId = to.id;
-            character.displayName = to.name;
+            character.characterId = identity.id;
+            character.displayName = identity.name;
             if (changed) Swapped?.Invoke();
         }
 
@@ -337,7 +355,7 @@ namespace AcRoguelike.Liminal
         public void RefreshGameplayAvailability()
         {
             if (!initialized || current < 0 || current >= hunters.Count) return;
-            var hunter = hunters[current];
+            var hunter = worn;
             bool combatAllowed = !hunter.movementOnly && !inLobby
                 && (!director || director.Phase == LiminalRunPhase.Exploring);
             if (combat)
@@ -391,7 +409,7 @@ namespace AcRoguelike.Liminal
             motor.moveSpeed = sharedMoveSpeed = moveSpeed;
             motor.walkSpeed = sharedWalkSpeed = walkSpeed;
             moveSpeedOverridden = walkSpeedOverridden = false;
-            if (initialized && current >= 0 && current < hunters.Count) ApplyMovementSpeeds(hunters[current]);
+            if (initialized && worn != null) ApplyMovementSpeeds(worn);
         }
 
         /// <summary>The leaving hunter fades out as a violet afterimage while the new one steps in.</summary>

@@ -120,6 +120,12 @@ namespace AcRoguelike.Liminal
         public void StartNewRun(int newSeed)
         {
             if (!initialized) return;
+            // Direct run starts also leave the lobby appearance, just like entering through its gate.
+            if (roster && roster.InLobby)
+            {
+                if (lobby) lobby.Leave(player);
+                roster.LeaveLobby();
+            }
             seed = newSeed;
             StageIndex = 0;
             PendingReward = 0;
@@ -635,7 +641,7 @@ namespace AcRoguelike.Liminal
             if (health) health.ResetHealth();
             if (!lobby) lobby = LiminalLobby.Build(this, transform.position + LobbyOffset, hud);
             SetPhase(LiminalRunPhase.Lobby);
-            // The lobby dresses the first hunter in everyday clothes; the picked hunter returns at the gate.
+            // The roster chooses any dedicated lobby form; the lobby dresses the scene's first hunter separately.
             if (roster) roster.EnterLobby();
             lobby.Enter(player);
             RoomChanged?.Invoke();
