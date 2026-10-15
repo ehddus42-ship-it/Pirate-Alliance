@@ -17,11 +17,24 @@ namespace AcRoguelike.Liminal
     /// - the boss bar;
     /// - the just-dodge stamp;
     /// - the interaction key chip;
-    /// - menu windows (augments, pause, results).
+    /// - edge markers for living enemies off screen (<see cref="OffscreenEnemyIndicators"/>);
+    /// - menu windows (augments, the ESC quit question, results).
     /// </summary>
     public sealed class LiminalHud : MonoBehaviour
     {
+        // Augment cards are dealt face down and flip one after another; none can be picked until all are face up,
+        // the grace has passed and the mouse button is up, so clicks meant for a sword swing never pick a card.
+        const float FlipDelay = .3f, FlipStagger = .18f, FlipDuration = .42f, PickGrace = .3f;
+
+        struct AugmentCard { public RectTransform rect; public GameObject back; public Button button; }
+
         LiminalRunDirector run;
+        OffscreenEnemyIndicators indicators;
+        readonly System.Collections.Generic.List<AugmentCard> augmentCards = new System.Collections.Generic.List<AugmentCard>();
+        float augmentDealtAt;
+        bool augmentsUnlocked;
+        TextMeshProUGUI augmentKeys;
+        string augmentKeysText;
         TMP_FontAsset font;
         Font ownedSourceFont;
         GameObject canvasObject, modal, combatGroup, lobbyGroup, bossGroup;
@@ -126,6 +139,9 @@ namespace AcRoguelike.Liminal
             HunterUi.Text("Sub", stamp, font, "COUNTER READY", 14, HunterUi.Gold, new Vector2(0, -78), new Vector2(520, 22), FontStyles.Bold, TextAlignmentOptions.Center);
             stampGroup.alpha = 0;
 
+            // Over the HUD windows, under every menu window.
+            indicators = new OffscreenEnemyIndicators(root, font);
+
             modal = new GameObject("SystemWindow", typeof(RectTransform), typeof(Image));
             modal.transform.SetParent(root, false);
             modal.GetComponent<Image>().color = new Color(.03f, .04f, .09f, .82f);
@@ -155,13 +171,15 @@ namespace AcRoguelike.Liminal
         {
             if (!run) return;
             Bind();
-            bool lobby = run.Phase == LiminalRunPhase.Lobby;
+            bool lobby = run.Phase == LiminalRunPhase.Lobby || run.PausedInLobby;
             bool movementOnly = run.Roster && run.Roster.CurrentMovementOnly;
             if (lobbyMovementLabel) lobbyMovementLabel.gameObject.SetActive(movementOnly);
             if (combatGroup) combatGroup.SetActive(!lobby && run.CurrentStage);
             if (lobbyGroup) lobbyGroup.SetActive(lobby && !(run.Lobby && run.Lobby.WindowOpen));
             if (currencyLabel) currencyLabel.text = HunterProgress.Currency.ToString("N0");
             UpdateStamp();
+            indicators?.Tick(run, run.Phase == LiminalRunPhase.Exploring && combatGroup && combatGroup.activeSelf && run.LivingEnemyCount > 0);
+            UpdateAugmentReveal();
             if (lobby || !run.CurrentStage) return;
             if (run.ExitAvailable) ShowPrompt("E", "다음 구역");
             else if (promptLabel && promptLabel.text == "다음 구역") ShowPrompt("E", null);
@@ -220,12 +238,36 @@ namespace AcRoguelike.Liminal
                         bossFill.rectTransform.sizeDelta = new Vector2(688f * storm.Health.Health / Mathf.Max(1, storm.Health.maxHealth), 10);
                         break;
                     }
-            if (run.Phase == LiminalRunPhase.AugmentChoice && Keyboard.current != null)
+            if (run.Phase == LiminalRunPhase.AugmentChoice && augmentsUnlocked && Keyboard.current != null)
             {
                 if (Keyboard.current.digit1Key.wasPressedThisFrame) run.SelectAugment(0);
                 else if (Keyboard.current.digit2Key.wasPressedThisFrame) run.SelectAugment(1);
                 else if (Keyboard.current.digit3Key.wasPressedThisFrame) run.SelectAugment(2);
             }
+        }
+
+        /// <summary>Flips the dealt augment cards face up in turn (real time: the run is paused), then unlocks picking.</summary>
+        void UpdateAugmentReveal()
+        {
+            if (augmentCards.Count == 0) return;
+            float t = Time.unscaledTime - augmentDealtAt;
+            for (int i = 0; i < augmentCards.Count; i++)
+            {
+                var card = augmentCards[i];
+                if (!card.rect) continue;
+                float p = Mathf.Clamp01((t - FlipDelay - i * FlipStagger) / FlipDuration);
+                // Edge-on at the midpoint, where the back gives way to the face; a slight lift while turning.
+                float lift = 1 + Mathf.Sin(p * Mathf.PI) * .06f;
+                card.rect.localScale = new Vector3(Mathf.Max(.001f, Mathf.Abs(Mathf.Cos(p * Mathf.PI))) * lift, lift, 1);
+                if (card.back.activeSelf != p < .5f) card.back.SetActive(p < .5f);
+            }
+            float revealed = FlipDelay + (augmentCards.Count - 1) * FlipStagger + FlipDuration;
+            // A button pressed while locked would still click on release, so wait for the mouse to come up too.
+            bool held = Mouse.current != null && Mouse.current.leftButton.isPressed;
+            if (augmentsUnlocked || t < revealed + PickGrace || held) return;
+            augmentsUnlocked = true;
+            foreach (var card in augmentCards) if (card.button) card.button.interactable = true;
+            if (augmentKeys) { augmentKeys.text = augmentKeysText; augmentKeys.color = HunterUi.Muted; }
         }
 
         /// <summary>The worn hunter's own skill: gold when ready, dim with the seconds left while it recharges.</summary>
@@ -301,20 +343,24 @@ namespace AcRoguelike.Liminal
             if (!modal) return;
             bool show = run.Phase != LiminalRunPhase.Exploring && run.Phase != LiminalRunPhase.Lobby;
             modal.SetActive(show);
+            augmentCards.Clear();
+            augmentsUnlocked = false;
             if (!show) return;
             ShowPrompt(null, null);
             foreach (Transform child in modalContent)
                 if (child.name != "FrameTop" && child.name != "FrameBottom" && child.name != "FrameLeft" && child.name != "FrameRight" && child.name != "Tick")
                 { child.gameObject.SetActive(false); Destroy(child.gameObject); }
+            modalContent.sizeDelta = new Vector2(960, 480);
             if (run.Phase == LiminalRunPhase.AugmentChoice)
             {
                 Heading("구역 정리 완료", "AUGMENT · 증강 선택");
                 var offers = run.AugmentOffers;
+                augmentDealtAt = Time.unscaledTime;
                 // Cards stay centred when the pool deals fewer than three.
                 float left = 480 - (offers.Count * 300 - 20) * .5f;
                 for (int i = 0; i < offers.Count; i++) Choice(left + i * 300, offers[i], i);
-                string keys = offers.Count == 1 ? "1" : offers.Count == 2 ? "1 · 2" : "1 · 2 · 3";
-                HunterUi.Text("Keys", modalContent, font, keys, 14, HunterUi.Muted, new Vector2(0, -440), new Vector2(960, 22), FontStyles.Bold, TextAlignmentOptions.Center);
+                augmentKeysText = offers.Count == 1 ? "1" : offers.Count == 2 ? "1 · 2" : "1 · 2 · 3";
+                augmentKeys = HunterUi.Text("Keys", modalContent, font, "증강 공개 중…", 14, HunterUi.GoldDim, new Vector2(0, -440), new Vector2(960, 22), FontStyles.Bold, TextAlignmentOptions.Center);
             }
             else if (run.Phase == LiminalRunPhase.NextStageChoice)
             {
@@ -326,10 +372,20 @@ namespace AcRoguelike.Liminal
             }
             else if (run.Phase == LiminalRunPhase.Paused)
             {
-                Heading("일시 정지", "PAUSE");
-                HunterUi.Text("Augments", modalContent, font, run.AugmentHistory, 19, HunterUi.Cream, new Vector2(70, -150), new Vector2(820, 140), FontStyles.Normal, TextAlignmentOptions.Top);
-                HunterUi.Button("Resume", modalContent, font, "계속", new Vector2(300, -310), new Vector2(360, 56), run.Resume);
-                HunterUi.Button("Return", modalContent, font, "로비로 귀환", new Vector2(300, -380), new Vector2(360, 48), run.ReturnToLobby);
+                // ESC: the quit question. In a gate the run summary and the way back to the lobby stay below it.
+                bool inGate = !run.PausedInLobby;
+                if (!inGate) modalContent.sizeDelta = new Vector2(960, 330);
+                Heading("게임 종료", "PAUSE");
+                HunterUi.Text("Question", modalContent, font, "종료하시겠습니까?", 30, HunterUi.Cream, new Vector2(0, -135), new Vector2(960, 48), FontStyles.Bold, TextAlignmentOptions.Center);
+                HunterUi.Button("Yes", modalContent, font, "네", new Vector2(190, -220), new Vector2(270, 60), run.QuitGame, 21);
+                HunterUi.Button("No", modalContent, font, "아니요", new Vector2(500, -220), new Vector2(270, 60), run.Resume, 21);
+                if (inGate)
+                {
+                    HunterUi.Fill("Divider", modalContent, new Vector2(0, 1), new Vector2(0, 1), new Vector2(40, -320), new Vector2(880, 1.2f), HunterUi.GoldDim);
+                    HunterUi.Text("Augments", modalContent, font, run.AugmentHistory.Replace("\n", "   ·   "), 15, HunterUi.Muted,
+                        new Vector2(40, -342), new Vector2(570, 110));
+                    HunterUi.Button("Return", modalContent, font, "로비로 귀환", new Vector2(650, -350), new Vector2(270, 48), run.ReturnToLobby, 17);
+                }
             }
             else if (run.Phase == LiminalRunPhase.Victory || run.Phase == LiminalRunPhase.Defeat)
             {
@@ -364,10 +420,39 @@ namespace AcRoguelike.Liminal
             int held = run.Augments ? run.Augments.Stacks(augment.id) : 0;
             HunterUi.Title(card, font, held > 0 ? $"{augment.title} +" : augment.title, new Vector2(20, -42), 240, 24);
             HunterUi.Text("Description", card, font, augment.description, 15, HunterUi.Cream, new Vector2(20, -100), new Vector2(240, 190));
+
+            // Turn around the card's centre, not the top-left corner the layout places it by.
+            card.pivot = new Vector2(.5f, .5f);
+            card.anchoredPosition += new Vector2(card.sizeDelta.x * .5f, -card.sizeDelta.y * .5f);
+            var button = card.GetComponent<Button>();
+            var colors = button.colors;
+            colors.disabledColor = colors.normalColor;
+            button.colors = colors;
+            button.interactable = false;
+            augmentCards.Add(new AugmentCard { rect = card, back = CardBack(card), button = button });
+        }
+
+        /// <summary>The face-down side, drawn over the face until the card turns.</summary>
+        GameObject CardBack(RectTransform card)
+        {
+            // Fully opaque: in linear colour space even a 4% gap lets the cream face text read through.
+            var navy = HunterUi.NavyDeep;
+            var back = HunterUi.Fill("Back", card, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, Vector2.zero, new Color(navy.r, navy.g, navy.b, 1)).rectTransform;
+            back.anchorMin = Vector2.zero; back.anchorMax = Vector2.one; back.offsetMin = back.offsetMax = Vector2.zero;
+            HunterUi.Frame(back, HunterUi.Gold, 1.6f);
+            var inset = HunterUi.Fill("Inset", back, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, card.sizeDelta - new Vector2(24, 24), Color.clear).rectTransform;
+            HunterUi.Frame(inset, HunterUi.GoldDim, 1);
+            var crest = HunterUi.Fill("Crest", back, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, 10), new Vector2(84, 84), new Color(HunterUi.Gate.r, HunterUi.Gate.g, HunterUi.Gate.b, .22f)).rectTransform;
+            crest.localRotation = Quaternion.Euler(0, 0, 45);
+            HunterUi.Frame(crest, HunterUi.Gold, 1.6f);
+            HunterUi.Text("Mark", back, font, "?", 44, HunterUi.Gold, new Vector2(0, -card.sizeDelta.y * .5f + 43), new Vector2(card.sizeDelta.x, 64), FontStyles.Bold, TextAlignmentOptions.Center);
+            HunterUi.Text("Tag", back, font, "AUGMENT", 12, HunterUi.GoldDim, new Vector2(0, -card.sizeDelta.y + 46), new Vector2(card.sizeDelta.x, 18), FontStyles.Bold, TextAlignmentOptions.Center);
+            return back.gameObject;
         }
 
         void OnDestroy()
         {
+            indicators?.Release();
             if (subscribed) subscribed.JustDodged -= OnJustDodged;
             HunterUi.ReleaseFont(font, ownedSourceFont);
         }

@@ -36,6 +36,8 @@ namespace AcRoguelike.Liminal
         public int LivingEnemyCount => living.Count;
         public bool InCombat => Phase == LiminalRunPhase.Exploring && living.Count > 0;
         public LiminalRunPhase Phase { get; private set; }
+        /// <summary>The ESC quit question was opened from the lobby (아니요 returns there, not to a gate).</summary>
+        public bool PausedInLobby => Phase == LiminalRunPhase.Paused && resumePhase == LiminalRunPhase.Lobby;
         public IReadOnlyList<LiminalRoom> Rooms => rooms;
         public LiminalPlayerHealth PlayerHealth => health;
         /// <summary>F swaps hunters in a gate (HunterRoster on the player).</summary>
@@ -76,6 +78,8 @@ namespace AcRoguelike.Liminal
         float originalMoveSpeed, originalWalkSpeed, originalCooldown;
         int originalFlames;
         bool initialized;
+        LiminalRunPhase resumePhase = LiminalRunPhase.Exploring;
+        int escapeFrame = -1;
         LiminalStageDefinition[] originalStages;
 
         void Start()
@@ -143,12 +147,9 @@ namespace AcRoguelike.Liminal
         {
             // Dashes only spend stamina while hostiles are alive in the run.
             if (motor) motor.StaminaFree = !InCombat;
+            // The lobby reads ESC itself: it closes an open lobby window first.
             if (Phase == LiminalRunPhase.Lobby) return;
-            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-            {
-                if (Phase == LiminalRunPhase.Exploring) SetPhase(LiminalRunPhase.Paused);
-                else if (Phase == LiminalRunPhase.Paused) Resume();
-            }
+            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) HandleEscape();
             if (Phase != LiminalRunPhase.Exploring || !player || rooms.Count == 0) return;
             int next = ActiveRoomIndex + 1;
             if (next < rooms.Count && (ActiveRoomIndex < 0 || cleared[ActiveRoomIndex]) && rooms[next].Contains(player.position, 1.3f)) ActivateRoom(next);
@@ -608,12 +609,53 @@ namespace AcRoguelike.Liminal
             LoadStage(StageIndex + 1);
         }
 
-        public void Resume() { if (Phase == LiminalRunPhase.Paused) SetPhase(LiminalRunPhase.Exploring); }
+        /// <summary>
+        /// ESC: asks 종료하시겠습니까? over the current screen (gate, lobby, augment cards, results), or answers it
+        /// with 아니요 when it is already open. The director and the lobby both forward ESC; only the first call in a
+        /// frame counts, so one key press never opens and closes the question together.
+        /// </summary>
+        public void HandleEscape()
+        {
+            if (!initialized || escapeFrame == Time.frameCount) return;
+            escapeFrame = Time.frameCount;
+            if (Phase == LiminalRunPhase.Paused) Resume();
+            else Pause();
+        }
+
+        /// <summary>Stops play under the quit question. Resume returns to the screen it was opened from.</summary>
+        public void Pause()
+        {
+            if (!initialized || Phase == LiminalRunPhase.Paused) return;
+            resumePhase = Phase;
+            SetPhase(LiminalRunPhase.Paused);
+        }
+
+        public void Resume() { if (Phase == LiminalRunPhase.Paused) SetPhase(resumePhase); }
+
+        /// <summary>네 in the ESC question: closes the game (leaves Play mode in the editor).</summary>
+        public void QuitGame()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
+
+        /// <summary>Living room enemies (those that hold the room's doors), copied without allocating.</summary>
+        public void GetLivingEnemies(List<TrainingEnemy> into)
+        {
+            into.Clear();
+            foreach (var enemy in living) if (enemy && enemy.IsAlive) into.Add(enemy);
+        }
+
         void OnPlayerDied() => SetPhase(LiminalRunPhase.Defeat);
 
         void SetPhase(LiminalRunPhase phase)
         {
             Phase = phase;
+            // A pause set any other way (validators) resumes into the gate, as before.
+            if (phase != LiminalRunPhase.Paused) resumePhase = LiminalRunPhase.Exploring;
             bool exploring = phase == LiminalRunPhase.Exploring, inLobby = phase == LiminalRunPhase.Lobby;
             bool combatAllowed = exploring && (!roster || !roster.CurrentMovementOnly);
             Time.timeScale = exploring || inLobby ? 1 : 0;

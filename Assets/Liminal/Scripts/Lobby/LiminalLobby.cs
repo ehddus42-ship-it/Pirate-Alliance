@@ -355,6 +355,8 @@ namespace AcRoguelike.Liminal
                 if (back || (!missionBoardOpen && keyboard != null && keyboard.eKey.wasPressedThisFrame)) CloseWindow();
                 return;
             }
+            // With no lobby window to close, ESC asks whether to quit the game.
+            if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { run.HandleEscape(); return; }
             Nearest = null;
             if (run.player)
             {
