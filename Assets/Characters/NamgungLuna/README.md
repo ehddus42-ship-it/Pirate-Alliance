@@ -15,7 +15,7 @@ URP Toon 캐릭터 + Magica Cloth 2 옷·머리 물리 설정.
 - 기존 두 프로필을 정리할 때는 `Tools > Namgung Luna > Stage Capture > Install Unified Hunter`를 사용합니다. 기존 파일을 이동해 GUID를 유지하고 모델·모션은 다시 생성하지 않습니다. `Install Battle Movement`와 `Install Peaceful Movement`를 다시 실행해도 같은 단일 선택 프로필과 평시 연결을 갱신합니다.
 - 실제 플레이 검증은 같은 메뉴의 `Validate Both Forms`를 사용합니다. 검증 결과와 화면은 `Documentation/NamgungLuna/Validation/`에 저장됩니다. 기존 선택 캐릭터와 편집 씬은 검증 종료 후 복원됩니다.
 - 생성 이력은 `Documentation/NamgungLuna/peaceful_*_meshy.json`과 `peaceful_walk_retarget.json`에 기록했습니다. 모델·리깅·걷기·리타깃 생성에 Meshy 48크레딧을 사용했습니다. `Tools/NamgungLuna/`의 요청 스크립트는 저장된 작업 ID를 재사용하며 API 키와 다운로드 서명 URL은 문서에 저장하지 않습니다.
-- 성능(렉) 분석: `Documentation/NamgungLuna/Performance/battle_form_lag.md`. 전시 모델 `Models/NamgungLuna.fbx`는 775,107 → 358,626 삼각형으로 감량했습니다(UV·노멀 보존, `Tools/NamgungLuna/optimize_battle_model.py`, 원본은 `Models/Source~/NamgungLuna_Full.fbx`). 감량 뒤에는 `Setup Magica Cloth` → `Install Battle Movement`를 다시 실행하세요. 안쪽·작은 파츠 20개(`LunaStageSetup.BattleShadowlessParts`)는 그림자를 드리우지 않고, `LunaClothFollower`는 같은 결과를 내는 행렬 블렌드로 계산합니다. Profiler 마커는 `LunaClothFollower.Follow`입니다.
+- 성능(렉) 분석: `Documentation/NamgungLuna/Performance/battle_form_lag.md`. 전시 모델 `Models/NamgungLuna.fbx`는 775,107 → 249,020 삼각형으로 감량했습니다(UV·노멀 보존, `Tools/NamgungLuna/optimize_battle_model.py`, 원본은 `Models/Source~/NamgungLuna_Full.fbx`). 감량 뒤에는 `Setup Magica Cloth` → `Install Battle Movement`를 다시 실행하세요. 안쪽·작은 파츠 20개(`LunaStageSetup.BattleShadowlessParts`)는 그림자를 드리우지 않고, `LunaClothFollower`는 같은 결과를 내는 행렬 블렌드로 계산합니다. Profiler 마커는 `LunaClothFollower.Follow`입니다.
 - 아래의 대시 수치(0.3초 · 3 m)와 자동 시연은 전시 **단독 데모 씬**(`LunaMoonMotor`) 기준입니다. 게임 안에서는 위의 공용 대시를 따릅니다.
 
 ## 필요한 것

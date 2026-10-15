@@ -28,17 +28,18 @@ from mathutils.bvhtree import BVHTree
 
 # triangles per part after decimation
 TARGETS = {
-    "BellSleeve_L": 25000, "BellSleeve_R": 25000,
-    "Skirt_Ivory": 28000, "Skirt_Navy": 20000,
-    "Hair_Back_L": 20000, "Hair_Back_R": 19000, "Hair_Front": 12000,
-    "Hair_BackFill_Lock_01": 8000, "Hair_BackFill_Lock_02": 8000, "Hair_BackFill_Lock_03": 8000,
-    "Hair_BackFill_Lock_04": 5500, "Hair_BackFill_Lock_05": 5500, "Hair_BackFill_Lock_06": 5500,
-    "Hair_BackFill_Lock_07": 5500,
-    "Lantern_Frame": 10000, "Bodice_Navy": 14000,
-    "Gold_Hem_Charms_R": 10000, "Gold_Hem_Charms_L": 8500, "Chest_Crescent": 6000,
-    "Collar_Ribbons_Ivory": 9000, "Waist_Navy_Inset": 6000,
-    "Boot_L": 9000, "Boot_R": 9000, "Boot_Shaft_Underlap_L": 5000, "Boot_Shaft_Underlap_R": 5000,
-    "Floating_FullMoon": 5000,
+    "BellSleeve_L": 12000, "BellSleeve_R": 12000,
+    "Skirt_Ivory": 12000, "Skirt_Navy": 17000,
+    "Hair_Back_L": 20000, "Hair_Back_R": 19000, "Hair_Front": 12000,   # fewer shortens thin strand tips
+    "Hair_BackFill_Lock_01": 4000, "Hair_BackFill_Lock_02": 4000, "Hair_BackFill_Lock_03": 4000,
+    "Hair_BackFill_Lock_04": 3000, "Hair_BackFill_Lock_05": 3000, "Hair_BackFill_Lock_06": 3000,
+    "Hair_BackFill_Lock_07": 3000,
+    "Lantern_Frame": 9000, "Bodice_Navy": 9000, "Body_VisibleSkin": 8000,
+    "Gold_Hem_Charms_R": 9500, "Gold_Hem_Charms_L": 7000, "Gold_Hem_Trim": 4500, "Chest_Crescent": 3500,
+    "Collar_Ribbons_Ivory": 6000, "Waist_Navy_Inset": 3500,
+    "Puff_Sleeve_Join_L": 3000, "Puff_Sleeve_Join_R": 3000,
+    "Boot_L": 6000, "Boot_R": 6000, "Boot_Shaft_Underlap_L": 2500, "Boot_Shaft_Underlap_R": 2500,
+    "Floating_FullMoon": 3000,
 }
 
 # Matches the source FBX: see Documentation/NamgungLuna/Performance/battle_form_lag.md
@@ -76,14 +77,15 @@ def deviation_mm(points, tree, stride=1):
 def simplify(obj, target_triangles):
     """Simplify one single-material, single-UV part in place, keeping authored UVs and normals on every kept corner."""
     mesh = obj.data
-    if len(mesh.materials) > 1 or len(mesh.uv_layers) != 1:
-        raise ValueError(f"{obj.name}: expected one material and one UV layer")
+    if len(mesh.materials) > 1 or len(mesh.uv_layers) > 1:
+        raise ValueError(f"{obj.name}: expected one material and at most one UV layer")
     mesh.calc_loop_triangles()
     loops = len(mesh.loops)
     corner_vertex = np.empty(loops, np.int32)
     mesh.loops.foreach_get("vertex_index", corner_vertex)
-    uv = np.empty(loops * 2, np.float32)
-    mesh.uv_layers[0].data.foreach_get("uv", uv)
+    uv = np.zeros(loops * 2, np.float32)   # parts without UVs (sleeve joins) simplify on position + normal
+    if mesh.uv_layers:
+        mesh.uv_layers[0].data.foreach_get("uv", uv)
     normal = np.empty(loops * 3, np.float32)
     mesh.corner_normals.foreach_get("vector", normal)
     position = np.empty(len(mesh.vertices) * 3, np.float32)
@@ -102,7 +104,7 @@ def simplify(obj, target_triangles):
 
     destination = np.zeros(len(indices), np.uint32)
     count = meshoptimizer.simplify(destination, indices, render_position,
-                                   target_index_count=target_triangles * 3, target_error=0.02)
+                                   target_index_count=target_triangles * 3, target_error=0.05)
     kept = destination[:count].reshape(-1, 3)
     # Two render vertices of one seam vertex can end up in the same triangle; drop those and exact duplicates.
     corners_vertex = render_vertex[kept]
@@ -121,9 +123,10 @@ def simplify(obj, target_triangles):
     rebuilt.from_pydata(position[used].tolist(), [], faces.tolist())
     if rebuilt.validate() or len(rebuilt.loops) != kept.size:
         raise ValueError(f"{obj.name}: simplified mesh needed repairs")
-    rebuilt.uv_layers.new(name=mesh.uv_layers[0].name)
     corners = kept.reshape(-1)
-    rebuilt.uv_layers[0].data.foreach_set("uv", uv[first_corner[corners]].reshape(-1))
+    if mesh.uv_layers:
+        rebuilt.uv_layers.new(name=mesh.uv_layers[0].name)
+        rebuilt.uv_layers[0].data.foreach_set("uv", uv[first_corner[corners]].reshape(-1))
     for material in mesh.materials:
         rebuilt.materials.append(material)
     rebuilt.polygons.foreach_set("use_smooth", np.ones(len(rebuilt.polygons), bool))
