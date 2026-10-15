@@ -55,11 +55,11 @@ public static class ProiMagicaSetup
     static readonly Plan[] Plans =
     {
         // long, thick twin tails: one even weight from the tie to the tips (no stiff root / floppy tip curves, no speed cap that
-        // holds the tips back), streaming back from the way she moves; half the gravity stays on at rest so the hair keeps
-        // its weight instead of floating up in the moving wind
+        // holds the tips back), streaming back from the way she moves; three quarters of the gravity stays on at rest and the
+        // air slows the swing a little, so the hair hangs and swings heavily instead of floating up and fluttering in the wind
         // (5 m/s particle speed: the tips keep up with the root, yet a spin kick does not fling the hair through her head)
         new Plan { group = "Hair", preset = "LongHair", renderer = "Hair", simpleReduction = 0.012f, shapeReduction = 0.02f, particleRadius = 0.014f, maxDistance = 0.3f,
-                   gravityFalloff = 0.5f, damping = 0.06f, angleRestoration = 0.2f, restorationTip = 1f, angleLimit = 60f, wind = 1f, movingWind = 0.9f, turbulence = 0.6f,
+                   gravityFalloff = 0.25f, damping = 0.08f, angleRestoration = 0.2f, restorationTip = 1f, angleLimit = 60f, wind = 1f, movingWind = 0.7f, turbulence = 0.4f,
                    particleSpeedLimit = 5f, movementSpeedLimit = 12f,
                    colliders = new[] { "Head", "Neck", "Chest", "Spine", "LeftUpperArm", "LeftLowerArm", "RightUpperArm", "RightLowerArm", "LeftUpperLeg", "RightUpperLeg" } },
         // thin torn strips: light, little air resistance, floppy, catch the wind
