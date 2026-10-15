@@ -1,0 +1,101 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "game-theme original arcade hardware",
+  "theme": "game",
+  "role": "prop",
+  "prompt": "Stack of five chunky retro CRT television sets of different sizes piled in a stepped pyramid, thick boxy bodies, rounded screens showing simple abstract pixel patterns, short antennas on two of them, tangled cables at the base. Solid grouped prop, no logos. Single isolated complete environment prop, full object visible, no scene or floor plane, no characters. Clear silhouette from an elevated three-quarter game camera, precise bevelled hard surfaces, large clean forms, no tiny floating pieces, rich PBR normal detail, premium stylized game asset.",
+  "texture_prompt": "Ivory, warm grey and navy plastic casings, glowing cyan, amber and raspberry pixel screens, dark grilles, black cables, light scuffs, rich PBR detail.",
+  "preview_task_id": "01a102b0-e5f9-759a-850a-cfd4e840f482",
+  "refine_task_id": "01a102b1-e0c3-7660-8f24-3909abd0d68c",
+  "attempt": 1,
+  "created_utc": "2026-10-03T16:57:39.801844+00:00",
+  "texture_attempt": 1,
+  "rejected_geometry": [],
+  "rejected_textures": [],
+  "requested_triangles": 9000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.0,
+    2.2,
+    1.4
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 7761,
+    "vertices": 12231,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 383561,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 184830,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/png",
+        "bytes": 1026463,
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9496989846229553,
+      -0.6207990050315857,
+      -0.2056799978017807
+    ],
+    "unity_bounds_max": [
+      0.9521270394325256,
+      0.6093729734420776,
+      0.19833102822303772
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 2081656
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 7681560
+}

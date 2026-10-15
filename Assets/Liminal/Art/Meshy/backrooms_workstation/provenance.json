@@ -1,0 +1,51 @@
+{
+  "task": "01a0ef96-975e-7635-b6db-45917df6a0e7",
+  "workflow": "image-to-3d",
+  "target_size": 2.8,
+  "geometry_resolution": "4k",
+  "texture_resolution": "4k",
+  "target_polycount": 50000,
+  "topology": "triangle",
+  "enable_pbr": true,
+  "model": "meshy-7.1",
+  "texture_prompt": "1990s office furniture: one ivory beige rectangular laminate desk, one ivory beige CRT monitor with dark blank glass screen, beige keyboard, mustard yellow woven fabric cubicle partitions with gray steel frame. Closed ivory three-drawer pedestal and chunky gray legs. Subtle natural wear. Preserve the source image colors and geometry. No text, no logo.",
+  "reference_image": "backrooms_workstation_reference.png",
+  "reference_image_provider": "OpenAI built-in imagegen",
+  "provider": "Meshy",
+  "status": "SUCCEEDED",
+  "license": "Generated using the project owner Meshy account; subject to that account plan and Meshy terms.",
+  "generated_date": "2026-09-30",
+  "source": "https://docs.meshy.ai/en/api/image-to-3d",
+  "consumed_credits": 35,
+  "generation_iterations": 2,
+  "validation": {
+    "glb_bytes": 29054632,
+    "triangles": 44513,
+    "bounds_min": [
+      -0.9532860517501831,
+      -0.6761560440063477,
+      -0.6293890476226807
+    ],
+    "bounds_max": [
+      0.9504330158233643,
+      0.6788529753684998,
+      0.6297839879989624
+    ],
+    "up_axis": "Y",
+    "forward_axis": "+Z",
+    "pivot": "center",
+    "base_color_resolution": [
+      4096,
+      4096
+    ],
+    "normal_resolution": [
+      4096,
+      4096
+    ],
+    "metallic_roughness_resolution": [
+      2048,
+      2048
+    ],
+    "geometry_review": "Inspected with Blender 5.2.2 front and rear elevated orthographic renders."
+  }
+}

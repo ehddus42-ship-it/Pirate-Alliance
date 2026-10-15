@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "digital",
+  "role": "landmark",
+  "prompt": "Futuristic prison containment pod, tall upright rounded capsule chamber about twice as tall as wide, a thick dark metal frame ring around a closed luminous frosted front panel, heavy clamps at the top and bottom, cables and hoses plugged into the rear, a small control panel on the side, sturdy stepped base. Sealed empty cell of a computer program prison, nobody inside. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Dark graphite metal armor with brushed steel edges, frosted cyan luminous front panel, thin magenta warning light strips, black rubber hoses, fine panel seams, bolts and vents in the normal map.",
+  "preview_task_id": "01a0f2c2-9e49-7520-b688-4222757b8fd3",
+  "refine_task_id": "01a0f2c4-dc70-738c-9f11-0af266c32c05",
+  "attempt": 1,
+  "created_utc": "2026-09-30T14:44:09.397199+00:00",
+  "requested_triangles": 24000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.4,
+    4.6,
+    2.4
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 22946,
+    "vertices": 32749,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3151387,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2463429,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2424378,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.4984790086746216,
+      -0.9518899917602539,
+      -0.48824796080589294
+    ],
+    "unity_bounds_max": [
+      0.5018640160560608,
+      0.9505190253257751,
+      0.48679909110069275
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 9364812
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

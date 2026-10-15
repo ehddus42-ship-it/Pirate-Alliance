@@ -1,0 +1,41 @@
+{
+  "provider": "Meshy AI",
+  "api": "image-to-3d v1",
+  "model": "meshy-7.1",
+  "theme": "ruins/apocalypse",
+  "role": "Additional eerie female-shaped cyborg; skeletal rig for mechanical claw lunge attacks.",
+  "image_task_id": "01a10707-8158-7268-8fd2-19ac3e62dc5c",
+  "created_utc": "2026-10-04T13:12:38.608287+00:00",
+  "requested_triangles": 12000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "concept_provider": "OpenAI built-in image_gen",
+  "concept_file": "Tools/RuinsMonsters/References/mourning_matron_concept.png",
+  "concept_sha256": "e7e2b9b4b3c673ca50a72b1ebdb8a07623f663b70de7961e101a09a97ff16947",
+  "actual": {
+    "triangles": 12014,
+    "vertices": 25445,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.5401129126548767,
+      -0.951742947101593,
+      -0.16745203733444214
+    ],
+    "unity_bounds_max": [
+      0.5405949950218201,
+      0.9478999376296997,
+      0.17864997684955597
+    ],
+    "bytes": 13818844
+  },
+  "consumed_credits": 30,
+  "discarded_text_task_credits": 30,
+  "discarded_text_task_id": "01a10703-54e2-754f-8d7f-b3562b6a60f3",
+  "discarded_reason": "Text model missed the required exposed humanlike face, black cable hair, hollow abdomen and long claws.",
+  "review": "Textured Blender front and reverse views inspected: pale exposed face, black cable hair, hollow mechanical abdomen and long claw fingers preserved. Runtime assembly pending.",
+  "unity_model_yaw_degrees": 0,
+  "front_axis_review": "Unity +Z; exposed humanlike face"
+}

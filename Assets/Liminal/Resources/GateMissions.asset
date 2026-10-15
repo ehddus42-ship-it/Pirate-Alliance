@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c61cacda90741ab9d2790fbb316af65, type: 3}
+  m_Name: GateMissions
+  m_EditorClassIdentifier: Assembly-CSharp::AcRoguelike.Liminal.GateMissionCatalog
+  missions:
+  - id: liminal_campaign
+    code: G-01
+    title: "\uACBD\uACC4 \uC18C\uD0D5"
+    destinationId: liminal
+    destinationName: "\uACBD\uACC4 \uACF5\uAC04"
+    briefing: "\uB9E4\uBC88 \uB2EC\uB77C\uC9C0\uB294 \uC138 \uACF5\uAC04\uC744 \uB3CC\uD30C\uD574.
+      \uB9C8\uC9C0\uB9C9 \uCD9C\uBC1C \uB300\uD569\uC2E4\uC758 \uBCF4\uC2A4\uB97C
+      \uC4F0\uB7EC\uB728\uB9AC\uACE0 \uADC0\uD658\uD574."
+    difficulty: 2
+    difficultyName: "\uBCF4\uD1B5"
+    healthMultiplier: 1
+    enemyGimmicks: 0
+    gimmickName: "\uCD94\uAC00 \uBCC0\uC774 \uC5C6\uC74C"
+    gimmickDescription: "\uAE30\uC874 \uACF5\uAC04 \uC911 \uC138 \uACF3\uC774 \uC911\uBCF5
+      \uC5C6\uC774 \uB098\uD0C0\uB098. \uB9C8\uC9C0\uB9C9 \uBCF4\uC2A4 \uBC29\uC740
+      \uD56D\uC0C1 \uAC19\uC544."
+    objective: "\uC138 \uAD6C\uAC04 \uB3CC\uD30C \xB7 \uCD5C\uC885 \uBCF4\uC2A4 \uACA9\uD30C
+      \xB7 \uCD9C\uAD6C \uB3C4\uB2EC"
+    stages:
+    - {fileID: 11400000, guid: c6debafd8b7c78a4d9b4c5e2a6857f50, type: 2}
+  - id: forest_survey
+    code: G-02
+    title: "\uACBD\uB85C \uC815\uCC30"
+    destinationId: forest
+    destinationName: "\uB2EC\uBE5B \uACE0\uBAA9\uC758 \uC232"
+    briefing: "\uBE44\uAD50\uC801 \uC548\uC815\uC801\uC778 \uC2E0\uD638\uC57C. \uACBD\uB85C\uB97C
+      \uC870\uC0AC\uD558\uACE0 \uADC0\uD658 \uC9C0\uC810\uC744 \uD655\uBCF4\uD574."
+    difficulty: 1
+    difficultyName: "\uC26C\uC6C0"
+    healthMultiplier: 1
+    enemyGimmicks: 0
+    gimmickName: "\uC232\uC758 \uC0DD\uC874 \uBCF8\uB2A5"
+    gimmickDescription: "\uC9C0\uB801\uC774\uC758 \uAE30\uC2B5 \xB7 \uAC1C\uAD6C\uB9AC\uC758
+      \uD600 \xB7 \uB098\uBE44\uC758 \uAC00\uB8E8\uC640 \uB3CC\uD48D \xB7 \uACE0\uBAA9\uC758
+      \uBB18\uBAA9\uACFC \uBFCC\uB9AC. \uBC14\uB2E5 \uC608\uACE0\uB97C \uD53C\uD558\uACE0,
+      \uB2EC\uB824\uB4DC\uB294 \uBB18\uBAA9\uC744 \uBA3C\uC800 \uC81C\uAC70\uD574."
+    objective: "\uBAA8\uB4E0 \uC804\uD22C\uBC29 \uC815\uB9AC \xB7 \uCD9C\uAD6C \uB3C4\uB2EC"
+    stages:
+    - {fileID: 11400000, guid: cbd8b2bd2257f5149adde130d9911ca5, type: 2}
+  - id: ruins_clearance
+    code: G-04
+    title: "\uC800\uD56D\uCCB4 \uC18C\uD0D5"
+    destinationId: ruins
+    destinationName: "\uBA78\uB9DD\uD55C \uC9C0\uAD6C"
+    briefing: "\uC801\uC758 \uBC29\uC5B4 \uBC18\uC751\uC774 \uAC15\uD654\uB410\uC5B4.
+      \uAE34 \uAD50\uC804\uC5D0 \uB300\uBE44\uD574."
+    difficulty: 2
+    difficultyName: "\uBCF4\uD1B5"
+    healthMultiplier: 1.25
+    enemyGimmicks: 1
+    gimmickName: "\uAC15\uD654\uC7A5\uAC11 \xB7 \uD3ED\uD48D\uC758 \uAD70\uC8FC"
+    gimmickDescription: "\uC801\uC774 \uBC1B\uB294 \uD53C\uD574 25% \uAC10\uC18C.
+      \uC804\uAE30 \uD0C4\uB9C9 \xB7 \uC21C\uC11C\uB300\uB85C \uAE68\uC5B4\uB098\uB294
+      \uC804\uC7C1 \uAE30\uACC4 \xB7 3\uC5F0\uBC1C \uB099\uD558 \uBBF8\uC0AC\uC77C.
+      \uC608\uACE0\uC640 \uD0C4\uB9C9 \uC0AC\uC774 \uBE48\uD2C8\uC744 \uBCF4\uACE0
+      \uD53C\uD558\uB77C."
+    objective: "\uC138 \uC804\uD22C \uAD6C\uC5ED \uB3CC\uD30C \xB7 \uD3ED\uD48D\uC758
+      \uAD70\uC8FC \uACA9\uD30C \xB7 \uCD9C\uAD6C \uB3C4\uB2EC"
+    stages:
+    - {fileID: 11400000, guid: 6b1be001ba878b6438624137657e3f1f, type: 2}
+  - id: cave_expedition
+    code: G-05
+    title: "\uACE0\uC704\uD5D8 \uC218\uC0C9"
+    destinationId: cave
+    destinationName: "\uC2EC\uC5F0\uC758 \uC218\uC815 \uB3D9\uAD74"
+    briefing: "\uBC29\uC5B4 \uAC15\uD654\uC640 \uC0AC\uB9DD \uD6C4 \uC704\uD5D8 \uBC18\uC751\uC774
+      \uB3D9\uC2DC\uC5D0 \uAC10\uC9C0\uB3FC. \uCDA9\uBD84\uD788 \uC900\uBE44\uD558\uACE0
+      \uC9C4\uC785\uD574."
+    difficulty: 3
+    difficultyName: "\uC5B4\uB824\uC6C0"
+    healthMultiplier: 1.5
+    enemyGimmicks: 3
+    gimmickName: "\uAC15\uD654 \uC7A5\uAC11 + \uC0AC\uB9DD \uD3ED\uBC1C"
+    gimmickDescription: "\uC801\uC774 \uBC1B\uB294 \uD53C\uD574 25% \uAC10\uC18C(\uBC18\uC62C\uB9BC,
+      \uCD5C\uC18C 1). \uCC98\uCE58 \uD6C4 1.25\uCD08 \uC608\uACE0 \uB4A4 \uBC18\uACBD
+      3m\uC5D0 \uD53C\uD574 14. \uD3ED\uBC1C\uC740 \uD68C\uD53C \uAC00\uB2A5."
+    objective: "\uBAA8\uB4E0 \uC804\uD22C\uBC29 \uC815\uB9AC \xB7 \uCD9C\uAD6C \uB3C4\uB2EC"
+    stages:
+    - {fileID: 11400000, guid: 4f36d5da9619297469eb82c844b552cb, type: 2}
+  - id: game_exhibition
+    code: G-06
+    title: "\uBA48\uCD94\uC9C0 \uC54A\uB294 \uAC8C\uC784"
+    destinationId: game
+    destinationName: "\uAC8C\uC784\uC758 \uC794\uC0C1"
+    briefing: "\uB20C\uB9B0 \uCE78\uC740 \uAE38\uC774 \uB418\uACE0, \uB2EB\uD78C
+      \uCE78\uC740 \uBCBD\uC774 \uB41C\uB2E4. \uAC70\uB300\uD55C \uBE14\uB85D\uACFC
+      \uAC8C\uC784 \uAE30\uAE30 \uC0AC\uC774\uB97C \uD1B5\uACFC\uD558\uB77C."
+    difficulty: 2
+    difficultyName: "\uBCF4\uD1B5"
+    healthMultiplier: 1
+    enemyGimmicks: 0
+    gimmickName: "\uBCF5\uC140 \uAD70\uB2E8 \xB7 \uB4DC\uB86D \uD0A4\uD37C"
+    gimmickDescription: "\uAC00\uC18D\uD558\uB294 \uBE14\uB85D \uD0C4\uB9C9 \xB7
+      \uB124 \uBC88 \uD295\uAE30\uB294 I\uC790 \uBE14\uB85D \xB7 Z\uC790 \uBE14\uB85D
+      \uC138 \uB9C8\uB9AC\uC758 \uB3CC\uC9C4. \uBC14\uB2E5 \uC608\uACE0\uB97C \uBCF4\uACE0
+      \uD53C\uD558\uB77C."
+    objective: "\uC138 \uC804\uD22C \uAD6C\uC5ED \uB3CC\uD30C \xB7 \uB4DC\uB86D \uD0A4\uD37C
+      \uACA9\uD30C \xB7 \uCD9C\uAD6C \uB3C4\uB2EC"
+    stages:
+    - {fileID: 11400000, guid: 6718179d0ab1f284a8066f58bac55709, type: 2}

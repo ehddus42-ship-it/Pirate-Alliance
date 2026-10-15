@@ -1,0 +1,19 @@
+{
+  "provider": "Meshy AI",
+  "api": "rigging v1",
+  "rig_task_id": "01a1073d-d1bf-7796-9b26-4571543fece0",
+  "input_task_id": "01a10731-8be5-7111-9b9b-3eccb3856d97",
+  "status": "FAILED",
+  "consumed_credits": 0,
+  "task_error": {
+    "type": "invalid_input",
+    "code": "invalid_input",
+    "message": "This model could not be rigged. Please check that the mesh is a single, well-formed humanoid character.",
+    "doc_url": "https://docs.meshy.ai/en/api/errors#invalid-input"
+  },
+  "animations_requested": false,
+  "retries": 0,
+  "adopted": false,
+  "fallback": "Unity-authored mechanical joint rig on the original Meshy geometry; not a Meshy-generated skeleton.",
+  "assets": {}
+}

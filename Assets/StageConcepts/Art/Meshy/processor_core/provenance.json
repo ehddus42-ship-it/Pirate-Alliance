@@ -1,0 +1,52 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "digital",
+  "prompt": "Massive futuristic processor core machine, upright central faceted cube held in a thick industrial hexagonal supporting ring, grounded on a broad technical machine foot, four sturdy mechanical connections between cube and ring, futuristic supercomputer dungeon landmark. Complete standalone device. Single isolated complete game environment prop, full object visible, no background scene, no ground plane, no pedestal, no characters. Strong readable silhouette, efficient low polygon game mesh, large clean forms, fine detail in PBR normal textures, realistic stylized fantasy game quality.",
+  "texture_prompt": "Black graphite and silver brushed metal, bright cyan circuit traces on cube, magenta energy seams, subtle etched microcircuits and vents as normal texture, science fiction computer core.",
+  "preview_task_id": "01a0f172-7da0-736b-b161-bd8626eb8c27",
+  "refine_task_id": "01a0f173-b2bc-73ce-9a66-1368e93dcd88",
+  "created_utc": "2026-09-30T08:35:42.258408+00:00",
+  "requested_triangles": 5000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 4587,
+    "vertices": 8807,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "bytes": 2056488
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 8563256
+}

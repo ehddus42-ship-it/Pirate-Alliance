@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "digital",
+  "role": "prop",
+  "prompt": "Stack of three sealed sci-fi quarantine cargo crates, one large crate with two smaller ones on top, glowing seams, heavy latches, a red glowing lock panel, hazard stripes. Solid grouped cargo prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Dark slate composite panels, glowing red and cyan seams, yellow black hazard stripes, worn metal latches, scuffed edges, crisp hard surface normal detail.",
+  "preview_task_id": "01a102b3-8694-7426-8d03-6df0a71d1d92",
+  "refine_task_id": "01a102b4-ce5f-7748-aa15-0e9a1e6454a9",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:00:50.757034+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.4,
+    1.7,
+    1.8
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 13803,
+    "vertices": 23659,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 2848408,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2150188,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2117305,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.6045569181442261,
+      -0.9516829252243042,
+      -0.8532098531723022
+    ],
+    "unity_bounds_max": [
+      0.6054109930992126,
+      0.9506808519363403,
+      0.8539029359817505
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 8040848
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

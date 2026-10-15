@@ -1,0 +1,52 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "cave",
+  "prompt": "Cluster of seven large quartz crystals growing from a small irregular natural rock foot, tall thick central hexagonal pointed crystal with varied shorter tilted hexagonal spikes around it, strong crisp faceted geometry, fantasy deep cave mineral formation, complete freestanding prop. Single isolated complete game environment prop, full object visible, no background scene, no ground plane, no pedestal, no characters. Strong readable silhouette, efficient low polygon game mesh, large clean forms, fine detail in PBR normal textures, realistic stylized fantasy game quality.",
+  "texture_prompt": "Rich luminous blue turquoise quartz crystals, saturated blue tips, pale cyan edges, dark grey rock foot, subtle mineral surface texture, polished faceted crystal appearance.",
+  "preview_task_id": "01a0f175-50d6-774d-8685-f5591225315d",
+  "refine_task_id": "01a0f176-8c87-7251-8a6d-611536b080af",
+  "created_utc": "2026-09-30T08:38:48.760856+00:00",
+  "requested_triangles": 3000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 3116,
+    "vertices": 5586,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "bytes": 2003968
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 8552380
+}

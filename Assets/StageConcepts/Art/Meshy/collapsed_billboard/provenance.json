@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "ruins",
+  "role": "landmark",
+  "prompt": "Collapsed roadside billboard, a large rectangular blank sign panel torn and tilted down at a steep angle, held up by one remaining bent steel lattice leg while the other leg is broken at its base, a catwalk rail on the front edge, dangling light fixtures. Post apocalyptic highway landmark, no letters, no advertisement image. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Rusty dark steel lattice and frame, faded torn pale blank panel with water stains, peeling paint, rust, soot, fine metal fatigue normal detail.",
+  "preview_task_id": "01a0f2db-f809-74d3-a136-98aab851902d",
+  "refine_task_id": "01a0f2dd-3fed-755c-aa05-e56d5d3d565a",
+  "attempt": 2,
+  "created_utc": "2026-09-30T15:11:25.798575+00:00",
+  "requested_triangles": 22000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    7.5,
+    6.5,
+    3.0
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 21403,
+    "vertices": 35923,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3747433,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2049514,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2763136,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9500100016593933,
+      -0.5718079805374146,
+      -0.2212589830160141
+    ],
+    "unity_bounds_max": [
+      0.951556921005249,
+      0.5727670192718506,
+      0.20413394272327423
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 9968772
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

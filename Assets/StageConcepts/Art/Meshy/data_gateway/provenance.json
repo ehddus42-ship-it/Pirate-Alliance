@@ -1,0 +1,52 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "digital",
+  "prompt": "Futuristic digital gateway arch, two tall rectangular circuit board towers connected at top by squared technological beam, large completely empty rectangular walk-through central opening, thick geometric frame, inset strips and motherboard circuit traces, computer program prison portal. Single isolated complete game environment prop, full object visible, no background scene, no ground plane, no pedestal, no characters. Strong readable silhouette, efficient low polygon game mesh, large clean forms, fine detail in PBR normal textures, realistic stylized fantasy game quality.",
+  "texture_prompt": "Black graphite circuit panels, electric cyan circuit traces, purple magenta luminous edge strips, metallic silver connectors, crisp sci-fi etched circuitry normal map.",
+  "preview_task_id": "01a0f172-7ef0-73f0-89d3-5438ebc93069",
+  "refine_task_id": "01a0f173-b624-72ba-bf83-d0d1ce03d47d",
+  "created_utc": "2026-09-30T08:35:43.669901+00:00",
+  "requested_triangles": 4500,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 3886,
+    "vertices": 6182,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "bytes": 1910760
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 8092436
+}

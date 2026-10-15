@@ -1,0 +1,526 @@
+{
+ "roomId": "Digital_04",
+ "displayName": "데이터 강",
+ "kind": "Combat",
+ "notes": "Data river: a glowing stream of data cuts the hall diagonally; two light bridges cross it, coolant plants line its banks.",
+ "playerSpawn": {
+  "x": 0.0,
+  "y": 0.05,
+  "z": 4.0
+ },
+ "enemySpawns": [
+  {
+   "x": -4.5,
+   "y": 0.08,
+   "z": 20.5
+  },
+  {
+   "x": 5.5,
+   "y": 0.08,
+   "z": 16.0
+  },
+  {
+   "x": 1.5,
+   "y": 0.08,
+   "z": 29.5
+  }
+ ],
+ "decor": [
+  {
+   "material": "Program_Cyan",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_04_Program_Cyan.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Data",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_04_Program_Data.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Floor",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_04_Program_Floor.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_FloorDark",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_04_Program_FloorDark.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Frame",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_04_Program_Frame.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Grid",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_04_Program_Grid.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Hazard",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_04_Program_Hazard.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Magenta",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_04_Program_Magenta.asset",
+   "castShadows": false
+  },
+  {
+   "material": "Program_Panels",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_04_Program_Panels.asset",
+   "castShadows": true
+  },
+  {
+   "material": "Program_Void",
+   "mesh": "Assets/StageConcepts/Geometry/Variations/Digital_04_Program_Void.asset",
+   "castShadows": true
+  }
+ ],
+ "models": [
+  {
+   "key": "coolant_pipes",
+   "position": {
+    "x": -8.2,
+    "y": 0.0,
+    "z": 5.5
+   },
+   "yaw": 20,
+   "targetSize": {
+    "x": 4.2,
+    "y": 3.2,
+    "z": 2.2
+   },
+   "modelYaw": 0.0,
+   "scale": 2.2082066,
+   "offset": {
+    "x": -2e-05,
+    "y": 1.00364,
+    "z": 0.00254
+   }
+  },
+  {
+   "key": "coolant_pipes",
+   "position": {
+    "x": 8.8,
+    "y": 0.0,
+    "z": 29.8
+   },
+   "yaw": 200,
+   "targetSize": {
+    "x": 4.2,
+    "y": 3.2,
+    "z": 2.2
+   },
+   "modelYaw": 0.0,
+   "scale": 2.2082066,
+   "offset": {
+    "x": -2e-05,
+    "y": 1.00364,
+    "z": 0.00254
+   }
+  },
+  {
+   "key": "coolant_pipes",
+   "position": {
+    "x": 9.2,
+    "y": 0.0,
+    "z": 13.0
+   },
+   "yaw": 200,
+   "targetSize": {
+    "x": 3.4,
+    "y": 2.6,
+    "z": 1.8
+   },
+   "modelYaw": 0.0,
+   "scale": 1.7875958,
+   "offset": {
+    "x": -1e-05,
+    "y": 0.81247,
+    "z": 0.00206
+   }
+  },
+  {
+   "key": "holo_terminal",
+   "position": {
+    "x": -7.8,
+    "y": 0.0,
+    "z": 26.5
+   },
+   "yaw": 110,
+   "targetSize": {
+    "x": 2.2,
+    "y": 2.3,
+    "z": 1.3
+   },
+   "modelYaw": 0.0,
+   "scale": 1.1564996,
+   "offset": {
+    "x": -0.00057,
+    "y": 0.68167,
+    "z": -0.01037
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": -3.2,
+    "y": 0.0,
+    "z": 32.2
+   },
+   "yaw": 0,
+   "targetSize": {
+    "x": 2.2,
+    "y": 3.4,
+    "z": 2.2
+   },
+   "modelYaw": 0.0,
+   "scale": 1.7638622,
+   "offset": {
+    "x": -0.00352,
+    "y": 1.67704,
+    "z": -0.00696
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 17.63881,
+    "y": 0.0,
+    "z": 5.0
+   },
+   "yaw": 89.73504396566388,
+   "targetSize": {
+    "x": 5.2,
+    "y": 13.472,
+    "z": 5.2
+   },
+   "modelYaw": 0.0,
+   "scale": 4.1691289,
+   "offset": {
+    "x": -0.00832,
+    "y": 3.96391,
+    "z": -0.01645
+   }
+  },
+  {
+   "key": "server_monolith",
+   "position": {
+    "x": 18.49205,
+    "y": 0.0,
+    "z": 30.0
+   },
+   "yaw": 87.68383630092903,
+   "targetSize": {
+    "x": 5.2,
+    "y": 13.31045,
+    "z": 5.2
+   },
+   "modelYaw": 0.0,
+   "scale": 4.1691289,
+   "offset": {
+    "x": -0.00832,
+    "y": 3.96391,
+    "z": -0.01645
+   }
+  },
+  {
+   "key": "drone_dock",
+   "position": {
+    "x": -1.08085,
+    "y": 0.0,
+    "z": 8.73984
+   },
+   "yaw": 123.30767959834081,
+   "targetSize": {
+    "x": 1.81112,
+    "y": 1.52515,
+    "z": 1.81112
+   },
+   "modelYaw": 0.0,
+   "scale": 1.0777351,
+   "offset": {
+    "x": 0.00052,
+    "y": 0.76469,
+    "z": 0.00039
+   }
+  },
+  {
+   "key": "glitch_cube_pile",
+   "position": {
+    "x": -5.43707,
+    "y": 0.0,
+    "z": 23.99931
+   },
+   "yaw": 299.6250279552924,
+   "targetSize": {
+    "x": 2.6924,
+    "y": 1.55331,
+    "z": 2.48529
+   },
+   "modelYaw": 0.0,
+   "scale": 1.4728943,
+   "offset": {
+    "x": -0.06619,
+    "y": 0.77282,
+    "z": -0.05506
+   }
+  },
+  {
+   "key": "cable_junction",
+   "position": {
+    "x": -8.73719,
+    "y": 0.0,
+    "z": 17.96407
+   },
+   "yaw": 142.31971779471772,
+   "targetSize": {
+    "x": 3.71587,
+    "y": 0.83607,
+    "z": 1.67214
+   },
+   "modelYaw": 0.0,
+   "scale": 0.5511365,
+   "offset": {
+    "x": -0.00041,
+    "y": 0.42026,
+    "z": -0.00401
+   }
+  }
+ ],
+ "colliders": [
+  {
+   "name": "Data river 0",
+   "center": {
+    "x": -9.30075,
+    "y": 0.35,
+    "z": 13.25516
+   },
+   "size": {
+    "x": 2.8,
+    "y": 0.7,
+    "z": 9.53299
+   },
+   "yaw": 61.7626,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Data river 1",
+   "center": {
+    "x": 0.0,
+    "y": 0.35,
+    "z": 18.25
+   },
+   "size": {
+    "x": 2.8,
+    "y": 0.7,
+    "z": 5.58121
+   },
+   "yaw": 61.7626,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Data river 2",
+   "center": {
+    "x": 9.30075,
+    "y": 0.35,
+    "z": 23.24484
+   },
+   "size": {
+    "x": 2.8,
+    "y": 0.7,
+    "z": 9.53299
+   },
+   "yaw": 61.7626,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Rack line east",
+   "center": {
+    "x": 12.3,
+    "y": 1.2,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.4,
+    "z": 33.4
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Rack line west",
+   "center": {
+    "x": -12.4,
+    "y": 1.2,
+    "z": 18.2
+   },
+   "size": {
+    "x": 1.5,
+    "y": 2.4,
+    "z": 33.4
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__coolant_pipes",
+   "center": {
+    "x": -8.2,
+    "y": 0.99829,
+    "z": 5.5
+   },
+   "size": {
+    "x": 2.772,
+    "y": 1.99658,
+    "z": 0.64729
+   },
+   "yaw": 20.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__coolant_pipes",
+   "center": {
+    "x": 8.8,
+    "y": 0.99829,
+    "z": 29.8
+   },
+   "size": {
+    "x": 2.772,
+    "y": 1.99658,
+    "z": 0.64729
+   },
+   "yaw": 200.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__coolant_pipes",
+   "center": {
+    "x": 9.2,
+    "y": 0.80814,
+    "z": 13.0
+   },
+   "size": {
+    "x": 2.244,
+    "y": 1.61628,
+    "z": 0.524
+   },
+   "yaw": 200.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__holo_terminal",
+   "center": {
+    "x": -7.8,
+    "y": 0.67967,
+    "z": 26.5
+   },
+   "size": {
+    "x": 1.452,
+    "y": 1.35933,
+    "z": 0.70337
+   },
+   "yaw": 110.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__server_monolith",
+   "center": {
+    "x": -3.2,
+    "y": 1.5,
+    "z": 32.2
+   },
+   "size": {
+    "x": 1.8,
+    "y": 3.0,
+    "z": 1.8
+   },
+   "yaw": 0.0,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__drone_dock",
+   "center": {
+    "x": -1.08085,
+    "y": 0.76258,
+    "z": 8.73984
+   },
+   "size": {
+    "x": 1.17952,
+    "y": 1.52515,
+    "z": 1.16071
+   },
+   "yaw": 123.3077,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__glitch_cube_pile",
+   "center": {
+    "x": -5.43707,
+    "y": 0.7623,
+    "z": 23.99931
+   },
+   "size": {
+    "x": 1.76287,
+    "y": 1.52459,
+    "z": 1.64029
+   },
+   "yaw": 299.625,
+   "pitch": 0.0,
+   "walkable": false
+  },
+  {
+   "name": "Landmark footprint__cable_junction",
+   "center": {
+    "x": -8.73719,
+    "y": 0.41804,
+    "z": 17.96407
+   },
+   "size": {
+    "x": 0.69043,
+    "y": 0.83607,
+    "z": 0.49161
+   },
+   "yaw": 142.3197,
+   "pitch": 0.0,
+   "walkable": false
+  }
+ ],
+ "lights": [
+  {
+   "name": "River glow west",
+   "position": {
+    "x": -6.0,
+    "y": 1.5,
+    "z": 14.0
+   },
+   "color": "#7df3ff",
+   "intensity": 2.2,
+   "range": 9.0
+  },
+  {
+   "name": "River glow east",
+   "position": {
+    "x": 6.0,
+    "y": 1.5,
+    "z": 22.5
+   },
+   "color": "#7df3ff",
+   "intensity": 2.2,
+   "range": 9.0
+  }
+ ]
+}

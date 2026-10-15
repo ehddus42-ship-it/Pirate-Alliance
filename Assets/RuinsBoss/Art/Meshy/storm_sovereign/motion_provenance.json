@@ -1,0 +1,114 @@
+{
+  "provider": "Meshy AI",
+  "created_utc": "2026-10-04T13:57:24.939079+00:00",
+  "rig_task_id": "01a10733-db01-7717-b361-8fb863a39e2d",
+  "animation_task_id": "01a10734-3e6a-7333-8547-a3fc1d383348",
+  "action_ids": [
+    0,
+    125,
+    8
+  ],
+  "input_task_id": "01a10731-6d8e-766a-9b44-fe7fe0ca05da",
+  "input_api": "image-to-3d v1",
+  "action_names": [
+    "Idle",
+    "Charged Spell Cast",
+    "Dead"
+  ],
+  "height_meters": 3.6,
+  "consumed_credits": 14,
+  "assets": {
+    "storm_sovereign_rig.glb": {
+      "skins": 1,
+      "joints": [
+        "Hips",
+        "Spine02",
+        "Spine01",
+        "Spine",
+        "neck",
+        "Head",
+        "head_end",
+        "headfront",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ],
+      "clips": [
+        {
+          "name": "Armature|clip0|baselayer",
+          "start": 0.03333333507180214,
+          "end": 0.03333333507180214,
+          "channels": 72
+        }
+      ]
+    },
+    "storm_sovereign_rig.fbx": {
+      "format": "fbx"
+    },
+    "storm_sovereign_motions.glb": {
+      "skins": 1,
+      "joints": [
+        "Hips",
+        "Spine02",
+        "Spine01",
+        "Spine",
+        "neck",
+        "Head",
+        "head_end",
+        "headfront",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ],
+      "clips": [
+        {
+          "name": "Idle",
+          "start": 0,
+          "end": 4,
+          "channels": 72
+        },
+        {
+          "name": "Charged_Spell_Cast",
+          "start": 0,
+          "end": 2.6666666666666665,
+          "channels": 72
+        },
+        {
+          "name": "Dead",
+          "start": 0,
+          "end": 2.966666666666667,
+          "channels": 72
+        }
+      ]
+    },
+    "storm_sovereign_motions.fbx": {
+      "format": "fbx"
+    }
+  }
+}

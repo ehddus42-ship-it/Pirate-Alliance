@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "digital",
+  "role": "prop",
+  "prompt": "Square charging cradle platform with four short pylons and a small round security drone parked on top, the drone has a single glowing lens and folded rotor arms, thick power cables running from the base. Compact sci-fi prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Gunmetal grey platform with glowing cyan charge rings, white and dark grey drone shell, red lens glow, black cables, small warning decals without text, hard surface normal detail.",
+  "preview_task_id": "01a102b3-962a-757b-a245-12ff7524557e",
+  "refine_task_id": "01a102b5-7ea7-7646-9e39-8a03ca95be02",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:02:19.967134+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    1.9,
+    1.6,
+    1.9
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 14907,
+    "vertices": 27192,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 2941718,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2000504,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2280638,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.8296079635620117,
+      -0.7095319628715515,
+      -0.816261887550354
+    ],
+    "unity_bounds_max": [
+      0.8286339640617371,
+      0.7056159973144531,
+      0.8155379891395569
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 8274216
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

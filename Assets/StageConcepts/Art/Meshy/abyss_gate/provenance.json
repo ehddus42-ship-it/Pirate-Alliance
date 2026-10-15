@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "cave",
+  "role": "landmark",
+  "prompt": "Ancient carved stone gate set into a rough natural rock outcrop, huge closed double doors with deep carved spiral and eye runes, a heavy stone lintel and pillars framing the doors, rough cave rock mass around the frame on the sides and top, a few steps in front. Mysterious sealed door to the abyss, front facing, thick and solid. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Dark basalt grey carved stone doors, glowing cyan and violet rune grooves, rough brown grey cave rock around the frame, mineral dust, fine chiselled carving normal map.",
+  "preview_task_id": "01a0f2d0-e8e7-7752-92cf-d429ac778e1b",
+  "refine_task_id": "01a0f2d3-2692-715b-bc91-42bc393a50f4",
+  "attempt": 1,
+  "created_utc": "2026-09-30T15:00:25.519232+00:00",
+  "requested_triangles": 30000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    8.5,
+    7.0,
+    3.4
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 28807,
+    "vertices": 37841,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3193091,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2206521,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2343441,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9508630633354187,
+      -0.713621973991394,
+      -0.24664101004600525
+    ],
+    "unity_bounds_max": [
+      0.9516869783401489,
+      0.7162630558013916,
+      0.24434205889701843
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 9301920
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

@@ -1,0 +1,52 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "cave",
+  "prompt": "Natural dark limestone cave arch rock formation, two massive irregular craggy stone pillars joined by a thick rough stone ceiling bridge, large clear open pass-through central hole, stalactites hanging from arch underside, primitive underground cavern landmark, no flat plinth. Single isolated complete game environment prop, full object visible, no background scene, no ground plane, no pedestal, no characters. Strong readable silhouette, efficient low polygon game mesh, large clean forms, fine detail in PBR normal textures, realistic stylized fantasy game quality.",
+  "texture_prompt": "Dark wet blue grey limestone, layered sediment, rough carved erosion, small patches of muted moss, subtle earthy brown streaks, detailed damp rock normal texture.",
+  "preview_task_id": "01a0f174-8e34-7476-9c5b-9f2445f51a9a",
+  "refine_task_id": "01a0f175-c309-7288-a0bf-da1286831345",
+  "created_utc": "2026-09-30T08:37:58.601714+00:00",
+  "requested_triangles": 5500,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 5586,
+    "vertices": 8025,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "bytes": 5975344
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 2048px; tangent normals renormalized; binary payload compactly repacked.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 7093404
+}
