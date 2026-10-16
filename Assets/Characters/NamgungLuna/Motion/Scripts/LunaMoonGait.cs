@@ -24,6 +24,19 @@ namespace NamgungLuna.Motion
         public Vector3[] solePoints = new Vector3[0];
     }
 
+    /// <summary>
+    /// Layers another motion (e.g. <see cref="LunaBasicAttack"/>) over the gait. The gait calls it every frame: after
+    /// the legs are posed, while the body rotation is built (before the toe-to-floor lift is measured), and once the
+    /// body is placed (before the lantern swings), so arm poses and the lantern grip follow the final body.
+    /// </summary>
+    public interface ILunaPoseOverlay
+    {
+        void OverlayLegs(ref LunaMoonGait.LegPose left, ref LunaMoonGait.LegPose right);
+        /// <summary><paramref name="offset"/>: extra body offset in root space (y = lift).</summary>
+        void OverlayBody(ref Quaternion rotation, ref Vector3 offset);
+        void AfterBodyPosed();
+    }
+
     public enum LunaGaitEventKind { Step, Settle, Jump, Land, SprintStart, Dash }
 
     public struct LunaGaitEvent
@@ -170,7 +183,8 @@ namespace NamgungLuna.Motion
         public float LowestSoleHeight { get; private set; }
         public int StepCount { get; private set; }
 
-        struct LegPose
+        /// <summary>Leg angles (degrees): hip swing forward, knee fold back, toes pointed down, sideways splay.</summary>
+        public struct LegPose
         {
             public float hip, knee, ankle, splay;
 
@@ -196,6 +210,7 @@ namespace NamgungLuna.Motion
         static readonly LegPose FallR = new LegPose(-3f, 18f, 42f, 1f);
 
         ILunaMotionSource source;
+        ILunaPoseOverlay overlay;
         Vector3 lastPosition, planarVelocity, smoothedAccel;
         float speed, lastYaw, yawRate, verticalVelocity;
         float psi;                       // gait phase, two bounds per cycle: the left toe touches at 0, the right at 1
@@ -216,6 +231,7 @@ namespace NamgungLuna.Motion
         void Awake()
         {
             source = GetComponent<ILunaMotionSource>();
+            overlay = GetComponent<ILunaPoseOverlay>();
             if (visual == null) visual = transform;
             if (left.hip != null) { hipRestL = left.hip.localRotation; kneeRestL = left.knee.localRotation; ankleRestL = left.ankle.localRotation; }
             if (right.hip != null) { hipRestR = right.hip.localRotation; kneeRestR = right.knee.localRotation; ankleRestR = right.ankle.localRotation; }
@@ -259,6 +275,7 @@ namespace NamgungLuna.Motion
             AdvancePhase(dt, p);
             PoseLegs(p);
             PoseBody(dt, p);
+            overlay?.AfterBodyPosed();
             UpdateLantern(dt);
             UpdateMoon(dt);
             FlushEvents();
@@ -412,6 +429,7 @@ namespace NamgungLuna.Motion
             LegPose airL = LegPose.Lerp(FallL, RiseL, riseW), airR = LegPose.Lerp(FallR, RiseR, riseW);
             LegPose l = LegPose.Lerp(LegPose.Lerp(idleL, gaitL, moveW), airL, airW);
             LegPose r = LegPose.Lerp(LegPose.Lerp(idleR, gaitR, moveW), airR, airW);
+            overlay?.OverlayLegs(ref l, ref r);
             Apply(left, hipRestL, kneeRestL, ankleRestL, l, -1f);
             Apply(right, hipRestR, kneeRestR, ankleRestR, r, 1f);
         }
@@ -452,7 +470,9 @@ namespace NamgungLuna.Motion
             BodyPitch = pitch;
 
             Quaternion rotation = Quaternion.AngleAxis(twist, Vector3.up) * Quaternion.AngleAxis(pitch, Vector3.right) * Quaternion.AngleAxis(roll, Vector3.forward);
-            Vector3 basePosition = leanPivot - rotation * leanPivot;
+            Vector3 extra = Vector3.zero;
+            overlay?.OverlayBody(ref rotation, ref extra);
+            Vector3 basePosition = leanPivot - rotation * leanPivot + new Vector3(extra.x, 0f, extra.z);
             visual.localRotation = rotation;
             visual.localPosition = basePosition;
 
@@ -467,7 +487,7 @@ namespace NamgungLuna.Motion
             // the dash leap: the root slides along the floor, the body floats over it
             DashLiftNow = dashProgress >= 0f ? dashLift * Mathf.Sin(Mathf.PI * dashProgress) : 0f;
             // A landing dip or the end of the air blend may bring the toe down to the floor, never through it.
-            float lifted = offset + dip + DashLiftNow;
+            float lifted = offset + dip + DashLiftNow + extra.y;
             if (grounded) lifted = Mathf.Max(lifted, groundLevel - lowest);
             visual.localPosition = basePosition + Vector3.up * lifted;
             LowestSoleHeight = lowest + lifted - groundLevel;
