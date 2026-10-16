@@ -334,7 +334,7 @@ namespace AcRoguelike.Liminal
             label.color = color;
             label.alignment = alignment;
             label.raycastTarget = false;
-            label.enableWordWrapping = true;
+            label.textWrappingMode = TextWrappingModes.Normal;
             return label;
         }
 

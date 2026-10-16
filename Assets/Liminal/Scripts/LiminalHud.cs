@@ -79,7 +79,7 @@ namespace AcRoguelike.Liminal
             Stretch(combatGroup.GetComponent<RectTransform>());
             var status = HunterUi.Window("HunterStatus", combatGroup.transform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(22, -20), new Vector2(330, 96), font);
             HunterUi.Text("Rank", status, font, "HUNTER", 12, HunterUi.Gold, new Vector2(16, -10), new Vector2(120, 18), FontStyles.Bold);
-            hunterName = HunterUi.Text("Name", status, font, HunterRoster.FirstHunterName, 19, HunterUi.Cream, new Vector2(16, -26), new Vector2(200, 28), FontStyles.Bold);
+            hunterName = HunterUi.Text("Name", status, font, run.Roster ? run.Roster.CurrentName : "프로이", 19, HunterUi.Cream, new Vector2(16, -26), new Vector2(200, 28), FontStyles.Bold);
             skillLabel = HunterUi.Text("Skill", status, font, "", 12, HunterUi.Gold, new Vector2(220, -32), new Vector2(96, 18), FontStyles.Bold, TextAlignmentOptions.TopRight);
             counterLabel = HunterUi.Text("Counter", status, font, "", 13, HunterUi.Gate, new Vector2(200, -12), new Vector2(116, 20), FontStyles.Bold, TextAlignmentOptions.TopRight);
             var track = HunterUi.Fill("HealthTrack", status, new Vector2(0, 1), new Vector2(0, 1), new Vector2(16, -60), new Vector2(232, 10), new Color(.05f, .07f, .14f, 1));

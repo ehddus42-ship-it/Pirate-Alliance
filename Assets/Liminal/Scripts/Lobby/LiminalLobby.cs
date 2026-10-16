@@ -390,7 +390,7 @@ namespace AcRoguelike.Liminal
             motor = player ? player.GetComponent<PlayerMotor>() : null;
             // The first hunter walks the plaza in everyday clothes; another picked hunter keeps her gate outfit.
             var roster = run ? run.Roster : null;
-            if (!roster || roster.CurrentIndex == 0) SetOutfit(player, true);
+            if (!roster || roster.CurrentUsesSceneModel) SetOutfit(player, true);
             if (motor)
             {
                 motor.ResetAt(SpawnPoint);
@@ -756,7 +756,7 @@ namespace AcRoguelike.Liminal
             // them back on when she returns.
             if (casualWorn) SetOutfit(run.player, false);
             roster.Choose(index);
-            if (roster.CurrentIndex == 0) SetOutfit(run.player, true);
+            if (roster.CurrentUsesSceneModel) SetOutfit(run.player, true);
             HitFeedback.ScreenFlash(new Color(HunterUi.Gold.r, HunterUi.Gold.g, HunterUi.Gold.b, .14f), .25f);
             RefreshLoadout();
         }

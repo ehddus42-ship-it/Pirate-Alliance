@@ -32,6 +32,7 @@ namespace AcRoguelike.Liminal.EditorTests
         static float wakeAt, deadline;
         static Wait waiting;
         static bool finishing;
+        static int lastFrame = -1;
 
         static TrafficLightBossPlayValidation()
         {
@@ -42,7 +43,7 @@ namespace AcRoguelike.Liminal.EditorTests
                 if (mode == PlayModeStateChange.EnteredPlayMode)
                 {
                     report = new Report { utc = DateTime.UtcNow.ToString("o"), unityVersion = Application.unityVersion };
-                    stack.Clear(); stack.Push(Routine()); waiting = null; wakeAt = 0; finishing = false;
+                    stack.Clear(); stack.Push(Routine()); waiting = null; wakeAt = 0; finishing = false; lastFrame = -1;
                 }
                 else if (mode == PlayModeStateChange.EnteredEditMode) Conclude();
             };
@@ -60,6 +61,10 @@ namespace AcRoguelike.Liminal.EditorTests
         static void Tick()
         {
             if (report == null || stack.Count == 0 || !EditorApplication.isPlaying || finishing) return;
+            // Editor updates can run many times during a single game frame. A yielded frame must
+            // observe a new projectile position rather than exhausting the sample limit instantly.
+            if (Time.frameCount == lastFrame) return;
+            lastFrame = Time.frameCount;
             if (waiting != null)
             {
                 if (waiting.condition()) waiting = null;
@@ -87,7 +92,9 @@ namespace AcRoguelike.Liminal.EditorTests
             Directory.CreateDirectory(Folder);
             File.WriteAllText(Folder + "/validation.json", JsonUtility.ToJson(report, true));
             Debug.Log("TRAFFIC_LIGHT_BOSS_VALIDATION: " + report.status + " (" + report.checks.Count + " checks, " + report.errors.Count + " errors)");
+            bool passed = report.status == "passed" && report.errors.Count == 0;
             report = null;
+            if (Application.isBatchMode) EditorApplication.Exit(passed ? 0 : 1);
         }
 
         static void Check(bool ok, string message) { if (ok) report.checks.Add(message); else report.errors.Add("FAILED: " + message); }
@@ -169,7 +176,7 @@ namespace AcRoguelike.Liminal.EditorTests
             var centers = field.Centers.ToArray();
             Check(!field.transform.Find("RedFloor").GetComponent<Renderer>().enabled,
                 "The field windup has no red floor fill.");
-            Check(boss.Lamp == TrafficLampColor.Red, "The signal holds red while the field charges.");
+            Check(boss.Lamp == TrafficLampColor.Green, "The signal is already green during the field telegraph, before damage begins.");
             Check(centers.Length == boss.safeZoneCount && Mathf.Approximately(field.Radius, boss.safeRadius), "The field draws " + centers.Length + " safe circles of radius " + field.Radius + ".");
             Check(centers.All(c => { var l = Quaternion.Inverse(arenaRotation) * (c - arenaCenter); return Mathf.Abs(l.x) <= arenaSize.x * .5f && Mathf.Abs(l.z) <= arenaSize.y * .5f; }), "Every safe circle lies inside the arena.");
             float nearest = centers.Min(c => Vector2.Distance(Flat(c), Flat(motor.transform.position)));
@@ -189,7 +196,7 @@ namespace AcRoguelike.Liminal.EditorTests
             Check(field.transform.Find("RedFloor").GetComponent<Renderer>().enabled,
                 "The red field appears only with its active damage phase.");
             yield return Shot("03_field_judgement");
-            Check(boss.Lamp == TrafficLampColor.Green, "The signal turns green at the judgement.");
+            Check(boss.Lamp == TrafficLampColor.Green, "The signal stays green through the judgement.");
             Check(field.IsSafe(centers[0]) && field.IsSafe(centers[0] + Vector3.right * (field.Radius - .05f)) && !field.IsSafe(centers[0] + Vector3.right * (field.Radius + .05f) + Vector3.forward * 0),
                 "Circle edge is judged by the feet at the exact radius.");
             yield return .2f;
@@ -223,12 +230,14 @@ namespace AcRoguelike.Liminal.EditorTests
             Check(car && car.Launched, "A car projectile exists after the release.");
             float resting = car ? car.halfExtents.y + car.groundClearance + .1f : 1.6f;   // centre height when on the floor; the van is 4m tall
             var samples = new List<Vector3>(); float minY = 99;
-            while (car && samples.Count < 900)
+            float flightDeadline = Time.time + (car ? ProjectileTuning.ScaleFlightDuration(car.lifetime) : 6f) + 2f;
+            while (car && Time.time < flightDeadline)
             {
                 samples.Add(car.transform.position); minY = Mathf.Min(minY, car.transform.position.y);
                 if (samples.Count == 25) { report.screenshots.Add("05_car_flight.png"); ScreenCapture.CaptureScreenshot(Folder + "/Review/05_car_flight.png"); }
                 yield return 0f;
             }
+            Check(!car, "The first car completes its flight within its configured lifetime.");
             Check(samples.Count > 20, "The car stays alive long enough to travel (" + samples.Count + " frames).");
             if (samples.Count > 20)
             {

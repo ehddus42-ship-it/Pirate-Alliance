@@ -105,7 +105,7 @@ namespace AcRoguelike.Liminal.EditorTests
             EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
             report = new Report { utc = DateTime.UtcNow.ToString("O"), unityVersion = Application.unityVersion };
             var catalog = Resources.Load<GateMissionCatalog>("GateMissions");
-            Require(catalog && catalog.Missions.Count >= 5, "At least five gate missions are required.");
+            Require(catalog && catalog.Missions.Count == 2, "The demo requires exactly the Liminal and Game missions.");
             Require(catalog.Missions.All(m => m != null && m.id != "digital_suppression" && m.destinationId != "digital" &&
                 m.stages != null && m.stages.All(s => s && s.stageId != "concept_digital")),
                 "The program prison theme must not appear in the playable mission catalog.");
@@ -176,7 +176,7 @@ namespace AcRoguelike.Liminal.EditorTests
             }
             Require(run && run.Lobby && run.Phase == LiminalRunPhase.Lobby, "LiminalRun must initialize in the lobby.");
             var missions = run.AvailableMissions.ToArray();
-            Require(missions.Length >= 5 && missions.All(m => m.IsAvailable && m.DisplayDestination == "???"), "All unvisited destinations must be ???.");
+            Require(missions.Length == 2 && missions.Any(m => m.id == "liminal_campaign") && missions.Any(m => m.id == "game_exhibition") && missions.All(m => m.IsAvailable && m.DisplayDestination == "???"), "All unvisited destinations must be ???.");
             var font = HunterUi.CreateFont(null, out var source);
             Require(font && font.atlasPopulationMode == AtlasPopulationMode.Static, "Missing scene font must use the bundled static Korean main.");
             Require(font.HasCharacters("강화 게이트 미션 난이도 적 변이 숲 감옥 폐허 동굴 ???", out uint[] missing, true, true), "Korean font fallback has missing characters.");

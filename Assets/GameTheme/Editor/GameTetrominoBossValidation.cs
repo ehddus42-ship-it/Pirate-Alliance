@@ -71,7 +71,8 @@ namespace AcRoguelike.GameTheme.Editor
             report = new Report { utc = DateTime.UtcNow.ToString("O") };
             try
             {
-                GameTetrominoBossBuilder.Build();
+                if (!Resources.Load<GameObject>("GameTheme/TetrominoBoss"))
+                    throw new InvalidOperationException("Build and save the authored boss assets before running validation.");
                 EditorSceneManager.OpenScene("Assets/Liminal/Scenes/LiminalRun.unity", OpenSceneMode.Single);
                 CapturePrefs(); Save();
                 SessionState.SetBool(Active + ".finished", false); SessionState.SetBool(Active, true);

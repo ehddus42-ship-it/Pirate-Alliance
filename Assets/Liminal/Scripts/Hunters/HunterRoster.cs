@@ -24,6 +24,12 @@ namespace AcRoguelike.Liminal
         public const string FirstHunterPortrait = "Loadout/hunter_astraia";
         [Tooltip("Seconds between two swaps.")]
         public float swapCooldown = .6f;
+        [Tooltip("Developer outfit preview. Disabled in the demo so combat cannot be turned off accidentally.")]
+        public bool allowOutfitPreview;
+        [Tooltip("Completed hunters available in this demo. Add future characters here after combat validation.")]
+        public string[] playableHunterIds = { "proi" };
+        GameObject sceneVisual;
+        public bool CurrentUsesSceneModel => initialized && current < hunters.Count && hunters[current].visual == sceneVisual;
 
         sealed class Hunter
         {
@@ -111,7 +117,7 @@ namespace AcRoguelike.Liminal
         {
             get
             {
-                if (!HasOtherOutfit || Time.time < outfitReadyAt || Time.timeScale <= 0) return false;
+                if (!allowOutfitPreview || !HasOtherOutfit || Time.time < outfitReadyAt || Time.timeScale <= 0) return false;
                 if (director && director.Phase != LiminalRunPhase.Exploring && director.Phase != LiminalRunPhase.Lobby) return false;
                 if (!motor.isActiveAndEnabled || motor.IsDashing || motor.IsHeld || motor.IsLaunched) return false;
                 if (combat && combat.isActiveAndEnabled && combat.IsAttacking) return false;
@@ -250,31 +256,33 @@ namespace AcRoguelike.Liminal
                 castOrigin = caster ? caster.castOrigin : null,
             };
             first.skills = first.visual.GetComponents<IHunterSkill>();
-            hunters.Add(first);
+            sceneVisual = first.visual;
             worn = first;
             var profiles = Resources.LoadAll<HunterProfile>(ProfileFolder);
             Array.Sort(profiles, (a, b) => a.order != b.order ? a.order.CompareTo(b.order) : string.CompareOrdinal(a.name, b.name));
             foreach (var profile in profiles)
             {
+                if (Array.IndexOf(playableHunterIds ?? Array.Empty<string>(), profile.characterId) < 0) continue;
                 var hunter = Spawn(profile, first);
                 if (hunter == null) continue;
                 if (profile.lobbyForm && profile.lobbyForm != profile)
                     hunter.lobbyForm = Spawn(profile.lobbyForm, first);
                 hunters.Add(hunter);
             }
+            if (hunters.Count == 0)
+                throw new InvalidOperationException("완성된 플레이 캐릭터 프로이의 설정을 불러오지 못했습니다.");
             selected = current = 0;
-            character.displayName = FirstHunterName;
-            // The party saved last session (HunterLoadout); an unknown id keeps the first hunter.
             string saved = HunterLoadout.HunterId;
-            for (int i = 1; i < hunters.Count; i++)
+            for (int i = 0; i < hunters.Count; i++)
                 if (hunters[i].id == saved || (!string.IsNullOrEmpty(saved)
                     && Array.IndexOf(hunters[i].previousCharacterIds ?? Array.Empty<string>(), saved) >= 0))
                 {
                     selected = i;
-                    HunterLoadout.HunterId = hunters[i].id;
-                    Wear(i, false);
                     break;
                 }
+            // Removed or old saved hunters migrate to the first completed character.
+            Wear(selected, false);
+            HunterLoadout.HunterId = hunters[selected].id;
         }
 
         Hunter Spawn(HunterProfile profile, Hunter first)

@@ -12,22 +12,15 @@ using Object = UnityEngine.Object;
 
 namespace AcRoguelike.Liminal.Editor
 {
-    /// <summary>
-    /// Batch play-mode check of the lobby loadout, the support character 꼬끼오, Proi's basic skill and her six
-    /// augments, on the real LiminalRun scene:
-    /// loadout officer and terminal → loadout window cards → pick Proi (worn in the lobby, in her everyday clothes) and 꼬끼오
-    /// (HUD card) → back to Astraia's everyday clothes and to Proi → gate keeps Proi (battle clothes) → 꼬끼오 drop / pickup heal / stage clear →
-    /// throw, fireball, 맹화돌진 + 폭발확장 → 화염질주, 불씨수호, 반사의화염, 업화해방 offer rules.
-    /// The player's saved loadout is restored afterwards. Report and captures go to Documentation/Liminal/Loadout.
-    /// Unity -batchmode -projectPath . -executeMethod AcRoguelike.Liminal.Editor.LoadoutValidation.RunBatch -logFile Logs/loadout.log
-    /// In the open editor: Tools > Liminal > Validate Loadout In Game (leaves the editor open).
-    /// </summary>
+    /// <summary>Demo integration: Proi-only lobby, both supports, combat/augments, both missions,
+    /// victory rewards, permanent upgrades and defeat/retry. Room clearing uses scripted damage;
+    /// combat skills are separately exercised on live targets. Restores all touched progression.</summary>
     [InitializeOnLoad]
     public static class LoadoutValidation
     {
         const string Active = "Liminal.LoadoutValidation";
         const string ScenePath = "Assets/Liminal/Scenes/LiminalRun.unity";
-        const string Folder = "Documentation/Liminal/Loadout";
+        const string Folder = "Documentation/Demo/Validation";
         const string HunterKey = "Hunter.Loadout.Hunter", SupportKey = "Hunter.Loadout.Support";
         static readonly Vector3 Arena = new Vector3(1400, 0, 1400);
 
@@ -47,6 +40,7 @@ namespace AcRoguelike.Liminal.Editor
         static double deadline, started;
         static string savedHunter, savedSupport;
         static bool hadHunter, hadSupport;
+        static readonly string[] ProgressKeys = { "Hunter.MagicStones", "Hunter.Upgrade.Vitality", "Hunter.Upgrade.Swordsmanship", "Hunter.Upgrade.Evasion", "Hunter.Upgrade.Counter", "Hunter.Destination.liminal", "Hunter.Destination.game", "Hunter.VisitedStage.liminal_1", "Hunter.VisitedStage.concept_game" };
 
         static LoadoutValidation()
         {
@@ -87,12 +81,18 @@ namespace AcRoguelike.Liminal.Editor
 
         static void Begin(bool live)
         {
-            // Start from the default party (Astraia + 유니); the player's own pick is put back at the end.
+            foreach (string key in ProgressKeys)
+            {
+                SessionState.SetBool(Active + key + ".exists", PlayerPrefs.HasKey(key));
+                SessionState.SetInt(Active + key, PlayerPrefs.GetInt(key));
+                PlayerPrefs.DeleteKey(key);
+            }
+            // The player's own party and progression are put back at the end.
             hadHunter = PlayerPrefs.HasKey(HunterKey); savedHunter = PlayerPrefs.GetString(HunterKey, "");
             hadSupport = PlayerPrefs.HasKey(SupportKey); savedSupport = PlayerPrefs.GetString(SupportKey, "");
             SessionState.SetString(Active + ".hunter", hadHunter ? savedHunter : "\u0000");
             SessionState.SetString(Active + ".support", hadSupport ? savedSupport : "\u0000");
-            PlayerPrefs.DeleteKey(HunterKey);
+            PlayerPrefs.SetString(HunterKey, "test");
             PlayerPrefs.DeleteKey(SupportKey);
             PlayerPrefs.Save();
             EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
@@ -106,7 +106,7 @@ namespace AcRoguelike.Liminal.Editor
             if (routine == null || !EditorApplication.isPlaying) return;
             try
             {
-                if (EditorApplication.timeSinceStartup - started > 180) throw new TimeoutException("Loadout validation exceeded 180 seconds.");
+                if (EditorApplication.timeSinceStartup - started > 420) throw new TimeoutException("Loadout validation exceeded 420 seconds.");
                 if (waiting != null)
                 {
                     if (!waiting.condition())
@@ -149,70 +149,34 @@ namespace AcRoguelike.Liminal.Editor
             var kokkio = run.GetComponent<KokkioSupport>();
             motor.SetAutomationInput(Vector2.zero, run.player.position + Vector3.forward);
 
-            // ---- lobby officer, terminal and window
-            Check(lobby.LoadoutOfficer && lobby.Officials.Contains(lobby.LoadoutOfficer), "the loadout officer stands in the lobby");
-            Check(lobby.transform.Find("MonitorScreen") && lobby.transform.Find("TerminalSign"), "the blue LCD terminal is built beside her");
-            Check(kokkio && yuni, "both support characters are on the run (유니 in the scene, 꼬끼오 added by the director)");
-            Check(roster.SelectedIndex == 0 && HunterLoadout.SupportId == SupportCharacterCatalog.Yuni, "default party: Astraia + 유니");
-            Vector3 officer = lobby.LoadoutOfficer.transform.position;
-            motor.ResetAt(officer + (run.player.position - officer).normalized * 1.6f);
-            var lobbyCamera = Object.FindFirstObjectByType<IsometricFollowCamera>();
-            if (lobbyCamera) lobbyCamera.Snap();
+            Check(roster.Count == 1 && roster.CurrentId == "proi" && roster.SelectedIndex == 0,
+                "only completed Proi is playable; removed saved hunter migrates to Proi");
+            Check(HunterLoadout.HunterId == "proi" && roster.WearsLobbyForm && !roster.CurrentUsesSceneModel,
+                "default Proi wears her own everyday body in the lobby");
+            Check(lobby.LoadoutOfficer && lobby.Officials.Contains(lobby.LoadoutOfficer), "loadout officer is available");
+            Check(kokkio && yuni && SupportCharacterCatalog.All.Count == 2, "both supports are available");
+            typeof(LiminalLobby).GetMethod("OpenLoadout", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(lobby, null);
             yield return Seconds(.3f);
-            Check(lobby.LoadoutOfficer.GetComponentsInChildren<SkinnedMeshRenderer>().Length > 0, "the officer is a rigged lobby character, not a stand-in");
-            Capture("loadout_officer.png");
-            Check(lobby.Nearest != null && lobby.Nearest.label == "헌터 편성", "walking up shows the 'E 헌터 편성' prompt");
-            var astraia = motor.visual.gameObject;
-            var casual = astraia.transform.Find("CasualOutfit");
-            Check(casual && casual.gameObject.activeSelf, "Astraia walks the lobby in everyday clothes");
-            lobby.Nearest.use();
-            yield return Seconds(.2f);
-            Check(lobby.LoadoutOpen && lobby.WindowOpen && !motor.enabled, "the loadout window opens and holds the hunter still");
             var window = FindWindow(run);
-            Check(window, "window is on the HUD canvas");
-            Button Card(string name) => Find(window, name)?.GetComponent<Button>();
-            Check(Card("Hunter_" + roster.IdAt(0)) && Card("Hunter_proi") && Card("Support_yuni") && Card("Support_kokkio"),
-                "cards: Astraia, Proi, 유니, 꼬끼오");
-            var proiArt = Find(Find(window, "Hunter_proi"), "Illustration")?.GetComponent<RawImage>();
-            var kokkioArt = Find(Find(window, "Support_kokkio"), "Illustration")?.GetComponent<RawImage>();
-            Check(proiArt && proiArt.texture && kokkioArt && kokkioArt.texture, "Proi and 꼬끼오 cards show their Figma illustrations");
-
-            Card("Hunter_proi").onClick.Invoke();
+            Check(window && Find(window, "Hunter_proi") && !Find(window, "Hunter_test") && !Find(window, "Hunter_namgung_luna"),
+                "loadout window offers Proi without Astraia or unfinished Luna");
+            Button Card(string name) => Find(window, name).GetComponent<Button>();
             Card("Support_kokkio").onClick.Invoke();
-            yield return Seconds(.3f);
-            var lobbyProi = motor.visual.gameObject;
-            Check(roster.SelectedIndex == 1 && lobbyProi != astraia && lobbyProi.activeInHierarchy && !astraia.activeSelf && roster.WearsLobbyForm,
-                "picking Proi puts her on in the lobby, in her everyday clothes");
-            Check(motor.animator && motor.animator.runtimeAnimatorController && motor.animator.runtimeAnimatorController.name == "Proi_General",
-                "the motor drives Proi's everyday animator");
-            Check(PlayerPrefs.GetString(HunterKey) == "proi" && PlayerPrefs.GetString(SupportKey) == SupportCharacterCatalog.Kokkio, "the party is saved (proi + kokkio)");
-            var kokkioCard = run.GetComponent<LiminalHud>().Canvas.Find("KokkioSupportCard");
-            var yuniCard = GameObject.Find("SupportSkillCard");
-            Check(kokkioCard && kokkioCard.gameObject.activeSelf && !yuniCard, "the HUD shows 꼬끼오's card instead of 유니's");
+            yield return Seconds(.2f);
+            Check(HunterLoadout.SupportId == SupportCharacterCatalog.Kokkio, "loadout selects and saves 꼬끼오");
+            Card("Support_yuni").onClick.Invoke();
+            yield return Seconds(.2f);
+            Check(HunterLoadout.SupportId == SupportCharacterCatalog.Yuni, "loadout selects and saves 유니");
+            Card("Support_kokkio").onClick.Invoke();
             Capture("loadout_window.png");
-
-            Card("Hunter_" + roster.IdAt(0)).onClick.Invoke();
-            yield return Seconds(.3f);
-            Check(roster.SelectedIndex == 0 && motor.visual.gameObject == astraia && casual.gameObject.activeSelf, "back to Astraia: everyday clothes again");
-            Card("Hunter_proi").onClick.Invoke();
-            yield return Seconds(.3f);
-            Check(roster.CurrentIndex == 1 && !casual.gameObject.activeInHierarchy, "and Proi again");
             Find(window, "Close").GetComponent<Button>().onClick.Invoke();
             yield return Seconds(.2f);
-            Check(!lobby.WindowOpen && motor.enabled, "closing the window frees the hunter");
-            motor.SetAutomationInput(Vector2.zero, run.player.position + Vector3.forward);
-            if (lobbyCamera) lobbyCamera.Snap();
-            yield return Seconds(.3f);
-            Capture("loadout_lobby_proi.png");
-
-            // ---- the gate keeps the pick
+            Check(!lobby.WindowOpen && motor.enabled, "closing loadout releases movement");
             run.EnterDungeon();
             yield return Until(() => run.Phase == LiminalRunPhase.Exploring, 20, "gate entered");
             var proi = motor.visual.gameObject;
-            Check(roster.CurrentIndex == 1 && proi != lobbyProi && !lobbyProi.activeSelf && !roster.WearsLobbyForm,
-                "the gate starts with the picked hunter (Proi), in her battle clothes");
-            Check(motor.animator && motor.animator.runtimeAnimatorController && motor.animator.runtimeAnimatorController.name == "Proi", "the motor drives Proi's battle animator");
-            Check(!AugmentCatalog.IsOfferable(AugmentCatalog.Find(AugmentCatalog.AutoSupport), augments, "proi"), "알아하쇼 stays out of the pool while the support is passive (꼬끼오)");
+            Check(roster.CurrentId == "proi" && !roster.WearsLobbyForm && motor.animator.runtimeAnimatorController.name == "Proi",
+                "the selected Proi enters the gate in her battle body");
 
             // ---- arena far from the route (no attackers: the validation enemies are bare TrainingEnemy targets)
             run.enabled = false;
@@ -228,6 +192,34 @@ namespace AcRoguelike.Liminal.Editor
             if (cameraRig) cameraRig.Snap();
             Physics.SyncTransforms();
             yield return Seconds(.5f);
+
+            HunterLoadout.SupportId = SupportCharacterCatalog.Yuni;
+            var comboTarget = Enemy(arena.transform, Arena + Vector3.forward * 2.2f, 100000);
+            Physics.SyncTransforms();
+            yield return Seconds(.2f);
+            Check(yuni.TryActivate(), "유니 activates bonus stage");
+            yield return Until(() => yuni.OneUpActive, 5, "유니 meteor lands");
+            int targetBefore = comboTarget.Health;
+            int chompers = yuni.ChompersFired;
+            var combat = run.player.GetComponent<PlayerCombat>();
+            int combos = combat.CompletedComboCount;
+            combat.SetAutomationInput(true, true);
+            yield return Until(() => combat.AttackCount >= 3, 8, "Proi three attacks");
+            combat.SetAutomationInput(false, false);
+            yield return Until(() => !combat.IsAttacking, 5, "combo finishes");
+            combat.ReleaseAutomation();
+            Check(combat.CompletedComboCount > combos && comboTarget.Health < targetBefore && yuni.ChompersFired > chompers,
+                "Proi's live three-hit combo damages target and fires 유니 bonus projectiles");
+            var ultimate = proi.GetComponent<ProiHunterUltimate>();
+            motor.SetAutomationInput(Vector2.zero, comboTarget.transform.position);
+            Check(ultimate && ultimate.TryActivate(), "Proi ultimate activates");
+            yield return Until(() => !ultimate.Busy, 18, "ultimate finishes");
+            Capture("proi_combat.png");
+            Object.Destroy(comboTarget.gameObject);
+            HunterLoadout.SupportId = SupportCharacterCatalog.Kokkio;
+            yield return Seconds(1.5f);
+            motor.ResetAt(Arena + Vector3.up * .05f);
+            motor.SetAutomationInput(Vector2.zero, Arena + Vector3.forward * 5);
 
             // ---- 꼬끼오: a kill drops a skewer where the health hit zero; walking in heals 3 %
             kokkio.dropChance = 1;
@@ -340,6 +332,65 @@ namespace AcRoguelike.Liminal.Editor
             int proiAugments = 0;
             foreach (var augment in AugmentCatalog.All) if (augment.characterId == ProiAugments.CharacterId) proiAugments++;
             Check(proiAugments == 6, "six Proi augments are registered");
+
+            Object.Destroy(arena);
+            run.enabled = true;
+            run.ReturnToLobby();
+            yield return Seconds(.2f);
+            LiminalRunDirector.SuppressAugmentOffers = false;
+            foreach (string missionId in new[] { "liminal_campaign", "game_exhibition" })
+            {
+                int wallet = HunterProgress.Currency;
+                Check(run.EnterMission(missionId), "enter demo mission " + missionId);
+                yield return Seconds(.3f);
+                Check(run.Rooms.Count == 4 && roster.CurrentId == "proi", "four-room mission starts as Proi");
+                run.PlayerHealth.GrantInvulnerability(300);
+                for (int i = 0; i < run.Rooms.Count; i++)
+                {
+                    var room = run.Rooms[i];
+                    motor.ResetAt(room.playerSpawn.position + Vector3.up * .05f);
+                    motor.SetAutomationInput(Vector2.zero, room.playerSpawn.position + room.transform.forward * 5);
+                    yield return Until(() => run.ActiveRoomIndex == i && run.LivingEnemyCount > 0, 10, "room activates " + i);
+                    Check(!run.TryUseExit(), "uncleared room blocks exit");
+                    var enemies = new List<TrainingEnemy>();
+                    run.GetLivingEnemies(enemies);
+                    foreach (var enemy in enemies) enemy.TakeDamage(1000000);
+                    yield return Until(() => run.LivingEnemyCount == 0, 5, "room clears");
+                    if (room.kind == LiminalRoomKind.Combat)
+                    {
+                        Check(run.Phase == LiminalRunPhase.AugmentChoice && run.AugmentOffers.Count > 0,
+                            "room clear offers augments for Proi");
+                        int picks = run.Augments.PickCount;
+                        run.SelectAugment(0);
+                        Check(run.Phase == LiminalRunPhase.Exploring && run.Augments.PickCount == picks + 1,
+                            "augment selection grants one choice and resumes combat");
+                    }
+                    yield return Seconds(.15f);
+                }
+                var last = run.Rooms[run.Rooms.Count - 1];
+                motor.ResetAt(last.exit.position - last.exit.forward * 2.5f + Vector3.up * .05f);
+                Check(run.TryUseExit() && run.Phase == LiminalRunPhase.Victory, "boss clear and exit reach victory: " + missionId);
+                Capture(missionId + "_victory.png");
+                int reward = run.PendingReward;
+                Check(reward > 0, "victory has earned currency");
+                run.ReturnToLobby();
+                yield return Seconds(.2f);
+                Check(HunterProgress.Currency == wallet + reward && run.PendingReward == 0 && roster.WearsLobbyForm,
+                    "return pays rewards once and restores Proi everyday body");
+                run.ReturnToLobby();
+                Check(HunterProgress.Currency == wallet + reward, "repeated lobby return cannot duplicate rewards");
+            }
+            Check(HunterProgress.TryBuy(HunterProgress.Upgrade.Vitality), "earned rewards purchase a permanent upgrade");
+            Check(run.EnterMission("game_exhibition"), "enter after upgrade");
+            Check(run.PlayerHealth.maximumHealth == 112, "next run applies purchased maximum-health upgrade");
+            yield return Seconds(1.1f);
+            Check(run.PlayerHealth.TakeDamage(100000) && run.Phase == LiminalRunPhase.Defeat, "player death opens defeat");
+            run.RetryMission();
+            yield return Seconds(.3f);
+            Check(run.Phase == LiminalRunPhase.Exploring && run.ActiveMission.id == "game_exhibition" && run.PlayerHealth.IsAlive,
+                "defeat retries the same mission with restored health");
+            run.ReturnToLobby();
+            Capture("demo_lobby.png");
         }
 
         static Vector3 Flat(Vector3 v) => new Vector3(v.x, 0, v.z);
@@ -419,6 +470,9 @@ namespace AcRoguelike.Liminal.Editor
             LiminalRunDirector.SuppressAugmentOffers = false;
             Restore(HunterKey, SessionState.GetString(Active + ".hunter", "\u0000"));
             Restore(SupportKey, SessionState.GetString(Active + ".support", "\u0000"));
+            foreach (string key in ProgressKeys)
+                if (SessionState.GetBool(Active + key + ".exists", false)) PlayerPrefs.SetInt(key, SessionState.GetInt(Active + key, 0));
+                else PlayerPrefs.DeleteKey(key);
             PlayerPrefs.Save();
             SessionState.SetInt(Active + ".exit", report.errors.Count == 0 ? 0 : 1);
             EditorApplication.ExitPlaymode();
