@@ -202,6 +202,8 @@ namespace AcRoguelike.RuinsBoss
             if (distance <= .000001f) { Cancel(); return; }
             if (room && !room.Contains(transform.position)) { Cancel(); return; }
             transform.rotation = Quaternion.LookRotation(direction);
+            // A shot that only grazes a dodging player is a just dodge too.
+            target.NearMiss(transform.position, transform.position + direction * distance, CollisionRadius + target.BodyRadius);
             if (RuinsSweep.Cast(gameObject.scene.GetPhysicsScene(), room, transform.position, CollisionRadius, direction,
                 distance, target, hits, overlaps, out var hit))
             {

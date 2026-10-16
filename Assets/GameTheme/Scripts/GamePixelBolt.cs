@@ -41,6 +41,8 @@ namespace AcRoguelike.GameTheme
             if (!owner || !owner.IsAlive || !target || !target.IsAlive) { Destroy(gameObject); return; }
             float step = Mathf.Min(remaining, Speed * Time.deltaTime);
             if (step <= 0) return;
+            // A bolt that only grazes a dodging player is a just dodge too.
+            target.NearMiss(transform.position, transform.position + direction * step, Radius + target.BodyRadius);
             RaycastHit? closest = null;
             foreach (var hit in Physics.SphereCastAll(transform.position, Radius, direction, step, ~0, QueryTriggerInteraction.Ignore))
             {

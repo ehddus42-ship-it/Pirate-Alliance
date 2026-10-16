@@ -273,6 +273,7 @@ namespace AcRoguelike.Ruins
                     if (!connected && InsideLine(player.transform.position, attackStart, aim, limit + reach, halfWidth) &&
                         SegmentDistance(player.transform.position, before, strikeEnd) <= halfWidth && CanSeePlayer())
                     { connected = true; DamageAttempts++; player.TakeDamage(matron ? 25 : 20); }
+                    else if (!connected) player.NearMiss(before, strikeEnd, halfWidth);
                     if (travelled >= limit - .01f || elapsed >= (matron ? .8f : .5f) || (wanted > .001f && moved < wanted * .2f))
                         Enter(RuinsMonsterState.Recovery);
                 }
@@ -298,6 +299,7 @@ namespace AcRoguelike.Ruins
             Vector3 offset = player.transform.position - attackStart; offset.y = 0;
             if (offset.magnitude <= radius && Vector3.Angle(aim, offset) <= halfAngle && CanSeePlayer())
             { DamageAttempts++; player.TakeDamage(damage); }
+            else player.NearMissFan(attackStart, aim, radius, halfAngle);
             HitFeedback.Sparks(attackStart + aim * (radius * .6f) + Vector3.up * .5f, aim, 6, .45f);
         }
 

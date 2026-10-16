@@ -12,12 +12,14 @@ namespace AcRoguelike.Liminal
         public int baseMaximum = 100;
         [Tooltip("After a dash ends, hits are still evaded (and count as a just dodge) for this long.")]
         public float dodgeGrace = .26f;
+        [Tooltip("Just-dodge leeway (m). While a dash makes the player untouchable, an attack that misses by up to this much past the edge of its hit range still counts as a just dodge, not only one that would have connected.")]
+        public float justDodgeReach = 1.2f;
         public int Health { get; private set; } = 100;
         public bool IsAlive => Health > 0;
         public int JustDodges { get; private set; }
         public event Action Died;
         public event Action Changed;
-        /// <summary>An attack that would have hit was slipped through with a dash's invulnerability.</summary>
+        /// <summary>An attack that would have hit, or came close, was slipped through with a dash's invulnerability.</summary>
         public event Action JustDodged;
         public event Action<int> Hurt;
         float invulnerableUntil;
@@ -31,10 +33,12 @@ namespace AcRoguelike.Liminal
         public void AddGuard(Func<int, bool> guard) { if (guard != null && !guards.Contains(guard)) guards.Add(guard); }
         public void RemoveGuard(Func<int, bool> guard) => guards.Remove(guard);
         PlayerMotor motor;
+        CharacterController body;
 
         void Awake()
         {
             motor = GetComponent<PlayerMotor>();
+            body = GetComponent<CharacterController>();
             Health = maximumHealth;
             if (!GetComponent<JustDodgeFeedback>()) gameObject.AddComponent<JustDodgeFeedback>();
         }
@@ -68,8 +72,8 @@ namespace AcRoguelike.Liminal
         }
 
         /// <summary>
-        /// Called when an attack is evaded with a dash (damage blocked by the dash, or a grab that missed a
-        /// dashing player). Counts once per dash.
+        /// Called when an attack is evaded with a dash (damage blocked by the dash, a grab that missed a dashing
+        /// player, or an attack that passed close by: see NearMiss). Counts once per dash.
         /// </summary>
         public void NotifyDodged()
         {
@@ -81,6 +85,71 @@ namespace AcRoguelike.Liminal
 
         /// <summary>True while a dash (or its short grace) makes the player untouchable.</summary>
         public bool IsEvading => IsAlive && Dodging;
+
+        /// <summary>Radius of the body (the CharacterController) on the ground plane.</summary>
+        public float BodyRadius => body ? body.radius * Mathf.Max(Mathf.Abs(transform.lossyScale.x), Mathf.Abs(transform.lossyScale.z)) : .3f;
+        float BodyHeight => body ? body.height * Mathf.Abs(transform.lossyScale.y) : 1.8f;
+
+        // Just-dodge leeway. A hit only counts as a just dodge when it would have landed, so an attack that misses
+        // calls NearMiss after its hit test: while a dash makes the player untouchable, a miss that came within
+        // justDodgeReach of connecting still counts (once per dash, like any just dodge). Outside a dodge they do
+        // nothing, so they are safe to call every frame. Each returns true when the miss was close enough to count.
+
+        /// <summary>
+        /// A miss by `missedBy` metres: how far the player stood outside the attack's hit range (zero or less means
+        /// inside it, e.g. a hit that cover or line of sight stopped).
+        /// </summary>
+        public bool NearMiss(float missedBy)
+        {
+            if (!IsEvading || missedBy > justDodgeReach) return false;
+            NotifyDodged();
+            return true;
+        }
+
+        /// <summary>A round attack (blast, pulse, eruption) that hits when the player's position is within `reach` of `center`.</summary>
+        public bool NearMiss(Vector3 center, float reach)
+        {
+            if (!IsEvading || !NearHeight(center.y, center.y)) return false;
+            Vector3 offset = transform.position - center; offset.y = 0;
+            return NearMiss(offset.magnitude - reach);
+        }
+
+        /// <summary>
+        /// An attack swept along a path (a shot's step this frame, a charge, a lunge) that hits when the player's
+        /// position is within `reach` of the path. For a sphere sweep against the body, reach is its radius plus BodyRadius.
+        /// </summary>
+        public bool NearMiss(Vector3 from, Vector3 to, float reach)
+        {
+            if (!IsEvading || !NearHeight(Mathf.Min(from.y, to.y), Mathf.Max(from.y, to.y))) return false;
+            return NearMiss(PlanarSegmentDistance(transform.position, from, to) - reach);
+        }
+
+        /// <summary>A swing over a cone from `origin` toward `forward`, `radius` long and `halfAngle` degrees to each side.</summary>
+        public bool NearMissFan(Vector3 origin, Vector3 forward, float radius, float halfAngle)
+        {
+            if (!IsEvading || !NearHeight(origin.y, origin.y)) return false;
+            Vector3 offset = transform.position - origin; offset.y = 0; forward.y = 0;
+            if (forward.sqrMagnitude < .0001f || Vector3.Angle(forward, offset) <= halfAngle) return NearMiss(offset.magnitude - radius);
+            // Beside the cone: the nearest part of it is the edge on the player's side.
+            float side = Vector3.SignedAngle(forward, offset, Vector3.up) < 0 ? -halfAngle : halfAngle;
+            Vector3 edge = Quaternion.AngleAxis(side, Vector3.up) * forward.normalized * radius;
+            return NearMiss(PlanarSegmentDistance(transform.position, origin, origin + edge));
+        }
+
+        // An attack far above the head (a lobbed can at the top of its arc) or below the floor is not a near miss.
+        bool NearHeight(float low, float high)
+        {
+            float feet = transform.position.y;
+            return high >= feet - justDodgeReach && low <= feet + BodyHeight + justDodgeReach;
+        }
+
+        static float PlanarSegmentDistance(Vector3 point, Vector3 a, Vector3 b)
+        {
+            point.y = a.y = b.y = 0;
+            Vector3 ab = b - a;
+            float t = ab.sqrMagnitude > 1e-6f ? Mathf.Clamp01(Vector3.Dot(point - a, ab) / ab.sqrMagnitude) : 0;
+            return Vector3.Distance(point, a + ab * t);
+        }
 
         /// <summary>Ignores damage for the given time (support skills are cast with a short invulnerability).</summary>
         public void GrantInvulnerability(float seconds)

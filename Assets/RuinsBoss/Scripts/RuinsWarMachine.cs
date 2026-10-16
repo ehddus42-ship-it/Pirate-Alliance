@@ -173,6 +173,7 @@ namespace AcRoguelike.RuinsBoss
             bool collision = Sweep(aim, wanted, out var impact, out var hitPlayer);
             float step = collision ? Mathf.Max(0, impact - .015f) : wanted;
             controllerContact = null; movingCharge = true;
+            Vector3 before = transform.position;
             float moved = MoveBody(aim * step);
             movingCharge = false;
             Travelled += moved;
@@ -182,6 +183,9 @@ namespace AcRoguelike.RuinsBoss
                 connected = true; DamageAttempts++; player.TakeDamage(chargeDamage);
                 Thud(transform.position + aim, .7f);
             }
+            else if (!connected && body)
+                player.NearMiss(before, transform.position, body.radius * Mathf.Max(Mathf.Abs(transform.lossyScale.x),
+                    Mathf.Abs(transform.lossyScale.z)) + player.BodyRadius);
             if (collision || controllerContact || Travelled >= chargeDistance - .02f || moved < wanted * .2f || elapsed > chargeDistance / Mathf.Max(1, chargeSpeed) + .5f)
             {
                 if (collision && !hitPlayer) Thud(transform.position + aim, .85f);

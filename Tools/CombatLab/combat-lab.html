@@ -119,7 +119,7 @@ const DEF = [
   ["hitStopMul","히트 스톱 배율",1,0,4,.1],["hitStopScale","히트 스톱 속도",.08,0,.5,.01],["heavyStopScale","강타 스톱 속도",.04,0,.5,.01],
   ["shakeMul","화면 흔들림 배율",1,0,4,.1],["knockMul","넉백 배율",1,0,4,.1],["staggerMul","경직 배율",1,0,4,.1]]],
  ["저스트 회피 · 반격", [
-  ["dodgeGrace","판정 유예 (대시 후 s)",.26,0,.4,.01],["slowSeconds","슬로 시간 (실제 s)",.5,0,2,.05],["slowScale","슬로 속도",.22,.02,1,.01],
+  ["dodgeGrace","판정 유예 (대시 후 s)",.26,0,.4,.01],["justDodgeReach","판정 여유 거리 (m)",1.2,0,3,.05],["slowSeconds","슬로 시간 (실제 s)",.5,0,2,.05],["slowScale","슬로 속도",.22,.02,1,.01],
     ["counterSeconds","반격 창 (s)",1.3,0,4,.05],["counterMul","반격 피해 배율",1.5,1,4,.05]]],
  ["복사기", [
   ["cHP","체력",70,10,400,5],["cHop","점프 거리 (m)",1.35,.2,4,.05],["cAir","체공 (s)",.34,.1,1,.01],["cKeep","유지 거리 (m)",6,2,12,.25],
@@ -422,6 +422,8 @@ function damagePlayer(amount,from,src){
   player.hurtT=.25; number(player.p,`-${amount}`,"#ff6b5f"); hitStop(.075,.07); addShake(.1,.2); screenFlash("rgba(255,40,30,.28)",.28); SFX.hurt();
   return true;
 }
+// Just-dodge leeway: while dodging, an attack that misses its hit range by up to justDodgeReach still counts.
+function nearMiss(missedBy){ if(player.hp>0 && player.held<=0 && dodging() && missedBy<=T.justDodgeReach) justDodge(); }
 function justDodge(){
   if(player.dodgedId===player.dashId) return; player.dodgedId=player.dashId;
   slowMotion(T.slowSeconds,T.slowScale); screenFlash("rgba(140,110,255,.32)",.35); addShake(.04,.12);
@@ -573,6 +575,7 @@ function locker(e,dt,to,dist){
     e.grab=Math.min(T.lGrabRange,e.grab+dt*22); const tip=add(e.p,mul(e.aim,e.grab));
     const near=len(sub(player.p,tip))<.7 || (dot(sub(player.p,e.p),e.aim)>0 && dot(sub(player.p,e.p),e.aim)<e.grab && Math.abs((sub(player.p,e.p).x*e.aim.y-sub(player.p,e.p).y*e.aim.x))<.55);
     if(near && player.held<=0){ if(dodging()){ justDodge(); } else { e.state="grabHold"; e.t=0; player.held=.75; SFX.thud(); return; } }
+    else if(!near) nearMiss(len(sub(player.p,tip))-.7);
     if(e.grab>=T.lGrabRange){ e.state="grabRetract"; e.t=0; }
     return;
   }
@@ -583,6 +586,7 @@ function locker(e,dt,to,dist){
     const step=T.lTumbleSpeed*dt; e.p=add(e.p,mul(e.aim,step)); e.traveled+=step; confine(e.p,e.radius);
     const flips=Math.floor(e.traveled/(T.lTumbleDist/8)); if(flips!==e.flips){ e.flips=flips; addShake(.07*Math.max(0,1-dist/16),.12); ring(e.p,.9,"rgba(224,216,192,.7)",.25); SFX.thud(); }
     if(!e.hitThis && len(sub(player.p,e.p))<e.radius+.55){ e.hitThis=true; if(damagePlayer(T.lSlamDmg)) player.launched=mul(norm(sub(player.p,e.p)),7); }
+    else if(!e.hitThis) nearMiss(len(sub(player.p,e.p))-e.radius-.55);
     if(e.traveled>=T.lTumbleDist){ e.state="recover"; e.t=0; addShake(.09,.2); }
     return;
   }
@@ -600,6 +604,7 @@ function updateShots(dt){
     s.t+=dt; const step=s.speed*dt; s.p=add(s.p,mul(s.dir,step)); s.traveled+=step;
     if(s.kind==="paper"){ s.dir=rot(s.dir,Math.sin(s.t*9+s.wob)*20*dt); }
     if(player.hp>0 && player.held<=0 && len(sub(s.p,player.p))<.42){ if(damagePlayer(s.dmg)) s.dead=true; else if(!dodging()) s.dead=true; }
+    else nearMiss(len(sub(s.p,player.p))-.42);
     if(s.traveled>=s.range||s.p.x<0||s.p.y<0||s.p.x>ROOM.w||s.p.y>ROOM.h) s.dead=true;
   }
   shots=shots.filter(s=>!s.dead);
@@ -694,6 +699,8 @@ function drawPlayer(){
   g.fillStyle="rgba(0,0,0,.35)"; g.beginPath(); g.ellipse(0,0,.42*PX,.22*PX,0,0,7); g.fill();
   const inv=dodging();
   g.fillStyle=pl.hurtT>0?"#ff9a90":inv?"#cbbcff":"#f2d6e2"; g.beginPath(); g.arc(0,0,.35*PX,0,7); g.fill();
+  // The just-dodge leeway ring: attacks that come inside it while dodging still count.
+  if(inv && T.justDodgeReach>0){ g.strokeStyle="rgba(153,128,255,.4)"; g.lineWidth=1.5; g.setLineDash([5,5]); g.beginPath(); g.arc(0,0,(.35+T.justDodgeReach)*PX,0,7); g.stroke(); g.setLineDash([]); }
   if(pl.counter>0){ g.strokeStyle="#9980ff"; g.lineWidth=3; g.beginPath(); g.arc(0,0,.5*PX,0,7*(pl.counter/T.counterSeconds)); g.stroke(); }
   const a=Math.atan2(pl.face.y,pl.face.x); g.rotate(a); g.strokeStyle="#e8ecf4"; g.lineWidth=3; g.beginPath(); g.moveTo(.2*PX,0); g.lineTo(.95*PX,0); g.stroke();
   g.restore();

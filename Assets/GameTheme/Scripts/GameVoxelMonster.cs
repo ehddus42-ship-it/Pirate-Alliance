@@ -192,6 +192,7 @@ namespace AcRoguelike.GameTheme
                     player.TakeDamage(champion ? 20 : 13);
                     connected = true;
                 }
+                else if (!connected) player.NearMiss(before, transform.position, ChargeHalfWidth);
                 if (travelled >= ChargeLength - .01f || elapsed >= .65f || (wanted > .01f && moved < wanted * .2f))
                 { Thud(transform.position, .65f); Enter(GameVoxelState.Recover); }
             }
@@ -220,6 +221,7 @@ namespace AcRoguelike.GameTheme
                     offset.y = 0;
                     if (offset.magnitude <= SlamRadius && Vector3.Angle(aim, offset) <= SlamHalfAngle && CanSeePlayer())
                         player.TakeDamage(champion ? 25 : 19);
+                    else player.NearMissFan(attackStart, aim, SlamRadius, SlamHalfAngle);
                     Thud(attackStart + aim * 2.1f, 1.45f);
                     HitFeedback.Sparks(attackStart + aim * 2.1f + Vector3.up * .08f, Vector3.up, 10, .7f);
                 }

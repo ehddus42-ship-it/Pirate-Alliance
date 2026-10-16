@@ -88,6 +88,8 @@ namespace AcRoguelike.Ruins
             float travel = Mathf.Min(Speed * Mathf.Min(dt, Mathf.Max(0, 7f - age)), MaximumTravel - Travelled);
             age += dt;
             if (visual) visual.Rotate(Vector3.forward, (Energy ? 210 : 490) * dt, Space.Self);
+            // A shot that only grazes a dodging player is a just dodge too.
+            target.NearMiss(transform.position, transform.position + direction * travel, CollisionRadius + target.BodyRadius);
             if (RuinsSweep.Cast(gameObject.scene.GetPhysicsScene(), room, transform.position, CollisionRadius,
                 direction, travel, target, hits, overlaps, out var impact))
             {

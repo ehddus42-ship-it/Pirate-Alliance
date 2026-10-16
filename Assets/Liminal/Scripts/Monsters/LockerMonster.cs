@@ -176,8 +176,8 @@ namespace AcRoguelike.Liminal
                         Vector3 offset = player.transform.position + Vector3.up * .9f - grabTarget;
                         bool inReach = offset.magnitude < 1.05f;
                         bool caught = motor && !player.IsEvading && !motor.IsLaunched && inReach;
-                        // Slipping the grab with a dash at the last moment is a just dodge.
-                        if (inReach && player.IsEvading) player.NotifyDodged();
+                        // Slipping the grab with a dash at the last moment is a just dodge, and so is a dash close by.
+                        player.NearMiss(offset.magnitude - 1.05f);
                         if (caught)
                         {
                             heldMotor = motor;
@@ -435,6 +435,13 @@ namespace AcRoguelike.Liminal
                     if (away.sqrMagnitude < .01f) away = transform.forward;
                     if (motor && !motor.IsHeld) motor.Launch(away.normalized * 6.5f + Vector3.up * 3.2f);
                 }
+            }
+            else
+            {
+                // How far outside the slammed footprint the player stood, for the just-dodge leeway.
+                float outX = Mathf.Max(0, Mathf.Max(minX - margin - p.x, p.x - maxX - margin));
+                float outZ = Mathf.Max(0, Mathf.Max(minZ - margin - p.z, p.z - maxZ - margin));
+                player.NearMiss(new Vector2(outX, outZ).magnitude);
             }
         }
 

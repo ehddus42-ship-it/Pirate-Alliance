@@ -90,6 +90,8 @@ namespace AcRoguelike.Liminal
                 HitFeedback.Sparks(next, direction, 6, .7f);
                 Land(next);
             }
+            // A sheet that only grazes a dodging player is a just dodge too (the copier's harmless scraps are not).
+            else if (!spent && target && damage > 0) target.NearMiss(previous, next, .5f);
         }
 
         bool HitsPlayer(Vector3 a, Vector3 b)

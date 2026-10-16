@@ -85,6 +85,8 @@ namespace AcRoguelike.GameTheme
             // At most four wall contacts can occur before destruction, even with a very long frame.
             for (int step = 0; step < 5 && distance > .0001f && !Finished; step++)
             {
+                // A shot that only grazes a dodging player is a just dodge too.
+                target.NearMiss(transform.position, transform.position + direction * distance, radius + target.BodyRadius);
                 if (!TetrominoSweep.Cast(gameObject.scene.GetPhysicsScene(), room, transform.position, radius,
                     direction, distance, target, hits, overlaps, out var impact))
                 { transform.position += direction * distance; return; }

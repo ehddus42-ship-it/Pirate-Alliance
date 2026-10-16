@@ -78,6 +78,7 @@ namespace AcRoguelike.Forest
                         Vector3 delta = player.transform.position - origin; delta.y = 0;
                         if (delta.magnitude <= pollenRadius && ForestAttackUtility.HasLineOfSight(gameObject, origin + Vector3.up * .8f, player, sight))
                         { DamageAttempts++; player.TakeDamage(pollenDamage); }
+                        else player.NearMiss(origin, pollenRadius);
                         Enter(ForestButterflyState.PollenBurst);
                     }
                     break;

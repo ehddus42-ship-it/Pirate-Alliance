@@ -96,6 +96,7 @@ namespace AcRoguelike.Forest
                 Cancel(); return;
             }
             float phase = Mathf.Repeat(Travelled / 2.2f, 1); AboveGround = phase > .12f && phase < .9f;
+            if (AboveGround && DamageAttempts == 0) target.NearMiss(start, start + Direction * step, .58f + target.BodyRadius);
             if (AboveGround && DamageAttempts == 0 && ForestAttackUtility.Sweep(gameObject.scene.GetPhysicsScene(), room, start, .58f,
                 Direction, step, target, hits, overlaps, out var impact) && impact.player)
             { DamageAttempts++; HitPlayer = target.TakeDamage(21); }

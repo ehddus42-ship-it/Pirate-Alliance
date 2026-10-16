@@ -138,6 +138,7 @@ namespace AcRoguelike.Liminal
                     float travelled = Vector3.Distance(previous, transform.position); chargeTravel += travelled;
                     if (!hitDuringCharge && SweptPlayer(previous, transform.position, 1.04f))
                     { player.TakeDamage(chargeDamage); hitDuringCharge = true; Play(impactSound, .8f); }
+                    else if (!hitDuringCharge) player.NearMiss(previous, transform.position, 1.04f);
                     if(animator)animator.speed=Mathf.Clamp01(travelled/(chargeSpeed*Time.deltaTime));
                     StepSound(.15f);
                     if (chargeTravel >= chargeDistance || travelled < distanceThisFrame * .3f || stateTime >= 1.65f)
