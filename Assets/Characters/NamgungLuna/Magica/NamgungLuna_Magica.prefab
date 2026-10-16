@@ -395169,6 +395169,8 @@ GameObject:
   - component: {fileID: 3494794005765755035}
   - component: {fileID: 1968074759852456075}
   - component: {fileID: 1029843686614677761}
+  - component: {fileID: 7412583690214455011}
+  - component: {fileID: 7412583690214455012}
   m_Layer: 0
   m_Name: NamgungLuna_Magica
   m_TagString: Untagged
@@ -708316,3 +708318,31 @@ MonoBehaviour:
   reverseDirection: 0
   radiusSeparation: 1
   alignedOnCenter: 1
+--- !u!114 &7412583690214455011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3886769099726839001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 646af9f35d7e4ea5ac721dcc1fcfecb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NamgungLuna.Motion::NamgungLuna.Motion.LunaArmRig
+  gait: {fileID: 3494794005765755035}
+--- !u!114 &7412583690214455012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3886769099726839001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e80d3a31e1540e6a7076928ff9fb75d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NamgungLuna.Motion::NamgungLuna.Motion.LunaBasicAttack
+  gait: {fileID: 3494794005765755035}
+  arms: {fileID: 7412583690214455011}
+  fx: {fileID: 1968074759852456075}

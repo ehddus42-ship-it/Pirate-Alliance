@@ -535,7 +535,7 @@ namespace NamgungLuna.Editor
             return t;
         }
 
-        /// <summary>Add LunaMoonGait + LunaMoonFx on the character root, wired to the rig.</summary>
+        /// <summary>Add LunaMoonGait + LunaMoonFx + LunaArmRig + LunaBasicAttack on the character root, wired to the rig.</summary>
         public static void AttachGait(GameObject character, Rig rig)
         {
             Materials materials = EnsureMaterials();
@@ -553,6 +553,13 @@ namespace NamgungLuna.Editor
             fx.glowMaterial = materials.glow;
             fx.trailMaterial = materials.trail;
             fx.sparkleMaterial = materials.sparkle;
+            // arms are rigged at runtime from the static mesh (LunaArmRig); the basic attack layers over the gait
+            var arms = character.AddComponent<LunaArmRig>();
+            arms.gait = gait;
+            var attack = character.AddComponent<LunaBasicAttack>();
+            attack.gait = gait;
+            attack.arms = arms;
+            attack.fx = fx;
             if (rig.moon != null)
             {
                 // the moon floats 0.8 m behind her: fade it while it hides her from the camera
@@ -665,7 +672,7 @@ namespace NamgungLuna.Editor
 
         /// <summary>
         /// Playable demo: floor grid, a ring of pillars for scale, moonlit light, Luna with LunaMoonMotor (WASD / Shift / Space /
-        /// Ctrl) and LunaMoonShowcase (tours every gait when the keyboard is left alone), and an orbit camera with bloom.
+        /// Ctrl / left mouse or J to attack) and LunaMoonShowcase (tours every gait when the keyboard is left alone), and an orbit camera with bloom.
         /// </summary>
         public static Scene BuildDemoScene(GameObject prefab, Action<Scene, GameObject> decorate = null)
         {

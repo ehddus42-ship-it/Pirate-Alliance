@@ -20,9 +20,9 @@ URP Toon 캐릭터 + Magica Cloth 2 옷·머리 물리 설정.
 | `Magica/*.json` | 고정/이동 페인트 점 데이터와 콜라이더 정의 (Setup Magica Cloth가 사용) |
 | `Magica/Tests/` | Play 모드 검증 테스트 (관통·겹침·정지 유지), 영상 프레임 녹화(Explicit) |
 | `Motion/NamgungLuna_MoonGaitDemo.unity` | **이동 모션 데모 씬** (콜롬비나식 이동). 아래 "이동 모션" 참고 |
-| `Motion/Scripts/` | `LunaMoonGait` (이동 모션), `LunaMoonMotor` (조작), `LunaMoonFx` (달빛 연출), `LunaOcclusionFade` (달 가림 처리), `LunaOrbitCamera`, `LunaMoonShowcase` (자동 시연) |
+| `Motion/Scripts/` | `LunaMoonGait` (이동 모션), `LunaMoonMotor` (조작), `LunaMoonFx` (달빛 연출), `LunaOcclusionFade` (달 가림 처리), `LunaOrbitCamera`, `LunaMoonShowcase` (자동 시연), `LunaArmRig` (팔 리그), `LunaBasicAttack` (기본공격 3타), `LunaLightOrb` (평타 빛 구체) |
 | `Motion/Shaders/`, `Motion/Materials/` | 달빛 물결 / 빛·반짝임·꼬리 셰이더와 재질, 데모 바닥 |
-| `Motion/Tests/` | 이동 모션 Play 모드 검증, 영상 프레임 녹화(Explicit) |
+| `Motion/Tests/` | 이동 모션·기본공격 Play 모드 검증, 영상 프레임 녹화(Explicit) |
 
 ## 이동 모션 (원신 콜롬비나식)
 콜롬비나는 걷지 않고 **발끝으로 떠서** 움직입니다. 대기 중에는 발끝을 세운 채 몇 cm 떠 있고, 달릴 때는 발끝을 한 번 대면
@@ -55,6 +55,29 @@ URP Toon 캐릭터 + Magica Cloth 2 옷·머리 물리 설정.
   없으면 루트의 움직임에서 속도를 계산합니다. 게임의 플레이어 모터에 `ILunaMotionSource`만 구현하면 그대로 붙습니다.
 - 수치(박자·높이·기울기·다리 각도)는 `LunaMoonGait` 인스펙터의 Walk/Run/Sprint 프로필에서 조절합니다.
 
+## 기본공격 (평타 3타)
+랜턴은 **오른손**에 들려 있으므로 랜턴 안 든 손은 왼손입니다. 30fps 프레임 데이터(블로킹 v0.2)를 `LunaBasicAttack`이 재생합니다.
+
+| 타 | 동작 | 길이 | 발사 | 다음 타 입력 / 연계 | 이동 캔슬 | 발사 위치 |
+|---|---|---|---|---|---|---|
+| 1타 | 왼손을 어깨 옆으로 당겼다가 앞으로 곧게 뻗어 발사. 앞발(오른발)을 들었다 f7에 디딤 | 20f | f8 | f6~ / f13 | f12 | 왼손 손바닥 |
+| 2타 | 왼손을 오른쪽 가슴 앞까지 감았다가 바깥으로 휘둘러, 정면을 지날 때 발사 | 22f | f9 | f7~ / f15 | f14 | 왼손 손바닥 |
+| 3타 | 앉으며 랜턴을 낮췄다가 오른무릎을 차올리며 랜턴을 머리 위로 들고, f14 디딤 → f15 발사 | 30f | f15 | — (1타로) | f21 | 랜턴 등불 |
+
+- 조작(데모 씬): 왼쪽 마우스 / J. 발사 프레임 2프레임 전부터 다시 누르면 다음 타가 예약되어 연계 프레임에 이어집니다.
+  예약이 없으면 그 타를 끝까지 재생하고, `comboResetTime`(0.6초) 안에 누르면 다음 타, 지나면 1타부터 시작합니다.
+- 공격 중에는 이동 캔슬 프레임까지 멈춰 서고(이동 키를 누르고 있어도), 누르는 순간 이동 키 방향을 봅니다. 대쉬(회피)로 언제든 끊을 수 있습니다.
+- 몸: 원본에 척추 뼈가 없어 상체 비틀기는 몸 전체(`Visual`) 회전으로, 체중 이동은 `Visual` 위치로, 디딤·무릎 차올리기는 다리 체인으로 합니다.
+  골반·다리가 0.5~1프레임 먼저 움직이는 오버랩이 있습니다. `LunaMoonGait`의 `ILunaPoseOverlay`로 이동 모션 위에 덮어씁니다.
+- 팔: `LunaArmRig`가 시작할 때 Visual 아래에 `Clavicle → UpperArm → ForeArm → Hand` 뼈를 만들고 `Body_VisibleSkin`, `Bodice_Navy`(퍼프 소매),
+  `Puff_Sleeve_Join_L/R`을 스킨 메시로 바꿉니다(원본 렌더러는 꺼짐, FBX Read/Write 필요). 벨 소매·소매 띠(클로스)는 위팔의 `SleevePivot`에 매달려
+  아래팔 회전을 70% 따라가고, `Collider_Forearm_L/R`은 아래팔을 따라갑니다. 랜턴 손잡이는 오른손을 따라갑니다.
+  관절 위치는 FBX 정점 단면에서 잰 값이며 `LunaArmRig` 인스펙터에서 고칠 수 있습니다.
+- 연출: 발사 프레임에 빛 구체(1·2타 달빛 소형, 3타 랜턴빛 대형)와 섬광·반짝임, 디딤 프레임에 달빛 물결, 예비동작 동안 손바닥·랜턴에 빛이 모입니다.
+- 게임 연동: `NamgungLuna.Motion`은 게임 전투 코드(`PlayerCombat`, `TrainingEnemy`)를 참조할 수 없으므로 피해는 넣지 않았습니다.
+  `LunaBasicAttack.AttackEvent`(Start / Release / End)와 `Hit`(구체가 맞힌 콜라이더)를 구독해 피해를 주면 됩니다.
+- `LunaMoonShowcase` 자동 시연 끝에 3타 콤보가 추가되었습니다.
+
 ## 클로스 구성
 - 머리 4개(앞머리 / 뒷머리 좌 / 뒷머리 우 / 뒷머리 보강다발): 두피는 고정, 길이만 움직임. 머리·목·몸통·어깨 콜라이더.
 - 치마 2개(속치마 / 겉치마): 겉치마→속치마 상호 충돌(Mutual Collision)로 서로 뚫지 않음. 골반·허벅지·정강이·발 콜라이더.
@@ -63,8 +86,8 @@ URP Toon 캐릭터 + Magica Cloth 2 옷·머리 물리 설정.
 
 ## 주의
 - 원본은 스킨 웨이트·애니메이션 클립이 없는 정적 모델입니다. 몸 전체와 하체·부츠·다리 콜라이더·랜턴·달은 `LunaMoonGait`가 움직이고,
-  클로스는 그 움직임과 바람에 반응합니다. 팔은 아직 고정 자세입니다(소매는 클로스로 흔들림).
-  나중에 리깅하면 `Magica_Colliders` 아래 콜라이더를 해당 뼈 아래로 옮기세요.
+  클로스는 그 움직임과 바람에 반응합니다. 팔은 `LunaArmRig`가 실행 중에 절차적으로 리깅합니다(기본공격 때만 움직이고 평소에는 원래 자세).
+  나중에 제대로 리깅하면 `LunaArmRig`를 빼고 `Magica_Colliders` 아래 콜라이더를 해당 뼈 아래로 옮기세요.
 - `NamgungLuna_MagicaDemo` 씬은 클로스 검증용이라 `LunaMoonGait`/`LunaMoonFx`가 꺼져 있습니다.
 - Magica 제한: 클로스 1개의 렌더 정점 합 65,535 이하(넘으면 빌드가 멈춤), 렌더러 31개 이하.
   그래서 머리는 3개 메시로 나뉘어 있고 치마 금장식은 클로스가 아니라 `LunaClothFollower`로 따라갑니다.

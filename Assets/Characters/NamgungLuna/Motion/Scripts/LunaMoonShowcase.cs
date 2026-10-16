@@ -5,7 +5,7 @@ namespace NamgungLuna.Motion
 {
     /// <summary>
     /// 자동 시연: 키보드를 몇 초 동안 만지지 않으면 대기 → 걷기 → 달리기(곡선) 중 대쉬 → 미끄러지듯 멈춤 →
-    /// 연속 대쉬 → 제자리 대쉬 → 달리기 순서로 남궁루나를 움직입니다. 키를 누르면 바로 조작이 넘어옵니다.
+    /// 연속 대쉬 → 제자리 대쉬 → 달리기 → 기본공격 3타 순서로 남궁루나를 움직입니다. 키를 누르면 바로 조작이 넘어옵니다.
     /// Scripted tour of every gait and the dash for the demo scene and the play-mode tests. Hands control back on any key press.
     /// </summary>
     [DefaultExecutionOrder(-20)]
@@ -24,6 +24,12 @@ namespace NamgungLuna.Motion
             public float turn;
             [Tooltip("이 구간 시작 후 대쉬할 시각 (s, 음수면 없음)")]
             public float dashAt;
+            [Tooltip("이 구간에서 누를 기본공격 횟수 (0이면 없음, 3이면 3타 콤보)")]
+            public int attacks;
+            [Tooltip("첫 공격 입력 시각 (s)")]
+            public float attackAt;
+            [Tooltip("공격 입력 간격 (s)")]
+            public float attackInterval;
         }
 
         public LunaMoonMotor motor;
@@ -44,6 +50,8 @@ namespace NamgungLuna.Motion
             new Beat { duration = 1.4f, mode = Mode.Idle, dashAt = -1f },
             new Beat { duration = 3.0f, mode = Mode.Run, heading = 300f, turn = 90f, dashAt = -1f },
             new Beat { duration = 2.5f, mode = Mode.Idle, dashAt = -1f },
+            new Beat { duration = 3.0f, mode = Mode.Idle, dashAt = -1f, attacks = 3, attackAt = 0.3f, attackInterval = 0.4f },   // basic attack combo
+            new Beat { duration = 1.5f, mode = Mode.Idle, dashAt = -1f },
         };
 
         public bool Playing { get; private set; }
@@ -53,6 +61,7 @@ namespace NamgungLuna.Motion
 
         float quiet, beatTime;
         bool dashed;
+        int attacksDone;
 
         void Awake()
         {
@@ -66,6 +75,7 @@ namespace NamgungLuna.Motion
             Clock = beatTime = 0f;
             BeatIndex = 0;
             dashed = false;
+            attacksDone = 0;
         }
 
         void Update()
@@ -91,6 +101,11 @@ namespace NamgungLuna.Motion
                 motor.Dash();
                 dashed = true;
             }
+            if (attacksDone < beat.attacks && beatTime >= beat.attackAt + attacksDone * beat.attackInterval)
+            {
+                motor.Attack();
+                attacksDone++;
+            }
 
             beatTime += Time.deltaTime;
             Clock += Time.deltaTime;
@@ -98,6 +113,7 @@ namespace NamgungLuna.Motion
             {
                 beatTime = 0f;
                 dashed = false;
+                attacksDone = 0;
                 BeatIndex++;
                 if (BeatIndex >= beats.Length)
                 {

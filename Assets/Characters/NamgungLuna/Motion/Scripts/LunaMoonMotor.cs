@@ -4,13 +4,14 @@ using UnityEngine.InputSystem;
 namespace NamgungLuna.Motion
 {
     /// <summary>
-    /// 남궁루나 조작: WASD 이동(카메라 기준, 기본이 콜롬비나 질주 모션) · Space / 왼쪽 Shift 대쉬(회피) · Ctrl 걷기 전환.
+    /// 남궁루나 조작: WASD 이동(카메라 기준, 기본이 콜롬비나 질주 모션) · Space / 왼쪽 Shift 대쉬(회피) · Ctrl 걷기 전환 ·
+    /// 왼쪽 마우스 / J 기본공격(3타, <see cref="LunaBasicAttack"/>). 공격 중에는 이동 캔슬 프레임까지 멈추고, 대쉬로 끊을 수 있습니다.
     /// 가볍게 미끄러지듯 움직입니다. 손을 떼면 조금 더 떠서 나아가다 멈추고, 방향은 곡선으로 바뀝니다.
     /// 대쉬는 게임의 회피(PlayerMotor)와 같은 규칙입니다: 스태미나 칸(기본 3)을 하나 쓰고, 대쉬 사이 최소 간격이 있고,
     /// 마지막 대쉬 뒤 잠깐 기다렸다가 칸이 하나씩 차오릅니다. 몸은 그동안 떠서 날듯이 도약합니다(LunaMoonGait).
     /// Floaty CharacterController mover for the moon gait: run at the game's move speed with the fast (sprint) motion,
     /// glide a little before stopping, turn on arcs, dash (dodge) with stamina pips like the game's PlayerMotor.
-    /// There is no jump. Keyboard input can be replaced by <see cref="scriptedMove"/> / <see cref="Dash"/>.
+    /// There is no jump. Keyboard input can be replaced by <see cref="scriptedMove"/> / <see cref="Dash"/> / <see cref="Attack"/>.
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
     [DefaultExecutionOrder(-10)]
@@ -67,7 +68,8 @@ namespace NamgungLuna.Motion
         CharacterController controller;
         Vector3 planar, dashDirection;
         float vertical, sinceGrounded, dashTime = -1f, lastDashStart = -10f, curveArea = 1f;
-        bool grounded = true, sprinting, walkToggle, scriptedDash;
+        bool grounded = true, sprinting, walkToggle, scriptedDash, scriptedAttack;
+        LunaBasicAttack attack;
 
         void Awake()
         {
@@ -75,6 +77,7 @@ namespace NamgungLuna.Motion
             if (cameraTransform == null && Camera.main != null) cameraTransform = Camera.main.transform;
             Stamina = maxStamina;
             curveArea = CurveArea();
+            attack = GetComponent<LunaBasicAttack>();
             var gait = GetComponent<LunaMoonGait>();
             if (gait != null)
             {
@@ -88,6 +91,9 @@ namespace NamgungLuna.Motion
 
         /// <summary>Dash on the next update (scripted input), in the move direction or where she faces.</summary>
         public void Dash() => scriptedDash = true;
+
+        /// <summary>Basic attack on the next update (scripted input), toward the move direction if one is held.</summary>
+        public void Attack() => scriptedAttack = true;
 
         /// <summary>Stop at once (e.g. before a cutscene); the gait settles from here.</summary>
         public void Halt()
@@ -103,8 +109,8 @@ namespace NamgungLuna.Motion
             if (dt <= 0f) return;
 
             Vector3 move = scriptedMove;
-            bool walkHeld = scriptedWalk, dashPressed = scriptedDash;
-            scriptedDash = false;
+            bool walkHeld = scriptedWalk, dashPressed = scriptedDash, attackPressed = scriptedAttack;
+            scriptedDash = scriptedAttack = false;
             HasKeyboardInput = false;
             Keyboard kb = readKeyboard ? Keyboard.current : null;
             if (kb != null)
@@ -116,12 +122,15 @@ namespace NamgungLuna.Motion
                 if (kb.aKey.isPressed) input.x -= 1f;
                 if (kb.leftCtrlKey.wasPressedThisFrame) walkToggle = !walkToggle;
                 bool dashKey = kb.spaceKey.wasPressedThisFrame || kb.leftShiftKey.wasPressedThisFrame;
-                if (input != Vector2.zero || dashKey)
+                Mouse mouse = Mouse.current;
+                bool attackKey = kb.jKey.wasPressedThisFrame || (mouse != null && mouse.leftButton.wasPressedThisFrame);
+                if (input != Vector2.zero || dashKey || attackKey)
                 {
                     HasKeyboardInput = true;
                     move = ToWorld(Vector2.ClampMagnitude(input, 1f));
                     walkHeld = walkToggle;
                     dashPressed |= dashKey;
+                    attackPressed |= attackKey;
                 }
             }
             move = Vector3.ClampMagnitude(Vector3.ProjectOnPlane(move, Vector3.up), 1f);
@@ -131,8 +140,18 @@ namespace NamgungLuna.Motion
             sinceGrounded = controller.isGrounded ? 0f : sinceGrounded + dt;
             RecoverStamina(dt);
 
+            bool attacking = attack != null && attack.IsAttacking;
+            if (attackPressed && attack != null && dashTime < 0f)
+            {
+                // aim where she is steered; otherwise straight ahead
+                if (wantsMove && !attacking) transform.rotation = Quaternion.LookRotation(move.normalized, Vector3.up);
+                attack.RequestAttack();
+                attacking = attack.IsAttacking;
+            }
             if (dashPressed && dashTime < 0f && Stamina >= 1f && Time.time - lastDashStart >= dashInterval)
             {
+                if (attacking) attack.Cancel();   // a dodge cuts the attack
+                attacking = false;
                 dashDirection = wantsMove ? move.normalized : transform.forward;
                 dashTime = 0f;
                 lastDashStart = Time.time;
@@ -152,6 +171,11 @@ namespace NamgungLuna.Motion
                 direction = dashDirection;
                 dashTime += dt;
             }
+            else if (attacking && attack.LocksMovement)
+            {
+                // planted while casting: come to a quick stop
+                speed = Mathf.MoveTowards(speed, 0f, acceleration * dt);
+            }
             else if (wantsMove)
             {
                 Vector3 desired = move.normalized;
@@ -169,7 +193,7 @@ namespace NamgungLuna.Motion
             planar = direction * speed;
             sprinting = IsDashing || (wantsMove && !walkHeld && speed > walkSpeed);
 
-            if (speed > 0.2f && direction.sqrMagnitude > 0.5f)
+            if (speed > 0.2f && direction.sqrMagnitude > 0.5f && !(attacking && attack.LocksMovement))
             {
                 Quaternion face = Quaternion.LookRotation(direction, Vector3.up);
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, face, (IsDashing ? 1800f : facingRate) * dt);

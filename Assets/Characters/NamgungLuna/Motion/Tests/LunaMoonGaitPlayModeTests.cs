@@ -69,6 +69,7 @@ namespace NamgungLuna.Motion.Tests
             var rig = new Rig();
             yield return LoadDemo(rig, Step);
             var gait = rig.gait;
+            var attack = rig.motor.GetComponent<LunaBasicAttack>();
 
             var events = new Dictionary<LunaGaitEventKind, int>();
             gait.GaitEvent += e => events[e.kind] = (events.TryGetValue(e.kind, out int n) ? n : 0) + 1;
@@ -95,7 +96,8 @@ namespace NamgungLuna.Motion.Tests
                 if (float.IsNaN(body.x) || float.IsNaN(body.y) || float.IsInfinity(body.y)) nan = true;
                 maxSpeed = Mathf.Max(maxSpeed, gait.Speed);
                 if (rig.motor.IsGrounded && gait.AirWeight < 0.01f) lowestGrounded = Mathf.Min(lowestGrounded, gait.LowestSoleHeight);
-                if (rig.motor.IsGrounded && gait.MoveWeight < 0.02f && gait.AirWeight < 0.01f && gait.Speed < 0.05f) hover.Add(gait.LowestSoleHeight);
+                bool attacking = attack != null && attack.Weight > 0f;   // the basic attack beat poses the legs itself
+                if (rig.motor.IsGrounded && gait.MoveWeight < 0.02f && gait.AirWeight < 0.01f && gait.Speed < 0.05f && !attacking) hover.Add(gait.LowestSoleHeight);
                 if (gait.SprintWeight > 0.95f && gait.AirWeight < 0.01f) maxSprintPitch = Mathf.Max(maxSprintPitch, gait.BodyPitch);
                 // toe height right at each touch of a running bound
                 if (gait.MoveWeight > 0.95f && gait.RunWeight > 0.95f && Mathf.FloorToInt(gait.Phase) != Mathf.FloorToInt(previousPhase))

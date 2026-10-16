@@ -173,6 +173,13 @@ namespace NamgungLuna.Motion
             }
         }
 
+        /// <summary>Moonlight ripple on the floor under <paramref name="position"/> (attacks, scripted moments).</summary>
+        public void Ripple(Vector3 position, float radius, float strength) => SpawnRipple(position, radius, strength);
+        /// <summary>A burst of sparkles around <paramref name="position"/>.</summary>
+        public void Sparkle(Vector3 position, int count, float radius, float speed) => Burst(position, count, radius, speed);
+        /// <summary>Flash the body light (0..1, fades by itself).</summary>
+        public void Flash(float level) => flashLevel = Mathf.Max(flashLevel, level);
+
         void SpawnRipple(Vector3 position, float radius, float strength)
         {
             if (rippleMaterial == null) return;
