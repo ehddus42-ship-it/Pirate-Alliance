@@ -482,6 +482,20 @@ namespace AcRoguelike.Liminal
             if (state == LockerState.Walk || state == LockerState.Recover) HideTentacles();
         }
 
+        protected override void OnHeldByHunter()
+        {
+            // Picked up mid-attack: the player it held drops from where they hang, and the grab or tumble folds away.
+            Release(Vector3.zero);
+            HideTentacles();
+            doorOpen = 0;
+            if (door) door.gameObject.SetActive(false);
+            if (interior) interior.gameObject.SetActive(false);
+            missed = false;
+            tumbleRotation = poseRotation = Quaternion.identity;
+            tumbleOffset = poseOffset = Vector3.zero;
+            Enter(LockerState.Recover);
+        }
+
         protected override void OnDeathStart(Vector3 direction)
         {
             Release(direction * 4f + Vector3.up * 3f);

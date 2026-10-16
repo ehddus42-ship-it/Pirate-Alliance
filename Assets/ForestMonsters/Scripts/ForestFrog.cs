@@ -435,6 +435,7 @@ namespace AcRoguelike.Forest
 
         void PlayerDied() => CancelTongue();
         void OnDisable() => CancelTongue();
+        protected override void OnHeldByHunter() => CancelTongue();
         protected override void OnHit(Vector3 direction, float impact)
         {
             if (State == ForestFrogState.TongueWindup && impact >= 1.25f) CancelTongue();

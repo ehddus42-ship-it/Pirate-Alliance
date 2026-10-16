@@ -41,7 +41,7 @@ namespace AcRoguelike.Liminal
 
         Vector3 knockback, tiltAxis = Vector3.right;
         float tilt, tiltVelocity, squash;
-        bool dying;
+        bool dying, heldByHunter;
 
         /// <summary>Knockback and tilt multiplier for the current action (heavy actions resist).</summary>
         protected virtual float Weight => 1;
@@ -53,6 +53,8 @@ namespace AcRoguelike.Liminal
         protected virtual void OnSetup() { }
         protected virtual void OnHit(Vector3 direction, float impact) { }
         protected virtual void OnDeathStart(Vector3 direction) { }
+        /// <summary>A hunter just picked this monster up: drop whatever attack is under way (a held player first).</summary>
+        protected virtual void OnHeldByHunter() { }
         /// <summary>Half the thickness of the prop along the side it falls onto, so it lies on the floor.</summary>
         protected virtual float LyingHalfDepth => .4f;
 
@@ -78,6 +80,22 @@ namespace AcRoguelike.Liminal
             if (!Health || !Health.IsAlive || dying || Time.deltaTime <= 0) return;
             if (!player) player = FindFirstObjectByType<LiminalPlayerHealth>();
             if (!player || !player.IsAlive) { if (telegraph) telegraph.Hide(); AttackAnticipation.Hide(transform); return; }
+            // Held or thrown by a hunter: the hunter carries the body, so the AI waits. Left running, a locker
+            // lifting the hunter who lifts it would raise both of them a little more every frame.
+            if (Health.HeldByHunter)
+            {
+                if (!heldByHunter)
+                {
+                    heldByHunter = true;
+                    knockback = Vector3.zero;
+                    IsWindingUp = false;
+                    if (telegraph) telegraph.Hide();
+                    AttackAnticipation.Hide(transform);
+                    OnHeldByHunter();
+                }
+                return;
+            }
+            heldByHunter = false;
             float dt = Time.deltaTime;
             if (knockback.sqrMagnitude > .0025f)
             {

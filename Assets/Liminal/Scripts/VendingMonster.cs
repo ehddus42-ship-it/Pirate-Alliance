@@ -89,6 +89,8 @@ namespace AcRoguelike.Liminal
             if (!initialized || !Health || !Health.IsAlive || State == VendingMonsterState.Dead || Time.deltaTime <= 0) return;
             if (!player) player = FindFirstObjectByType<LiminalPlayerHealth>();
             if (!player || !player.IsAlive) { if (warning) warning.enabled = false; AttackAnticipation.Hide(transform); return; }
+            // Held or thrown by a hunter: the hunter carries the body, so the AI waits.
+            if (Health.HeldByHunter) { if (warning) warning.enabled = false; AttackAnticipation.Hide(transform); return; }
             stateTime += Time.deltaTime;
             UpdateKnockback();
             Vector3 delta = player.transform.position - transform.position; delta.y = 0;
@@ -163,13 +165,13 @@ namespace AcRoguelike.Liminal
         void LateUpdate()
         {
             ApplyHitPose();
-            if(State!=VendingMonsterState.CanThrow || !Health || !Health.IsAlive || Time.deltaTime<=0) return;
+            if(State!=VendingMonsterState.CanThrow || !Health || !Health.IsAlive || Health.HeldByHunter || Time.deltaTime<=0) return;
             // Event fallback also runs after Animator evaluation, covering large frame steps.
             if(!canPulled && stateTime>=VendingMonsterRig.CanGrabTime) PullCan();
             if(!canReleased && stateTime>=VendingMonsterRig.CanReleaseTime) ReleaseCan();
         }
-        public void GrabCanFromAnimation() {if(State==VendingMonsterState.CanThrow&&!canPulled)PullCan();}
-        public void ReleaseCanFromAnimation() {if(State==VendingMonsterState.CanThrow&&!canReleased)ReleaseCan();}
+        public void GrabCanFromAnimation() {if(State==VendingMonsterState.CanThrow&&!canPulled&&!Health.HeldByHunter)PullCan();}
+        public void ReleaseCanFromAnimation() {if(State==VendingMonsterState.CanThrow&&!canReleased&&!Health.HeldByHunter)ReleaseCan();}
 
         public bool Activate()
         {
