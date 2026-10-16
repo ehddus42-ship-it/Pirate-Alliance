@@ -176,6 +176,7 @@ namespace AcRoguelike.Liminal.Editor
             var proiArt = Find(Find(window, "Hunter_proi"), "Illustration")?.GetComponent<RawImage>();
             var kokkioArt = Find(Find(window, "Support_kokkio"), "Illustration")?.GetComponent<RawImage>();
             Check(proiArt && proiArt.texture && kokkioArt && kokkioArt.texture, "Proi and 꼬끼오 cards show their Figma illustrations");
+            Capture("loadout_window_yuni.png");
 
             Card("Hunter_proi").onClick.Invoke();
             Card("Support_kokkio").onClick.Invoke();

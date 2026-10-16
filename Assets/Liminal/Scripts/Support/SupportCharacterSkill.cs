@@ -58,6 +58,8 @@ namespace AcRoguelike.Liminal
         // HUD
         TMP_FontAsset font;
         RectTransform panel, portraitFrame;
+        UnityEngine.UI.RawImage scanlines;
+        Texture2D scanlineTexture;
         Image cooldownShade, slotBorder, buffFill;
         TextMeshProUGUI cooldownLabel, buffLabel, stateLabel;
         float hudSearchUntil;
@@ -66,7 +68,8 @@ namespace AcRoguelike.Liminal
         static readonly Color Paper = HunterUi.Cream;
         static readonly Color Accent = HunterUi.Gold;
         static readonly Color Fluorescent = new Color(1f, .93f, .72f);
-        static readonly Color Wallpaper = new Color(.78f, .71f, .43f);
+        static readonly Color Lcd = new Color(.33f, .74f, 1f);
+        static readonly Color LcdDeep = new Color(.02f, .09f, .2f, 1);
         static Sprite white;
 
         void Awake()
@@ -89,6 +92,7 @@ namespace AcRoguelike.Liminal
         {
             action?.Dispose();
             if (font) Destroy(font);
+            if (scanlineTexture) Destroy(scanlineTexture);
         }
 
         void Update()
@@ -230,27 +234,40 @@ namespace AcRoguelike.Liminal
 
             // Card: dark HUD panel with a fluorescent tube on top, like the ceiling lights of the stage.
             panel = Node("SupportSkillCard", canvas, new Vector2(22, 58), new Vector2(338, 164), Vector2.zero);
+            panel.SetAsFirstSibling();
             Img(panel, Panel);
             var tube = Node("Fluorescent", panel, new Vector2(0, 161), new Vector2(338, 3), Vector2.zero);
             Img(tube, Fluorescent);
 
-            // Illustration window: yellow liminal wallpaper behind the character, clipped to the frame.
-            portraitFrame = Node("Portrait", panel, new Vector2(8, 8), new Vector2(142, 150), Vector2.zero);
-            var wall = portraitFrame.gameObject.AddComponent<RawImage>();
-            wall.texture = WallpaperTexture();
-            wall.uvRect = new Rect(0, 0, 3, 1);
+            // Match Kokkio's operator monitor: blue LCD, rolling scanlines, bezel and live lamp.
+            var bezel = Node("MonitorBezel", panel, new Vector2(8, 8), new Vector2(142, 150), Vector2.zero);
+            Img(bezel, new Color(.05f, .06f, .09f, 1));
+            portraitFrame = Node("Monitor", bezel, new Vector2(4, 4), new Vector2(134, 142), Vector2.zero);
+            portraitFrame.pivot = new Vector2(.5f, .5f);
+            portraitFrame.anchoredPosition += portraitFrame.sizeDelta * .5f;
+            Img(portraitFrame, LcdDeep);
             portraitFrame.gameObject.AddComponent<RectMask2D>();
             if (portrait)
             {
-                var art = Node("Illustration", portraitFrame, new Vector2(-50, -140), new Vector2(250, 313), Vector2.zero);
-                art.gameObject.AddComponent<RawImage>().texture = portrait;
+                var art = Node("Illustration", portraitFrame, Vector2.zero, new Vector2(134, 142), Vector2.zero);
+                var image = art.gameObject.AddComponent<UnityEngine.UI.RawImage>();
+                image.texture = portrait;
+                image.raycastTarget = false;
+                image.color = new Color(.82f, .93f, 1f);
+                image.uvRect = UpperBody(portrait, 134f / 142f);
             }
-            var edge = Node("PortraitEdge", portraitFrame, Vector2.zero, new Vector2(142, 4), Vector2.zero);
-            Img(edge, Accent);
-            var nameplate = Node("Nameplate", portraitFrame, new Vector2(0, 4), new Vector2(142, 24), Vector2.zero);
-            Img(nameplate, HunterUi.NavyDeep);
-            Label(nameplate, "SUPPORT", 12, Accent, new Vector2(8, 0), new Vector2(70, 24), TextAlignmentOptions.MidlineLeft);
-            Label(nameplate, characterName, 15, Paper, new Vector2(62, 0), new Vector2(74, 24), TextAlignmentOptions.MidlineRight);
+            scanlineTexture = ScanlineTexture();
+            var lines = Node("Scanlines", portraitFrame, Vector2.zero, new Vector2(134, 142), Vector2.zero);
+            scanlines = lines.gameObject.AddComponent<UnityEngine.UI.RawImage>();
+            scanlines.texture = scanlineTexture;
+            scanlines.uvRect = new Rect(0, 0, 1, 142f / 3f);
+            scanlines.raycastTarget = false;
+            var nameplate = Node("Nameplate", portraitFrame, Vector2.zero, new Vector2(134, 24), Vector2.zero);
+            Img(nameplate, new Color(.02f, .05f, .12f, .9f));
+            Label(nameplate, "SUPPORT", 11, Lcd, new Vector2(6, 0), new Vector2(70, 24), TextAlignmentOptions.MidlineLeft);
+            Label(nameplate, characterName, 14, Paper, new Vector2(56, 0), new Vector2(74, 24), TextAlignmentOptions.MidlineRight);
+            var lamp = Node("LiveLamp", bezel, new Vector2(128, 138), new Vector2(6, 6), Vector2.zero);
+            Img(lamp, new Color(.35f, 1f, .55f));
 
             // Skill info and slot.
             Label(panel, skillName, 17, Accent, new Vector2(160, 126), new Vector2(172, 28), TextAlignmentOptions.MidlineLeft);
@@ -300,7 +317,8 @@ namespace AcRoguelike.Liminal
             stateLabel.text = left > 0 ? "추가 투사체" : ready ? "준비 완료" : "재충전";
             stateLabel.color = left > 0 ? HunterUi.Gate : ready ? Accent : Paper;
             portraitPulse = Mathf.MoveTowards(portraitPulse, 0, Time.unscaledDeltaTime * 2.5f);
-            portraitFrame.localScale = Vector3.one * (1 + .06f * Mathf.Sin(portraitPulse * Mathf.PI));
+            portraitFrame.localScale = Vector3.one * (1 + .05f * Mathf.Sin(portraitPulse * Mathf.PI));
+            scanlines.uvRect = new Rect(0, Time.unscaledTime * .6f, 1, 142f / 3f);
         }
 
         RectTransform Node(string name, Transform parent, Vector2 position, Vector2 size, Vector2 anchor)
@@ -338,18 +356,21 @@ namespace AcRoguelike.Liminal
             return label;
         }
 
-        static Texture2D WallpaperTexture()
+        static Rect UpperBody(Texture texture, float aspect)
         {
-            // Faded backrooms wallpaper: vertical stripes with a faint diamond motif.
-            var texture = new Texture2D(32, 32, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Bilinear };
-            for (int y = 0; y < 32; y++)
-                for (int x = 0; x < 32; x++)
-                {
-                    float stripe = (x % 16) < 2 ? .9f : 1f;
-                    float diamond = Mathf.Abs((x % 16) - 8) + Mathf.Abs((y % 16) - 8) == 6 ? .93f : 1f;
-                    float shade = .88f + .12f * y / 31f;
-                    texture.SetPixel(x, y, Wallpaper * (stripe * diamond * shade));
-                }
+            // Keep her face and handheld console visible without stretching the supplied illustration.
+            float h = .55f;
+            float w = h * texture.height * aspect / Mathf.Max(1, texture.width);
+            if (w > 1) { h /= w; w = 1; }
+            return new Rect((1 - w) * .5f, 1 - h, w, h);
+        }
+
+        static Texture2D ScanlineTexture()
+        {
+            var texture = new Texture2D(1, 3, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Point };
+            texture.SetPixel(0, 0, new Color(.1f, .45f, .9f, .22f));
+            texture.SetPixel(0, 1, Color.clear);
+            texture.SetPixel(0, 2, new Color(.25f, .6f, 1f, .08f));
             texture.Apply();
             return texture;
         }
