@@ -26,6 +26,8 @@ namespace NamgungLuna.Magica.Tests
 #endif
         const float Step = 1f / 60f;
         static string OutDir => Path.GetFullPath(Path.Combine(Application.dataPath, "..", "MagicaValidation"));
+        RenderTexture simulationTarget;
+        Camera simulationCamera;
 
         class Part
         {
@@ -45,6 +47,11 @@ namespace NamgungLuna.Magica.Tests
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
 #endif
             Time.captureDeltaTime = Step;
+            simulationCamera = Camera.main;
+            Assert.IsNotNull(simulationCamera);
+            // Batch-mode backbuffers do not establish renderer visibility. Keep the real scene camera rendering.
+            simulationTarget = new RenderTexture(720, 960, 24);
+            simulationCamera.targetTexture = simulationTarget;
             var motion = Object.FindFirstObjectByType<LunaMagicaDemoMotion>();
             Assert.NotNull(motion, "demo motion missing");
             motion.play = false;
@@ -83,6 +90,8 @@ namespace NamgungLuna.Magica.Tests
 
             // 1) rest: no motion and no wind for 3 s, the authored pose should hold
             for (int i = 0; i < 180; i++) yield return null;
+            yield return AfterCloth(() =>
+            {
             report.AppendLine("  \"rest_drift_mm\": {");
             var restLines = new List<string>();
             foreach (var kv in parts)
@@ -95,6 +104,7 @@ namespace NamgungLuna.Magica.Tests
             report.AppendLine(string.Join(",\n", restLines));
             report.AppendLine("  },");
             Capture(root, "rest");
+            });
             if (wind != null) wind.gameObject.SetActive(true);
 
             // 2) motion: 10 s of walk / turns / spin with wind
@@ -108,6 +118,9 @@ namespace NamgungLuna.Magica.Tests
             {
                 yield return null;
                 if (frame % 15 != 0) continue;
+                yield return AfterCloth(() =>
+                {
+                Assert.IsTrue(cloths.All(c => MagicaManager.Team.GetTeamDataRef(c.Process.TeamId).IsProcess), "Visibility culling must not turn this motion check into a static-mesh check");
                 samples++;
                 shapes = ReadColliders(root);
                 foreach (var kv in parts)
@@ -130,6 +143,7 @@ namespace NamgungLuna.Magica.Tests
                 var (crossing, depth) = skirtCheck.Crossings();
                 worstCrossing = Mathf.Max(worstCrossing, crossing); worstCrossDepth = Mathf.Max(worstCrossDepth, depth);
                 if (frame % 60 == 0) Capture(root, $"motion_{frame / 60:00}s");
+                });
             }
             skirtCheck.Dispose();
 
@@ -137,6 +151,8 @@ namespace NamgungLuna.Magica.Tests
             motion.play = false;
             if (wind != null) wind.gameObject.SetActive(false);
             for (int i = 0; i < 240; i++) yield return null;
+            yield return AfterCloth(() =>
+            {
             report.AppendLine("  \"recovered_drift_mm\": {");
             report.AppendLine(string.Join(",\n", parts.Select(kv =>
             {
@@ -145,6 +161,7 @@ namespace NamgungLuna.Magica.Tests
             })));
             report.AppendLine("  },");
             Capture(root, "recovered");
+            });
             report.AppendLine($"  \"motion_samples\": {samples},");
             report.AppendLine($"  \"nan\": {nan.ToString().ToLower()},");
             report.AppendLine($"  \"max_deviation_from_rest_m\": {maxDeviation:F3},");
@@ -160,7 +177,31 @@ namespace NamgungLuna.Magica.Tests
             Time.captureDeltaTime = 0f;
 
             Assert.IsFalse(nan, "NaN in cloth vertices");
+            Assert.Greater(maxDeviation, .005f, "The moving cloth must actually deform");
             Assert.Less(maxDeviation, 0.6f, "cloth blew up");
+        }
+
+        static IEnumerator AfterCloth(System.Action sample)
+        {
+            bool done = false; System.Exception failure = null;
+            MagicaManager.UpdateMethod callback = () =>
+            {
+                if (done) return;
+                try { sample(); } catch (System.Exception e) { failure = e; }
+                done = true;
+            };
+            MagicaManager.afterDelayedDelegate += callback;
+            try { while (!done) yield return null; }
+            finally { MagicaManager.afterDelayedDelegate -= callback; }
+            if (failure != null) throw failure;
+        }
+
+        [UnityTearDown] public IEnumerator CleanupRendering()
+        {
+            if (simulationCamera) simulationCamera.targetTexture = null;
+            if (simulationTarget) Object.Destroy(simulationTarget);
+            Time.captureDeltaTime = 0;
+            yield return null;
         }
 
         static string Escape(string s) => (s ?? "").Replace("\\", "/").Replace("\"", "'").Replace("\n", " ");

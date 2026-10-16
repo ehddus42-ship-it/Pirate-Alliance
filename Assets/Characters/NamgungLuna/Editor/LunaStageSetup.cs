@@ -77,6 +77,9 @@ namespace NamgungLuna.Editor
                 foreach (var renderer in instance.GetComponentsInChildren<Renderer>(true))
                     if (Array.IndexOf(BattleShadowlessParts, renderer.name) >= 0)
                         renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+#if MAGICACLOTH2
+                LunaMagicaSetup.BakePerformance(instance, Root + "/Stage/PreBuild");
+#endif
                 PrefabUtility.SaveAsPrefabAsset(instance, BattlePrefab);
             }
             finally { PrefabUtility.UnloadPrefabContents(instance); }

@@ -1,5 +1,9 @@
 using System.Collections.Generic;
 using MagicaCloth2;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using Unity.Profiling;
 using UnityEngine;
 
@@ -22,6 +26,9 @@ namespace NamgungLuna.Magica
         public MeshRenderer[] followers = new MeshRenderer[0];
         [Tooltip("기준점 간격 (m)")]
         public float anchorSpacing = 0.03f;
+        [Tooltip("Editor-generated attachment data. Rebuild after changing the cloth or ornament meshes.")]
+        public LunaClothBindingData bindingData;
+        public bool UsesBakedBinding { get; private set; }
 
         const int ClothPointsPerAnchor = 24;
         const int AnchorsPerVertex = 4;
@@ -46,6 +53,10 @@ namespace NamgungLuna.Magica
             public float[] weight;
             public Matrix4x4 targetToFollower;
             public float[] anchorMatrix;   // per anchor, targetToFollower * [rotation | translation] (row-major 3x4)
+            public NativeArray<float3> jobRest, jobNormals;
+            public NativeArray<Vector3> jobVertices, jobOutputNormals;
+            public NativeArray<int> jobAnchors;
+            public NativeArray<float> jobWeights, jobMatrices;
         }
 
         readonly List<Anchor> anchors = new List<Anchor>();
@@ -55,13 +66,85 @@ namespace NamgungLuna.Magica
         Mesh targetOriginal;
         int targetVertexCount;
         bool subscribed;
+        bool wasSimulating;
+        MagicaCloth targetCloth;
 
         void Awake()
         {
             // Bind in the authored pose, before Magica swaps the cloth mesh.
-            if (target == null) return;
-            targetFilter = target.GetComponent<MeshFilter>();
+            if (!InitializeTarget()) return;
+            UsesBakedBinding = ReadBakedBinding();
+            if (!UsesBakedBinding) BuildBindings();
+            foreach (var b in bindings)
+            {
+                b.anchorMatrix = new float[anchors.Count * 12];
+                b.deformed = Instantiate(b.original);
+                b.deformed.name = b.original.name + "_Follow";
+                b.deformed.MarkDynamic();
+                b.filter.sharedMesh = b.deformed;
+                b.jobRest = new NativeArray<float3>(b.rest.Length, Allocator.Persistent);
+                b.jobNormals = new NativeArray<float3>(b.rest.Length, Allocator.Persistent);
+                for (int i = 0; i < b.rest.Length; i++) { b.jobRest[i] = b.rest[i]; b.jobNormals[i] = b.restNormal[i]; }
+                b.jobVertices = new NativeArray<Vector3>(b.current, Allocator.Persistent);
+                b.jobOutputNormals = new NativeArray<Vector3>(b.currentNormal, Allocator.Persistent);
+                b.jobAnchors = new NativeArray<int>(b.anchor, Allocator.Persistent);
+                b.jobWeights = new NativeArray<float>(b.weight, Allocator.Persistent);
+                b.jobMatrices = new NativeArray<float>(b.anchorMatrix.Length, Allocator.Persistent);
+            }
+            targetNow.Capacity = targetVertexCount;
+        }
+
+        bool InitializeTarget()
+        {
+            if (!target || !(targetFilter = target.GetComponent<MeshFilter>()) || !targetFilter.sharedMesh) return false;
             targetOriginal = targetFilter.sharedMesh;
+            targetVertexCount = targetOriginal.vertexCount;
+            targetCloth = GetComponent<MagicaCloth>();
+            return true;
+        }
+
+        bool ReadBakedBinding()
+        {
+            if (!bindingData || bindingData.target != targetOriginal || bindingData.targetVertexCount != targetVertexCount
+                || !Mathf.Approximately(bindingData.anchorSpacing, anchorSpacing) || bindingData.anchors == null
+                || bindingData.parts == null || bindingData.parts.Length != followers.Length) return false;
+            for (int i = 0; i < followers.Length; i++)
+            {
+                var part = bindingData.parts[i];
+                if (!followers[i] || part == null || part.source != followers[i].GetComponent<MeshFilter>().sharedMesh
+                    || part.rest.Length != part.source.vertexCount) return false;
+                Matrix4x4 actual = followers[i].transform.worldToLocalMatrix * target.transform.localToWorldMatrix;
+                for (int j = 0; j < 16; j++) if (Mathf.Abs(actual[j] - part.targetToFollower[j]) > .0001f) return false;
+            }
+            foreach (var a in bindingData.anchors) anchors.Add(new Anchor { cloth = a.cloth, clothRest = a.clothRest, restCenter = a.restCenter });
+            for (int i = 0; i < followers.Length; i++)
+            {
+                var p = bindingData.parts[i];
+                bindings.Add(new Binding { filter = followers[i].GetComponent<MeshFilter>(), original = p.source,
+                    rest = p.rest, restNormal = p.restNormal, anchor = p.anchor, weight = p.weight,
+                    targetToFollower = p.targetToFollower, current = p.source.vertices, currentNormal = p.source.normals });
+            }
+            return true;
+        }
+
+#if UNITY_EDITOR
+        public LunaClothBindingData BakeBinding()
+        {
+            if (Application.isPlaying) throw new System.InvalidOperationException("Bake attachments outside Play mode.");
+            if (!InitializeTarget()) throw new System.InvalidOperationException("The follower needs a target mesh.");
+            anchors.Clear(); bindings.Clear(); BuildBindings();
+            var data = ScriptableObject.CreateInstance<LunaClothBindingData>();
+            data.target = targetOriginal; data.targetVertexCount = targetVertexCount; data.anchorSpacing = anchorSpacing;
+            data.anchors = anchors.ConvertAll(a => new LunaClothBindingData.Anchor { cloth = a.cloth, clothRest = a.clothRest, restCenter = a.restCenter }).ToArray();
+            data.parts = bindings.ConvertAll(b => new LunaClothBindingData.Part { source = b.original, rest = b.rest, restNormal = b.restNormal,
+                anchor = b.anchor, weight = b.weight, targetToFollower = b.targetToFollower }).ToArray();
+            anchors.Clear(); bindings.Clear();
+            return data;
+        }
+#endif
+
+        void BuildBindings()
+        {
             Vector3[] clothRest = targetOriginal.vertices;
             targetVertexCount = clothRest.Length;
             Matrix4x4 targetToWorld = target.transform.localToWorldMatrix;
@@ -166,11 +249,6 @@ namespace NamgungLuna.Magica
                     }
                     for (int j = 0; j < AnchorsPerVertex; j++) b.weight[v * AnchorsPerVertex + j] = sum > 0f ? b.weight[v * AnchorsPerVertex + j] / sum : 0f;
                 }
-                b.anchorMatrix = new float[anchorWorld.Count * 12];
-                b.deformed = Instantiate(b.original);
-                b.deformed.name = b.original.name + "_Follow";
-                b.deformed.MarkDynamic();
-                filter.sharedMesh = b.deformed;
                 bindings.Add(b);
             }
         }
@@ -191,6 +269,13 @@ namespace NamgungLuna.Magica
             {
                 if (b.filter != null) b.filter.sharedMesh = b.original;
                 if (b.deformed != null) Destroy(b.deformed);
+                if (b.jobRest.IsCreated) b.jobRest.Dispose();
+                if (b.jobNormals.IsCreated) b.jobNormals.Dispose();
+                if (b.jobVertices.IsCreated) b.jobVertices.Dispose();
+                if (b.jobOutputNormals.IsCreated) b.jobOutputNormals.Dispose();
+                if (b.jobAnchors.IsCreated) b.jobAnchors.Dispose();
+                if (b.jobWeights.IsCreated) b.jobWeights.Dispose();
+                if (b.jobMatrices.IsCreated) b.jobMatrices.Dispose();
             }
         }
 
@@ -201,10 +286,17 @@ namespace NamgungLuna.Magica
         void Follow()
         {
             if (targetFilter == null) return;
+            if (targetCloth && (!targetCloth.isActiveAndEnabled || !targetCloth.Process.IsRunning()
+                || !MagicaManager.Team.GetTeamDataRef(targetCloth.Process.TeamId).IsProcess))
+            {
+                ResetAfterCulling();
+                return;
+            }
             Mesh now = targetFilter.sharedMesh;
-            if (now == null || now == targetOriginal) return;   // cloth not built yet
+            if (now == null || now == targetOriginal) { ResetAfterCulling(); return; }
             now.GetVertices(targetNow);
             if (targetNow.Count != targetVertexCount) return;
+            wasSimulating = true;
             using var scope = FollowMarker.Auto();
 
             for (int ai = 0; ai < anchors.Count; ai++)
@@ -252,33 +344,51 @@ namespace NamgungLuna.Magica
                     }
                 }
 
-                Vector3[] rest = b.rest, restNormal = b.restNormal, current = b.current, currentNormal = b.currentNormal;
-                int[] anchorOf = b.anchor;
-                float[] weight = b.weight;
-                for (int v = 0; v < rest.Length; v++)
+                b.jobMatrices.CopyFrom(m);
+                new DeformJob { rest = b.jobRest, normals = b.jobNormals, anchor = b.jobAnchors, weight = b.jobWeights,
+                    matrices = b.jobMatrices, vertices = b.jobVertices, outputNormals = b.jobOutputNormals }.Schedule(b.rest.Length, 128).Complete();
+                b.deformed.SetVertices(b.jobVertices);
+                b.deformed.SetNormals(b.jobOutputNormals);
+            }
+        }
+
+        void ResetAfterCulling()
+        {
+            if (!wasSimulating) return;
+            wasSimulating = false;
+            foreach (var a in anchors) { a.rotation = Quaternion.identity; a.rotationMatrix = Matrix4x4.identity; a.translation = Vector3.zero; }
+            foreach (var b in bindings)
+            {
+                b.jobVertices.CopyFrom(b.current); b.jobOutputNormals.CopyFrom(b.currentNormal);
+                b.deformed.SetVertices(b.jobVertices); b.deformed.SetNormals(b.jobOutputNormals);
+            }
+        }
+
+        [BurstCompile]
+        struct DeformJob : IJobParallelFor
+        {
+            [ReadOnly] public NativeArray<float3> rest, normals;
+            [ReadOnly] public NativeArray<int> anchor;
+            [ReadOnly] public NativeArray<float> weight, matrices;
+            public NativeArray<Vector3> vertices, outputNormals;
+            public void Execute(int v)
+            {
+                int k = v * AnchorsPerVertex;
+                if (weight[k] <= 0) return;
+                float4 row0 = 0, row1 = 0, row2 = 0;
+                for (int j = 0; j < AnchorsPerVertex; j++)
                 {
-                    int k = v * AnchorsPerVertex;
-                    if (weight[k] <= 0f) continue;   // no cloth nearby: stays in place
-                    float m0 = 0f, m1 = 0f, m2 = 0f, m3 = 0f, m4 = 0f, m5 = 0f, m6 = 0f, m7 = 0f, m8 = 0f, m9 = 0f, m10 = 0f, m11 = 0f;
-                    for (int j = 0; j < AnchorsPerVertex; j++)
-                    {
-                        float w = weight[k + j];
-                        if (w <= 0f) continue;
-                        int o = anchorOf[k + j] * 12;
-                        m0 += w * m[o]; m1 += w * m[o + 1]; m2 += w * m[o + 2]; m3 += w * m[o + 3];
-                        m4 += w * m[o + 4]; m5 += w * m[o + 5]; m6 += w * m[o + 6]; m7 += w * m[o + 7];
-                        m8 += w * m[o + 8]; m9 += w * m[o + 9]; m10 += w * m[o + 10]; m11 += w * m[o + 11];
-                    }
-                    Vector3 p = rest[v], q = restNormal[v];
-                    current[v] = new Vector3(m0 * p.x + m1 * p.y + m2 * p.z + m3,
-                                             m4 * p.x + m5 * p.y + m6 * p.z + m7,
-                                             m8 * p.x + m9 * p.y + m10 * p.z + m11);
-                    float nx = m0 * q.x + m1 * q.y + m2 * q.z, ny = m4 * q.x + m5 * q.y + m6 * q.z, nz = m8 * q.x + m9 * q.y + m10 * q.z;
-                    float len = Mathf.Sqrt(nx * nx + ny * ny + nz * nz);
-                    currentNormal[v] = len > 1e-5f ? new Vector3(nx / len, ny / len, nz / len) : Vector3.zero;
+                    float w = weight[k + j]; if (w <= 0) continue;
+                    int o = anchor[k + j] * 12;
+                    row0 += w * new float4(matrices[o], matrices[o + 1], matrices[o + 2], matrices[o + 3]);
+                    row1 += w * new float4(matrices[o + 4], matrices[o + 5], matrices[o + 6], matrices[o + 7]);
+                    row2 += w * new float4(matrices[o + 8], matrices[o + 9], matrices[o + 10], matrices[o + 11]);
                 }
-                b.deformed.SetVertices(current);
-                b.deformed.SetNormals(currentNormal);
+                float4 p = new float4(rest[v], 1);
+                vertices[v] = new float3(math.dot(row0, p), math.dot(row1, p), math.dot(row2, p));
+                float3 q = normals[v];
+                float3 n = new float3(math.dot(row0.xyz, q), math.dot(row1.xyz, q), math.dot(row2.xyz, q));
+                outputNormals[v] = math.lengthsq(n) > 1e-10f ? math.normalize(n) : float3.zero;
             }
         }
 

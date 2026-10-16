@@ -56,28 +56,28 @@ namespace NamgungLuna.Editor
         static readonly ClothPlan[] Plans =
         {
             new ClothPlan { name = "Hair_Front", selection = "Hair", preset = "FrontHair", renderers = new[] { "Hair_Front" },
-                            simpleReduction = 0.02f, shapeReduction = 0.03f, particleRadius = 0.005f, maxDistance = 0.06f, gravityFalloff = 1.0f, colliders = HairColliders, movingWind = 1.5f },
+                            simpleReduction = 0.035f, shapeReduction = 0.05f, particleRadius = 0.005f, maxDistance = 0.06f, gravityFalloff = 1.0f, colliders = HairColliders, movingWind = 1.5f },
             new ClothPlan { name = "Hair_Back_L", selection = "Hair", preset = "LongHair", renderers = new[] { "Hair_Back_L" },
-                            simpleReduction = 0.012f, shapeReduction = 0.018f, particleRadius = 0.012f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = HairColliders, movingWind = 2.0f },
+                            simpleReduction = 0.025f, shapeReduction = 0.04f, particleRadius = 0.012f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = HairColliders, movingWind = 2.0f },
             new ClothPlan { name = "Hair_Back_R", selection = "Hair", preset = "LongHair", renderers = new[] { "Hair_Back_R" },
-                            simpleReduction = 0.012f, shapeReduction = 0.018f, particleRadius = 0.012f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = HairColliders, movingWind = 2.0f },
+                            simpleReduction = 0.025f, shapeReduction = 0.04f, particleRadius = 0.012f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = HairColliders, movingWind = 2.0f },
             new ClothPlan { name = "Hair_Locks", selection = "Hair", preset = "LongHair",
                             renderers = Enumerable.Range(1, 7).Select(i => $"Hair_BackFill_Lock_{i:00}").ToArray(),
                             // locks collapse to a centre line in the proxy, so a wider particle keeps their edges off the body
-                            simpleReduction = 0.02f, shapeReduction = 0.03f, particleRadius = 0.012f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = HairColliders, movingWind = 1.2f },
+                            simpleReduction = 0.035f, shapeReduction = 0.05f, particleRadius = 0.012f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = HairColliders, movingWind = 1.2f },
             new ClothPlan { name = "Skirt_Ivory", selection = "Skirt", preset = "Skirt", renderers = new[] { "Skirt_Ivory" },
-                            simpleReduction = 0.015f, shapeReduction = 0.025f, particleRadius = 0.01f, maxDistance = 0.3f, gravityFalloff = 1.0f, colliders = LegColliders, movingWind = 1.2f },
+                            simpleReduction = 0.03f, shapeReduction = 0.045f, particleRadius = 0.01f, maxDistance = 0.3f, gravityFalloff = 1.0f, colliders = LegColliders, movingWind = 1.2f },
             // The gold hem pieces sit up to 1.5 cm off the skirt, too far for Magica's reduction to merge them reliably,
             // so they follow the simulated skirt surface instead of being cloth themselves.
             new ClothPlan { name = "Skirt_Navy", selection = "Skirt", preset = "Skirt", renderers = new[] { "Skirt_Navy" },
-                            simpleReduction = 0.015f, shapeReduction = 0.025f, particleRadius = 0.01f, maxDistance = 0.3f, gravityFalloff = 1.0f, movingWind = 1.2f,
+                            simpleReduction = 0.03f, shapeReduction = 0.045f, particleRadius = 0.01f, maxDistance = 0.3f, gravityFalloff = 1.0f, movingWind = 1.2f,
                             mutualCollisionWith = "Skirt_Ivory", colliders = LegColliders, followers = new[] { "Gold_Hem_Trim", "Gold_Hem_Charms_L", "Gold_Hem_Charms_R" } },
             new ClothPlan { name = "Sleeve_L", selection = "Sleeve_L", preset = "Skirt", renderers = new[] { "BellSleeve_L", "Sleeve_Band_L" },
-                            simpleReduction = 0.025f, shapeReduction = 0.035f, particleRadius = 0.008f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = new[] { "Forearm_L" }, movingWind = 1.5f },
+                            simpleReduction = 0.04f, shapeReduction = 0.055f, particleRadius = 0.008f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = new[] { "Forearm_L" }, movingWind = 1.5f },
             new ClothPlan { name = "Sleeve_R", selection = "Sleeve_R", preset = "Skirt", renderers = new[] { "BellSleeve_R", "Sleeve_Band_R" },
-                            simpleReduction = 0.025f, shapeReduction = 0.035f, particleRadius = 0.008f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = new[] { "Forearm_R" }, movingWind = 1.5f },
+                            simpleReduction = 0.04f, shapeReduction = 0.055f, particleRadius = 0.008f, maxDistance = 0.12f, gravityFalloff = 1.0f, colliders = new[] { "Forearm_R" }, movingWind = 1.5f },
             new ClothPlan { name = "CollarRibbon", selection = "CollarRibbon", preset = "Accessory", renderers = new[] { "Collar_Ribbons_Ivory" },
-                            simpleReduction = 0.015f, shapeReduction = 0.025f, particleRadius = 0.006f, maxDistance = 0.08f, gravityFalloff = 1.0f, colliders = new[] { "Neck", "Torso_L", "Torso_R" }, movingWind = 1.5f },
+                            simpleReduction = 0.03f, shapeReduction = 0.04f, particleRadius = 0.006f, maxDistance = 0.08f, gravityFalloff = 1.0f, colliders = new[] { "Neck", "Torso_L", "Torso_R" }, movingWind = 1.5f },
         };
 
         [MenuItem("Tools/Namgung Luna/Setup Magica Cloth")]
@@ -260,6 +260,7 @@ namespace NamgungLuna.Editor
                               $"lantern {(rig.lantern != null ? "yes" : "no")}, moon {(rig.moon != null ? "yes" : "no")}");
 
             EnsureFolder(DataFolder);
+            BakePerformance(character, DataFolder + "/PreBuild", report);
             GameObject prefab = PrefabUtility.SaveAsPrefabAssetAndConnect(character, PrefabPath, InteractionMode.AutomatedAction, out bool saved);
             if (!saved || prefab == null) throw new InvalidOperationException("Prefab save failed: " + PrefabPath);
 
@@ -307,6 +308,91 @@ namespace NamgungLuna.Editor
             AssetDatabase.ImportAsset(DataFolder + "/MagicaSetupReport.txt");
             AssetDatabase.SaveAssets();
             return report.ToString();
+        }
+
+        /// <summary>Rebuild only performance data; preserve the existing battle kit and authored rig.</summary>
+        [MenuItem("Tools/Namgung Luna/Optimize Battle Cloth")]
+        public static void OptimizeBattleCloth()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Stop Play mode first.");
+            var report = new StringBuilder("Luna battle cloth performance setup\n");
+            foreach (string path in new[] { PrefabPath, LunaStageSetup.BattlePrefab })
+            {
+                var character = PrefabUtility.LoadPrefabContents(path);
+                try
+                {
+                    report.AppendLine(path);
+                    string folder = Path.GetDirectoryName(path).Replace('\\', '/') + "/PreBuild";
+                    BakePerformance(character, folder, report);
+                    PrefabUtility.SaveAsPrefabAsset(character, path);
+                }
+                finally { PrefabUtility.UnloadPrefabContents(character); }
+            }
+            Directory.CreateDirectory("Documentation/NamgungLuna/Performance/Runtime");
+            File.WriteAllText("Documentation/NamgungLuna/Performance/Runtime/setup.txt", report.ToString());
+            AssetDatabase.SaveAssets(); Debug.Log(report.ToString());
+        }
+
+        public static void BatchOptimizeBattleCloth()
+        {
+            try { OptimizeBattleCloth(); EditorApplication.Exit(0); }
+            catch (Exception e) { Debug.LogException(e); EditorApplication.Exit(1); }
+        }
+
+        public static void BakePerformance(GameObject character, string folder, StringBuilder report = null)
+        {
+            EnsureFolder(folder);
+            bool sync = Unity.Burst.BurstCompiler.Options.EnableBurstCompileSynchronously;
+            Unity.Burst.BurstCompiler.Options.EnableBurstCompileSynchronously = true;
+            try
+            {
+                int total = 0;
+                foreach (var cloth in character.GetComponentsInChildren<MagicaCloth>(true))
+                {
+                    var plan = Plans.Single(p => "Cloth_" + p.name == cloth.name);
+                    var s = cloth.SerializeData;
+                    s.reductionSetting.simpleDistance = plan.simpleReduction;
+                    s.reductionSetting.shapeDistance = plan.shapeReduction;
+                    s.cullingSettings.cameraCullingMode = CullingSettings.CameraCullingMode.Reset;
+                    s.cullingSettings.cameraCullingMethod = CullingSettings.CameraCullingMethod.ManualRenderer;
+                    s.cullingSettings.cameraCullingRenderers = s.sourceRenderers.ToList();
+                    // The gameplay camera sits 15.5m away and can zoom out to 24m.
+                    s.cullingSettings.distanceCullingLength = new CheckSliderSerializeData(true, 30);
+                    s.cullingSettings.distanceCullingFadeRatio = .25f;
+                    s.inertiaConstraint.teleportMode = InertiaConstraint.TeleportMode.Reset;
+                    s.inertiaConstraint.teleportDistance = 2;
+                    s.inertiaConstraint.teleportRotation = 100;
+                    s.DataValidate();
+                    var pre = cloth.GetSerializeData2().preBuildData;
+                    pre.enabled = false;
+                    var fresh = ScriptableObject.CreateInstance<PreBuildScriptableObject>();
+                    pre.preBuildScriptableObject = fresh;
+                    var result = PreBuildDataCreation.CreatePreBuildData(cloth, false);
+                    if (result.IsError()) throw new InvalidOperationException(cloth.name + ": " + result.GetResultString());
+                    string path = folder + "/" + plan.name + ".asset";
+                    var saved = AssetDatabase.LoadAssetAtPath<PreBuildScriptableObject>(path);
+                    if (saved) { EditorUtility.CopySerialized(fresh, saved); UnityEngine.Object.DestroyImmediate(fresh); }
+                    else { saved = fresh; AssetDatabase.CreateAsset(saved, path); }
+                    pre.preBuildScriptableObject = saved; pre.enabled = true;
+                    EditorUtility.SetDirty(saved); EditorUtility.SetDirty(cloth);
+                    if (pre.DataValidate().IsError()) throw new InvalidOperationException("Invalid prebuild " + cloth.name);
+                    int particles = pre.GetSharePreBuildData().proxyMesh.attributes.count; total += particles;
+                    report?.AppendLine($"{cloth.name}: {particles} particles, prebuild valid");
+                }
+                foreach (var follower in character.GetComponentsInChildren<LunaClothFollower>(true))
+                {
+                    var fresh = follower.BakeBinding();
+                    string path = folder + "/" + follower.target.name + "_Attachments.asset";
+                    var saved = AssetDatabase.LoadAssetAtPath<LunaClothBindingData>(path);
+                    if (saved) { EditorUtility.CopySerialized(fresh, saved); UnityEngine.Object.DestroyImmediate(fresh); }
+                    else { saved = fresh; AssetDatabase.CreateAsset(saved, path); }
+                    follower.bindingData = saved;
+                    EditorUtility.SetDirty(saved); EditorUtility.SetDirty(follower);
+                    report?.AppendLine($"Attachments: {saved.anchors.Length} anchors, {saved.parts.Sum(p => p.rest.Length)} vertices baked");
+                }
+                report?.AppendLine($"Total: {total} particles; distance/offscreen culling enabled.");
+            }
+            finally { Unity.Burst.BurstCompiler.Options.EnableBurstCompileSynchronously = sync; }
         }
 
         /// <summary>Thigh, shin and foot capsules on the leg bones in place of the single authored leg capsule, as thick as the

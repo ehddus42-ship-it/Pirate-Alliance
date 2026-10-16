@@ -1,0 +1,71 @@
+{
+    "label": "after",
+    "unity": "6000.3.19f1",
+    "cpu": "Intel(R) Core(TM) i5-14400F",
+    "gpu": "NVIDIA GeForce RTX 5060",
+    "instantiateMs": 18.8858,
+    "readyMs": 40.3697,
+    "cloths": 9,
+    "prebuiltCloths": 9,
+    "particles": 2223,
+    "renderVertices": 152695,
+    "phases": [
+        {
+            "name": "full",
+            "frames": 360,
+            "frame": {
+                "medianMs": 8.6233,
+                "p95Ms": 10.4766,
+                "maxMs": 11.1976
+            },
+            "simulation": {
+                "medianMs": 3.1416,
+                "p95Ms": 4.2347,
+                "maxMs": 5.7549
+            },
+            "clothAndFollowers": {
+                "medianMs": 5.2665,
+                "p95Ms": 6.5798,
+                "maxMs": 7.9177
+            }
+        },
+        {
+            "name": "without_followers",
+            "frames": 360,
+            "frame": {
+                "medianMs": 7.0292,
+                "p95Ms": 8.2872,
+                "maxMs": 9.604
+            },
+            "simulation": {
+                "medianMs": 3.0956,
+                "p95Ms": 3.9134,
+                "maxMs": 5.1959
+            },
+            "clothAndFollowers": {
+                "medianMs": 3.9285,
+                "p95Ms": 4.9182,
+                "maxMs": 6.139
+            }
+        },
+        {
+            "name": "without_cloth",
+            "frames": 360,
+            "frame": {
+                "medianMs": 1.9524,
+                "p95Ms": 2.804,
+                "maxMs": 3.9717
+            },
+            "simulation": {
+                "medianMs": 0.0,
+                "p95Ms": 0.0,
+                "maxMs": 0.0
+            },
+            "clothAndFollowers": {
+                "medianMs": 0.0351,
+                "p95Ms": 0.0571,
+                "maxMs": 0.0854
+            }
+        }
+    ]
+}

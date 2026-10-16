@@ -1438,8 +1438,8 @@ MonoBehaviour:
     disableMode: 0
     animationPoseRatio: 0
     reductionSetting:
-      simpleDistance: 0.025
-      shapeDistance: 0.035
+      simpleDistance: 0.04
+      shapeDistance: 0.055
     customSkinningSetting:
       enable: 0
       skinningBones: []
@@ -1447,13 +1447,15 @@ MonoBehaviour:
       alignmentMode: 0
       adjustmentTransform: {fileID: 0}
     cullingSettings:
-      cameraCullingMode: 30
-      cameraCullingMethod: 0
-      cameraCullingRenderers: []
+      cameraCullingMode: 10
+      cameraCullingMethod: 10
+      cameraCullingRenderers:
+      - {fileID: 5449973212830125190}
+      - {fileID: 7779611128682900845}
       distanceCullingLength:
         value: 30
-        use: 0
-      distanceCullingFadeRatio: 0.2
+        use: 1
+      distanceCullingFadeRatio: 0.25
       distanceCullingReferenceObject: {fileID: 0}
     normalAxis: 1
     gravity: 5
@@ -1541,9 +1543,9 @@ MonoBehaviour:
       particleSpeedLimit:
         value: 4
         use: 1
-      teleportMode: 0
-      teleportDistance: 0.5
-      teleportRotation: 90
+      teleportMode: 1
+      teleportDistance: 2
+      teleportRotation: 100
     tetherConstraint:
       distanceCompression: 0.3
     distanceConstraint:
@@ -83919,19 +83921,47 @@ MonoBehaviour:
       maxConnectionDistance: 0.006
       userEdit: 1
     preBuildData:
-      enabled: 0
+      enabled: 1
       buildId: 7bbe6f9a
-      preBuildScriptableObject: {fileID: 0}
+      preBuildScriptableObject: {fileID: 11400000, guid: f5180c49072a8aa449c5a08e588d7334, type: 2}
       uniquePreBuildData:
-        version: 0
+        version: 2
         buildResult:
-          result: 0
+          result: 2
           warning: 0
-        renderSetupDataList: []
+        renderSetupDataList:
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 5449973212830125190}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 1614300867700356194}
+          originalMesh: {fileID: -3526489329650997140, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 8819261390824772996}
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 7779611128682900845}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 1250647743795608630}
+          originalMesh: {fileID: -3316199090353175722, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 2944772557019555945}
         proxyMesh:
           transformData:
-            transformArray: []
-        renderMeshList: []
+            transformArray:
+            - {fileID: 8819261390824772996}
+            - {fileID: 2944772557019555945}
+            - {fileID: 1357760033775705917}
+            - {fileID: 1357760033775705917}
+        renderMeshList:
+        - transformData:
+            transformArray:
+            - {fileID: 8819261390824772996}
+        - transformData:
+            transformArray:
+            - {fileID: 2944772557019555945}
   gizmoSerializeData:
     always: 0
     clothDebugSettings:
@@ -84452,8 +84482,8 @@ MonoBehaviour:
     disableMode: 0
     animationPoseRatio: 0
     reductionSetting:
-      simpleDistance: 0.012
-      shapeDistance: 0.018
+      simpleDistance: 0.025
+      shapeDistance: 0.04
     customSkinningSetting:
       enable: 0
       skinningBones: []
@@ -84461,13 +84491,14 @@ MonoBehaviour:
       alignmentMode: 0
       adjustmentTransform: {fileID: 0}
     cullingSettings:
-      cameraCullingMode: 30
-      cameraCullingMethod: 0
-      cameraCullingRenderers: []
+      cameraCullingMode: 10
+      cameraCullingMethod: 10
+      cameraCullingRenderers:
+      - {fileID: 3464856656006728886}
       distanceCullingLength:
         value: 30
-        use: 0
-      distanceCullingFadeRatio: 0.2
+        use: 1
+      distanceCullingFadeRatio: 0.25
       distanceCullingReferenceObject: {fileID: 0}
     normalAxis: 1
     gravity: 5
@@ -84555,9 +84586,9 @@ MonoBehaviour:
       particleSpeedLimit:
         value: 3
         use: 1
-      teleportMode: 0
-      teleportDistance: 0.5
-      teleportRotation: 90
+      teleportMode: 1
+      teleportDistance: 2
+      teleportRotation: 100
     tetherConstraint:
       distanceCompression: 0.4
     distanceConstraint:
@@ -140973,19 +141004,34 @@ MonoBehaviour:
       maxConnectionDistance: 0.006
       userEdit: 1
     preBuildData:
-      enabled: 0
+      enabled: 1
       buildId: 60e56aa5
-      preBuildScriptableObject: {fileID: 0}
+      preBuildScriptableObject: {fileID: 11400000, guid: 825580ef401fcae48a154c07da6246fa, type: 2}
       uniquePreBuildData:
-        version: 0
+        version: 2
         buildResult:
-          result: 0
+          result: 2
           warning: 0
-        renderSetupDataList: []
+        renderSetupDataList:
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 3464856656006728886}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 4564254657169075734}
+          originalMesh: {fileID: -2301358363284153485, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 1549448463921409205}
         proxyMesh:
           transformData:
-            transformArray: []
-        renderMeshList: []
+            transformArray:
+            - {fileID: 1549448463921409205}
+            - {fileID: 7912211125335357143}
+            - {fileID: 7912211125335357143}
+        renderMeshList:
+        - transformData:
+            transformArray:
+            - {fileID: 1549448463921409205}
   gizmoSerializeData:
     always: 0
     clothDebugSettings:
@@ -141069,8 +141115,8 @@ MonoBehaviour:
     disableMode: 0
     animationPoseRatio: 0
     reductionSetting:
-      simpleDistance: 0.015
-      shapeDistance: 0.025
+      simpleDistance: 0.03
+      shapeDistance: 0.04
     customSkinningSetting:
       enable: 0
       skinningBones: []
@@ -141078,13 +141124,14 @@ MonoBehaviour:
       alignmentMode: 0
       adjustmentTransform: {fileID: 0}
     cullingSettings:
-      cameraCullingMode: 30
-      cameraCullingMethod: 0
-      cameraCullingRenderers: []
+      cameraCullingMode: 10
+      cameraCullingMethod: 10
+      cameraCullingRenderers:
+      - {fileID: 1647869324108031281}
       distanceCullingLength:
         value: 30
-        use: 0
-      distanceCullingFadeRatio: 0.2
+        use: 1
+      distanceCullingFadeRatio: 0.25
       distanceCullingReferenceObject: {fileID: 0}
     normalAxis: 1
     gravity: 0
@@ -141172,9 +141219,9 @@ MonoBehaviour:
       particleSpeedLimit:
         value: 4
         use: 1
-      teleportMode: 0
-      teleportDistance: 0.5
-      teleportRotation: 90
+      teleportMode: 1
+      teleportDistance: 2
+      teleportRotation: 100
     tetherConstraint:
       distanceCompression: 0.1
     distanceConstraint:
@@ -160320,19 +160367,34 @@ MonoBehaviour:
       maxConnectionDistance: 0.006
       userEdit: 1
     preBuildData:
-      enabled: 0
+      enabled: 1
       buildId: 41d5f6fa
-      preBuildScriptableObject: {fileID: 0}
+      preBuildScriptableObject: {fileID: 11400000, guid: c79a41828b6630246a58f3d417c8b648, type: 2}
       uniquePreBuildData:
-        version: 0
+        version: 2
         buildResult:
-          result: 0
+          result: 2
           warning: 0
-        renderSetupDataList: []
+        renderSetupDataList:
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 1647869324108031281}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 7884031461560590400}
+          originalMesh: {fileID: 2519702295255534301, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 453477225551324301}
         proxyMesh:
           transformData:
-            transformArray: []
-        renderMeshList: []
+            transformArray:
+            - {fileID: 453477225551324301}
+            - {fileID: 7135277314732307274}
+            - {fileID: 7135277314732307274}
+        renderMeshList:
+        - transformData:
+            transformArray:
+            - {fileID: 453477225551324301}
   gizmoSerializeData:
     always: 0
     clothDebugSettings:
@@ -160627,8 +160689,8 @@ MonoBehaviour:
     disableMode: 0
     animationPoseRatio: 0
     reductionSetting:
-      simpleDistance: 0.012
-      shapeDistance: 0.018
+      simpleDistance: 0.025
+      shapeDistance: 0.04
     customSkinningSetting:
       enable: 0
       skinningBones: []
@@ -160636,13 +160698,14 @@ MonoBehaviour:
       alignmentMode: 0
       adjustmentTransform: {fileID: 0}
     cullingSettings:
-      cameraCullingMode: 30
-      cameraCullingMethod: 0
-      cameraCullingRenderers: []
+      cameraCullingMode: 10
+      cameraCullingMethod: 10
+      cameraCullingRenderers:
+      - {fileID: 1440401507904589189}
       distanceCullingLength:
         value: 30
-        use: 0
-      distanceCullingFadeRatio: 0.2
+        use: 1
+      distanceCullingFadeRatio: 0.25
       distanceCullingReferenceObject: {fileID: 0}
     normalAxis: 1
     gravity: 5
@@ -160730,9 +160793,9 @@ MonoBehaviour:
       particleSpeedLimit:
         value: 3
         use: 1
-      teleportMode: 0
-      teleportDistance: 0.5
-      teleportRotation: 90
+      teleportMode: 1
+      teleportDistance: 2
+      teleportRotation: 100
     tetherConstraint:
       distanceCompression: 0.4
     distanceConstraint:
@@ -213808,19 +213871,34 @@ MonoBehaviour:
       maxConnectionDistance: 0.006
       userEdit: 1
     preBuildData:
-      enabled: 0
+      enabled: 1
       buildId: cbaf18ab
-      preBuildScriptableObject: {fileID: 0}
+      preBuildScriptableObject: {fileID: 11400000, guid: 41f2e39ec7575a544bc44442f0a00d1a, type: 2}
       uniquePreBuildData:
-        version: 0
+        version: 2
         buildResult:
-          result: 0
+          result: 2
           warning: 0
-        renderSetupDataList: []
+        renderSetupDataList:
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 1440401507904589189}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 8927912728763570049}
+          originalMesh: {fileID: 3542878770186000999, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 4230793660803989495}
         proxyMesh:
           transformData:
-            transformArray: []
-        renderMeshList: []
+            transformArray:
+            - {fileID: 4230793660803989495}
+            - {fileID: 532535758834593796}
+            - {fileID: 532535758834593796}
+        renderMeshList:
+        - transformData:
+            transformArray:
+            - {fileID: 4230793660803989495}
   gizmoSerializeData:
     always: 0
     clothDebugSettings:
@@ -215115,8 +215193,8 @@ MonoBehaviour:
     disableMode: 0
     animationPoseRatio: 0
     reductionSetting:
-      simpleDistance: 0.025
-      shapeDistance: 0.035
+      simpleDistance: 0.04
+      shapeDistance: 0.055
     customSkinningSetting:
       enable: 0
       skinningBones: []
@@ -215124,13 +215202,15 @@ MonoBehaviour:
       alignmentMode: 0
       adjustmentTransform: {fileID: 0}
     cullingSettings:
-      cameraCullingMode: 30
-      cameraCullingMethod: 0
-      cameraCullingRenderers: []
+      cameraCullingMode: 10
+      cameraCullingMethod: 10
+      cameraCullingRenderers:
+      - {fileID: 8965711416982629285}
+      - {fileID: 4349941209194559496}
       distanceCullingLength:
         value: 30
-        use: 0
-      distanceCullingFadeRatio: 0.2
+        use: 1
+      distanceCullingFadeRatio: 0.25
       distanceCullingReferenceObject: {fileID: 0}
     normalAxis: 1
     gravity: 5
@@ -215218,9 +215298,9 @@ MonoBehaviour:
       particleSpeedLimit:
         value: 4
         use: 1
-      teleportMode: 0
-      teleportDistance: 0.5
-      teleportRotation: 90
+      teleportMode: 1
+      teleportDistance: 2
+      teleportRotation: 100
     tetherConstraint:
       distanceCompression: 0.3
     distanceConstraint:
@@ -298504,19 +298584,47 @@ MonoBehaviour:
       maxConnectionDistance: 0.006
       userEdit: 1
     preBuildData:
-      enabled: 0
+      enabled: 1
       buildId: 1c8c4528
-      preBuildScriptableObject: {fileID: 0}
+      preBuildScriptableObject: {fileID: 11400000, guid: ed218f5e78ce98e44bbd7d1e61172e0a, type: 2}
       uniquePreBuildData:
-        version: 0
+        version: 2
         buildResult:
-          result: 0
+          result: 2
           warning: 0
-        renderSetupDataList: []
+        renderSetupDataList:
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 8965711416982629285}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 1619802221962498812}
+          originalMesh: {fileID: 5300183749217370041, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 9218213845149125025}
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 4349941209194559496}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 6984974679327086477}
+          originalMesh: {fileID: 5748790118301126072, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 7513507507470824869}
         proxyMesh:
           transformData:
-            transformArray: []
-        renderMeshList: []
+            transformArray:
+            - {fileID: 9218213845149125025}
+            - {fileID: 7513507507470824869}
+            - {fileID: 5699913385701369504}
+            - {fileID: 5699913385701369504}
+        renderMeshList:
+        - transformData:
+            transformArray:
+            - {fileID: 9218213845149125025}
+        - transformData:
+            transformArray:
+            - {fileID: 7513507507470824869}
   gizmoSerializeData:
     always: 0
     clothDebugSettings:
@@ -298674,8 +298782,8 @@ MonoBehaviour:
     disableMode: 0
     animationPoseRatio: 0
     reductionSetting:
-      simpleDistance: 0.015
-      shapeDistance: 0.025
+      simpleDistance: 0.03
+      shapeDistance: 0.045
     customSkinningSetting:
       enable: 0
       skinningBones: []
@@ -298683,13 +298791,14 @@ MonoBehaviour:
       alignmentMode: 0
       adjustmentTransform: {fileID: 0}
     cullingSettings:
-      cameraCullingMode: 30
-      cameraCullingMethod: 0
-      cameraCullingRenderers: []
+      cameraCullingMode: 10
+      cameraCullingMethod: 10
+      cameraCullingRenderers:
+      - {fileID: 2256115570426759801}
       distanceCullingLength:
         value: 30
-        use: 0
-      distanceCullingFadeRatio: 0.2
+        use: 1
+      distanceCullingFadeRatio: 0.25
       distanceCullingReferenceObject: {fileID: 0}
     normalAxis: 1
     gravity: 5
@@ -298777,9 +298886,9 @@ MonoBehaviour:
       particleSpeedLimit:
         value: 4
         use: 1
-      teleportMode: 0
-      teleportDistance: 0.5
-      teleportRotation: 90
+      teleportMode: 1
+      teleportDistance: 2
+      teleportRotation: 100
     tetherConstraint:
       distanceCompression: 0.3
     distanceConstraint:
@@ -481477,19 +481586,34 @@ MonoBehaviour:
       maxConnectionDistance: 0.006
       userEdit: 1
     preBuildData:
-      enabled: 0
+      enabled: 1
       buildId: 6c864b15
-      preBuildScriptableObject: {fileID: 0}
+      preBuildScriptableObject: {fileID: 11400000, guid: e92c4801d7434ed459d111f03a944606, type: 2}
       uniquePreBuildData:
-        version: 0
+        version: 2
         buildResult:
-          result: 0
+          result: 2
           warning: 0
-        renderSetupDataList: []
+        renderSetupDataList:
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 2256115570426759801}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 180673247490432191}
+          originalMesh: {fileID: -9076361589293135468, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 7075046612084245660}
         proxyMesh:
           transformData:
-            transformArray: []
-        renderMeshList: []
+            transformArray:
+            - {fileID: 7075046612084245660}
+            - {fileID: 3219226148547333047}
+            - {fileID: 3219226148547333047}
+        renderMeshList:
+        - transformData:
+            transformArray:
+            - {fileID: 7075046612084245660}
   gizmoSerializeData:
     always: 0
     clothDebugSettings:
@@ -481531,6 +481655,7 @@ MonoBehaviour:
   - {fileID: 5178645632982628553}
   - {fileID: 2475374258953964140}
   anchorSpacing: 0.03
+  bindingData: {fileID: 11400000, guid: 5869438ad16fc3b4bb9c049ae32bd04f, type: 2}
 --- !u!1 &6723640541033374719
 GameObject:
   m_ObjectHideFlags: 0
@@ -481913,8 +482038,8 @@ MonoBehaviour:
     disableMode: 0
     animationPoseRatio: 0
     reductionSetting:
-      simpleDistance: 0.02
-      shapeDistance: 0.03
+      simpleDistance: 0.035
+      shapeDistance: 0.05
     customSkinningSetting:
       enable: 0
       skinningBones: []
@@ -481922,13 +482047,14 @@ MonoBehaviour:
       alignmentMode: 0
       adjustmentTransform: {fileID: 0}
     cullingSettings:
-      cameraCullingMode: 30
-      cameraCullingMethod: 0
-      cameraCullingRenderers: []
+      cameraCullingMode: 10
+      cameraCullingMethod: 10
+      cameraCullingRenderers:
+      - {fileID: 2251685496917606545}
       distanceCullingLength:
         value: 30
-        use: 0
-      distanceCullingFadeRatio: 0.2
+        use: 1
+      distanceCullingFadeRatio: 0.25
       distanceCullingReferenceObject: {fileID: 0}
     normalAxis: 1
     gravity: 4
@@ -482016,9 +482142,9 @@ MonoBehaviour:
       particleSpeedLimit:
         value: 2
         use: 1
-      teleportMode: 0
-      teleportDistance: 0.5
-      teleportRotation: 90
+      teleportMode: 1
+      teleportDistance: 2
+      teleportRotation: 100
     tetherConstraint:
       distanceCompression: 0.1
     distanceConstraint:
@@ -503922,19 +504048,34 @@ MonoBehaviour:
       maxConnectionDistance: 0.006
       userEdit: 1
     preBuildData:
-      enabled: 0
+      enabled: 1
       buildId: 74deab09
-      preBuildScriptableObject: {fileID: 0}
+      preBuildScriptableObject: {fileID: 11400000, guid: b38bfd11bbc18d040bfc0601ad2841c9, type: 2}
       uniquePreBuildData:
-        version: 0
+        version: 2
         buildResult:
-          result: 0
+          result: 2
           warning: 0
-        renderSetupDataList: []
+        renderSetupDataList:
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 2251685496917606545}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 2126788963123932304}
+          originalMesh: {fileID: 8337207609564725690, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 7127465827386032811}
         proxyMesh:
           transformData:
-            transformArray: []
-        renderMeshList: []
+            transformArray:
+            - {fileID: 7127465827386032811}
+            - {fileID: 6099959011109184151}
+            - {fileID: 6099959011109184151}
+        renderMeshList:
+        - transformData:
+            transformArray:
+            - {fileID: 7127465827386032811}
   gizmoSerializeData:
     always: 0
     clothDebugSettings:
@@ -504204,8 +504345,8 @@ MonoBehaviour:
     disableMode: 0
     animationPoseRatio: 0
     reductionSetting:
-      simpleDistance: 0.02
-      shapeDistance: 0.03
+      simpleDistance: 0.035
+      shapeDistance: 0.05
     customSkinningSetting:
       enable: 0
       skinningBones: []
@@ -504213,13 +504354,20 @@ MonoBehaviour:
       alignmentMode: 0
       adjustmentTransform: {fileID: 0}
     cullingSettings:
-      cameraCullingMode: 30
-      cameraCullingMethod: 0
-      cameraCullingRenderers: []
+      cameraCullingMode: 10
+      cameraCullingMethod: 10
+      cameraCullingRenderers:
+      - {fileID: 7210635314843407083}
+      - {fileID: 2835532459408812006}
+      - {fileID: 335577110439062867}
+      - {fileID: 8717148239156740338}
+      - {fileID: 5905733012687299308}
+      - {fileID: 5325002247228885934}
+      - {fileID: 7066653649800460129}
       distanceCullingLength:
         value: 30
-        use: 0
-      distanceCullingFadeRatio: 0.2
+        use: 1
+      distanceCullingFadeRatio: 0.25
       distanceCullingReferenceObject: {fileID: 0}
     normalAxis: 1
     gravity: 5
@@ -504307,9 +504455,9 @@ MonoBehaviour:
       particleSpeedLimit:
         value: 3
         use: 1
-      teleportMode: 0
-      teleportDistance: 0.5
-      teleportRotation: 90
+      teleportMode: 1
+      teleportDistance: 2
+      teleportRotation: 100
     tetherConstraint:
       distanceCompression: 0.4
     distanceConstraint:
@@ -552929,19 +553077,112 @@ MonoBehaviour:
       maxConnectionDistance: 0.006
       userEdit: 1
     preBuildData:
-      enabled: 0
+      enabled: 1
       buildId: 72728cf0
-      preBuildScriptableObject: {fileID: 0}
+      preBuildScriptableObject: {fileID: 11400000, guid: 298eff42c96e5d44f9aa2d726c6475d1, type: 2}
       uniquePreBuildData:
-        version: 0
+        version: 2
         buildResult:
-          result: 0
+          result: 2
           warning: 0
-        renderSetupDataList: []
+        renderSetupDataList:
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 7210635314843407083}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 6909706129927508170}
+          originalMesh: {fileID: -6687425894503751826, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 4304872215222559663}
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 2835532459408812006}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 1182357053257634826}
+          originalMesh: {fileID: 8782748374720097406, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 8843975493000576748}
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 335577110439062867}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 287643230492458199}
+          originalMesh: {fileID: -6141317126679442138, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 7697269299972203214}
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 8717148239156740338}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 3609623420561985307}
+          originalMesh: {fileID: 7554769130820614083, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 3139318564249037773}
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 5905733012687299308}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 350945901873964798}
+          originalMesh: {fileID: 5311908695482280285, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 287471991129081181}
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 5325002247228885934}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 8612214205328980061}
+          originalMesh: {fileID: 4825729347060464062, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 4204319954405653084}
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 7066653649800460129}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 4348312065241827747}
+          originalMesh: {fileID: -5942738254505549560, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 1576336641512918459}
         proxyMesh:
           transformData:
-            transformArray: []
-        renderMeshList: []
+            transformArray:
+            - {fileID: 4304872215222559663}
+            - {fileID: 8843975493000576748}
+            - {fileID: 7697269299972203214}
+            - {fileID: 3139318564249037773}
+            - {fileID: 287471991129081181}
+            - {fileID: 4204319954405653084}
+            - {fileID: 1576336641512918459}
+            - {fileID: 3649742619073291259}
+            - {fileID: 3649742619073291259}
+        renderMeshList:
+        - transformData:
+            transformArray:
+            - {fileID: 4304872215222559663}
+        - transformData:
+            transformArray:
+            - {fileID: 8843975493000576748}
+        - transformData:
+            transformArray:
+            - {fileID: 7697269299972203214}
+        - transformData:
+            transformArray:
+            - {fileID: 3139318564249037773}
+        - transformData:
+            transformArray:
+            - {fileID: 287471991129081181}
+        - transformData:
+            transformArray:
+            - {fileID: 4204319954405653084}
+        - transformData:
+            transformArray:
+            - {fileID: 1576336641512918459}
   gizmoSerializeData:
     always: 0
     clothDebugSettings:
@@ -553333,8 +553574,8 @@ MonoBehaviour:
     disableMode: 0
     animationPoseRatio: 0
     reductionSetting:
-      simpleDistance: 0.015
-      shapeDistance: 0.025
+      simpleDistance: 0.03
+      shapeDistance: 0.045
     customSkinningSetting:
       enable: 0
       skinningBones: []
@@ -553342,13 +553583,14 @@ MonoBehaviour:
       alignmentMode: 0
       adjustmentTransform: {fileID: 0}
     cullingSettings:
-      cameraCullingMode: 30
-      cameraCullingMethod: 0
-      cameraCullingRenderers: []
+      cameraCullingMode: 10
+      cameraCullingMethod: 10
+      cameraCullingRenderers:
+      - {fileID: 378986455626412892}
       distanceCullingLength:
         value: 30
-        use: 0
-      distanceCullingFadeRatio: 0.2
+        use: 1
+      distanceCullingFadeRatio: 0.25
       distanceCullingReferenceObject: {fileID: 0}
     normalAxis: 1
     gravity: 5
@@ -553436,9 +553678,9 @@ MonoBehaviour:
       particleSpeedLimit:
         value: 4
         use: 1
-      teleportMode: 0
-      teleportDistance: 0.5
-      teleportRotation: 90
+      teleportMode: 1
+      teleportDistance: 2
+      teleportRotation: 100
     tetherConstraint:
       distanceCompression: 0.3
     distanceConstraint:
@@ -707380,19 +707622,34 @@ MonoBehaviour:
       maxConnectionDistance: 0.006
       userEdit: 1
     preBuildData:
-      enabled: 0
+      enabled: 1
       buildId: f9929201
-      preBuildScriptableObject: {fileID: 0}
+      preBuildScriptableObject: {fileID: 11400000, guid: aacd44fef368a0643a77aa9780045fb6, type: 2}
       uniquePreBuildData:
-        version: 0
+        version: 2
         buildResult:
-          result: 0
+          result: 2
           warning: 0
-        renderSetupDataList: []
+        renderSetupDataList:
+        - result:
+            result: 2
+            warning: 0
+          renderer: {fileID: 378986455626412892}
+          skinRenderer: {fileID: 0}
+          meshFilter: {fileID: 2733356230262972738}
+          originalMesh: {fileID: -8343109087354268635, guid: 93ff25c0ca0dbca48ae174f2830f0e86, type: 3}
+          transformList:
+          - {fileID: 8872791136731111359}
         proxyMesh:
           transformData:
-            transformArray: []
-        renderMeshList: []
+            transformArray:
+            - {fileID: 8872791136731111359}
+            - {fileID: 671947988529790011}
+            - {fileID: 671947988529790011}
+        renderMeshList:
+        - transformData:
+            transformArray:
+            - {fileID: 8872791136731111359}
   gizmoSerializeData:
     always: 0
     clothDebugSettings:
