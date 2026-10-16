@@ -149,6 +149,7 @@ namespace AcRoguelike.Forest
             Vector3 offset = target.transform.position - landing; offset.y = 0;
             if (offset.magnitude <= explosionRadius && ForestAttackUtility.HasLineOfSight(gameObject, landing + Vector3.up * .6f, target, hits))
             { DamageAttempts++; target.TakeDamage(explosionDamage); }
+            else target.NearMiss(landing, explosionRadius);
             Cancel();
         }
         void OnKilled(TrainingEnemy _)

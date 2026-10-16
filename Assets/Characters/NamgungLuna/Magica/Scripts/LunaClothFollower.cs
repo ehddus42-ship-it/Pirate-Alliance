@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using MagicaCloth2;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace NamgungLuna.Magica
@@ -24,6 +25,7 @@ namespace NamgungLuna.Magica
 
         const int ClothPointsPerAnchor = 24;
         const int AnchorsPerVertex = 4;
+        static readonly ProfilerMarker FollowMarker = new ProfilerMarker("LunaClothFollower.Follow");
 
         class Anchor
         {
@@ -31,6 +33,7 @@ namespace NamgungLuna.Magica
             public Vector3[] clothRest;    // rest positions relative to restCenter (target space)
             public Vector3 restCenter;
             public Quaternion rotation = Quaternion.identity;
+            public Matrix4x4 rotationMatrix = Matrix4x4.identity;
             public Vector3 translation;
         }
 
@@ -42,6 +45,7 @@ namespace NamgungLuna.Magica
             public int[] anchor;
             public float[] weight;
             public Matrix4x4 targetToFollower;
+            public float[] anchorMatrix;   // per anchor, targetToFollower * [rotation | translation] (row-major 3x4)
         }
 
         readonly List<Anchor> anchors = new List<Anchor>();
@@ -162,6 +166,7 @@ namespace NamgungLuna.Magica
                     }
                     for (int j = 0; j < AnchorsPerVertex; j++) b.weight[v * AnchorsPerVertex + j] = sum > 0f ? b.weight[v * AnchorsPerVertex + j] / sum : 0f;
                 }
+                b.anchorMatrix = new float[anchorWorld.Count * 12];
                 b.deformed = Instantiate(b.original);
                 b.deformed.name = b.original.name + "_Follow";
                 b.deformed.MarkDynamic();
@@ -190,6 +195,9 @@ namespace NamgungLuna.Magica
         }
 
         // Called by Magica's player loop after it has written the cloth meshes (PostLateUpdate).
+        // Runs every frame for ~25k trim vertices, so the inner loops use plain float math instead of Vector3/Quaternion
+        // operators: each anchor's rigid motion is folded together with targetToFollower into one 3x4 matrix per binding,
+        // and each vertex blends those matrices once (sum w * (T * (R * rest + t)) = (sum w * T[R|t]) * rest, weights sum to 1).
         void Follow()
         {
             if (targetFilter == null) return;
@@ -197,44 +205,80 @@ namespace NamgungLuna.Magica
             if (now == null || now == targetOriginal) return;   // cloth not built yet
             now.GetVertices(targetNow);
             if (targetNow.Count != targetVertexCount) return;
+            using var scope = FollowMarker.Auto();
 
-            foreach (var a in anchors)
+            for (int ai = 0; ai < anchors.Count; ai++)
             {
+                Anchor a = anchors[ai];
                 int n = a.cloth.Length;
                 if (n < 3) continue;
-                Vector3 center = Vector3.zero;
-                for (int j = 0; j < n; j++) center += targetNow[a.cloth[j]];
-                center /= n;
+                float cx = 0f, cy = 0f, cz = 0f;
+                for (int j = 0; j < n; j++) { Vector3 p = targetNow[a.cloth[j]]; cx += p.x; cy += p.y; cz += p.z; }
+                float inv = 1f / n;
+                cx *= inv; cy *= inv; cz *= inv;
                 // covariance between current and rest offsets; its rotational part is the best-fit rotation
-                Vector3 c0 = Vector3.zero, c1 = Vector3.zero, c2 = Vector3.zero;
+                float c0x = 0f, c0y = 0f, c0z = 0f, c1x = 0f, c1y = 0f, c1z = 0f, c2x = 0f, c2y = 0f, c2z = 0f;
                 for (int j = 0; j < n; j++)
                 {
-                    Vector3 cur = targetNow[a.cloth[j]] - center, r = a.clothRest[j];
-                    c0 += cur * r.x; c1 += cur * r.y; c2 += cur * r.z;
+                    Vector3 p = targetNow[a.cloth[j]], r = a.clothRest[j];
+                    float ux = p.x - cx, uy = p.y - cy, uz = p.z - cz;
+                    c0x += ux * r.x; c0y += uy * r.x; c0z += uz * r.x;
+                    c1x += ux * r.y; c1y += uy * r.y; c1z += uz * r.y;
+                    c2x += ux * r.z; c2y += uy * r.z; c2z += uz * r.z;
                 }
-                a.rotation = ExtractRotation(c0, c1, c2, a.rotation);
-                a.translation = center - a.rotation * a.restCenter;
+                a.rotation = ExtractRotation(new Vector3(c0x, c0y, c0z), new Vector3(c1x, c1y, c1z), new Vector3(c2x, c2y, c2z), a.rotation);
+                a.translation = new Vector3(cx, cy, cz) - a.rotation * a.restCenter;
+                a.rotationMatrix = Matrix4x4.Rotate(a.rotation);
             }
 
             foreach (var b in bindings)
             {
-                for (int v = 0; v < b.rest.Length; v++)
+                // per anchor: M = targetToFollower * [R | t] as a row-major 3x4
+                Matrix4x4 T = b.targetToFollower;
+                float[] m = b.anchorMatrix;
+                for (int ai = 0; ai < anchors.Count; ai++)
                 {
-                    if (b.weight[v * AnchorsPerVertex] <= 0f) continue;   // no cloth nearby: stays in place
-                    Vector3 p = Vector3.zero, nrm = Vector3.zero;
+                    Anchor a = anchors[ai];
+                    Matrix4x4 r = a.rotationMatrix;
+                    Vector3 t = a.translation;
+                    int o = ai * 12;
+                    for (int row = 0; row < 3; row++)
+                    {
+                        float t0 = T[row, 0], t1 = T[row, 1], t2 = T[row, 2];
+                        m[o + row * 4 + 0] = t0 * r.m00 + t1 * r.m10 + t2 * r.m20;
+                        m[o + row * 4 + 1] = t0 * r.m01 + t1 * r.m11 + t2 * r.m21;
+                        m[o + row * 4 + 2] = t0 * r.m02 + t1 * r.m12 + t2 * r.m22;
+                        m[o + row * 4 + 3] = t0 * t.x + t1 * t.y + t2 * t.z + T[row, 3];
+                    }
+                }
+
+                Vector3[] rest = b.rest, restNormal = b.restNormal, current = b.current, currentNormal = b.currentNormal;
+                int[] anchorOf = b.anchor;
+                float[] weight = b.weight;
+                for (int v = 0; v < rest.Length; v++)
+                {
+                    int k = v * AnchorsPerVertex;
+                    if (weight[k] <= 0f) continue;   // no cloth nearby: stays in place
+                    float m0 = 0f, m1 = 0f, m2 = 0f, m3 = 0f, m4 = 0f, m5 = 0f, m6 = 0f, m7 = 0f, m8 = 0f, m9 = 0f, m10 = 0f, m11 = 0f;
                     for (int j = 0; j < AnchorsPerVertex; j++)
                     {
-                        float w = b.weight[v * AnchorsPerVertex + j];
+                        float w = weight[k + j];
                         if (w <= 0f) continue;
-                        var a = anchors[b.anchor[v * AnchorsPerVertex + j]];
-                        p += (a.rotation * b.rest[v] + a.translation) * w;
-                        nrm += a.rotation * b.restNormal[v] * w;
+                        int o = anchorOf[k + j] * 12;
+                        m0 += w * m[o]; m1 += w * m[o + 1]; m2 += w * m[o + 2]; m3 += w * m[o + 3];
+                        m4 += w * m[o + 4]; m5 += w * m[o + 5]; m6 += w * m[o + 6]; m7 += w * m[o + 7];
+                        m8 += w * m[o + 8]; m9 += w * m[o + 9]; m10 += w * m[o + 10]; m11 += w * m[o + 11];
                     }
-                    b.current[v] = b.targetToFollower.MultiplyPoint3x4(p);
-                    b.currentNormal[v] = b.targetToFollower.MultiplyVector(nrm).normalized;
+                    Vector3 p = rest[v], q = restNormal[v];
+                    current[v] = new Vector3(m0 * p.x + m1 * p.y + m2 * p.z + m3,
+                                             m4 * p.x + m5 * p.y + m6 * p.z + m7,
+                                             m8 * p.x + m9 * p.y + m10 * p.z + m11);
+                    float nx = m0 * q.x + m1 * q.y + m2 * q.z, ny = m4 * q.x + m5 * q.y + m6 * q.z, nz = m8 * q.x + m9 * q.y + m10 * q.z;
+                    float len = Mathf.Sqrt(nx * nx + ny * ny + nz * nz);
+                    currentNormal[v] = len > 1e-5f ? new Vector3(nx / len, ny / len, nz / len) : Vector3.zero;
                 }
-                b.deformed.SetVertices(b.current);
-                b.deformed.SetNormals(b.currentNormal);
+                b.deformed.SetVertices(current);
+                b.deformed.SetNormals(currentNormal);
             }
         }
 

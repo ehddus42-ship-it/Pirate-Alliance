@@ -183,6 +183,8 @@ public sealed class ProiHunterThrow : MonoBehaviour, IHunterSkill
 
     void Update()
     {
+        // Caught by a monster's grab (or thrown) mid-skill: the skill ends and whatever is in her hand drops.
+        if (mode != Mode.None && motor && (motor.IsHeld || motor.IsLaunched)) Interrupt();
         if (Application.isFocused && action.WasPressedThisFrame()) TryActivate();
         if (mode == Mode.Rush) TickRush(Time.deltaTime);
         else if (mode != Mode.None) Tick(Time.deltaTime);
@@ -309,6 +311,8 @@ public sealed class ProiHunterThrow : MonoBehaviour, IHunterSkill
         targetBody = target.GetComponent<CharacterController>();
         targetWasTargetable = target.CanBeTargeted;
         target.CanBeTargeted = false;
+        // Its own AI waits until it lands: a held locker must not grab and lift her back.
+        target.HeldByHunter = true;
         targetYaw = target.transform.eulerAngles.y;
         HitFeedback.HitStop(.04f, .05f);
         HitFeedback.Shake(.02f, .1f);
@@ -389,7 +393,15 @@ public sealed class ProiHunterThrow : MonoBehaviour, IHunterSkill
         if (combat) combat.ReleaseAutomation();
     }
 
-    /// <summary>Lets go of a held enemy where it hangs (swap, lobby or an early end).</summary>
+    /// <summary>Ends the skill at once (she was grabbed): the held enemy drops, a fireball still in hand fizzles.</summary>
+    void Interrupt()
+    {
+        DropHeld();
+        if (ball && !released) { Destroy(ball.gameObject); ball = null; ballLight = null; }
+        Finish();
+    }
+
+    /// <summary>Lets go of a held enemy where it hangs (swap, lobby, an early end or a grab on her).</summary>
     void DropHeld()
     {
         if (target && grabbed && !released)
@@ -397,6 +409,7 @@ public sealed class ProiHunterThrow : MonoBehaviour, IHunterSkill
             Vector3 at = target.transform.position;
             Place(target, targetBody, new Vector3(at.x, Ground(at, target), at.z), targetYaw);
             target.CanBeTargeted = targetWasTargetable;
+            target.HeldByHunter = false;
         }
         target = null;
         grabbed = false;
@@ -466,6 +479,7 @@ public sealed class ProiHunterThrow : MonoBehaviour, IHunterSkill
         if (f.enemy && !f.enemy.IsAlive)
         {
             f.enemy.CanBeTargeted = f.wasTargetable;
+            f.enemy.HeldByHunter = false;
             Vector3 at = f.enemy.transform.position;
             Place(f.enemy, f.body, new Vector3(at.x, Ground(at, f.enemy), at.z), f.yaw);
             return;
@@ -483,6 +497,7 @@ public sealed class ProiHunterThrow : MonoBehaviour, IHunterSkill
             center.y = floor;
             Place(f.enemy, f.body, center, f.yaw);
             f.enemy.CanBeTargeted = f.wasTargetable;
+            f.enemy.HeldByHunter = false;
             if (f.enemy.IsAlive)
             {
                 int damage = Mathf.Max(1, Mathf.RoundToInt(thrownDamage * DamageScale));

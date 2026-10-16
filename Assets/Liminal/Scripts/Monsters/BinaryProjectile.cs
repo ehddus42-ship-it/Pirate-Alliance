@@ -78,6 +78,8 @@ namespace AcRoguelike.Liminal
                 Break();
                 return;
             }
+            // A stream that only grazes a dodging player is a just dodge too.
+            if (target) target.NearMiss(headBefore, head, .48f);
             if (Blocked(headBefore, head) || travelled >= range + Length * Spacing) { Break(); return; }
             Layout();
         }

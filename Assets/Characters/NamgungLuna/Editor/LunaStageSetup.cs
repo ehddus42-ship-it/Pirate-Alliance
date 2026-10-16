@@ -23,6 +23,24 @@ namespace NamgungLuna.Editor
         const float PeaceSlowSpeed = .4f;
         const float PeaceWalkPlayback = 1.5f;
 
+        /// <summary>
+        /// Battle-form renderers that skip the shadow passes. They sit inside the silhouette of a larger part (hair fill under
+        /// the back hair, boot underlaps, chest ornaments, inset, facings, sleeve joins, lantern core) or are thin hem charms,
+        /// so the cast shadow is unchanged in practice while about 69k of her 249k triangles leave every shadow cascade.
+        /// They still render and receive shadows. Docs: Documentation/NamgungLuna/Performance/battle_form_lag.md
+        /// </summary>
+        public static readonly string[] BattleShadowlessParts =
+        {
+            "Hair_BackFill_Lock_01", "Hair_BackFill_Lock_02", "Hair_BackFill_Lock_03", "Hair_BackFill_Lock_04",
+            "Hair_BackFill_Lock_05", "Hair_BackFill_Lock_06", "Hair_BackFill_Lock_07",
+            "Gold_Hem_Charms_L", "Gold_Hem_Charms_R", "Gold_Hem_Trim",
+            "Chest_Crescent", "Chest_Star", "Waist_Navy_Inset",
+            "Boot_Shaft_Underlap_L", "Boot_Shaft_Underlap_R",
+            "Neckline_Navy_Facing_L", "Neckline_Navy_Facing_R",
+            "Puff_Sleeve_Join_L", "Puff_Sleeve_Join_R",
+            "Lantern_Emissive_Core",
+        };
+
         static void Folder(string path)
         {
             if (AssetDatabase.IsValidFolder(path)) return;
@@ -56,6 +74,9 @@ namespace NamgungLuna.Editor
                 if (fx) fx.enabled = true;
                 // Rebuilding locomotion must preserve the installed battle kit and its authored VFX references.
                 if (AssetDatabase.LoadMainAssetAtPath(CombatLibrary)) LunaCombatSetup.ApplyTo(instance);
+                foreach (var renderer in instance.GetComponentsInChildren<Renderer>(true))
+                    if (Array.IndexOf(BattleShadowlessParts, renderer.name) >= 0)
+                        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 PrefabUtility.SaveAsPrefabAsset(instance, BattlePrefab);
             }
             finally { PrefabUtility.UnloadPrefabContents(instance); }

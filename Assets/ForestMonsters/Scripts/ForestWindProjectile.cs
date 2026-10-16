@@ -35,6 +35,8 @@ namespace AcRoguelike.Forest
             if (!ForestAttackUtility.Alive(owner, target, room, hadRoom)) { Cancel(); return; }
             float dt = Time.deltaTime; if (dt <= 0) return;
             float step = Mathf.Min(Speed * dt, MaximumTravel - Travelled);
+            // A gust that only grazes a dodging player is a just dodge too.
+            target.NearMiss(transform.position, transform.position + Direction * step, Radius + target.BodyRadius);
             if (ForestAttackUtility.Sweep(gameObject.scene.GetPhysicsScene(), room, transform.position, Radius, Direction, step, target, hits, overlaps, out var impact))
             {
                 transform.position += Direction * Mathf.Max(0, impact.distance); Travelled += Mathf.Max(0, impact.distance);

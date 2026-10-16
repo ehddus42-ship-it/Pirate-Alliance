@@ -43,15 +43,27 @@ namespace AcRoguelike.Liminal
             transform.SetPositionAndRotation(position, Quaternion.LookRotation(direction) * Quaternion.Euler(slope, 0, spin));
             if (!dealtDamage && target && target.IsAlive && Overlaps(target.transform.position))
             { dealtDamage = true; HitCount++; target.TakeDamage(damage); }
+            else if (!dealtDamage && target && target.IsEvading) target.NearMiss(MissedBy(target.transform.position));
             if (!boss.ArenaContains(position, -1.5f)) { ImpactCount++; Destroy(gameObject); }
         }
+
+        const float PlayerRadius = .4f;
 
         bool Overlaps(Vector3 feet)
         {
             Vector3 local = Quaternion.Inverse(Quaternion.LookRotation(direction)) * (feet + Vector3.up * .9f - transform.position);
-            const float playerRadius = .4f;
-            return Mathf.Abs(local.x) <= halfExtents.x + playerRadius && Mathf.Abs(local.z) <= halfExtents.z + playerRadius
+            return Mathf.Abs(local.x) <= halfExtents.x + PlayerRadius && Mathf.Abs(local.z) <= halfExtents.z + PlayerRadius
                 && feet.y < transform.position.y + halfExtents.y && feet.y + 1.8f > transform.position.y - halfExtents.y;
+        }
+
+        /// <summary>How far the player stands outside the box Overlaps tests (for the just-dodge leeway).</summary>
+        float MissedBy(Vector3 feet)
+        {
+            Vector3 local = Quaternion.Inverse(Quaternion.LookRotation(direction)) * (feet + Vector3.up * .9f - transform.position);
+            float x = Mathf.Max(0, Mathf.Abs(local.x) - halfExtents.x - PlayerRadius);
+            float z = Mathf.Max(0, Mathf.Abs(local.z) - halfExtents.z - PlayerRadius);
+            float y = Mathf.Max(0, Mathf.Max(feet.y - (transform.position.y + halfExtents.y), transform.position.y - halfExtents.y - (feet.y + 1.8f)));
+            return new Vector3(x, y, z).magnitude;
         }
     }
 }

@@ -26,6 +26,11 @@ namespace AcRoguelike
         public bool CanBeTargeted { get; set; } = true;
         /// <summary>Owner-controlled immunity, independent of targeting and mission damage scaling.</summary>
         public bool IgnoreDamage { get; set; }
+        /// <summary>
+        /// Held or thrown by a hunter (Proi's grab and throw). The hunter moves the body, so the monster's own
+        /// AI stands still meanwhile: no attacks, and in particular no grab that lifts the hunter holding it.
+        /// </summary>
+        public bool HeldByHunter { get; set; }
         public Vector3 AimPoint => aimAnchor ? aimAnchor.position : transform.position + Vector3.up;
 
         Collider[] colliders;

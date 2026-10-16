@@ -31,6 +31,8 @@ namespace AcRoguelike.Liminal
             age += dt;
             if (age > lifetime || !owner || !target || !target.IsAlive || !owner.GetComponent<TrainingEnemy>().IsAlive) { Destroy(gameObject); return; }
             Vector3 step = velocity * dt + Physics.gravity * (.5f * dt * dt);
+            // A can that only grazes a dodging player is a just dodge too.
+            target.NearMiss(transform.position, transform.position + step, radius + target.BodyRadius);
             var hits = Physics.SphereCastAll(transform.position, radius, step.normalized, step.magnitude,
                 ~0, QueryTriggerInteraction.Ignore);
             System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));

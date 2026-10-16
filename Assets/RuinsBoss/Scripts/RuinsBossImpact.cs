@@ -91,6 +91,7 @@ namespace AcRoguelike.RuinsBoss
             float bodyRadius = body ? body.radius * Mathf.Max(Mathf.Abs(target.transform.lossyScale.x), Mathf.Abs(target.transform.lossyScale.z)) : .3f;
             if (to.sqrMagnitude <= (Radius + bodyRadius) * (Radius + bodyRadius) && !Covered(to))
             { DamageAttempts++; HitPlayer = target.TakeDamage(damage); }
+            else target.NearMiss(Center, Radius + bodyRadius);
             if (Finished) return;
             HitFeedback.Sparks(Center + Vector3.up * .15f, Vector3.up, 20, 1.05f);
             HitFeedback.Dust(Center, Radius * .75f);

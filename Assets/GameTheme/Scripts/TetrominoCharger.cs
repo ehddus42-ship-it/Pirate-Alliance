@@ -108,6 +108,8 @@ namespace AcRoguelike.GameTheme
             float moved = Vector3.ProjectOnPlane(transform.position - before, Vector3.up).magnitude;
             Travelled += moved;
             visual.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(elapsed * 22) * 8);
+            // A charge that only grazes a dodging player is a just dodge too.
+            target.NearMiss(before, transform.position, radius + target.BodyRadius);
             // Controller contacts are authoritative even when its skin stops the movement
             // before the query's mathematical surface. A nearer swept wall still wins.
             if (controllerContact && (!collision || impact.player))

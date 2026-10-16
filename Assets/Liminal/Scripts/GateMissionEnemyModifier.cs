@@ -62,6 +62,7 @@ namespace AcRoguelike.Liminal
                 Vector3 delta = target.transform.position - center;
                 if (Mathf.Abs(delta.y) <= 2.5f && new Vector2(delta.x, delta.z).sqrMagnitude <= BurstRadius * BurstRadius)
                     target.TakeDamage(BurstDamage);
+                else target.NearMiss(center, BurstRadius);
             }
             yield return new WaitForSeconds(.2f);
             ClearWarning();

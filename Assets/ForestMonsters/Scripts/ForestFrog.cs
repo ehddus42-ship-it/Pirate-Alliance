@@ -260,8 +260,11 @@ namespace AcRoguelike.Forest
                 if (!hit.collider || hit.transform == transform || hit.transform.IsChildOf(transform)) continue;
                 if (hit.distance < nearest) { nearest = hit.distance; contact = hit.collider; }
             }
+            Vector3 tipBefore = tipPosition;
             tipPosition += shotDirection * Mathf.Min(step, nearest);
             travelled += step;
+            // A tongue that only grazes a dodging player is a just dodge too.
+            if (player) player.NearMiss(tipBefore, tipPosition, .18f + player.BodyRadius);
             if (contact)
             {
                 var hitPlayer = contact.GetComponentInParent<LiminalPlayerHealth>();
@@ -432,6 +435,7 @@ namespace AcRoguelike.Forest
 
         void PlayerDied() => CancelTongue();
         void OnDisable() => CancelTongue();
+        protected override void OnHeldByHunter() => CancelTongue();
         protected override void OnHit(Vector3 direction, float impact)
         {
             if (State == ForestFrogState.TongueWindup && impact >= 1.25f) CancelTongue();

@@ -92,6 +92,7 @@ namespace AcRoguelike.Forest
                     {
                         eruptionHit = true;
                         if (distance <= eruptionRadius + PlayerRadius && CanSeePlayer(.65f)) player.TakeDamage(eruptionDamage);
+                        else player.NearMiss(transform.position, eruptionRadius + PlayerRadius);
                     }
                     if (t >= 1) { poseOffset = Vector3.zero; poseScale = Vector3.one; Enter(ForestWormState.Crawl); }
                     break;
@@ -154,6 +155,7 @@ namespace AcRoguelike.Forest
                         hitThisCharge = true;
                         if (player.TakeDamage(chargeDamage)) ChargeHits++;
                     }
+                    else if (!hitThisCharge) player.NearMiss(start, end, ChargeHalfWidth + PlayerRadius);
                     dustClock += dt;
                     if (dustClock >= .14f) { dustClock = 0; HitFeedback.Dust(before - chargeDirection * .6f, .28f); }
                     if (moved < wanted * .3f || travelled >= chargeDistance - .01f || stateTime >= 1.6f)

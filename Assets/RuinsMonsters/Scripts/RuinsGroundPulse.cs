@@ -78,6 +78,7 @@ namespace AcRoguelike.Ruins
                 DamageAttempts++;
                 HitPlayer = target.TakeDamage(damage);
             }
+            else target.NearMiss(Center, Radius + playerRadius);
             if (Finished) return; // Player death may cancel this instance synchronously from TakeDamage.
             HitFeedback.Sparks(Center + Vector3.up * .15f, Vector3.up, 13, .8f);
             HitFeedback.Dust(Center, Radius * .6f);
