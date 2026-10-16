@@ -657,7 +657,7 @@ namespace AcRoguelike.Liminal
             // A pause set any other way (validators) resumes into the gate, as before.
             if (phase != LiminalRunPhase.Paused) resumePhase = LiminalRunPhase.Exploring;
             bool exploring = phase == LiminalRunPhase.Exploring, inLobby = phase == LiminalRunPhase.Lobby;
-            bool combatAllowed = exploring && (!roster || !roster.CurrentMovementOnly);
+            bool combatAllowed = exploring && (!roster || (!roster.CurrentMovementOnly && !roster.CurrentCustomCombat));
             Time.timeScale = exploring || inLobby ? 1 : 0;
             if (motor) motor.enabled = exploring || inLobby;
             // No sword swings in the lobby: everyday clothes, everyday walk.

@@ -169,7 +169,7 @@ namespace AcRoguelike.Liminal.EditorTests
             var centers = field.Centers.ToArray();
             Check(!field.transform.Find("RedFloor").GetComponent<Renderer>().enabled,
                 "The field windup has no red floor fill.");
-            Check(boss.Lamp == TrafficLampColor.Red, "The signal holds red while the field charges.");
+            Check(boss.Lamp == TrafficLampColor.Green, "The signal is already green during the field telegraph, before damage begins.");
             Check(centers.Length == boss.safeZoneCount && Mathf.Approximately(field.Radius, boss.safeRadius), "The field draws " + centers.Length + " safe circles of radius " + field.Radius + ".");
             Check(centers.All(c => { var l = Quaternion.Inverse(arenaRotation) * (c - arenaCenter); return Mathf.Abs(l.x) <= arenaSize.x * .5f && Mathf.Abs(l.z) <= arenaSize.y * .5f; }), "Every safe circle lies inside the arena.");
             float nearest = centers.Min(c => Vector2.Distance(Flat(c), Flat(motor.transform.position)));
@@ -189,7 +189,7 @@ namespace AcRoguelike.Liminal.EditorTests
             Check(field.transform.Find("RedFloor").GetComponent<Renderer>().enabled,
                 "The red field appears only with its active damage phase.");
             yield return Shot("03_field_judgement");
-            Check(boss.Lamp == TrafficLampColor.Green, "The signal turns green at the judgement.");
+            Check(boss.Lamp == TrafficLampColor.Green, "The signal stays green through the judgement.");
             Check(field.IsSafe(centers[0]) && field.IsSafe(centers[0] + Vector3.right * (field.Radius - .05f)) && !field.IsSafe(centers[0] + Vector3.right * (field.Radius + .05f) + Vector3.forward * 0),
                 "Circle edge is judged by the feet at the exact radius.");
             yield return .2f;

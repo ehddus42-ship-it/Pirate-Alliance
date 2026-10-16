@@ -754,6 +754,8 @@ GameObject:
   - component: {fileID: 263225202791451040}
   - component: {fileID: 323834995104403124}
   - component: {fileID: 7159435024765740155}
+  - component: {fileID: 5231544444000114587}
+  - component: {fileID: 2872113977272926620}
   m_Layer: 0
   m_Name: NamgungLuna_Battle
   m_TagString: Untagged
@@ -946,6 +948,59 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f3667b7fb1ac4f4aa5c83f7491c1beb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NamgungLuna.LunaStageMotionSource
+--- !u!114 &5231544444000114587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2558899919049735764}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5da817bdc55c3a846a2bbed9e2cdd1a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NamgungLuna.LunaCombatVfx
+  library: {fileID: 11400000, guid: 97e1466e2c3a8564abcaf600fe31e84d, type: 2}
+  moonlightRadius: 4.5
+--- !u!114 &2872113977272926620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2558899919049735764}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d170b491a5948e241ad76742d602ee8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NamgungLuna.LunaCombatController
+  attackInterval: 0.55
+  comboResetTime: 1.3
+  attackDamage: 120000001800000020000000
+  criticalChance: 0.1
+  criticalMultiplier: 1.5
+  holdToAttack: 1
+  castBusyTime: 0.08
+  projectileSpeed: 18
+  projectileRange: 18
+  projectileLifetime: 3
+  projectileRadius: 0.18
+  projectileHeight: 1.15
+  explosionRadius: 1.6
+  homingDegreesPerSecond: 540
+  aimConeDot: 0.5
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  maximumProjectiles: 48
+  moonlightDuration: 8
+  moonlightCooldown: 14
+  moonlightRadius: 6
+  moonlightInterval: 0.8
+  moonlightDamage: 12
+  ultimateDuration: 10
+  ultimateCooldown: 24
+  awakenedAttackSpeed: 2
 --- !u!1 &2612032979851279551
 GameObject:
   m_ObjectHideFlags: 0

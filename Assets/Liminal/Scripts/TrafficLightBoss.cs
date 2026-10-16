@@ -9,6 +9,8 @@ namespace AcRoguelike.Liminal
     [DisallowMultipleComponent, RequireComponent(typeof(TrainingEnemy), typeof(CharacterController))]
     public sealed class TrafficLightBoss : MonoBehaviour
     {
+        const float FieldGreenLeadTime = 2.5f;
+
         [Header("Encounter")]
         [Min(1)] public float detectionRadius = 26f;
         public bool requireLineOfSight;
@@ -192,7 +194,7 @@ namespace AcRoguelike.Liminal
                 AttackAnticipation.Hide(transform);
                 fieldJudged = true; nextFieldTick = stateTime;
                 if (field) field.Judge();
-                SetLamp(TrafficLampColor.Green); Play(slamSound, 1);
+                Play(slamSound, 1);
             }
             if (fieldJudged && stateTime < TrafficLightBossRig.FieldJudgeTime + .9f && stateTime >= nextFieldTick)
             {
@@ -292,7 +294,7 @@ namespace AcRoguelike.Liminal
                     if (stateTime % .16f < Time.deltaTime) SetLamp((TrafficLampColor)(1 + UnityEngine.Random.Range(0, 3)));
                     return;
                 case TrafficLightBossState.FieldCast:
-                    if (!fieldJudged) SetLamp(TrafficLampColor.Red);
+                    SetLamp(stateTime >= TrafficLightBossRig.FieldJudgeTime - FieldGreenLeadTime ? TrafficLampColor.Green : TrafficLampColor.Red);
                     return;
                 case TrafficLightBossState.CarThrow:
                     SetLamp(stateTime < TrafficLightBossRig.CarReleaseTime ? TrafficLampColor.Yellow : stateTime < TrafficLightBossRig.CarReleaseTime + .6f ? TrafficLampColor.Green : TrafficLampColor.Red);
@@ -345,7 +347,7 @@ namespace AcRoguelike.Liminal
                 SetLamp(TrafficLampColor.Off, true);
             }
             else if (state == TrafficLightBossState.Awakening) { foreach (var r in limbRenderers) if (r) r.enabled = true; }
-            else if (state == TrafficLightBossState.FieldCast) { fieldShown = false; fieldJudged = false; }
+            else if (state == TrafficLightBossState.FieldCast) { fieldShown = false; fieldJudged = false; SetLamp(TrafficLampColor.Red); }
             else if (state == TrafficLightBossState.CarThrow) { carSpawned = false; carReleased = false; aimLocked = false; }
             if (state == TrafficLightBossState.FieldCast || state == TrafficLightBossState.CarThrow) lampTimer = 0;
             if (animator)

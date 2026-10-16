@@ -36,7 +36,7 @@ namespace AcRoguelike.Liminal
             public float movement, queueWindow, blend, returnBlend;
             public MeleeSlash.Swing[] swings;
             public bool blade;
-            public bool movementOnly, keepDash;
+            public bool movementOnly, keepDash, customCombat;
             public float moveSpeedOverride, walkSpeedOverride;
             public Transform[] origins;
             public Transform castOrigin;
@@ -71,6 +71,7 @@ namespace AcRoguelike.Liminal
         public string CurrentId => current < hunters.Count ? hunters[current].id : null;
         public GameObject CurrentVisual => worn?.visual;
         public bool CurrentMovementOnly => worn != null && worn.movementOnly;
+        public bool CurrentCustomCombat => worn != null && worn.customCombat;
         public float SharedMoveSpeed => moveSpeedOverridden ? sharedMoveSpeed : motor ? motor.moveSpeed : 0;
         public float SharedWalkSpeed => walkSpeedOverridden ? sharedWalkSpeed : motor ? motor.walkSpeed : 0;
         /// <summary>The worn hunter's own skill (an ultimate on R), or null.</summary>
@@ -279,7 +280,8 @@ namespace AcRoguelike.Liminal
 
         Hunter Spawn(HunterProfile profile, Hunter first)
         {
-            if (!profile.model || (!profile.movementOnly && (!profile.controller || profile.swings == null || profile.swings.Length == 0
+            bool sharedCombat = !profile.movementOnly && !profile.customCombat;
+            if (!profile.model || (sharedCombat && (!profile.controller || profile.swings == null || profile.swings.Length == 0
                 || profile.attackDurations == null || profile.attackDurations.Length == 0)))
             {
                 Debug.LogWarning("Hunter profile " + profile.name + " needs a model; combat hunters also need a controller and at least one swing.", profile);
@@ -294,10 +296,10 @@ namespace AcRoguelike.Liminal
             SetLayer(visual.transform, first.visual.layer);
             foreach (var collider in visual.GetComponentsInChildren<Collider>(true)) Destroy(collider);
             var animator = visual.GetComponent<Animator>();
-            if (!animator && (!profile.movementOnly || profile.controller)) animator = visual.AddComponent<Animator>();
+            if (!animator && (sharedCombat || profile.controller)) animator = visual.AddComponent<Animator>();
             if (animator)
             {
-                if (profile.controller || !profile.movementOnly) animator.runtimeAnimatorController = profile.controller;
+                if (profile.controller || sharedCombat) animator.runtimeAnimatorController = profile.controller;
                 animator.applyRootMotion = false;
                 animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
             }
@@ -330,6 +332,7 @@ namespace AcRoguelike.Liminal
                 swings = profile.swings != null ? (MeleeSlash.Swing[])profile.swings.Clone() : Array.Empty<MeleeSlash.Swing>(),
                 blade = profile.blade,
                 movementOnly = profile.movementOnly,
+                customCombat = profile.customCombat,
                 keepDash = profile.keepDash,
                 moveSpeedOverride = profile.moveSpeedOverride,
                 walkSpeedOverride = profile.walkSpeedOverride,
@@ -373,7 +376,7 @@ namespace AcRoguelike.Liminal
         void ApplyCombo(Hunter hunter)
         {
             // Keep the previous combat configuration intact while this preview body is worn.
-            if (hunter.movementOnly) return;
+            if (hunter.movementOnly || hunter.customCombat) return;
             if (combat && hunter.durations != null)
             {
                 combat.attackDurations = hunter.durations;
@@ -399,7 +402,7 @@ namespace AcRoguelike.Liminal
         {
             if (!initialized || current < 0 || current >= hunters.Count) return;
             var hunter = worn;
-            bool combatAllowed = !hunter.movementOnly && !inLobby
+            bool combatAllowed = !hunter.movementOnly && !hunter.customCombat && !inLobby
                 && (!director || director.Phase == LiminalRunPhase.Exploring);
             if (combat)
             {
@@ -410,12 +413,12 @@ namespace AcRoguelike.Liminal
             if (caster) caster.enabled = combatAllowed;
             if (melee)
             {
-                melee.enabled = defaultMeleeEnabled && !hunter.movementOnly;
-                melee.SetWeaponVisible(!hunter.movementOnly && !inLobby && hunter.blade);
+                melee.enabled = defaultMeleeEnabled && !hunter.movementOnly && !hunter.customCombat;
+                melee.SetWeaponVisible(!hunter.movementOnly && !hunter.customCombat && !inLobby && hunter.blade);
                 melee.ResetBodyCache();
             }
             motor.allowDash = defaultAllowDash && (!hunter.movementOnly || hunter.keepDash);
-            motor.faceMovementDirection = hunter.movementOnly || defaultFaceMovementDirection;
+            motor.faceMovementDirection = hunter.movementOnly || hunter.customCombat || defaultFaceMovementDirection;
             ApplyMovementSpeeds(hunter);
         }
 

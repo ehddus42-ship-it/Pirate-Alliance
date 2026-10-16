@@ -1,0 +1,112 @@
+{
+    "status": "passed",
+    "utc": "2026-10-16T00:05:42.5872693Z",
+    "error": "",
+    "method": "Real LiminalRun player/roster, isolated live TrainingEnemy fixtures, no time acceleration or tuning overrides.",
+    "checks": [
+        "The actual LiminalRun player and roster are available.",
+        "Luna starts in her peaceful lobby form.",
+        "The peaceful lobby form cannot attack.",
+        "The real outfit preview can expose the battle form in the lobby.",
+        "Battle appearance in the lobby still refuses attacks, moonlight and ultimate.",
+        "Dungeon entry selects the canonical battle form.",
+        "Battle combat, visual effects and eye fire are installed on the real body.",
+        "Initial battle appearance before any ultimate: no active eye fire, live trail particles or visible effect renderers.",
+        "The authored combat effect library exists.",
+        "Authored moonlight, ultimate and attack-speed values match the brief: 8 s / 10 s / x2.",
+        "The battle body can act in a live dungeon.",
+        "An external activation request before the ultimate is rejected immediately: no active eye fire, live trail particles or visible effect renderers.",
+        "An external activation request stays blocked after normal updates: no active eye fire, live trail particles or visible effect renderers.",
+        "A VFX request cannot create an ultimate without its real gameplay state.",
+        "A VFX awakening request before the ultimate: no active eye fire, live trail particles or visible effect renderers.",
+        "Ordinary movement before the ultimate: no active eye fire, live trail particles or visible effect renderers.",
+        "Normal attack 1 emits the correct moon phase.",
+        "Attack 1 damages a live TrainingEnemy through the real projectile.",
+        "Normal attack 1 before the ultimate: no active eye fire, live trail particles or visible effect renderers.",
+        "Attack 1 does not apply the full-moon area hit.",
+        "Normal attack 2 emits the correct moon phase.",
+        "Attack 2 damages a live TrainingEnemy through the real projectile.",
+        "Normal attack 2 before the ultimate: no active eye fire, live trail particles or visible effect renderers.",
+        "Attack 2 does not apply the full-moon area hit.",
+        "Normal attack 3 emits the correct moon phase.",
+        "Attack 3 damages a live TrainingEnemy through the real projectile.",
+        "Normal attack 3 before the ultimate: no active eye fire, live trail particles or visible effect renderers.",
+        "The third hit damages a nearby target outside the direct projectile path.",
+        "Area damage respects immunity and untargetable enemies.",
+        "An aimed shot can be attempted towards the protected targets.",
+        "Direct projectiles also respect immunity and untargetable enemies.",
+        "Miss scenario keeps combo phase 1.",
+        "Miss scenario keeps combo phase 2.",
+        "Miss scenario keeps combo phase 3.",
+        "A full moon that hits no enemy still detonates and deals area damage at its range endpoint.",
+        "A normal attack establishes the moonlight priority target.",
+        "The real projectile records its last hit target.",
+        "The moonlight skill activates during real dungeon play.",
+        "Moonlight prioritizes the basic-attack hit over a nearer alternative target.",
+        "Casting E moonlight before the ultimate: no active eye fire, live trail particles or visible effect renderers.",
+        "Moonlight follows its moving priority target and applies real damage.",
+        "E moonlight tracking and damage before the ultimate: no active eye fire, live trail particles or visible effect renderers.",
+        "Moonlight expires after its authored eight seconds without time acceleration.",
+        "The ultimate activates on the real battle body.",
+        "The ultimate enables the golden eye fire and produces live flame particles.",
+        "Every awakened attack uses the full-moon phase.",
+        "Every awakened attack uses the full-moon phase.",
+        "Every awakened attack uses the full-moon phase.",
+        "Awakening halves the real attack cooldown (twice the attack rate).",
+        "Both eye-fire anchors exist on the current visual.",
+        "Both eye-fire anchors exist on the current visual.",
+        "Awakening expires after its authored ten seconds without time acceleration.",
+        "The expired ultimate clears its eye effects completely: no active eye fire, live trail particles or visible effect renderers.",
+        "An external activation request after ultimate expiry is also rejected: no active eye fire, live trail particles or visible effect renderers.",
+        "A projectile can be launched immediately before a hunter swap.",
+        "The existing Astraia can be selected after Luna's attacks.",
+        "Disabling Luna clears projectiles, skill state and eye effects.",
+        "Returning to Astraia restores her existing combat, talismans, melee and dash.",
+        "Luna remains selectable after cleanup.",
+        "Reactivating Luna begins with clean combat effects.",
+        "Returning to the lobby restores peaceful appearance and blocks combat."
+    ],
+    "captures": [
+        {
+            "path": "Documentation/NamgungLuna/Combat/Validation/attack-1.png",
+            "gameTime": 4.4244256019592289
+        },
+        {
+            "path": "Documentation/NamgungLuna/Combat/Validation/attack-2.png",
+            "gameTime": 5.034298419952393
+        },
+        {
+            "path": "Documentation/NamgungLuna/Combat/Validation/attack-3.png",
+            "gameTime": 5.583918571472168
+        },
+        {
+            "path": "Documentation/NamgungLuna/Combat/Validation/moonlight-follow.png",
+            "gameTime": 15.099146842956543
+        },
+        {
+            "path": "Documentation/NamgungLuna/Combat/Validation/ultimate-game-camera.png",
+            "gameTime": 22.7478084564209
+        },
+        {
+            "path": "Documentation/NamgungLuna/Combat/Validation/ultimate-eye-closeup.png",
+            "gameTime": 22.837167739868165
+        },
+        {
+            "path": "Documentation/NamgungLuna/Combat/Validation/projectile-phases-crescent-half-full.png",
+            "gameTime": 22.995256423950197
+        },
+        {
+            "path": "Documentation/NamgungLuna/Combat/Validation/ultimate-moving-trail-closeup.png",
+            "gameTime": 25.485488891601564
+        }
+    ],
+    "normalAttackCooldown": 0.5500001907348633,
+    "awakenedAttackCooldown": 0.27499961853027346,
+    "moonlightSeconds": 8.036639213562012,
+    "ultimateSeconds": 10.022905349731446,
+    "directHits": 3,
+    "splashHits": 1,
+    "missedSplashHits": 1,
+    "eyeFrames": 0,
+    "eyeFramesPerSecond": 0
+}

@@ -122,6 +122,7 @@ namespace NamgungLuna.Editor
             CheckForm(roster, luna, true, "Startup lobby");
             var mainProfile = Resources.LoadAll<HunterProfile>(HunterRoster.ProfileFolder).Single(p => p.characterId == LunaId);
             Check(mainProfile.lobbyForm, "Luna's main profile references her dedicated lobby form.");
+            Check(mainProfile.keepDash && mainProfile.lobbyForm.keepDash, "Both Luna forms keep the shared dash.");
 
             // Use the actual officer interaction and card callbacks, so the UI also proves the single selection.
             var lobby = director.Lobby;
@@ -165,7 +166,7 @@ namespace NamgungLuna.Editor
             ResetAtArena(motor);
             yield return .5f;
             var peacefulVisual = roster.CurrentVisual;
-            var movement = ValidateMovement(roster, mainProfile.lobbyForm, false);
+            var movement = ValidateMovement(roster, mainProfile.lobbyForm, isBattle: false);
             while (movement.MoveNext()) yield return movement.Current;
 
             int swapsBeforeEntry = roster.SwapCount;
@@ -179,7 +180,7 @@ namespace NamgungLuna.Editor
             float originalMove = roster.SharedMoveSpeed, originalWalk = roster.SharedWalkSpeed;
             ResetAtArena(motor);
             yield return .5f;
-            movement = ValidateMovement(roster, mainProfile, true);
+            movement = ValidateMovement(roster, mainProfile, isBattle: true);
             while (movement.MoveNext()) yield return movement.Current;
 
             roster.Select(0);
@@ -274,22 +275,28 @@ namespace NamgungLuna.Editor
             var gait = roster.CurrentVisual.GetComponentInChildren<LunaMoonGait>();
             Check(peaceful ? animator && animator.runtimeAnimatorController && animator.runtimeAnimatorController.name == "LunaPeaceful" && !gait : gait != null,
                 context + (peaceful ? ": the peaceful walk controller is worn." : ": the battle moon gait is worn."));
-            Check(roster.CurrentMovementOnly && !roster.GetComponent<PlayerCombat>().enabled && !roster.GetComponent<TalismanCaster>().enabled
-                && !roster.GetComponent<MeleeSlash>().enabled && roster.GetComponent<PlayerMotor>().allowDash == !peaceful,
-                context + ": movement-only restrictions and form-specific dash settings are preserved.");
+            var lunarCombat = roster.CurrentVisual.GetComponent<LunaCombatController>();
+            Check(roster.CurrentMovementOnly == peaceful && roster.CurrentCustomCombat == !peaceful
+                && !roster.GetComponent<PlayerCombat>().enabled && !roster.GetComponent<TalismanCaster>().enabled
+                && !roster.GetComponent<MeleeSlash>().enabled && roster.GetComponent<PlayerMotor>().allowDash,
+                context + ": peaceful movement-only / battle custom combat and shared dash availability are preserved.");
+            Check(peaceful ? !lunarCombat : lunarCombat && lunarCombat.isActiveAndEnabled,
+                context + ": only the battle body owns the lunar combat controller.");
         }
 
-        static IEnumerator ValidateMovement(HunterRoster roster, HunterProfile profile, bool keepsDash)
+        static IEnumerator ValidateMovement(HunterRoster roster, HunterProfile profile, bool isBattle)
         {
-            string id = keepsDash ? "namgung_luna_battle" : "namgung_luna_peace";
+            string id = isBattle ? "namgung_luna_battle" : "namgung_luna_peace";
             var motor = roster.GetComponent<PlayerMotor>();
             var combat = roster.GetComponent<PlayerCombat>();
             var caster = roster.GetComponent<TalismanCaster>();
             var melee = roster.GetComponent<MeleeSlash>();
             var support = Object.FindFirstObjectByType<SupportCharacterSkill>();
-            Check(roster.CurrentMovementOnly && motor.allowDash == keepsDash && !combat.enabled && !caster.enabled && !melee.enabled,
-                id + (keepsDash ? ": attacks, talismans and melee disabled; dash kept." : ": attacks, talismans, melee and dash disabled."));
-            Check(!support || !support.TryActivate(), id + ": support skill blocked.");
+            Check(profile.keepDash && roster.CurrentMovementOnly == !isBattle && roster.CurrentCustomCombat == isBattle
+                && motor.allowDash && !combat.enabled && !caster.enabled && !melee.enabled,
+                id + ": common sword attacks and talismans disabled; body-specific combat policy and dash kept.");
+            if (!isBattle) Check(!support || !support.TryActivate(), id + ": peaceful support skill blocked.");
+            else Check(roster.CurrentVisual.GetComponent<LunaCombatController>().CanAct, id + ": the battle body's own lunar attacks are available.");
             Check(roster.CurrentVisual.GetComponentsInChildren<Renderer>().All(r => r.sharedMaterials.All(m => m && m.shader && m.shader.isSupported)),
                 id + ": all renderers have supported materials.");
             Check(roster.CurrentVisual.GetComponentsInChildren<Transform>().All(t => GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(t.gameObject) == 0),
@@ -305,22 +312,33 @@ namespace NamgungLuna.Editor
                 id + ": movement changes world position.");
             Check(transforms.Where((t, i) => Quaternion.Angle(t.localRotation, rests[i]) > 2f).Count() >= 2,
                 id + ": multiple joints animate during movement.");
-            Check((keepsDash ? motor.DashCount > dashCount : motor.DashCount == dashCount) && combat.AttackCount == attacks && caster.CastCount == casts,
-                id + (keepsDash ? ": dash input dashes; attack input produces no attack or cast." : ": simulated attack/dash input produces no attack, cast or dash."));
+            Check(motor.DashCount > dashCount && combat.AttackCount == attacks && caster.CastCount == casts,
+                id + ": dash input dashes; attack input produces no attack or cast.");
+            var animator = roster.CurrentVisual.GetComponent<Animator>();
+            if (!isBattle)
+            {
+                Check(animator && animator.runtimeAnimatorController, id + ": the peaceful Animator is available.");
+                Check(Mathf.Abs(motor.PlanarVelocity.magnitude - motor.moveSpeed) < .05f
+                    && Mathf.Abs(animator.GetFloat("Speed") - 1f) < .05f
+                    && animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.Locomotion"),
+                    id + ": normal walking resumes at its configured speed after the dash.");
+            }
             Capture(roster.CurrentVisual, id + "-moving");
             motor.SetAutomationInput(Vector2.up, motor.transform.position + Vector3.forward * 10, false, true);
             yield return .8f;
             Check(Mathf.Abs(motor.PlanarVelocity.magnitude - motor.walkSpeed) < .05f && motor.walkSpeed < motor.moveSpeed,
                 id + ": slow-walk input uses the lower movement speed.");
-            var animator = roster.CurrentVisual.GetComponent<Animator>();
             if (animator && animator.runtimeAnimatorController)
                 Check(Mathf.Abs(animator.GetFloat("Speed") - motor.walkSpeed / motor.moveSpeed) < .05f,
                     id + ": slow-walk animation follows the normalized movement speed.");
+            if (!isBattle)
+                Check(animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.Locomotion"),
+                    id + ": slow walking stays in peaceful locomotion.");
             motor.SetAutomationInput(Vector2.zero, motor.transform.position);
             combat.SetAutomationInput(false, false);
             yield return .6f;
             Check(motor.PlanarVelocity.magnitude < .03f, id + ": released input stops movement.");
-            if (keepsDash)
+            if (isBattle)
             {
                 // A dash from a standstill: the root slides on, the body leaps over it and lands with a ripple.
                 var gait = roster.CurrentVisual.GetComponentInChildren<LunaMoonGait>();
@@ -356,6 +374,42 @@ namespace NamgungLuna.Editor
                     id + ": the leap bursts at the start and lands with a ripple.");
                 Check(lanternFinite && lanternPeak <= 14.1f,
                     $"{id}: lantern stays stable through the real dash and landing (peak {lanternPeak:F2} degrees).");
+                Capture(roster.CurrentVisual, id + "-dash-landed");
+            }
+            else
+            {
+                Check(animator.HasState(0, Animator.StringToHash("Base Layer.Dash"))
+                    && animator.parameters.Any(p => p.name == "Dashing" && p.type == AnimatorControllerParameterType.Bool),
+                    id + ": the peaceful controller supports the shared dash state and parameter.");
+                yield return .5f;
+                Vector3 before = motor.transform.position;
+                int dashes = motor.DashCount;
+                float started = Time.time, phase = -1f, animationProgress = 0f;
+                bool playedDash = false, playedLanding = false;
+                motor.SetAutomationInput(Vector2.right, motor.transform.position + Vector3.right * 5, true);
+                while (Time.time - started < .9f)
+                {
+                    yield return 0f;
+                    phase = Mathf.Max(phase, motor.DashPhase);
+                    var state = animator.GetCurrentAnimatorStateInfo(0);
+                    if (state.IsName("Base Layer.Dash"))
+                    {
+                        playedDash |= motor.IsDashing;
+                        playedLanding |= !motor.IsDashing && state.normalizedTime >= .5f;
+                        animationProgress = Mathf.Max(animationProgress, state.normalizedTime);
+                    }
+                    if (motor.DashCount > dashes) motor.SetAutomationInput(Vector2.zero, motor.transform.position);
+                }
+                float travel = Vector3.ProjectOnPlane(motor.transform.position - before, Vector3.up).magnitude;
+                report.checks.Add($"{id}: dash travel {travel:F2} m, dash animation progress {animationProgress:F2}");
+                Check(motor.DashCount == dashes + 1 && phase > .5f && travel > motor.dashSpeed * motor.dashDuration * .8f,
+                    id + ": the shared dash moves the peaceful body.");
+                Check(playedDash && animationProgress >= .8f, id + ": the peaceful Dash animation plays through its main motion.");
+                Check(playedLanding, id + ": the peaceful dash keeps its short landing after travel ends.");
+                Check(!motor.IsDashing && !animator.GetBool("Dashing") && !animator.IsInTransition(0)
+                    && animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.Locomotion")
+                    && motor.PlanarVelocity.magnitude < .03f,
+                    id + ": the peaceful dash returns to stationary locomotion after landing.");
                 Capture(roster.CurrentVisual, id + "-dash-landed");
             }
             Capture(roster.CurrentVisual, id + "-idle");
