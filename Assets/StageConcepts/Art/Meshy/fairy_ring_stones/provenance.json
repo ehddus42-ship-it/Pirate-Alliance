@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "forest",
+  "role": "prop",
+  "prompt": "Ring of seven small weathered standing stones arranged in a circle on a low round mossy mound, each stone a different height and gently leaning, carved spiral marks, little white mushrooms between the stones. Low wide ritual prop, open centre. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Grey blue weathered granite, faint cyan glowing spiral carvings, thick green moss, ivory mushrooms, dark earth mound, eroded stone normal detail.",
+  "preview_task_id": "01a102b0-e628-7253-b788-2f0f5627acdc",
+  "refine_task_id": "01a102b2-337e-7103-b0de-7c22da7d2d1b",
+  "attempt": 1,
+  "created_utc": "2026-10-03T16:58:01.912589+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    3.4,
+    1.2,
+    3.4
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 15428,
+    "vertices": 18333,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3840568,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1960668,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2625998,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9489519596099854,
+      -0.4013669490814209,
+      -0.9207049608230591
+    ],
+    "unity_bounds_max": [
+      0.9513549208641052,
+      0.39513489603996277,
+      0.9170659184455872
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 9201324
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

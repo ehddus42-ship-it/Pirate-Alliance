@@ -1,0 +1,61 @@
+{
+  "status": "passed",
+  "utc": "2026-10-16T09:01:22.204390+00:00",
+  "unityVersion": "6000.3.19f1",
+  "sourceBase": "2e7d72c2dea87d19afb6dfc6bd7bb90e85b0cadf",
+  "playableHunters": [
+    "proi"
+  ],
+  "supports": [
+    "yuni",
+    "kokkio"
+  ],
+  "missions": [
+    "liminal_campaign",
+    "game_exhibition"
+  ],
+  "checks": [
+    {
+      "name": "프로이·지원·전체 흐름",
+      "status": "passed",
+      "recordCount": 67,
+      "errors": 0,
+      "report": "Documentation/Demo/Validation/loadout-validation.json"
+    },
+    {
+      "name": "로비 UI·강화·게이트",
+      "status": "passed",
+      "recordCount": 7,
+      "errors": 0,
+      "report": "Documentation/Liminal/GateMissionValidation/validation.json"
+    },
+    {
+      "name": "게임 보스",
+      "status": "passed",
+      "recordCount": 40,
+      "errors": 0,
+      "report": "Documentation/Demo/Validation/GameBoss/validation.json"
+    },
+    {
+      "name": "리미널 보스",
+      "status": "passed",
+      "recordCount": 40,
+      "errors": 0,
+      "report": "Documentation/Liminal/Concepts/TrafficLightBoss/validation.json"
+    }
+  ],
+  "scope": "Progression uses scripted room transitions and enemy damage; Proi combat and support effects are separately exercised against live targets.",
+  "build": {
+    "status": "Succeeded",
+    "errors": 0,
+    "warnings": 1,
+    "report": "Documentation/Demo/build-report.json"
+  },
+  "packagedPlayer": {
+    "status": "passed",
+    "recordCount": 9,
+    "errors": 0,
+    "report": "Documentation/Demo/Validation/Player/smoke-report.json"
+  },
+  "buildFilesTracked": false
+}

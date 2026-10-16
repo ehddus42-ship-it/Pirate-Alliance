@@ -1,0 +1,102 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "game-theme original arcade hardware",
+  "theme": "game",
+  "role": "prop",
+  "prompt": "Original upright retro arcade machine, broad sloping control panel with one chunky joystick and six large buttons, recessed deep square CRT screen beneath a projecting blank marquee, squared side panels and stout tapered base. Clearly articulated three-tier silhouette. Beveled block-built voxel architecture, precision chamfered hard edges. No lettering, recognizable brands or characters. Single isolated complete environment prop, full object visible, no scene or floor plane, no characters. Clear silhouette from an elevated three-quarter game camera, precise bevelled hard surfaces, large clean forms, no tiny floating pieces, rich PBR normal detail, premium stylized game asset.",
+  "texture_prompt": "Deep midnight navy enamel casing, warm ivory side panels, electric cyan screen with abstract pixel star shapes, raspberry control deck accents, amber large buttons, brushed aluminium edge trim. Light credible edge wear, screws, inset vents, rich PBR detail.",
+  "preview_task_id": "01a100ab-b28d-7054-8bcc-52d4e4e7c7fd",
+  "refine_task_id": "01a100ad-9afb-77f1-9a7d-8ea4b19e7a2a",
+  "attempt": 1,
+  "created_utc": "2026-10-03T07:33:03.466974+00:00",
+  "requested_triangles": 8000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "target_size_m": [
+    1.6,
+    2.8,
+    1.5
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 6026,
+    "vertices": 7755,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 370043,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 167944,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/png",
+        "bytes": 1111225,
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.3538689911365509,
+      -0.9516749978065491,
+      -0.42014893889427185
+    ],
+    "unity_bounds_max": [
+      0.35480600595474243,
+      0.9507110118865967,
+      0.41909199953079224
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 1971952
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "review": "Meshy geometry and PBR thumbnails visually inspected; accepted for Unity in-room placement review.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 7956792,
+  "review_notes": "Readable upright arcade silhouette, inset bright star screen and large controls; accepted as perimeter prop.",
+  "sha256": "840601d614bb88e3a6ed2044e24149ca328e6b3fe5dbe928fe43eedacb833505",
+  "unity_front_axis": "+Z",
+  "orientation_review": "Compared coarse GLB projections from Unity axis views; glTF X mirrored for glTFast. Final camera visibility is checked in Unity."
+}

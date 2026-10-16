@@ -1,0 +1,69 @@
+{
+    "status": "passed",
+    "startedUtc": "2026-09-30T02:59:18.3666191Z",
+    "finishedUtc": "2026-09-30T02:59:26.0532545Z",
+    "unityVersion": "6000.3.19f1",
+    "elapsedSeconds": 7.686981201171875,
+    "checks": [
+        {
+            "name": "Player setup",
+            "passed": true,
+            "expected": "PlayerMotor + PlayerCombat + TalismanCaster + visual + controller",
+            "observed": "present"
+        },
+        {
+            "name": "Ground contact",
+            "passed": true,
+            "expected": "standing on temporary floor",
+            "observed": "(1000.000, 0.010, 1000.000)"
+        },
+        {
+            "name": "Walking speed",
+            "passed": true,
+            "expected": "2.100 m/s +/- 0.35",
+            "observed": "2.099 m/s"
+        },
+        {
+            "name": "Running speed",
+            "passed": true,
+            "expected": "4.200 m/s +/- 0.40",
+            "observed": "4.206 m/s"
+        },
+        {
+            "name": "Decelerate to stop",
+            "passed": true,
+            "expected": "speed < 0.08 m/s",
+            "observed": "0.000 m/s"
+        },
+        {
+            "name": "Free dash distance",
+            "passed": true,
+            "expected": "3.000 m +/- 0.30; exactly one dash; finished",
+            "observed": "3.000 m; dash delta=1; active=False"
+        },
+        {
+            "name": "Wall stops dash",
+            "passed": true,
+            "expected": "dash cancelled on contact; player center z <= 1001.060",
+            "observed": "travel=0.885 m; center z=1000.885; cancelled=True"
+        },
+        {
+            "name": "Three-hit combo and projectiles",
+            "passed": true,
+            "expected": "attack indices 0/1/2; exactly 3 attacks and 3 casts; one completed combo; target damaged",
+            "observed": "attacks=3; casts=3; observed states=3; combos=1; damage=90"
+        },
+        {
+            "name": "Dash cancels attack before hit",
+            "passed": true,
+            "expected": "attack started, then one dash; no cast; attack idle",
+            "observed": "started=True; casts=0; dashes=1; attack index=-1"
+        },
+        {
+            "name": "Reset cancels pending attack",
+            "passed": true,
+            "expected": "attack cancelled; no delayed cast or dash",
+            "observed": "started=True; casts=0; attack index=-1; dash=False"
+        }
+    ]
+}

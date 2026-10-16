@@ -1,0 +1,167 @@
+{
+  "character_name": "남궁루나",
+  "state": "peaceful",
+  "provider": "Meshy AI",
+  "created_utc": "2026-10-15T02:19:00.795388+00:00",
+  "documentation": [
+    "https://docs.meshy.ai/en/api/image-to-3d",
+    "https://docs.meshy.ai/en/api/rigging"
+  ],
+  "reference": {
+    "ai_model": "meshy-7.1",
+    "should_remesh": true,
+    "target_polycount": 25000,
+    "topology": "triangle",
+    "should_texture": true,
+    "enable_pbr": false,
+    "texture_resolution": "2k",
+    "pose_mode": "a-pose",
+    "image_enhancement": false,
+    "target_formats": [
+      "glb"
+    ],
+    "reference": "남궁루나_일상.png",
+    "reference_sha256": "495e1c47c6819f4058442932ba8d62a7ff1af2e0036f4ed638a072a49bd25d26"
+  },
+  "image_to_3d_task_id": "01a13d59-0b24-701f-bbce-26efb6ad761f",
+  "rig_task_id": "01a13d5a-b985-77cf-b86a-e016689a0142",
+  "height_meters": 1.65,
+  "consumed_credits": {
+    "model": 30,
+    "rig": 5
+  },
+  "assets": [
+    {
+      "path": "Assets/Characters/NamgungLuna/Peaceful/Models/LunaPeaceful_Source.glb",
+      "bytes": 4455376,
+      "sha256": "2ce216ba927f0d21ce9a349ae19437295434e1ff8a1da29124b38f72da5abbb9",
+      "meshes": 1,
+      "skins": 0,
+      "animation_count": 0,
+      "joints": []
+    },
+    {
+      "path": "Assets/Characters/NamgungLuna/Peaceful/Models/LunaPeaceful_Albedo_0.png",
+      "bytes": 3864841,
+      "sha256": "ce2eee361587765f5ec860a830f1bb884d6f3a7edc23c51918570e7cb480c8c0"
+    },
+    {
+      "path": "Assets/Characters/NamgungLuna/Peaceful/Models/LunaPeaceful_Rig.glb",
+      "bytes": 5598068,
+      "sha256": "78ae6ea4ceed4c316b92f25f1b74ef26c66b7cded0c525c8fe479527b762244b",
+      "meshes": 1,
+      "skins": 1,
+      "animation_count": 1,
+      "joints": [
+        "Hips",
+        "Spine02",
+        "Spine01",
+        "Spine",
+        "neck",
+        "Head",
+        "head_end",
+        "headfront",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    },
+    {
+      "path": "Assets/Characters/NamgungLuna/Peaceful/Models/LunaPeaceful_Rig.fbx",
+      "bytes": 4908764,
+      "sha256": "06dbd01defb15938a2f437c19199328afb1c41ef3a6de05ec30a46f5fb6ce562"
+    },
+    {
+      "path": "Temp/NamgungLuna/Model/basic_walking.glb",
+      "bytes": 5578292,
+      "sha256": "66d7c361655bc1af9b2d95beadd3fe16f3451ffc93f4a142064548bc436bafcd",
+      "meshes": 1,
+      "skins": 1,
+      "animation_count": 1,
+      "joints": [
+        "Hips",
+        "Spine02",
+        "Spine01",
+        "Spine",
+        "neck",
+        "Head",
+        "head_end",
+        "headfront",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    },
+    {
+      "path": "Temp/NamgungLuna/Model/basic_walking.fbx",
+      "bytes": 4946668,
+      "sha256": "649c2375120b01a96b73c3f8ec2b725f61715ceecbea4dd07343ed919fd466a6"
+    },
+    {
+      "path": "Temp/NamgungLuna/Model/basic_running.glb",
+      "bytes": 5567668,
+      "sha256": "4da1f07879099f8dc23cfa98751db83a8974f3f2a091381fdffedd5804403131",
+      "meshes": 1,
+      "skins": 1,
+      "animation_count": 1,
+      "joints": [
+        "Hips",
+        "Spine02",
+        "Spine01",
+        "Spine",
+        "neck",
+        "Head",
+        "head_end",
+        "headfront",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    },
+    {
+      "path": "Temp/NamgungLuna/Model/basic_running.fbx",
+      "bytes": 4929532,
+      "sha256": "117472b8a65feb749f2018d0ad9796e36d785fbc4d1b1e2e5ab6db79fd4418dd"
+    }
+  ],
+  "notes": "Peaceful original illustration recovered from user's prior character design. Rig ready for custom calm locomotion retargeting."
+}

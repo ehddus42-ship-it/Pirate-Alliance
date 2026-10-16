@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "digital",
+  "role": "prop",
+  "prompt": "Industrial coolant pipe assembly, several thick parallel pipes rising from the floor, bending ninety degrees and running horizontally, large round valve wheels, a boxy pump housing with gauges, bolted flanges, a small cylindrical tank. Compact freestanding machinery cluster, sci-fi server facility plumbing. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Dark steel pipes with cyan glowing coolant bands, silver bolted flanges, yellow and black hazard stripes on the pump housing, red valve wheels, light frost on cold sections, fine metal normal detail.",
+  "preview_task_id": "01a0f2c5-8d46-77e2-9d42-f24cd0a9d77e",
+  "refine_task_id": "01a0f2c6-daa3-710d-9401-c4808681cf9a",
+  "attempt": 1,
+  "created_utc": "2026-09-30T14:45:57.717886+00:00",
+  "requested_triangles": 22000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    4.2,
+    3.2,
+    2.2
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 22602,
+    "vertices": 33076,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3643491,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2362453,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2631478,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9509900212287903,
+      -0.45450299978256226,
+      -0.2232169657945633
+    ],
+    "unity_bounds_max": [
+      0.9510059356689453,
+      0.44965898990631104,
+      0.2209170162677765
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 9969388
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

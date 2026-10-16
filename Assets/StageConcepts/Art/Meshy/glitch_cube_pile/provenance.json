@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "digital",
+  "role": "prop",
+  "prompt": "Pile of corrupted data cubes of different sizes heaped on the floor, some cubes cracked open showing glowing cores, a few cubes partly broken into smaller voxel fragments resting on the pile, solid grounded heap. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Matte black cube shells with glowing magenta and cyan cores, pixel noise patterns on the faces, bright edge highlights, subtle scanline texture, crisp bevel normal detail.",
+  "preview_task_id": "01a102b4-76a6-737a-8cce-7b374a5bf265",
+  "refine_task_id": "01a102b7-02b0-71c6-8512-8b36e6d9901b",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:03:36.561936+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.6,
+    1.5,
+    2.4
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 15132,
+    "vertices": 22877,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 2441142,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1582001,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1665068,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.8617849946022034,
+      -0.5246959924697876,
+      -0.8062959313392639
+    ],
+    "unity_bounds_max": [
+      0.951663076877594,
+      0.5104029774665833,
+      0.8810550570487976
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 6604168
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

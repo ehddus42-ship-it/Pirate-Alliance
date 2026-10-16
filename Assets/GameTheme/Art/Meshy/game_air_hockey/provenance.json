@@ -1,0 +1,101 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "game-theme original arcade hardware",
+  "theme": "game",
+  "role": "prop",
+  "prompt": "Original air hockey arcade table, long rectangular table with raised rails, a goal slot at each end, two round strikers and a puck on the playfield, a small blank score box on a short post at one side, sturdy legs. No lettering or brands. Single isolated complete environment prop, full object visible, no scene or floor plane, no characters. Clear silhouette from an elevated three-quarter game camera, precise bevelled hard surfaces, large clean forms, no tiny floating pieces, rich PBR normal detail, premium stylized game asset.",
+  "texture_prompt": "Glossy ivory playfield with a cyan centre line and circles, midnight navy rails and body, raspberry and amber strikers, chrome corners, light wear, rich PBR detail.",
+  "preview_task_id": "01a102b3-35e3-7081-94c7-f42c083f1c1a",
+  "refine_task_id": "01a102b4-3353-75cf-9fed-ac8099964b30",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:00:10.794440+00:00",
+  "texture_attempt": 1,
+  "rejected_geometry": [],
+  "rejected_textures": [],
+  "requested_triangles": 9000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.4,
+    1.0,
+    1.4
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 6757,
+    "vertices": 8914,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 348458,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 178042,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/png",
+        "bytes": 948983,
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9508249759674072,
+      -0.4528990387916565,
+      -0.4653390347957611
+    ],
+    "unity_bounds_max": [
+      0.9518569707870483,
+      0.4517269730567932,
+      0.4649519622325897
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 1844088
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 7176072
+}

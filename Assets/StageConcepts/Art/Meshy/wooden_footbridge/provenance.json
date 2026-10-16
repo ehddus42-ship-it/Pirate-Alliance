@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "forest",
+  "role": "prop",
+  "prompt": "Small rustic arched wooden footbridge for crossing a narrow forest stream, gently curved plank deck about three times longer than wide, chunky log posts at both ends and in the middle, thick rounded log handrails on both sides, rope lashings at the joints, moss on the posts. Complete standalone bridge with both ends resting at the same height, no water, no terrain. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Aged dark oak planks with a worn lighter walkway center, rough bark on the log posts and handrails, green moss on post tops, hemp rope lashings. Detailed wood grain normal map.",
+  "preview_task_id": "01a0f2c2-9ba4-76e6-9503-68270678fe59",
+  "refine_task_id": "01a0f2c4-893a-772c-afc6-c7858da0fe38",
+  "attempt": 1,
+  "created_utc": "2026-09-30T14:43:47.351428+00:00",
+  "requested_triangles": 20000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.6,
+    1.9,
+    7.0
+  ],
+  "long_horizontal_axis": "z",
+  "actual": {
+    "triangles": 19940,
+    "vertices": 24909,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 4132423,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2177470,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 3099945,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9493330121040344,
+      -0.4379750192165375,
+      -0.4245360493659973
+    ],
+    "unity_bounds_max": [
+      0.9507690668106079,
+      0.43713706731796265,
+      0.44203898310661316
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 10448540
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

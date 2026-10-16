@@ -1,0 +1,102 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "game-theme original arcade hardware",
+  "theme": "game",
+  "role": "prop",
+  "prompt": "Original arcade pinball machine, long shallow sloping glass-covered rectangular playfield with large colorful geometric bumpers clearly visible beneath glass, tall vertical backbox with framed pixel star graphic, four thick square metal legs, side flipper buttons. Chunky beveled block-built forms. Whole grounded freestanding table, no text, no logos. Single isolated complete environment prop, full object visible, no scene or floor plane, no characters. Clear silhouette from an elevated three-quarter game camera, precise bevelled hard surfaces, large clean forms, no tiny floating pieces, rich PBR normal detail, premium stylized game asset.",
+  "texture_prompt": "Midnight navy painted cabinet, warm ivory leg trim, cyan and raspberry geometric bumper islands, amber rails and buttons, clear glossy playfield panel, illuminated abstract star backbox. Tasteful wear, precise metal edges, rich PBR surface detail.",
+  "preview_task_id": "01a100ab-b28d-7052-9b10-5db1e39ade99",
+  "refine_task_id": "01a100ad-a0c9-76bb-8dd4-8fedc36dcfd2",
+  "attempt": 1,
+  "created_utc": "2026-10-03T07:33:04.900050+00:00",
+  "requested_triangles": 8000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "target_size_m": [
+    1.9,
+    2.7,
+    3.4
+  ],
+  "long_horizontal_axis": "z",
+  "actual": {
+    "triangles": 7006,
+    "vertices": 11199,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 388719,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 222337,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/png",
+        "bytes": 994835,
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.3970329761505127,
+      -0.951762855052948,
+      -0.8544459939002991
+    ],
+    "unity_bounds_max": [
+      0.39688897132873535,
+      0.9503588676452637,
+      0.854953944683075
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 2050604
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "review": "Meshy geometry and PBR thumbnails visually inspected; accepted for Unity in-room placement review.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 7836708,
+  "review_notes": "Long open playfield and tall illuminated backbox remain distinct in preview; accepted.",
+  "sha256": "7a296c70fb308f7a1cbc2be7466c86c36858c862653c88eb5376684ae090aa5e",
+  "unity_front_axis": "+Z",
+  "orientation_review": "Compared coarse GLB projections from Unity axis views; glTF X mirrored for glTFast. Final camera visibility is checked in Unity."
+}

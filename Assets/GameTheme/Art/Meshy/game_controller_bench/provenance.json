@@ -1,0 +1,102 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "game-theme original arcade hardware",
+  "theme": "game",
+  "role": "prop",
+  "prompt": "Original outdoor bench shaped like an oversized retro game controller, wide low horizontal rounded rectangular block, two thick stepped grip ends, large raised plus directional pad on left, four large circular button cushions on right, flat recessed center seat, two sturdy short rectangular support feet. Chunky beveled voxel-like solid geometry, architectural rest bench. No text, symbols or logos. Single isolated complete environment prop, full object visible, no scene or floor plane, no characters. Clear silhouette from an elevated three-quarter game camera, precise bevelled hard surfaces, large clean forms, no tiny floating pieces, rich PBR normal detail, premium stylized game asset.",
+  "texture_prompt": "Warm ivory painted body with midnight navy lower frame, raspberry rubber directional pad, cyan and amber round button cushions, brushed aluminium feet, subtle manufacturing seam lines, gentle rubbed edges and clean PBR detail.",
+  "preview_task_id": "01a100ae-eb87-72de-9576-fb57a6a1109a",
+  "refine_task_id": "01a100b0-33b5-7671-a3b3-80c6f8a93163",
+  "attempt": 1,
+  "created_utc": "2026-10-03T07:36:15.407159+00:00",
+  "requested_triangles": 7000,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "target_size_m": [
+    5.3,
+    1.3,
+    2.3
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 6770,
+    "vertices": 7937,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 292228,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 203307,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "mime": "image/png",
+        "bytes": 857778,
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9504650235176086,
+      -0.42332300543785095,
+      -0.36101600527763367
+    ],
+    "unity_bounds_max": [
+      0.9517620801925659,
+      0.42051297426223755,
+      0.37315604090690613
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 1690840
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "review": "Meshy geometry and PBR thumbnails visually inspected; accepted for Unity in-room placement review.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 6906708,
+  "review_notes": "Wide low controller silhouette and large buttons are readable; accepted. Use a modest height so it stays below the combat camera sightline.",
+  "sha256": "0d6c10dab3bc627782a5563c33466688dec7d29f9d8b8a950c712a08dc8640bb",
+  "unity_front_axis": "+Z",
+  "orientation_review": "Compared coarse GLB projections from Unity axis views; glTF X mirrored for glTFast. Final camera visibility is checked in Unity. Main control surface also faces upward."
+}

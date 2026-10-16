@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "forest",
+  "role": "landmark",
+  "prompt": "Colossal gnarled tree root archway, several thick twisting roots rise from the ground on both sides and fuse overhead into one arch, a large completely open walk-through passage in the middle, knotted braided roots with short hanging moss strands, thin depth compared to width, organic gate silhouette. Enchanted forest gateway, no tree crown, no leaves on top, no walls. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Dark mahogany brown root bark with twisted grain, patches of vivid green moss, faint turquoise glowing sap lines in the cracks, pale grey lichen. Rich organic bark normal detail.",
+  "preview_task_id": "01a0f2d7-8de5-7126-a3ce-d4c75670ba18",
+  "refine_task_id": "01a0f2da-1734-7526-af06-2d046f18bc71",
+  "attempt": 2,
+  "created_utc": "2026-09-30T15:08:03.124456+00:00",
+  "requested_triangles": 28000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    8.0,
+    6.2,
+    3.0
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 29000,
+    "vertices": 44323,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 2967139,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1747692,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2152421,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9496870636940002,
+      -0.7045880556106567,
+      -0.48245495557785034
+    ],
+    "unity_bounds_max": [
+      0.9521359801292419,
+      0.695758044719696,
+      0.43895208835601807
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 8635920
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

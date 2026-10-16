@@ -1,0 +1,52 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "forest",
+  "prompt": "Ancient enormous magical oak tree with a thick twisted trunk, sweeping exposed roots, three broad upward curving branches and a lush rounded dark green leafy crown. Blue luminous fissures in the bark, moss on roots. Ancient enchanted forest landmark, complete upright tree. Single isolated complete game environment prop, full object visible, no background scene, no ground plane, no pedestal, no characters. Strong readable silhouette, efficient low polygon game mesh, large clean forms, fine detail in PBR normal textures, realistic stylized fantasy game quality.",
+  "texture_prompt": "Warm dark brown deeply grooved bark, vivid moss, rich emerald leaves, turquoise blue magical cracks, ancient enchanted forest. Fine bark relief in normal map.",
+  "preview_task_id": "01a0f170-70ab-7070-abfd-e7e19413c0c4",
+  "refine_task_id": "01a0f172-721c-76a7-9113-d9062e6b9fd0",
+  "created_utc": "2026-09-30T08:34:45.574734+00:00",
+  "requested_triangles": 6000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 5867,
+    "vertices": 12349,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "bytes": 5666120
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 2048px; tangent normals renormalized; binary payload compactly repacked.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 6958904
+}

@@ -1,0 +1,52 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "digital",
+  "prompt": "Tall futuristic computer server rack monolith, black rectangular metal tower twice as tall as wide, stacked horizontal server modules, recessed vent grilles, narrow cyan status light strips, thick cables on side, strong geometric silhouette. Computer program prison world architecture. Single isolated complete game environment prop, full object visible, no background scene, no ground plane, no pedestal, no characters. Strong readable silhouette, efficient low polygon game mesh, large clean forms, fine detail in PBR normal textures, realistic stylized fantasy game quality.",
+  "texture_prompt": "Charcoal matte metal server panels, brushed dark steel, thin electric cyan LED strips, subtle tiny green indicators, fine vents and circuitry in normal maps, clean futuristic machine.",
+  "preview_task_id": "01a0f170-709a-768e-a2d2-2c449499f643",
+  "refine_task_id": "01a0f172-6c55-70f1-baf4-800028cf442a",
+  "created_utc": "2026-09-30T08:34:18.124631+00:00",
+  "requested_triangles": 4500,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 2960,
+    "vertices": 5889,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "bytes": 1073636
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 4544168
+}

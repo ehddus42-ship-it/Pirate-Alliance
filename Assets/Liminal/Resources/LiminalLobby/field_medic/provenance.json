@@ -1,0 +1,96 @@
+{
+  "provider": "Meshy AI",
+  "model": "meshy-7.1",
+  "concept_model": "gpt-image-2",
+  "role": "현장 의료요원",
+  "height_m": 1.64,
+  "target_triangles": 20000,
+  "texture_resolution": "2k",
+  "concept_prompt": "An original Korean woman field medic in her early thirties at a modern Seoul hunter association. Warm attentive face, warm brown eyes, short rounded chestnut bob tucked behind ears, small mint hair clip. Compact sturdy proportions. Ivory short medical utility jacket with mint-green shoulder panels and cuffs, pale mint high-neck inner shirt, charcoal tapered cargo trousers, clean ivory trainers with mint trim. A small mint emergency satchel attached firmly at left hip, discreet geometric mint medical emblem on sleeve, tiny silver name badge. Practical friendly professional, modest everyday outfit. Use the supplied image ONLY as a reference for the clean cel-shaded anime game art style, facial rendering and detail density. The new person must have the outfit described above, not a business suit. ONE adult character, full body including head and soles, front view facing camera, relaxed symmetrical A-pose with both arms STRAIGHT and 30 degrees away from the torso, hands at hip level, empty hands, fingers separated, both feet flat, legs slightly apart. No bent elbows, no pose, no props in hands. Clean white background, no text, no weapons, no frame, no floor shadow, soft even studio lighting. Polished stylized action-RPG NPC, readable simple large shapes and carefully placed clothing details.",
+  "delivered_geometry": {
+    "triangles": 20711,
+    "vertices": 23997,
+    "meshes": 1,
+    "materials": 1,
+    "source_bounds": [
+      {
+        "min": [
+          -0.4067550301551819,
+          -0.9517520666122437,
+          -0.18897607922554016
+        ],
+        "max": [
+          0.4050140380859375,
+          0.9508339762687683,
+          0.1729550063610077
+        ]
+      }
+    ]
+  },
+  "reference": "Tools/LiminalLobby/Reference/official.png (style only)",
+  "library_actions": {
+    "idle": 247,
+    "walk": 1,
+    "talk": 313,
+    "greet": 290,
+    "inspect": 281,
+    "listen": 47
+  },
+  "tasks": {
+    "concept": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 12,
+      "id": "01a10b89-c613-70dd-ac9e-10b0b3c07e2f",
+      "consumed_credits": 12
+    },
+    "model": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 30,
+      "id": "01a10b8a-cae5-742c-a7bc-724ab8832d16",
+      "consumed_credits": 30
+    },
+    "rig": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 5,
+      "id": "01a10b8c-5847-7544-b8e4-69808e7cd5fc",
+      "consumed_credits": 5
+    },
+    "anim_idle": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8c-97fb-71f5-88f4-074f3f9a8a47",
+      "consumed_credits": 3
+    },
+    "anim_walk": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8c-cd2f-763f-b483-483bee012e64",
+      "consumed_credits": 3
+    },
+    "anim_talk": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8d-0246-7462-b960-a5f08ae278ca",
+      "consumed_credits": 3
+    },
+    "anim_greet": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8d-3760-729f-a113-feb3875d5527",
+      "consumed_credits": 3
+    },
+    "anim_inspect": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8d-6c9f-71b6-8346-5613837d4f53",
+      "consumed_credits": 3
+    },
+    "anim_listen": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8d-a225-72bd-9ca6-939d33a50649",
+      "consumed_credits": 3
+    }
+  },
+  "created_utc": "2026-10-05T10:14:30.089612+00:00"
+}

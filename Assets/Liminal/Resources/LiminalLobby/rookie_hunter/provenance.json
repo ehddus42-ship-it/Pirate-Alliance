@@ -1,0 +1,96 @@
+{
+  "provider": "Meshy AI",
+  "model": "meshy-7.1",
+  "concept_model": "gpt-image-2",
+  "role": "신입 헌터",
+  "height_m": 1.72,
+  "target_triangles": 20000,
+  "texture_resolution": "2k",
+  "concept_prompt": "An original young adult Korean male rookie hunter, twenty-two years old, slim lanky build, youthful friendly face, tousled dark chestnut hair with a small upward tuft, amber-brown eyes. Teal hooded sports jacket with cream zipper and navy side panels over plain white T-shirt, slim dark navy cargo trousers, cream and teal high-top sneakers. Large practical dark teal backpack fixed tightly against upper back with visible padded shoulder straps and a rolled cream fabric pad at top; no dangling straps. A small orange hunter pass on chest. Cheerful earnest modern urban adventure outfit, empty hands. Use the supplied image ONLY as a reference for the clean cel-shaded anime game art style, facial rendering and detail density. The new person must have the outfit described above, not a business suit. ONE adult character, full body including head and soles, front view facing camera, relaxed symmetrical A-pose with both arms STRAIGHT and 30 degrees away from the torso, hands at hip level, empty hands, fingers separated, both feet flat, legs slightly apart. No bent elbows, no pose, no props in hands. Clean white background, no text, no weapons, no frame, no floor shadow, soft even studio lighting. Polished stylized action-RPG NPC, readable simple large shapes and carefully placed clothing details.",
+  "delivered_geometry": {
+    "triangles": 20564,
+    "vertices": 23763,
+    "meshes": 1,
+    "materials": 1,
+    "source_bounds": [
+      {
+        "min": [
+          -0.42532798647880554,
+          -0.9521089792251587,
+          -0.23717203736305237
+        ],
+        "max": [
+          0.4242439866065979,
+          0.951291024684906,
+          0.23547807335853577
+        ]
+      }
+    ]
+  },
+  "reference": "Tools/LiminalLobby/Reference/official.png (style only)",
+  "library_actions": {
+    "idle": 244,
+    "walk": 30,
+    "talk": 56,
+    "greet": 28,
+    "warmup": 326,
+    "breath": 31
+  },
+  "tasks": {
+    "concept": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 12,
+      "id": "01a10b89-c64c-702f-9b5c-3f522646f44b",
+      "consumed_credits": 12
+    },
+    "model": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 30,
+      "id": "01a10b8a-cae5-742a-a4bd-1ff7c34efc71",
+      "consumed_credits": 30
+    },
+    "rig": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 5,
+      "id": "01a10b8c-8857-7482-9108-22014e57cbc2",
+      "consumed_credits": 5
+    },
+    "anim_idle": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8c-c9af-721d-a590-5fb5cde5be5e",
+      "consumed_credits": 3
+    },
+    "anim_walk": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8c-ff14-7019-ad8a-a93afc771ad4",
+      "consumed_credits": 3
+    },
+    "anim_talk": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8d-36eb-7786-b65f-393937152c56",
+      "consumed_credits": 3
+    },
+    "anim_greet": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8d-6c03-7323-bb7f-8548903d6280",
+      "consumed_credits": 3
+    },
+    "anim_warmup": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8d-a163-75dd-8671-84880e3f9c12",
+      "consumed_credits": 3
+    },
+    "anim_breath": {
+      "status": "SUCCEEDED",
+      "estimated_credits": 3,
+      "id": "01a10b8d-d696-70cf-97d9-d996de14449d",
+      "consumed_credits": 3
+    }
+  },
+  "created_utc": "2026-10-05T10:14:30.099424+00:00"
+}
