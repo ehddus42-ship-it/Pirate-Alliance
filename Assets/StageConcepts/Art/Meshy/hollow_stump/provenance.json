@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "forest",
+  "role": "prop",
+  "prompt": "Wide hollow ancient tree stump, broken jagged rim, thick buttress roots spreading over the ground, open hollow centre visible from above, a cluster of glowing mushrooms growing inside and on one root, soft moss patches. Squat solid forest floor prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Dark aged oak bark with deep cracks, pale dry heartwood inside the hollow, emerald moss, luminous cyan and lavender mushroom caps, fine bark normal detail.",
+  "preview_task_id": "01a102b0-e5ee-7647-95e7-d8b2ab60bc71",
+  "refine_task_id": "01a102b2-32ef-779c-b6b0-e63b83b1aec0",
+  "attempt": 1,
+  "created_utc": "2026-10-03T16:58:05.906081+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.6,
+    2.0,
+    2.6
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 15529,
+    "vertices": 25435,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3746204,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1817626,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2796046,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9316920638084412,
+      -0.5338769555091858,
+      -0.9510279893875122
+    ],
+    "unity_bounds_max": [
+      0.941830039024353,
+      0.5513009428977966,
+      0.9385131001472473
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 9362456
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

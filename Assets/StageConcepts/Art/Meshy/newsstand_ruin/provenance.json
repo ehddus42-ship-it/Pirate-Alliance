@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "ruins",
+  "role": "prop",
+  "prompt": "Abandoned city newspaper kiosk booth, small boxy stall with a dented roof awning, broken window, empty sagging magazine racks, scattered blank papers at the base, one side panel bent open. Compact urban ruin prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Faded red and grey painted sheet metal with rust streaks, dusty broken glass, yellowed blank paper, grime and soot, no readable text, weathered metal normal detail.",
+  "preview_task_id": "01a102b6-6b3d-77b0-8913-2ceb41772e2f",
+  "refine_task_id": "01a102b8-51e0-757b-8ad1-06f68350ac37",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:05:22.684604+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.4,
+    2.6,
+    1.8
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 13983,
+    "vertices": 22872,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 2899493,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1990818,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1946679,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9498329758644104,
+      -0.6714490056037903,
+      -0.46790996193885803
+    ],
+    "unity_bounds_max": [
+      0.9506629705429077,
+      0.6720920205116272,
+      0.47815296053886414
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 7738928
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

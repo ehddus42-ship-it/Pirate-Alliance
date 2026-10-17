@@ -1,0 +1,52 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "ruins",
+  "prompt": "Collapsed modern highway overpass segment, two heavy concrete support piers holding a broken elevated road deck, one jagged shattered end sloping down, cracked low road barriers, exposed few thick bent reinforcement rods, compact standalone bridge ruin with empty space under it. Single isolated complete game environment prop, full object visible, no background scene, no ground plane, no pedestal, no characters. Strong readable silhouette, efficient low polygon game mesh, large clean forms, fine detail in PBR normal textures, realistic stylized fantasy game quality.",
+  "texture_prompt": "Weathered cracked grey concrete, faded dark asphalt top with worn yellow lane stripe, rusty steel reinforcement, dust and black soot, chipped normal detail, post apocalypse city.",
+  "preview_task_id": "01a0f173-ab47-74ed-8e83-f9ec5e31a732",
+  "refine_task_id": "01a0f174-e24f-70f0-99b0-be2cbcd3601b",
+  "created_utc": "2026-09-30T08:37:00.180169+00:00",
+  "requested_triangles": 5500,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 5025,
+    "vertices": 9137,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "bytes": 1534024
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 6221160
+}

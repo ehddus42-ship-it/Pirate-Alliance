@@ -1,0 +1,52 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "cave",
+  "prompt": "Natural limestone stalagmite cluster, five uneven tapering conical rock spires rising from a single small rough irregular rocky foot, tallest pillar at back, thick bumpy mineral deposits and flowing rock ridges, primitive underground cave formation, no manufactured objects. Single isolated complete game environment prop, full object visible, no background scene, no ground plane, no pedestal, no characters. Strong readable silhouette, efficient low polygon game mesh, large clean forms, fine detail in PBR normal textures, realistic stylized fantasy game quality.",
+  "texture_prompt": "Damp dark grey and brown limestone, tan layered mineral bands, subtle green mineral staining, rough eroded calcite normal texture, underground cave rock.",
+  "preview_task_id": "01a0f175-b91f-7713-8ca3-08c5c6623dd5",
+  "refine_task_id": "01a0f176-eda6-7140-b767-c2d4a84805d2",
+  "created_utc": "2026-09-30T08:39:14.125275+00:00",
+  "requested_triangles": 3500,
+  "texture_resolution": "1K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 3641,
+    "vertices": 6282,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "bytes": 1863072
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 1024px; tangent normals renormalized; binary payload compactly repacked.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        1024,
+        1024
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 8426100
+}

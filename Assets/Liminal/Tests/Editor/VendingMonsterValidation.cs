@@ -115,6 +115,7 @@ namespace AcRoguelike.Liminal.EditorTests
                     case 6:
                         if(monster.CansGripped<1)break;
                         Check(monster.canGrip.GetComponentsInChildren<VendingCanProjectile>().Length==1,"Can is parented to the gripping hand during extraction.");
+                        Check(!monster.warning.enabled,"Can windup does not reveal the projectile trajectory.");
                         Go(7);break;
                     case 7:
                         if(monster.CansThrown<1)break;
@@ -128,7 +129,7 @@ namespace AcRoguelike.Liminal.EditorTests
                         Check(pausedCan&&Vector3.Distance(pausedCan.transform.position,frozenPosition)<.001f,"Pause freezes ballistic can movement.");
                         Time.timeScale=1;Go(9);break;
                     case 9:
-                        if(player.Health>=healthBefore&&elapsed<2)break;
+                        if(player.Health>=healthBefore&&elapsed<ProjectileTuning.ScaleFlightDuration(2))break;
                         Check(player.Health<healthBefore,"Thrown can hits the player with swept collision.");
                         Check(monster.CansThrown==1&&monster.CansGripped==1,"Animation events and frame-step fallback do not duplicate cans.");
                         report.charges=monster.ChargeCount;report.cansGripped=monster.CansGripped;report.cansThrown=monster.CansThrown;
@@ -139,13 +140,20 @@ namespace AcRoguelike.Liminal.EditorTests
                         wallTestCan.Launch(player.transform.position+Vector3.up*.85f,1.2f,20,monster.transform,player);
                         Go(10);break;
                     case 10:
-                        if(elapsed<1.5)break;
+                        if(elapsed<ProjectileTuning.ScaleFlightDuration(1.5f))break;
                         Check(!wallTestCan&&player.Health==healthBefore,"Thrown can is blocked by a solid wall without damaging the player.");
                         monster.Health.TakeDamage(monster.Health.maxHealth);Go(11);break;
                     case 11:
                         if(elapsed<.1)break;
                         Check(monster.State==VendingMonsterState.Dead&&!monster.warning.enabled,"Defeat cancels attacks and telegraphs.");
-                        Check(!monster.GetComponent<CharacterController>().enabled&&!monster.limbRenderers.Any(r=>r.enabled),"Defeat disables collision and all limb renderers.");
+                        var death=monster.GetComponent<VendingMonsterDeath>();
+                        Check(!monster.GetComponent<CharacterController>().enabled&&death&&death.Playing,"Defeat disables collision and plays the knock-back death.");
+                        Go(12);break;
+                    case 12:
+                        var dying=monster.GetComponent<VendingMonsterDeath>();
+                        if(dying&&!dying.Finished&&elapsed<5)break;
+                        Check(dying&&dying.Finished&&!monster.limbRenderers.Any(r=>r.enabled)&&!monster.Health.visibleRenderers.Any(r=>r&&r.enabled),
+                            "Death ends with the limbs retracted and the machine hidden.");
                         Finish(true,null);break;
                 }
             }

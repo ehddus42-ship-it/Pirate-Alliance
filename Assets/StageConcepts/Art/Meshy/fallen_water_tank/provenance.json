@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "ruins",
+  "role": "landmark",
+  "prompt": "Large rooftop water tank fallen on its side onto a crushed steel stand, round riveted metal cylinder with a dented split, a short ladder bent beside it, rubble around the base. Bulky post-apocalyptic landmark prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Rust orange and faded teal painted steel with heavy corrosion, dark interior through the split, grey concrete rubble, dust, riveted metal normal detail.",
+  "preview_task_id": "01a102b7-b09c-76bc-84d5-58c0592f3e89",
+  "refine_task_id": "01a102b9-4bf7-75db-a7d5-061df9d76ae1",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:06:06.451189+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    3.8,
+    2.8,
+    3.0
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 14993,
+    "vertices": 24303,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3756083,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2365804,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2641966,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.8951440453529358,
+      -0.5710280537605286,
+      -0.8256949782371521
+    ],
+    "unity_bounds_max": [
+      0.9506651163101196,
+      0.5800500512123108,
+      0.8013660907745361
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 9723764
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

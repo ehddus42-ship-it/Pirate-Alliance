@@ -4,48 +4,70 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.UI;
 
 namespace AcRoguelike.Liminal
 {
-    /// <summary>Runtime overlay. The only route choice is the next stage; upgrades stay in the augment choice.</summary>
+    /// <summary>
+    /// Run overlay in the "Hunter Association system window" style (<see cref="HunterUi"/>). Play-time
+    /// sentences (toasts, objectives, control hints, skill callouts) are gone. What remains:
+    /// - the hunter status window (name of the worn hunter, her own skill's cooldown, health, dash charge, counter state);
+    /// - the gate indicator (stage and room);
+    /// - the remaining-enemy count;
+    /// - the boss bar;
+    /// - the just-dodge stamp;
+    /// - the interaction key chip;
+    /// - edge markers for living enemies off screen (<see cref="OffscreenEnemyIndicators"/>);
+    /// - menu windows (augments, the ESC quit question, results).
+    /// </summary>
     public sealed class LiminalHud : MonoBehaviour
     {
+        // Augment cards are dealt face down and flip one after another; none can be picked until all are face up,
+        // the grace has passed and the mouse button is up, so clicks meant for a sword swing never pick a card.
+        const float FlipDelay = .3f, FlipStagger = .18f, FlipDuration = .42f, PickGrace = .3f;
+
+        struct AugmentCard { public RectTransform rect; public GameObject back; public Button button; }
+
         LiminalRunDirector run;
+        OffscreenEnemyIndicators indicators;
+        readonly System.Collections.Generic.List<AugmentCard> augmentCards = new System.Collections.Generic.List<AugmentCard>();
+        float augmentDealtAt;
+        bool augmentsUnlocked;
+        TextMeshProUGUI augmentKeys;
+        string augmentKeysText;
         TMP_FontAsset font;
         Font ownedSourceFont;
-        bool ownsFont;
-        GameObject canvasObject, modal;
-        RectTransform modalContent;
-        TextMeshProUGUI stageLabel, roomLabel, healthLabel, objectiveLabel, toastLabel, bossLabel;
-        UnityEngine.UI.Image healthFill;
-        float toastUntil;
+        GameObject canvasObject, modal, combatGroup, lobbyGroup, bossGroup;
+        // Last values written to the number labels, so their strings are only built when they change.
+        int shownCurrency = int.MinValue, shownEnemies = int.MinValue, shownHealth = int.MinValue;
+        RectTransform modalContent, promptRoot, stamp;
+        TextMeshProUGUI gateLabel, roomLabel, healthLabel, enemyLabel, bossName, bossValue, counterLabel, currencyLabel, lobbyTitle, promptLabel, promptKey, hunterName, skillLabel, dashLabel, lobbyMovementLabel;
+        Image healthFill, healthGhost, bossFill;
+        RectTransform dashTrack;
+        // One pip per stamina point: a dark slot and the fill that grows back as it recovers.
+        readonly System.Collections.Generic.List<Image> dashPips = new System.Collections.Generic.List<Image>();
+        CanvasGroup stampGroup;
+        float stampAt = -10, ghost = 1;
         string configurationError;
-        static readonly Color Paper = new Color(.89f, .91f, .82f);
-        static readonly Color Accent = new Color(.72f, .86f, .55f);
+        PlayerMotor motor;
+        MeleeSlash melee;
+        LiminalPlayerHealth subscribed;
+
+        public TMP_FontAsset Font => font;
+        public Transform Canvas => canvasObject ? canvasObject.transform : null;
 
         public void Initialize(LiminalRunDirector director, Font sourceFont)
         {
             run = director;
-            if (!sourceFont)
-            {
-                ownedSourceFont = Font.CreateDynamicFontFromOSFont(new[] { "Malgun Gothic", "Arial" }, 30);
-                sourceFont = ownedSourceFont;
-            }
-            if (sourceFont)
-            {
-                font = TMP_FontAsset.CreateFontAsset(sourceFont, 40, 5,
-                    UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 2048, 2048, AtlasPopulationMode.Dynamic, true);
-                ownsFont = true;
-            }
-            else font = TMP_Settings.defaultFontAsset;
-            canvasObject = new GameObject("LiminalHUD", typeof(RectTransform), typeof(Canvas),
-                typeof(UnityEngine.UI.CanvasScaler), typeof(UnityEngine.UI.GraphicRaycaster));
+            shownCurrency = shownEnemies = shownHealth = int.MinValue;
+            font = HunterUi.CreateFont(sourceFont, out ownedSourceFont);
+            canvasObject = new GameObject("HunterHUD", typeof(RectTransform), typeof(UnityEngine.Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             canvasObject.transform.SetParent(transform, false);
-            var canvas = canvasObject.GetComponent<Canvas>();
+            var canvas = canvasObject.GetComponent<UnityEngine.Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 100;
-            var scaler = canvasObject.GetComponent<UnityEngine.UI.CanvasScaler>();
-            scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            var scaler = canvasObject.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1280, 720);
             scaler.matchWidthOrHeight = .5f;
             if (!FindFirstObjectByType<EventSystem>())
@@ -53,63 +75,179 @@ namespace AcRoguelike.Liminal
                 var events = new GameObject("LiminalEventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
                 events.transform.SetParent(canvasObject.transform, false);
             }
+            var root = canvasObject.transform;
 
-            var header = Box("Status", canvasObject.transform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(26, -22), new Vector2(390, 128), new Color(.045f, .075f, .075f, .92f));
-            stageLabel = Text("Stage", header, "", 23, Accent, new Vector2(16, -12), new Vector2(358, 40));
-            roomLabel = Text("Room", header, "", 17, Paper, new Vector2(16, -48), new Vector2(358, 28));
-            var track = Box("HealthTrack", header, Vector2.zero, Vector2.zero, new Vector2(16, 19), new Vector2(252, 9), new Color(.22f, .26f, .23f));
-            healthFill = Box("HealthFill", track, Vector2.zero, Vector2.zero, Vector2.zero, new Vector2(252, 9), Accent).GetComponent<UnityEngine.UI.Image>();
-            healthLabel = Text("Health", header, "", 16, Paper, new Vector2(279, -86), new Vector2(97, 28));
-            objectiveLabel = Text("Objective", canvasObject.transform, "", 18, Paper, new Vector2(-28, -30), new Vector2(500, 85));
-            SetCorner(objectiveLabel.rectTransform, new Vector2(1, 1), new Vector2(1, 1));
-            objectiveLabel.alignment = TextAlignmentOptions.TopRight;
-            var controls = Text("Controls", canvasObject.transform,
-                "WASD 이동 · CTRL 걷기 · 좌클릭/J 부적 3연타 · SPACE/SHIFT 대시 · Q 지원 스킬 · E 출구 · ESC 일시정지", 16,
-                Paper, new Vector2(0, 20), new Vector2(1200, 32));
-            SetCorner(controls.rectTransform, new Vector2(.5f, 0), new Vector2(.5f, 0));
-            controls.alignment = TextAlignmentOptions.Center;
-            toastLabel = Text("RoomMessage", canvasObject.transform, "", 24, Paper, new Vector2(0, -164), new Vector2(960, 92));
-            SetCorner(toastLabel.rectTransform, new Vector2(.5f, 1), new Vector2(.5f, 1));
-            toastLabel.alignment = TextAlignmentOptions.Center;
-            bossLabel = Text("BossHealth", canvasObject.transform, "", 21, new Color(1, .72f, .5f), new Vector2(0, 66), new Vector2(950, 40));
-            SetCorner(bossLabel.rectTransform, new Vector2(.5f, 0), new Vector2(.5f, 0));
-            bossLabel.alignment = TextAlignmentOptions.Center;
+            // Hunter status (top left).
+            combatGroup = HunterUi.Rect("Combat", root, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, new Vector2(1280, 720)).gameObject;
+            Stretch(combatGroup.GetComponent<RectTransform>());
+            var status = HunterUi.Window("HunterStatus", combatGroup.transform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(22, -20), new Vector2(330, 96), font);
+            HunterUi.Text("Rank", status, font, "HUNTER", 12, HunterUi.Gold, new Vector2(16, -10), new Vector2(120, 18), FontStyles.Bold);
+            hunterName = HunterUi.Text("Name", status, font, HunterRoster.FirstHunterName, 19, HunterUi.Cream, new Vector2(16, -26), new Vector2(200, 28), FontStyles.Bold);
+            skillLabel = HunterUi.Text("Skill", status, font, "", 12, HunterUi.Gold, new Vector2(220, -32), new Vector2(96, 18), FontStyles.Bold, TextAlignmentOptions.TopRight);
+            counterLabel = HunterUi.Text("Counter", status, font, "", 13, HunterUi.Gate, new Vector2(200, -12), new Vector2(116, 20), FontStyles.Bold, TextAlignmentOptions.TopRight);
+            var track = HunterUi.Fill("HealthTrack", status, new Vector2(0, 1), new Vector2(0, 1), new Vector2(16, -60), new Vector2(232, 10), new Color(.05f, .07f, .14f, 1));
+            healthGhost = HunterUi.Fill("HealthGhost", track.rectTransform, new Vector2(0, .5f), new Vector2(0, .5f), Vector2.zero, new Vector2(232, 10), new Color(1, .9f, .75f, .55f));
+            healthFill = HunterUi.Fill("HealthFill", track.rectTransform, new Vector2(0, .5f), new Vector2(0, .5f), Vector2.zero, new Vector2(232, 10), HunterUi.Gold);
+            for (int i = 1; i < 10; i++) HunterUi.Fill("Notch", track.rectTransform, new Vector2(i / 10f, .5f), new Vector2(.5f, .5f), Vector2.zero, new Vector2(1.5f, 10), new Color(.07f, .1f, .21f, .9f));
+            healthLabel = HunterUi.Text("Health", status, font, "", 15, HunterUi.Cream, new Vector2(254, -55), new Vector2(66, 22), FontStyles.Bold, TextAlignmentOptions.TopRight);
+            dashLabel = HunterUi.Text("DashLabel", status, font, "DASH", 11, HunterUi.Muted, new Vector2(16, -76), new Vector2(40, 16), FontStyles.Bold);
+            dashTrack = HunterUi.Rect("DashTrack", status, new Vector2(0, 1), new Vector2(0, 1), new Vector2(56, -80), new Vector2(110, 5));
 
-            modal = new GameObject("StageTransition", typeof(RectTransform), typeof(UnityEngine.UI.Image));
-            modal.transform.SetParent(canvasObject.transform, false);
-            var shade = modal.GetComponent<UnityEngine.UI.Image>();
-            shade.color = new Color(.02f, .035f, .04f, .9f);
-            var mr = modal.GetComponent<RectTransform>();
-            mr.anchorMin = Vector2.zero; mr.anchorMax = Vector2.one; mr.offsetMin = mr.offsetMax = Vector2.zero;
-            modalContent = Box("Content", modal.transform, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero,
-                new Vector2(980, 490), new Color(.065f, .095f, .09f, 1));
+            // Gate indicator (top centre) and remaining enemies (top right).
+            var gate = HunterUi.Window("Gate", combatGroup.transform, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -20), new Vector2(300, 52), font, null, true);
+            gateLabel = HunterUi.Text("GateLabel", gate, font, "", 13, HunterUi.Gold, new Vector2(0, -7), new Vector2(300, 18), FontStyles.Bold, TextAlignmentOptions.Top);
+            roomLabel = HunterUi.Text("RoomLabel", gate, font, "", 17, HunterUi.Cream, new Vector2(0, -25), new Vector2(300, 24), FontStyles.Bold, TextAlignmentOptions.Top);
+            var count = HunterUi.Window("Hostiles", combatGroup.transform, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-22, -20), new Vector2(118, 52), font, null, true);
+            HunterUi.Text("HostileTag", count, font, "HOSTILE", 11, HunterUi.Danger, new Vector2(12, -8), new Vector2(94, 16), FontStyles.Bold);
+            enemyLabel = HunterUi.Text("HostileCount", count, font, "", 22, HunterUi.Cream, new Vector2(12, -22), new Vector2(94, 28), FontStyles.Bold, TextAlignmentOptions.TopRight);
+
+            // Boss bar (bottom centre).
+            var boss = HunterUi.Window("Boss", combatGroup.transform, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 26), new Vector2(720, 56), font, null, true);
+            bossGroup = boss.gameObject;
+            bossName = HunterUi.Text("BossName", boss, font, "", 16, HunterUi.Gold, new Vector2(16, -7), new Vector2(500, 22), FontStyles.Bold);
+            bossValue = HunterUi.Text("BossValue", boss, font, "", 13, HunterUi.Muted, new Vector2(500, -9), new Vector2(204, 20), FontStyles.Normal, TextAlignmentOptions.TopRight);
+            var bossTrack = HunterUi.Fill("BossTrack", boss, new Vector2(0, 1), new Vector2(0, 1), new Vector2(16, -34), new Vector2(688, 10), new Color(.05f, .07f, .14f, 1));
+            bossFill = HunterUi.Fill("BossFill", bossTrack.rectTransform, new Vector2(0, .5f), new Vector2(0, .5f), Vector2.zero, new Vector2(688, 10), HunterUi.Danger);
+            bossGroup.SetActive(false);
+
+            // Lobby header: location and currency.
+            lobbyGroup = HunterUi.Rect("Lobby", root, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, new Vector2(1280, 720)).gameObject;
+            Stretch(lobbyGroup.GetComponent<RectTransform>());
+            var place = HunterUi.Window("Place", lobbyGroup.transform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(22, -20), new Vector2(330, 74), font);
+            HunterUi.Text("Org", place, font, "KOREA HUNTER ASSOCIATION", 11, HunterUi.Gold, new Vector2(16, -10), new Vector2(300, 16), FontStyles.Bold);
+            lobbyTitle = HunterUi.Text("PlaceName", place, font, "게이트 관리 구역", 19, HunterUi.Cream, new Vector2(16, -28), new Vector2(300, 28), FontStyles.Bold);
+            lobbyMovementLabel = HunterUi.Text("MovementOnly", place, font, "이동 전용", 11, HunterUi.Muted, new Vector2(16, -55), new Vector2(300, 16), FontStyles.Bold);
+            lobbyMovementLabel.gameObject.SetActive(false);
+            var wallet = HunterUi.Window("Wallet", lobbyGroup.transform, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-22, -20), new Vector2(170, 52), font, null, true);
+            HunterUi.Text("CurrencyTag", wallet, font, "마석", 12, HunterUi.Gate, new Vector2(14, -8), new Vector2(60, 16), FontStyles.Bold);
+            currencyLabel = HunterUi.Text("Currency", wallet, font, "", 22, HunterUi.Cream, new Vector2(14, -22), new Vector2(142, 28), FontStyles.Bold, TextAlignmentOptions.TopRight);
+            lobbyGroup.SetActive(false);
+
+            // Interaction key chip (bottom centre, above the boss bar).
+            promptRoot = HunterUi.KeyChip(root, font, "E", "", new Vector2(.5f, 0), new Vector2(0, 110));
+            promptKey = promptRoot.Find("Key/KeyLabel").GetComponent<TextMeshProUGUI>();
+            promptLabel = promptRoot.Find("Plate/Label").GetComponent<TextMeshProUGUI>();
+            promptRoot.gameObject.SetActive(false);
+
+            // Just-dodge stamp.
+            stamp = HunterUi.Rect("JustDodge", root, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, 120), new Vector2(520, 120));
+            stampGroup = stamp.gameObject.AddComponent<CanvasGroup>();
+            // A translucent system-window band keeps the stamp legible over bright floors.
+            HunterUi.Fill("Band", stamp, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, -2), new Vector2(560, 96), new Color(.07f, .1f, .21f, .72f));
+            HunterUi.Fill("BandTop", stamp, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, 46), new Vector2(560, 1.2f), HunterUi.GoldDim);
+            HunterUi.Fill("BandBottom", stamp, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, -50), new Vector2(560, 1.2f), HunterUi.GoldDim);
+            HunterUi.Fill("Slash", stamp, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, new Vector2(460, 3), HunterUi.Gate).rectTransform.localRotation = Quaternion.Euler(0, 0, 8);
+            HunterUi.Fill("Slash2", stamp, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, -10), new Vector2(380, 1.5f), HunterUi.Gold).rectTransform.localRotation = Quaternion.Euler(0, 0, 8);
+            HunterUi.Text("Just", stamp, font, "<i>JUST DODGE</i>", 46, HunterUi.Cream, new Vector2(0, -18), new Vector2(520, 60), FontStyles.Bold, TextAlignmentOptions.Center);
+            HunterUi.Text("Sub", stamp, font, "COUNTER READY", 14, HunterUi.Gold, new Vector2(0, -78), new Vector2(520, 22), FontStyles.Bold, TextAlignmentOptions.Center);
+            stampGroup.alpha = 0;
+
+            // Over the HUD windows, under every menu window.
+            indicators = new OffscreenEnemyIndicators(root, font);
+
+            modal = new GameObject("SystemWindow", typeof(RectTransform), typeof(Image));
+            modal.transform.SetParent(root, false);
+            modal.GetComponent<Image>().color = new Color(.03f, .04f, .09f, .82f);
+            Stretch(modal.GetComponent<RectTransform>());
+            modalContent = HunterUi.Window("Content", modal.transform, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, new Vector2(960, 480), font, null, true);
             modal.SetActive(false);
         }
 
+        static void Stretch(RectTransform r) { r.anchorMin = Vector2.zero; r.anchorMax = Vector2.one; r.offsetMin = r.offsetMax = Vector2.zero; }
+
+        /// <summary>Play-time messages are no longer shown; kept so existing callers still compile.</summary>
+        public void Notify(string message, float duration) { }
+
+        public void ShowPrompt(string key, string label)
+        {
+            if (!promptRoot) return;
+            bool show = !string.IsNullOrEmpty(label);
+            promptRoot.gameObject.SetActive(show);
+            if (!show) return;
+            promptKey.text = key;
+            promptLabel.text = label;
+        }
+
+        public void SetLocation(string name) { if (lobbyTitle) lobbyTitle.text = name; }
+
         void Update()
         {
-            if (!run || !run.CurrentStage) return;
-            stageLabel.text = $"{run.StageIndex + 1:00}  {run.CurrentStage.title}";
-            roomLabel.text = $"{run.CurrentRoomName}   {Mathf.Max(0, run.ActiveRoomIndex + 1):00}/{run.Rooms.Count:00}";
+            if (!run) return;
+            Bind();
+            bool lobby = run.Phase == LiminalRunPhase.Lobby || run.PausedInLobby;
+            bool movementOnly = run.Roster && run.Roster.CurrentMovementOnly;
+            if (lobbyMovementLabel) lobbyMovementLabel.gameObject.SetActive(movementOnly);
+            if (combatGroup) combatGroup.SetActive(!lobby && run.CurrentStage);
+            if (lobbyGroup) lobbyGroup.SetActive(lobby && !(run.Lobby && run.Lobby.WindowOpen));
+            if (currencyLabel && HunterProgress.Currency != shownCurrency)
+            {
+                shownCurrency = HunterProgress.Currency;
+                currencyLabel.text = shownCurrency.ToString("N0");
+            }
+            UpdateStamp();
+            indicators?.Tick(run, run.Phase == LiminalRunPhase.Exploring && combatGroup && combatGroup.activeSelf && run.LivingEnemyCount > 0);
+            UpdateAugmentReveal();
+            if (lobby || !run.CurrentStage) return;
+            if (run.ExitAvailable) ShowPrompt("E", "다음 구역");
+            else if (promptLabel && promptLabel.text == "다음 구역") ShowPrompt("E", null);
+            gateLabel.text = run.ActiveMission != null
+                ? $"{run.ActiveMission.code}  ·  {run.ActiveMission.difficultyName}"
+                : $"GATE  {run.StageIndex + 1:00}";
+            roomLabel.text = $"{run.CurrentStage.title}   {Mathf.Max(0, run.ActiveRoomIndex + 1):00} / {run.Rooms.Count:00}";
+            if (run.LivingEnemyCount != shownEnemies) { shownEnemies = run.LivingEnemyCount; enemyLabel.text = shownEnemies.ToString(); }
+            if (run.Roster) hunterName.text = run.Roster.CurrentName;
+            UpdateSkill(run.Roster ? run.Roster.CurrentSkill : null);
             if (run.PlayerHealth)
             {
-                healthLabel.text = $"{run.PlayerHealth.Health} / {run.PlayerHealth.maximumHealth}";
-                healthFill.rectTransform.sizeDelta = new Vector2(252f * run.PlayerHealth.Health / run.PlayerHealth.maximumHealth, 9);
+                float h = run.PlayerHealth.maximumHealth > 0 ? (float)run.PlayerHealth.Health / run.PlayerHealth.maximumHealth : 0;
+                healthFill.rectTransform.sizeDelta = new Vector2(232 * h, 10);
+                healthFill.color = h < .3f ? Color.Lerp(HunterUi.Danger, HunterUi.Cream, Mathf.PingPong(Time.unscaledTime * 3, 1) * .3f) : HunterUi.Gold;
+                // The lost part lingers as a pale ghost, then drains.
+                ghost = Mathf.Max(h, Mathf.MoveTowards(ghost, h, Time.unscaledDeltaTime * .5f));
+                healthGhost.rectTransform.sizeDelta = new Vector2(232 * ghost, 10);
+                if (run.PlayerHealth.Health != shownHealth) { shownHealth = run.PlayerHealth.Health; healthLabel.text = shownHealth.ToString(); }
             }
-            objectiveLabel.text = run.ExitAvailable ? "[E] 다음 구역으로 이동"
-                : run.LivingEnemyCount > 0 ? $"잔상 {run.LivingEnemyCount}개 · 정리하면 문이 열려\n바닥 예고선 밖으로 회피해"
-                : "열린 문을 따라 다음 공간으로\n" + $"SEED {run.seed}";
-            if (Time.unscaledTime > toastUntil) toastLabel.text = "";
-            bossLabel.text = "";
+            if (motor) UpdateStamina();
+            bool dashAvailable = motor && motor.allowDash;
+            if (dashLabel) dashLabel.gameObject.SetActive(dashAvailable);
+            if (dashTrack) dashTrack.gameObject.SetActive(dashAvailable);
+            counterLabel.text = !movementOnly && melee && melee.isActiveAndEnabled && melee.CounterActive ? "COUNTER" : "";
+            // Decided first and applied once: toggling the group off and on every frame rebuilt the canvas.
+            bool showBoss = false;
             if (run.CurrentStage.isBossStage && run.LivingEnemyCount > 0)
-                foreach (var enemy in FindObjectsByType<LiminalEnemy>(FindObjectsSortMode.None))
-                    if (enemy.isBoss && enemy.Health && enemy.Health.IsAlive)
+                foreach (var signal in FindObjectsByType<TrafficLightBoss>(FindObjectsSortMode.None))
+                    if (signal.enabled && signal.Health && signal.Health.IsAlive && signal.State != TrafficLightBossState.Dormant)
                     {
-                        bossLabel.text = $"관리자    {enemy.Health.Health} / {enemy.Health.maxHealth}" +
-                            (enemy.Health.Health < enemy.Health.maxHealth / 2 ? "    ·    두 번째 호출" : "");
+                        showBoss = true;
+                        bossName.text = signal.displayName + (signal.Enraged ? "   <color=#ff6b5f>ENRAGED</color>" : "");
+                        bossValue.text = $"{signal.Health.Health} / {signal.Health.maxHealth}";
+                        bossFill.rectTransform.sizeDelta = new Vector2(688f * signal.Health.Health / Mathf.Max(1, signal.Health.maxHealth), 10);
                         break;
                     }
-            if (run.Phase == LiminalRunPhase.AugmentChoice && Keyboard.current != null)
+            if (run.LivingEnemyCount > 0 && run.ActiveRoomIndex >= 0 && run.ActiveRoomIndex < run.Rooms.Count &&
+                run.Rooms[run.ActiveRoomIndex].kind == LiminalRoomKind.Boss)
+                foreach (var keeper in run.Rooms[run.ActiveRoomIndex].GetComponentsInChildren<AcRoguelike.GameTheme.GameTetrominoBoss>())
+                    if (keeper.enabled && keeper.Health && keeper.Health.IsAlive)
+                    {
+                        showBoss = true;
+                        bossName.text = keeper.displayName;
+                        bossValue.text = $"{keeper.Health.Health} / {keeper.Health.maxHealth}";
+                        bossFill.rectTransform.sizeDelta = new Vector2(688f * keeper.Health.Health / Mathf.Max(1, keeper.Health.maxHealth), 10);
+                        break;
+                    }
+            if (run.LivingEnemyCount > 0 && run.ActiveRoomIndex >= 0 && run.ActiveRoomIndex < run.Rooms.Count &&
+                run.Rooms[run.ActiveRoomIndex].kind == LiminalRoomKind.Boss)
+                foreach (var storm in run.Rooms[run.ActiveRoomIndex].GetComponentsInChildren<AcRoguelike.RuinsBoss.RuinsStormBoss>())
+                    if (storm.enabled && storm.Health && storm.Health.IsAlive && !storm.EncounterCancelled)
+                    {
+                        showBoss = true;
+                        bossName.text = storm.displayName + $"   <color=#70DCEA>기계 각성 {storm.MachinesActivated}/2</color>";
+                        bossValue.text = $"{storm.Health.Health} / {storm.Health.maxHealth}";
+                        bossFill.rectTransform.sizeDelta = new Vector2(688f * storm.Health.Health / Mathf.Max(1, storm.Health.maxHealth), 10);
+                        break;
+                    }
+            if (bossGroup.activeSelf != showBoss) bossGroup.SetActive(showBoss);
+            if (run.Phase == LiminalRunPhase.AugmentChoice && augmentsUnlocked && Keyboard.current != null)
             {
                 if (Keyboard.current.digit1Key.wasPressedThisFrame) run.SelectAugment(0);
                 else if (Keyboard.current.digit2Key.wasPressedThisFrame) run.SelectAugment(1);
@@ -117,121 +255,215 @@ namespace AcRoguelike.Liminal
             }
         }
 
-        public void Notify(string message, float duration)
-        { toastLabel.text = message; toastUntil = Time.unscaledTime + duration; }
+        /// <summary>Flips the dealt augment cards face up in turn (real time: the run is paused), then unlocks picking.</summary>
+        void UpdateAugmentReveal()
+        {
+            if (augmentCards.Count == 0) return;
+            float t = Time.unscaledTime - augmentDealtAt;
+            for (int i = 0; i < augmentCards.Count; i++)
+            {
+                var card = augmentCards[i];
+                if (!card.rect) continue;
+                float p = Mathf.Clamp01((t - FlipDelay - i * FlipStagger) / FlipDuration);
+                // Edge-on at the midpoint, where the back gives way to the face; a slight lift while turning.
+                float lift = 1 + Mathf.Sin(p * Mathf.PI) * .06f;
+                card.rect.localScale = new Vector3(Mathf.Max(.001f, Mathf.Abs(Mathf.Cos(p * Mathf.PI))) * lift, lift, 1);
+                if (card.back.activeSelf != p < .5f) card.back.SetActive(p < .5f);
+            }
+            float revealed = FlipDelay + (augmentCards.Count - 1) * FlipStagger + FlipDuration;
+            // A button pressed while locked would still click on release, so wait for the mouse to come up too.
+            bool held = Mouse.current != null && Mouse.current.leftButton.isPressed;
+            if (augmentsUnlocked || t < revealed + PickGrace || held) return;
+            augmentsUnlocked = true;
+            foreach (var card in augmentCards) if (card.button) card.button.interactable = true;
+            if (augmentKeys) { augmentKeys.text = augmentKeysText; augmentKeys.color = HunterUi.Muted; }
+        }
+
+        /// <summary>The worn hunter's own skill: gold when ready, dim with the seconds left while it recharges.</summary>
+        void UpdateSkill(IHunterSkill skill)
+        {
+            bool movementOnly = run.Roster && run.Roster.CurrentMovementOnly;
+            skillLabel.gameObject.SetActive(movementOnly || skill != null);
+            if (movementOnly)
+            {
+                skillLabel.text = "이동 전용";
+                skillLabel.color = HunterUi.Muted;
+                return;
+            }
+            if (skill == null) return;
+            float wait = skill.CooldownRemaining;
+            skillLabel.text = wait > 0 ? $"{skill.Label}  {Mathf.CeilToInt(wait)}" : skill.Label;
+            skillLabel.color = wait > 0 ? HunterUi.Muted : HunterUi.Gold;
+        }
+
+        void UpdateStamina()
+        {
+            int count = Mathf.Max(1, motor.maxStamina);
+            const float width = 110, gap = 4;
+            float pip = (width - gap * (count - 1)) / count;
+            if (dashPips.Count != count)
+            {
+                for (int i = dashTrack.childCount - 1; i >= 0; i--) Destroy(dashTrack.GetChild(i).gameObject);
+                dashPips.Clear();
+                for (int i = 0; i < count; i++)
+                {
+                    var slot = HunterUi.Fill("DashPip", dashTrack, new Vector2(0, .5f), new Vector2(0, .5f), new Vector2(i * (pip + gap), 0), new Vector2(pip, 5), new Color(.05f, .07f, .14f, 1));
+                    dashPips.Add(HunterUi.Fill("DashFill", slot.rectTransform, new Vector2(0, .5f), new Vector2(0, .5f), Vector2.zero, new Vector2(pip, 5), HunterUi.Gate));
+                }
+            }
+            for (int i = 0; i < count; i++)
+            {
+                // Full pips glow in the gate colour; the one recovering fills in dimmer.
+                float fill = Mathf.Clamp01(motor.Stamina - i);
+                dashPips[i].rectTransform.sizeDelta = new Vector2(pip * fill, 5);
+                dashPips[i].color = fill >= 1 ? HunterUi.Gate : HunterUi.Muted;
+            }
+        }
+
+        void Bind()
+        {
+            if (run.PlayerHealth && subscribed != run.PlayerHealth)
+            {
+                if (subscribed) subscribed.JustDodged -= OnJustDodged;
+                subscribed = run.PlayerHealth;
+                subscribed.JustDodged += OnJustDodged;
+                motor = subscribed.GetComponent<PlayerMotor>();
+                melee = subscribed.GetComponent<MeleeSlash>();
+            }
+        }
+
+        void OnJustDodged() => stampAt = Time.unscaledTime;
+
+        void UpdateStamp()
+        {
+            if (run.Roster && run.Roster.CurrentMovementOnly) { stampGroup.alpha = 0; return; }
+            float t = Time.unscaledTime - stampAt;
+            if (t > .9f) { stampGroup.alpha = 0; return; }
+            // Slams in big, settles, holds, fades.
+            float s = t < .08f ? Mathf.Lerp(1.6f, 1f, t / .08f) : 1 + .03f * Mathf.Sin(t * 30) * Mathf.Exp(-t * 6);
+            stamp.localScale = Vector3.one * s;
+            stampGroup.alpha = t < .6f ? 1 : 1 - (t - .6f) / .3f;
+        }
 
         public void ShowConfigurationError(string error) { configurationError = error; RefreshPhase(); }
 
         public void RefreshPhase()
         {
             if (!modal) return;
-            bool show = run.Phase != LiminalRunPhase.Exploring;
+            bool show = run.Phase != LiminalRunPhase.Exploring && run.Phase != LiminalRunPhase.Lobby;
             modal.SetActive(show);
+            augmentCards.Clear();
+            augmentsUnlocked = false;
             if (!show) return;
-            foreach (Transform child in modalContent) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
+            ShowPrompt(null, null);
+            foreach (Transform child in modalContent)
+                if (child.name != "FrameTop" && child.name != "FrameBottom" && child.name != "FrameLeft" && child.name != "FrameRight" && child.name != "Tick")
+                { child.gameObject.SetActive(false); Destroy(child.gameObject); }
+            modalContent.sizeDelta = new Vector2(960, 480);
             if (run.Phase == LiminalRunPhase.AugmentChoice)
             {
-                Heading("스테이지 완료", "잠깐 숨을 고르고, 증강 하나를 골라.");
-                Choice(0, "01  잔향", "부적 시전 간격 -16%\n\n같은 동작이 더 빠르게\n공간에 되돌아와.", 0);
-                Choice(1, "02  도깨비불", "부적 적중 시 불꽃 +2\n\n남은 불씨가\n오래 자리를 지켜.", 1);
-                Choice(2, "03  굳은 매듭", "최대 체력 +25 · 체력 25 회복\n\n다음 문을 지나갈\n여유를 챙겨.", 2);
-                Text("Hint", modalContent, "카드를 클릭하거나 숫자 1 · 2 · 3", 16, Paper, new Vector2(32, -437), new Vector2(916, 30)).alignment = TextAlignmentOptions.Center;
+                Heading("구역 정리 완료", "AUGMENT · 증강 선택");
+                var offers = run.AugmentOffers;
+                augmentDealtAt = Time.unscaledTime;
+                // Cards stay centred when the pool deals fewer than three.
+                float left = 480 - (offers.Count * 300 - 20) * .5f;
+                for (int i = 0; i < offers.Count; i++) Choice(left + i * 300, offers[i], i);
+                augmentKeysText = offers.Count == 1 ? "1" : offers.Count == 2 ? "1 · 2" : "1 · 2 · 3";
+                augmentKeys = HunterUi.Text("Keys", modalContent, font, "증강 공개 중…", 14, HunterUi.GoldDim, new Vector2(0, -440), new Vector2(960, 22), FontStyles.Bold, TextAlignmentOptions.Center);
             }
             else if (run.Phase == LiminalRunPhase.NextStageChoice)
             {
                 var next = run.stages[run.StageIndex + 1];
-                Heading("다음 스테이지 선택", "이어지는 길은 하나야. 준비됐으면 다음 문을 열어.");
-                Text("Route", modalContent, $"{run.CurrentStage.title}  →  {next.title}\n\n{next.subtitle}", 25, Paper, new Vector2(70, -166), new Vector2(840, 160)).alignment = TextAlignmentOptions.Center;
-                Button("Continue", modalContent, next.isBossStage ? "보스 방으로 이동" : "다음 스테이지로 이동", new Vector2(280, -346), new Vector2(420, 66), run.ContinueToNextStage);
+                Heading("다음 게이트", next.isBossStage ? "BOSS" : $"GATE {run.StageIndex + 2:00}");
+                string destination = HunterProgress.IsStageDiscovered(next.stageId) ? next.title : "???";
+                HunterUi.Text("Route", modalContent, font, $"{run.CurrentStage.title}   →   {destination}", 26, HunterUi.Cream, new Vector2(0, -190), new Vector2(960, 48), FontStyles.Bold, TextAlignmentOptions.Center);
+                HunterUi.Button("Continue", modalContent, font, next.isBossStage ? "보스 게이트 진입" : "다음 게이트 진입", new Vector2(300, -330), new Vector2(360, 60), run.ContinueToNextStage);
             }
             else if (run.Phase == LiminalRunPhase.Paused)
             {
-                Heading("잠시 멈춤", "문은 기다리고 있어.");
-                Text("Augments", modalContent, run.AugmentHistory, 21, Paper, new Vector2(70, -150), new Vector2(840, 165)).alignment = TextAlignmentOptions.Center;
-                Button("Resume", modalContent, "계속 탐방하기", new Vector2(280, -328), new Vector2(420, 62), run.Resume);
-                Button("Restart", modalContent, "같은 배치로 다시 시작", new Vector2(280, -406), new Vector2(420, 52), () => run.StartNewRun(run.seed));
+                // ESC: the quit question. In a gate the run summary and the way back to the lobby stay below it.
+                bool inGate = !run.PausedInLobby;
+                if (!inGate) modalContent.sizeDelta = new Vector2(960, 330);
+                Heading("게임 종료", "PAUSE");
+                HunterUi.Text("Question", modalContent, font, "종료하시겠습니까?", 30, HunterUi.Cream, new Vector2(0, -135), new Vector2(960, 48), FontStyles.Bold, TextAlignmentOptions.Center);
+                HunterUi.Button("Yes", modalContent, font, "네", new Vector2(190, -220), new Vector2(270, 60), run.QuitGame, 21);
+                HunterUi.Button("No", modalContent, font, "아니요", new Vector2(500, -220), new Vector2(270, 60), run.Resume, 21);
+                if (inGate)
+                {
+                    HunterUi.Fill("Divider", modalContent, new Vector2(0, 1), new Vector2(0, 1), new Vector2(40, -320), new Vector2(880, 1.2f), HunterUi.GoldDim);
+                    HunterUi.Text("Augments", modalContent, font, run.AugmentHistory.Replace("\n", "   ·   "), 15, HunterUi.Muted,
+                        new Vector2(40, -342), new Vector2(570, 110));
+                    HunterUi.Button("Return", modalContent, font, "로비로 귀환", new Vector2(650, -350), new Vector2(270, 48), run.ReturnToLobby, 17);
+                }
             }
             else if (run.Phase == LiminalRunPhase.Victory || run.Phase == LiminalRunPhase.Defeat)
             {
                 bool won = run.Phase == LiminalRunPhase.Victory;
-                Heading(won ? "마지막 문을 통과했어" : "이번 탐방은 여기까지", won ? "그런데, 이곳의 불은 여전히 켜져 있어." : "같은 배치로 다시 살펴볼 수 있어.");
-                Text("Result", modalContent, $"SEED {run.seed}\n\n{run.AugmentHistory}", 21, Paper, new Vector2(70, -150), new Vector2(840, 165)).alignment = TextAlignmentOptions.Center;
-                Button("Restart", modalContent, "같은 배치로 다시 시작", new Vector2(180, -357), new Vector2(300, 70), () => run.StartNewRun(run.seed));
-                Button("NewRun", modalContent, "새로운 배치 탐방", new Vector2(500, -357), new Vector2(300, 70), () => run.StartNewRun(unchecked(run.seed + 104729)));
+                Heading(won ? "게이트 클리어" : "헌터 후송", won ? "CLEAR" : "RETREAT");
+                HunterUi.Text("Reward", modalContent, font, $"획득 마석   <color=#a99bff>+{run.PendingReward:N0}</color>", 26, HunterUi.Cream, new Vector2(0, -150), new Vector2(960, 40), FontStyles.Bold, TextAlignmentOptions.Center);
+                HunterUi.Text("Result", modalContent, font, run.AugmentHistory, 17, HunterUi.Muted, new Vector2(70, -205), new Vector2(820, 100), FontStyles.Normal, TextAlignmentOptions.Top);
+                HunterUi.Button("Return", modalContent, font, "로비로 귀환", new Vector2(150, -350), new Vector2(300, 64), run.ReturnToLobby);
+                HunterUi.Button("Retry", modalContent, font, "같은 미션 재도전", new Vector2(510, -350), new Vector2(300, 64), run.RetryMission);
             }
             else
             {
-                Heading("맵 설정을 확인해 줘", "LiminalRunDirector의 플레이어와 스테이지 연결이 필요해.");
-                Text("Error", modalContent, configurationError ?? "설정을 불러오지 못했어.", 20, Paper, new Vector2(50, -175), new Vector2(880, 225));
+                Heading("설정 오류", "CONFIGURATION");
+                HunterUi.Text("Error", modalContent, font, configurationError ?? "", 18, HunterUi.Cream, new Vector2(50, -150), new Vector2(860, 180));
+                HunterUi.Button("Return", modalContent, font, "로비로 귀환", new Vector2(300, -365), new Vector2(360, 56), run.ReturnToLobby);
             }
         }
 
-        void Heading(string title, string subtitle)
+        void Heading(string title, string tag)
         {
-            Text("Title", modalContent, title, 35, Accent, new Vector2(32, -36), new Vector2(916, 60)).alignment = TextAlignmentOptions.Center;
-            Text("Subtitle", modalContent, subtitle, 20, Paper, new Vector2(32, -101), new Vector2(916, 46)).alignment = TextAlignmentOptions.Center;
+            HunterUi.Text("Tag", modalContent, font, tag, 13, HunterUi.Gold, new Vector2(40, -30), new Vector2(880, 18), FontStyles.Bold);
+            HunterUi.Title(modalContent, font, title, new Vector2(40, -50), 880, 30);
         }
 
-        void Choice(int column, string title, string description, int option)
+        void Choice(float x, AugmentDefinition augment, int option)
         {
-            var card = Button("Augment_" + option, modalContent, "", new Vector2(35 + column * 307, -175), new Vector2(296, 238), () => run.SelectAugment(option));
-            Text("Name", card, title, 25, Accent, new Vector2(20, -21), new Vector2(256, 42));
-            Text("Description", card, description, 19, Paper, new Vector2(20, -80), new Vector2(256, 144));
-        }
+            var card = HunterUi.Button("Augment_" + option, modalContent, font, "", new Vector2(x, -130), new Vector2(280, 300), () => run.SelectAugment(option));
+            HunterUi.Text("Index", card, font, $"0{option + 1}", 14, HunterUi.Gold, new Vector2(20, -18), new Vector2(60, 20), FontStyles.Bold);
+            string scope = augment.IsCommon ? "공용" : "전용";
+            HunterUi.Text("Rarity", card, font, $"{scope} · {AugmentDefinition.RarityLabel(augment.rarity)}", 13, AugmentDefinition.RarityColor(augment.rarity),
+                new Vector2(80, -18), new Vector2(180, 20), FontStyles.Bold, TextAlignmentOptions.TopRight);
+            int held = run.Augments ? run.Augments.Stacks(augment.id) : 0;
+            HunterUi.Title(card, font, held > 0 ? $"{augment.title} +" : augment.title, new Vector2(20, -42), 240, 24);
+            HunterUi.Text("Description", card, font, augment.description, 15, HunterUi.Cream, new Vector2(20, -100), new Vector2(240, 190));
 
-        RectTransform Button(string name, Transform parent, string label, Vector2 pos, Vector2 size, Action action)
-        {
-            var rect = Box(name, parent, new Vector2(0, 1), new Vector2(0, 1), pos, size, new Color(.14f, .2f, .17f));
-            var button = rect.gameObject.AddComponent<UnityEngine.UI.Button>();
-            rect.GetComponent<UnityEngine.UI.Image>().raycastTarget = true;
-            button.targetGraphic = rect.GetComponent<UnityEngine.UI.Image>();
+            // Turn around the card's centre, not the top-left corner the layout places it by.
+            card.pivot = new Vector2(.5f, .5f);
+            card.anchoredPosition += new Vector2(card.sizeDelta.x * .5f, -card.sizeDelta.y * .5f);
+            var button = card.GetComponent<Button>();
             var colors = button.colors;
-            colors.highlightedColor = new Color(.72f, .89f, .66f);
-            colors.selectedColor = colors.highlightedColor;
-            colors.pressedColor = new Color(.48f, .66f, .44f);
+            colors.disabledColor = colors.normalColor;
             button.colors = colors;
-            button.onClick.AddListener(() => action());
-            if (!string.IsNullOrEmpty(label))
-                Text("Label", rect, label, 21, Paper, Vector2.zero, size).alignment = TextAlignmentOptions.Center;
-            return rect;
+            button.interactable = false;
+            augmentCards.Add(new AugmentCard { rect = card, back = CardBack(card), button = button });
         }
 
-        static RectTransform Box(string name, Transform parent, Vector2 anchor, Vector2 pivot, Vector2 pos, Vector2 size, Color color)
+        /// <summary>The face-down side, drawn over the face until the card turns.</summary>
+        GameObject CardBack(RectTransform card)
         {
-            var go = new GameObject(name, typeof(RectTransform), typeof(UnityEngine.UI.Image));
-            go.transform.SetParent(parent, false);
-            var rect = go.GetComponent<RectTransform>();
-            SetCorner(rect, anchor, pivot); rect.anchoredPosition = pos; rect.sizeDelta = size;
-            var image = go.GetComponent<UnityEngine.UI.Image>(); image.color = color; image.raycastTarget = false;
-            return rect;
+            // Fully opaque: in linear colour space even a 4% gap lets the cream face text read through.
+            var navy = HunterUi.NavyDeep;
+            var back = HunterUi.Fill("Back", card, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, Vector2.zero, new Color(navy.r, navy.g, navy.b, 1)).rectTransform;
+            back.anchorMin = Vector2.zero; back.anchorMax = Vector2.one; back.offsetMin = back.offsetMax = Vector2.zero;
+            HunterUi.Frame(back, HunterUi.Gold, 1.6f);
+            var inset = HunterUi.Fill("Inset", back, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, card.sizeDelta - new Vector2(24, 24), Color.clear).rectTransform;
+            HunterUi.Frame(inset, HunterUi.GoldDim, 1);
+            var crest = HunterUi.Fill("Crest", back, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, 10), new Vector2(84, 84), new Color(HunterUi.Gate.r, HunterUi.Gate.g, HunterUi.Gate.b, .22f)).rectTransform;
+            crest.localRotation = Quaternion.Euler(0, 0, 45);
+            HunterUi.Frame(crest, HunterUi.Gold, 1.6f);
+            HunterUi.Text("Mark", back, font, "?", 44, HunterUi.Gold, new Vector2(0, -card.sizeDelta.y * .5f + 43), new Vector2(card.sizeDelta.x, 64), FontStyles.Bold, TextAlignmentOptions.Center);
+            HunterUi.Text("Tag", back, font, "AUGMENT", 12, HunterUi.GoldDim, new Vector2(0, -card.sizeDelta.y + 46), new Vector2(card.sizeDelta.x, 18), FontStyles.Bold, TextAlignmentOptions.Center);
+            return back.gameObject;
         }
-
-        TextMeshProUGUI Text(string name, Transform parent, string value, int size, Color color, Vector2 pos, Vector2 dimensions)
-        {
-            var go = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
-            go.transform.SetParent(parent, false);
-            var text = go.GetComponent<TextMeshProUGUI>();
-            text.font = font; text.fontSize = size; text.text = value; text.color = color;
-            text.raycastTarget = false; text.textWrappingMode = TextWrappingModes.Normal;
-            text.overflowMode = TextOverflowModes.Ellipsis;
-            text.margin = new Vector4(1, 0, 1, 0);
-            SetCorner(text.rectTransform, new Vector2(0, 1), new Vector2(0, 1));
-            text.rectTransform.anchoredPosition = pos; text.rectTransform.sizeDelta = dimensions;
-            return text;
-        }
-
-        static void SetCorner(RectTransform rect, Vector2 anchor, Vector2 pivot)
-        { rect.anchorMin = rect.anchorMax = anchor; rect.pivot = pivot; }
 
         void OnDestroy()
         {
-            if (ownsFont && font)
-            {
-                foreach (var atlas in font.atlasTextures) if (atlas) Destroy(atlas);
-                if (font.material) Destroy(font.material);
-                Destroy(font);
-            }
-            if (ownedSourceFont) Destroy(ownedSourceFont);
+            indicators?.Release();
+            if (subscribed) subscribed.JustDodged -= OnJustDodged;
+            HunterUi.ReleaseFont(font, ownedSourceFont);
         }
     }
 }

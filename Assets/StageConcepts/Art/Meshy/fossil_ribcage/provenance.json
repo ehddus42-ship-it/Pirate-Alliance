@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "cave",
+  "role": "landmark",
+  "prompt": "Long low fossil skeleton of a huge ancient serpent creature lying half buried along a long rock mound, a row of eight large curved rib bones arching up from the mound in a line like a tunnel frame, a long spine along the top of the mound, no skull. The whole prop is about twice as long as it is tall, horizontal. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Pale ivory and tan fossil bone with darker stained cracks, dark grey cave rock mound, small glowing violet and cyan crystal clusters between the ribs, fine bone and rock normal detail.",
+  "preview_task_id": "01a102be-db06-72d2-9053-fb3f966b6f25",
+  "refine_task_id": "01a102c0-7efe-7076-ab74-d9b7223f4e20",
+  "attempt": 2,
+  "created_utc": "2026-10-03T17:13:19.095548+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    4.6,
+    2.8,
+    2.4
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 15396,
+    "vertices": 27600,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3581691,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2251326,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2644255,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.6315019726753235,
+      -0.308227002620697,
+      -0.9487449526786804
+    ],
+    "unity_bounds_max": [
+      0.631309986114502,
+      0.31420207023620605,
+      0.9498100876808167
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 9547536
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

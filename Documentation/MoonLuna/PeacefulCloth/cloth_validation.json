@@ -1,0 +1,83 @@
+{
+  "passed": true,
+  "checks": {
+    "source_unchanged": true,
+    "centroid_entries_complete": true,
+    "all_centroids_finite": true,
+    "all_group_indices_valid": true,
+    "group_point_layout_valid": true,
+    "group_attributes_valid": true,
+    "all_group_points_finite": true,
+    "no_moving_points_in_frontal_face_roi": true,
+    "every_moving_component_has_fixed_anchor": true,
+    "hands_boots_upper_sleeves_not_simulated": true
+  },
+  "sourceSha256": "e165d9ae83cf439ce20a6ef22543243233687cf92298bbf61ec9f2c17ce4b4e7",
+  "clothDataSha256": "14241874657cb7aad9488d122306cba829737f3c44d01df9437099b35fcb6dad",
+  "char1TriangleCount": 19902,
+  "groups": [
+    {
+      "name": "Skirt",
+      "points": 4180,
+      "fixed": 139,
+      "move": 4041,
+      "components": 3,
+      "component_sizes": [
+        4093,
+        62,
+        25
+      ],
+      "unanchored_components_retained_fixed": []
+    },
+    {
+      "name": "Veil",
+      "points": 2593,
+      "fixed": 318,
+      "move": 2275,
+      "components": 4,
+      "component_sizes": [
+        2326,
+        130,
+        121,
+        16
+      ],
+      "unanchored_components_retained_fixed": []
+    },
+    {
+      "name": "CollarRibbon",
+      "points": 141,
+      "fixed": 96,
+      "move": 45,
+      "components": 2,
+      "component_sizes": [
+        76,
+        65
+      ],
+      "unanchored_components_retained_fixed": []
+    },
+    {
+      "name": "Cuff_L",
+      "points": 192,
+      "fixed": 96,
+      "move": 96,
+      "components": 1,
+      "component_sizes": [
+        192
+      ],
+      "unanchored_components_retained_fixed": []
+    },
+    {
+      "name": "Cuff_R",
+      "points": 192,
+      "fixed": 96,
+      "move": 96,
+      "components": 1,
+      "component_sizes": [
+        192
+      ],
+      "unanchored_components_retained_fixed": []
+    }
+  ],
+  "face_roi_violations": [],
+  "review": "Four bind-pose segmentation views checked. Skirt colour boundaries remain within one cloth group. Simulation tuning and collision behaviour must be checked in Unity."
+}

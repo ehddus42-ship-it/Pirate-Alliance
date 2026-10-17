@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "forest",
+  "role": "landmark",
+  "prompt": "Tall weathered stone statue of a hooded elven guardian standing upright on a low round plinth, long cloak falling to the feet, both hands resting on the pommel of a long greatsword planted point down in front of the body, face hidden in the hood shadow, a crack across one shoulder, ivy wrapping the legs. Solemn ancient forest monument. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Weathered pale grey marble with green moss in the cloak folds, dark ivy leaves, deep hood shadow, faint turquoise glow in the carved sword runes, rain streaks. Detailed carved stone normal map.",
+  "preview_task_id": "01a0f2c1-a7e2-7586-ac6d-62a898cc71df",
+  "refine_task_id": "01a0f2c2-a4d6-71ac-ab41-bca361199e6c",
+  "attempt": 1,
+  "created_utc": "2026-09-30T14:41:21.793978+00:00",
+  "requested_triangles": 26000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.8,
+    6.4,
+    2.6
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 26416,
+    "vertices": 27410,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3346234,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2010015,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2601923,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.32862600684165955,
+      -0.9517189264297485,
+      -0.33455294370651245
+    ],
+    "unity_bounds_max": [
+      0.33031201362609863,
+      0.9505609273910522,
+      0.3354540467262268
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 9154548
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

@@ -1,0 +1,79 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "forest/moonlit",
+  "role": "Destructible thrown sapling: arms, chases the player, explodes only if not destroyed.",
+  "prompt": "Small original animated woodland sapling creature facing +Z, full body upright. Squat gnarled round seedpod trunk with two bright inset eye hollows and jagged natural wooden mouth, two short separated root legs, tiny branch arms out at sides, broad pale glowing seed bulb embedded in chest. Two fresh green sprouting leaves on crooked head twig, moss tufts and bark ridges. Mischievous dangerous forest seedling, no weapon, clothing, flowerpot or ground base. Single isolated original stylized realistic fantasy game monster, complete visible object, centered, forward faces +Z, up +Y. No floor, pedestal, text or logos. Strong readable silhouette from an elevated three-quarter action game camera, sculpted organic detail, clear large forms, elegant moonlit enchanted forest quality.",
+  "texture_prompt": "Warm walnut and weathered chestnut bark, vivid emerald moss, fresh spring green leaves, pale mint inner seed bulb and small turquoise eye hollows. Fine grooved bark normals, light sap cracks around swelling seed bulb, matte natural wood with glossy sap only. Same moonlit forest palette as elder tree, no metal, explosive hardware, lettering or symbols.",
+  "preview_task_id": "01a10a75-df40-768f-b322-296404a7b21e",
+  "refine_task_id": "01a10a76-d71a-76e0-b1b1-41563e06d031",
+  "created_utc": "2026-10-05T05:09:26.245485+00:00",
+  "requested_triangles": 8000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 5945,
+    "vertices": 7203,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.36789199709892273,
+      -0.8410990238189697,
+      -0.2979399561882019
+    ],
+    "unity_bounds_max": [
+      0.3664400279521942,
+      0.9489269852638245,
+      0.29569005966186523
+    ],
+    "bytes": 7959592
+  },
+  "consumed_credits": 30,
+  "target_size_m": [
+    0.95,
+    1.25,
+    0.9
+  ],
+  "unity_front_axis": "+Z (requested; review before assembly)",
+  "recommended_ground_offset_y": 0.9520019888877869,
+  "review": "Pending thumbnail and Unity assembly review.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 8635384,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 2048px; tangent normals renormalized; binary payload compactly repacked.",
+  "form_preparation": "Removed the unwanted lower display slab from Meshy geometry; retains root feet and original atlas UVs.",
+  "removed_base_triangles": 2404,
+  "recommended_uniform_scale": 0.6983138756964193,
+  "recommended_local_offset_after_scale": [
+    0.0005069651011218063,
+    0.5873511191674997,
+    0.0007855669816110355
+  ]
+}

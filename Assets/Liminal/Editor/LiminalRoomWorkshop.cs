@@ -12,9 +12,8 @@ namespace AcRoguelike.Liminal.Editor
     {
         Vector2 scroll;
         string filter="",newName="NewRoomVariation",validation="";
-        int seed=73029,stageIndex;
+        int seed=73029;
         bool addCloneToStage=true;
-        static readonly string[] StageNames={"01 노란 방","02 풀룸","03 마지막 환승","04 끝없는 홀"};
 
         [MenuItem("AC Roguelike/Liminal/Room Workshop")]
         public static void Open()
@@ -29,10 +28,12 @@ namespace AcRoguelike.Liminal.Editor
             EditorGUILayout.LabelField("프리팹을 열어 수정하면 새로 생성되는 스테이지에도 반영돼.",EditorStyles.wordWrappedLabel);
             using(new EditorGUILayout.HorizontalScope())
             {
-                if(GUILayout.Button("20개 방 갤러리",GUILayout.Height(29)))OpenScene(LiminalMapBuilder.GalleryPath);
+                if(GUILayout.Button("전체 맵 갤러리",GUILayout.Height(29)))OpenScene(LiminalMapBuilder.GalleryPath);
                 if(GUILayout.Button("27개 기물 갤러리",GUILayout.Height(29)))OpenScene(LiminalMapBuilder.PropGalleryPath);
                 if(GUILayout.Button("게임 맵 열기",GUILayout.Height(29)))OpenScene(LiminalMapBuilder.RunPath);
             }
+            if(GUILayout.Button("같은 갤러리의 숲 · 프로그램 · 폐허 · 동굴 구역 보기",GUILayout.Height(25)))
+                AcRoguelike.StageConcepts.Editor.StageConceptGallery.OpenGallery();
             EditorGUILayout.Space(8);
             filter=EditorGUILayout.TextField("방 찾기",filter);
             scroll=EditorGUILayout.BeginScrollView(scroll,GUILayout.MinHeight(140));
@@ -55,8 +56,8 @@ namespace AcRoguelike.Liminal.Editor
             EditorGUILayout.Space(7);
             EditorGUILayout.LabelField("선택한 방으로 새 바리에이션 만들기",EditorStyles.boldLabel);
             newName=EditorGUILayout.TextField("새 프리팹 이름",newName);
-            stageIndex=EditorGUILayout.Popup("스테이지",stageIndex,StageNames);
-            addCloneToStage=EditorGUILayout.Toggle("해당 스테이지 방 풀에 추가",addCloneToStage);
+            EditorGUILayout.LabelField("세션 구성", "입장방 → 랜덤 3개 방 → 고정 보스방");
+            addCloneToStage=EditorGUILayout.Toggle("일반 방 랜덤 후보에 추가",addCloneToStage);
             using(new EditorGUILayout.HorizontalScope())
             {
                 if(GUILayout.Button("선택한 방 복제"))CloneSelectedRoom();
@@ -80,8 +81,9 @@ namespace AcRoguelike.Liminal.Editor
 
         static LiminalRoom[] Rooms()
         {
-            if(!AssetDatabase.IsValidFolder(LiminalMapBuilder.RoomFolder))return Array.Empty<LiminalRoom>();
-            return AssetDatabase.FindAssets("t:Prefab",new[]{LiminalMapBuilder.RoomFolder}).Select(g=>AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(g))).Where(g=>g).Select(g=>g.GetComponent<LiminalRoom>()).Where(r=>r).OrderBy(r=>r.name).ToArray();
+            var folders=new[]{LiminalMapBuilder.RoomFolder,AcRoguelike.StageConcepts.Editor.StageConceptGallery.RoomFolder}.Where(AssetDatabase.IsValidFolder).ToArray();
+            if(folders.Length==0)return Array.Empty<LiminalRoom>();
+            return AssetDatabase.FindAssets("t:Prefab",folders).Select(g=>AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(g))).Where(g=>g).Select(g=>g.GetComponent<LiminalRoom>()).Where(r=>r).OrderBy(r=>r.name).ToArray();
         }
 
         static void OpenScene(string path)
@@ -123,10 +125,11 @@ namespace AcRoguelike.Liminal.Editor
             if(PrefabUtility.IsPartOfPrefabInstance(copy))PrefabUtility.UnpackPrefabInstance(copy,PrefabUnpackMode.Completely,InteractionMode.AutomatedAction);
             var component=copy.GetComponent<LiminalRoom>();component.roomId=copy.name;component.displayName=copy.name;
             var prefab=PrefabUtility.SaveAsPrefabAsset(copy,path);Object.DestroyImmediate(copy);
-            if(addCloneToStage&&stageIndex<3)
+            if(addCloneToStage)
             {
-                var stage=AssetDatabase.LoadAssetAtPath<LiminalStageDefinition>(LiminalMapBuilder.Root+"/Stages/Stage_"+(stageIndex+1).ToString("00")+".asset");
-                if(stage){Undo.RecordObject(stage,"Add room variation to stage");stage.roomPool=stage.roomPool.Concat(new[]{prefab.GetComponent<LiminalRoom>()}).ToArray();EditorUtility.SetDirty(stage);AssetDatabase.SaveAssets();}
+                var room=prefab.GetComponent<LiminalRoom>();
+                var stage=AssetDatabase.LoadAssetAtPath<LiminalStageDefinition>(LiminalSessionBuilder.SessionStagePath);
+                if(stage&&room.kind!=LiminalRoomKind.Boss){Undo.RecordObject(stage,"Add room variation to session");stage.roomPool=stage.roomPool.Concat(new[]{room}).Distinct().ToArray();EditorUtility.SetDirty(stage);AssetDatabase.SaveAssets();}
             }
             Selection.activeObject=prefab;AssetDatabase.OpenAsset(prefab);
             validation="새 바리에이션을 저장했어: "+path;
@@ -157,8 +160,8 @@ namespace AcRoguelike.Liminal.Editor
             if(!director)return;
             // Regeneration replaces only GeneratedRoute. Save authored changes first, then explicitly confirm the replacement.
             if(director.transform.Find("GeneratedRoute") && !EditorUtility.DisplayDialog("스테이지 미리보기 교체","GeneratedRoute에 직접 배치한 변경은 새 조립 결과로 바뀌어. 방 변경은 먼저 프리팹에 저장해 줘.","새 시드로 생성","취소"))return;
-            Undo.RecordObject(director,"Change liminal preview seed");director.seed=seed;director.GeneratePreview(stageIndex);EditorUtility.SetDirty(director);EditorSceneManager.MarkSceneDirty(director.gameObject.scene);
-            Selection.activeGameObject=director.gameObject;SceneView.lastActiveSceneView?.FrameSelected();validation=StageNames[stageIndex]+" · 시드 "+seed+" 미리보기를 만들었어. Ctrl+S로 씬을 저장할 수 있어.";
+            Undo.RecordObject(director,"Change liminal preview seed");director.seed=seed;director.GeneratePreview(0);EditorUtility.SetDirty(director);EditorSceneManager.MarkSceneDirty(director.gameObject.scene);
+            Selection.activeGameObject=director.gameObject;SceneView.lastActiveSceneView?.FrameSelected();validation="경계 공간 · 시드 "+seed+" 미리보기를 만들었어. Ctrl+S로 씬을 저장할 수 있어.";
         }
     }
 }

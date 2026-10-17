@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "forest",
+  "role": "prop",
+  "prompt": "Ancient mossy stone lantern, tall slender carved column on a square stepped base, a curved pagoda-like stone cap on top, an open four-sided light chamber holding one faceted glowing crystal, a little moss and a few small vines. Elven forest path marker, upright and symmetric. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Weathered grey green carved stone, soft green moss patches, pale mint cyan crystal in the light chamber, darker stone inside, subtle lichen. Crisp carved stone normal map.",
+  "preview_task_id": "01a0f2c1-9d9c-7537-bd89-4c21fb5d6c10",
+  "refine_task_id": "01a0f2c2-9966-73ff-8a54-372bfd50285b",
+  "attempt": 1,
+  "created_utc": "2026-09-30T14:41:19.127014+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    0.9,
+    2.1,
+    0.9
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 14883,
+    "vertices": 18821,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3069353,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1328737,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2380823,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.2509840130805969,
+      -0.9516969919204712,
+      -0.252456933259964
+    ],
+    "unity_bounds_max": [
+      0.25245800614356995,
+      0.9504039883613586,
+      0.25201207399368286
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 7562100
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

@@ -1,0 +1,102 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "game-theme original arcade hardware",
+  "theme": "game",
+  "role": "landmark",
+  "prompt": "Original monumental gaming cartridge portal arch, two thick upright square stacks of interlocking rectangular game cartridges joined above by one massive horizontal cartridge lintel, huge completely empty rectangular walk-through opening. Broad stepped beveled block silhouette, recessed blank rectangular label panels, visible short golden connector teeth at outer sides, narrow depth. No side walls, no back wall, no letters or logos. Single isolated complete environment prop, full object visible, no scene or floor plane, no characters. Clear silhouette from an elevated three-quarter game camera, precise bevelled hard surfaces, large clean forms, no tiny floating pieces, rich PBR normal detail, premium stylized game asset.",
+  "texture_prompt": "Midnight navy cartridge shells with alternating ivory inset label panels, cyan and raspberry plastic ribbing, amber gold metal connector teeth, subtle molded plastic seams and worn corners, light scuffs. High quality PBR industrial toy architecture.",
+  "preview_task_id": "01a100ad-f8a5-773d-8c21-98b54f96d5a0",
+  "refine_task_id": "01a100ae-f09b-71f4-bd23-d97aacd71d20",
+  "attempt": 1,
+  "created_utc": "2026-10-03T07:34:30.816807+00:00",
+  "requested_triangles": 11000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    7.0,
+    6.5,
+    2.0
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 6979,
+    "vertices": 11586,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 1301388,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 452101,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/png",
+        "bytes": 4307911,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.950747013092041,
+      -0.5685530304908752,
+      -0.46211206912994385
+    ],
+    "unity_bounds_max": [
+      0.9516609907150269,
+      0.5679870843887329,
+      0.459494024515152
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 6518176
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 2048px; tangent normals renormalized; binary payload compactly repacked.",
+  "review": "Meshy geometry and PBR thumbnails visually inspected; accepted for Unity in-room placement review.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 7562412,
+  "review_notes": "Open central passage confirmed in preview; accepted as a neutral structural arch. Add game-colored scene lighting or trim around its quiet panel areas.",
+  "sha256": "df8d7cd962d4070f072b0642c2abe2432448e0fb1d4332179d2fe039e47fb9ff",
+  "unity_front_axis": "+Z",
+  "orientation_review": "Compared coarse GLB projections from Unity axis views; glTF X mirrored for glTFast. Final camera visibility is checked in Unity."
+}

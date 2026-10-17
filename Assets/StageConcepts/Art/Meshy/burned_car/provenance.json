@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "ruins",
+  "role": "prop",
+  "prompt": "Burned out abandoned compact hatchback car wreck, blackened body shell, empty window frames, melted tires on bare rims, crumpled hood popped open, sagging roof, recognizable small city car proportions. Post apocalyptic Earth street, complete grounded vehicle, no license plate. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Charred black and rusty orange metal with patches of scorched pale blue paint, soot, ash grey interior, bare dark rims, heavy flaking rust normal detail.",
+  "preview_task_id": "01a0f2c7-8b89-7206-9c03-5e87f5fed671",
+  "refine_task_id": "01a0f2c9-c73e-7660-8ddf-8907c99d8c84",
+  "attempt": 1,
+  "created_utc": "2026-09-30T14:50:11.871796+00:00",
+  "requested_triangles": 20000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.0,
+    1.5,
+    4.2
+  ],
+  "long_horizontal_axis": "z",
+  "actual": {
+    "triangles": 19073,
+    "vertices": 35094,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3709728,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2607711,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2564309,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9504669904708862,
+      -0.4030090272426605,
+      -0.41165900230407715
+    ],
+    "unity_bounds_max": [
+      0.9506850242614746,
+      0.402972012758255,
+      0.40966999530792236
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 10235928
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

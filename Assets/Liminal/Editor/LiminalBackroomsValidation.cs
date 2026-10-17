@@ -272,9 +272,26 @@ namespace AcRoguelike.Liminal.Editor
                 scene = EditorSceneManager.OpenPreviewScene(LiminalMapBuilder.GalleryPath);
                 var rooms = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<LiminalRoom>(true)).ToArray();
                 report.galleryRoomCount = rooms.Length;
-                if (rooms.Length != 20) report.errors.Add("Saved gallery must contain 20 rooms; found " + rooms.Length + ".");
-                foreach (string id in LiminalMapBuilder.RoomIds)
+                var expectedIds = new HashSet<string>(LiminalMapBuilder.RoomIds, StringComparer.Ordinal);
+                const string conceptRoomFolder = "Assets/StageConcepts/Prefabs/Rooms";
+                if (AssetDatabase.IsValidFolder(conceptRoomFolder))
+                    foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { conceptRoomFolder }))
+                    {
+                        string path = AssetDatabase.GUIDToAssetPath(guid);
+                        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                        var room = prefab ? prefab.GetComponent<LiminalRoom>() : null;
+                        if (!room) continue;
+                        if (string.IsNullOrEmpty(room.roomId)) report.errors.Add("Concept room prefab has no room id: " + path + ".");
+                        else if (!expectedIds.Add(room.roomId)) report.errors.Add("Duplicate expected gallery room id: " + room.roomId + " (" + path + ").");
+                    }
+                if (rooms.Length != expectedIds.Count) report.errors.Add("Saved gallery must contain " + expectedIds.Count + " rooms; found " + rooms.Length + ".");
+                foreach (string id in expectedIds.OrderBy(id => id))
                     if (rooms.Count(r => r.roomId == id) != 1) report.errors.Add("Gallery must contain exactly one " + id + ".");
+                foreach (var group in rooms.GroupBy(r => r.roomId))
+                {
+                    if (!expectedIds.Contains(group.Key)) report.errors.Add("Unexpected gallery room id: " + group.Key + ".");
+                    if (group.Count() > 1) report.errors.Add("Duplicate gallery room id: " + group.Key + ".");
+                }
                 for (int i = 0; i < rooms.Length; i++)
                     for (int j = 0; j < i; j++)
                     {

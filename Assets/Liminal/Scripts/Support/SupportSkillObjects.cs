@@ -236,7 +236,7 @@ namespace AcRoguelike.Liminal
         {
             owner = skill;
             target = point;
-            fallTime = Mathf.Max(.2f, duration);
+            fallTime = ProjectileTuning.ScaleFlightDuration(Mathf.Max(.2f, duration));
             radius = blastRadius;
             damage = blastDamage;
             start = target + new Vector3(-4.5f, 17f, -6.5f);
@@ -253,6 +253,7 @@ namespace AcRoguelike.Liminal
         void Update()
         {
             if (landed) return;
+            if (!owner || !owner.Selected) { Destroy(gameObject); return; }
             age += Time.deltaTime;
             float t = Mathf.Clamp01(age / fallTime);
             transform.position = Vector3.Lerp(start, target + Vector3.up * .9f, t * t);
@@ -384,6 +385,7 @@ namespace AcRoguelike.Liminal
     /// <summary>Voxel chomper fired with each talisman while 1UP is active: homes on the target, chomps, deals bonus damage.</summary>
     sealed class SupportChomper : MonoBehaviour
     {
+        SupportCharacterSkill owner;
         TrainingEnemy target;
         Vector3 direction;
         int damage;
@@ -392,8 +394,9 @@ namespace AcRoguelike.Liminal
         const float Speed = 12.5f, Lifetime = 2.4f;
         static readonly Color Yellow = new Color(1f, .86f, .16f);
 
-        public void Launch(Vector3 origin, Vector3 forward, TrainingEnemy enemy, int bonusDamage, GameObject source)
+        public void Launch(SupportCharacterSkill skill, Vector3 origin, Vector3 forward, TrainingEnemy enemy, int bonusDamage, GameObject source)
         {
+            owner = skill;
             transform.position = origin;
             direction = Vector3.ProjectOnPlane(forward, Vector3.up).normalized;
             if (direction.sqrMagnitude < .01f) direction = Vector3.forward;
@@ -407,15 +410,16 @@ namespace AcRoguelike.Liminal
 
         void Update()
         {
+            if (!owner || !owner.Selected) { Destroy(gameObject); return; }
             float dt = Time.deltaTime;
             age += dt;
             if (target && target.IsAlive)
             {
                 Vector3 to = target.AimPoint - transform.position;
                 if (to.magnitude < .55f) { Hit(); return; }
-                direction = Vector3.RotateTowards(direction, to.normalized, 9f * dt, 0);
+                direction = Vector3.RotateTowards(direction, to.normalized, 9f * ProjectileTuning.SpeedMultiplier * dt, 0);
             }
-            transform.position += direction * Speed * dt;
+            transform.position += direction * ProjectileTuning.ScaleSpeed(Speed) * dt;
             transform.rotation = Quaternion.LookRotation(direction);
             // Chomp: squash the mouth axis like a two-frame sprite.
             float chomp = Mathf.Abs(Mathf.Sin(age * 18f));
@@ -426,7 +430,7 @@ namespace AcRoguelike.Liminal
                 pelletClock = 0;
                 SupportVoxels.Burst(transform.position - direction * .3f, 1, .2f, .1f, new[] { new Color(1f, .95f, .7f) }, 2.5f);
             }
-            if (age >= Lifetime || transform.position.y < -1) Destroy(gameObject);
+            if (age >= ProjectileTuning.ScaleFlightDuration(Lifetime) || transform.position.y < -1) Destroy(gameObject);
         }
 
         void Hit()

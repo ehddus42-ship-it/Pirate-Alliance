@@ -1,0 +1,118 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "game-theme original arcade hardware",
+  "theme": "game",
+  "role": "landmark",
+  "prompt": "Two connected arcade racing game machines side by side. Each machine has one tall boxy upright monitor cabinet, a steering wheel below its recessed screen, and one separate bucket seat facing the screen. Both seats and cabinets are anchored to one low flat rectangular arcade floor platform. Stepped squared side panels, thick beveled edges. Stationary indoor game equipment, not a car. No vehicle wheels, tires, canopy, people, lettering or logos. Single isolated complete environment prop, full object visible, no scene or floor plane, no characters. Clear silhouette from an elevated three-quarter game camera, precise bevelled hard surfaces, large clean forms, no tiny floating pieces, rich PBR normal detail, premium stylized game asset.",
+  "texture_prompt": "Midnight navy metal cabinets with completely blank solid navy marquee header panels. No lettering, words, brands, logos, numbers or decals anywhere. Warm ivory seat shells, raspberry seat pads, cyan screens showing only simple abstract blue light lines, amber buttons, aluminium corners. Fine PBR vents, seams and lightly worn edges. All sign panels are plain unmarked dark navy.",
+  "preview_task_id": "01a100b1-7f4d-756a-8f4d-6756cdccac5d",
+  "refine_task_id": "01a100b5-bbc0-77dd-a553-b77f8d2caec7",
+  "attempt": 2,
+  "created_utc": "2026-10-03T07:42:15.920283+00:00",
+  "texture_attempt": 2,
+  "rejected_geometry": [
+    {
+      "preview_id": "01a100ab-b299-7460-aae5-cd62fd90a27c",
+      "refine_id": "01a100ad-edf6-7148-b795-ad514a7ea79f",
+      "reason": "First shape reads as a road vehicle with wheels; replace with stationary monitor cabinets and floor-mounted seats for the arcade environment.",
+      "rejected_utc": "2026-10-03T07:34:29.232477+00:00"
+    }
+  ],
+  "rejected_textures": [
+    {
+      "refine_id": "01a100b2-c8b5-7511-a221-99d88a96a285",
+      "reason": "Generated marquee lettering looks like unintended branding; retain approved arcade geometry and replace signs with plain unmarked panels.",
+      "rejected_utc": "2026-10-03T07:41:10.855586+00:00"
+    }
+  ],
+  "requested_triangles": 12000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    4.8,
+    3.3,
+    4.5
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 11333,
+    "vertices": 17171,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 1024776,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 559994,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/png",
+        "bytes": 3315572,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.6594110131263733,
+      -0.7460629343986511,
+      -0.9516889452934265
+    ],
+    "unity_bounds_max": [
+      0.6603170037269592,
+      0.7446770668029785,
+      0.9507540464401245
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 5588056
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 2048px; tangent normals renormalized; binary payload compactly repacked.",
+  "review": "Meshy geometry and PBR thumbnails visually inspected; accepted for Unity in-room placement review.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 7338208,
+  "review_notes": "Two floor-mounted arcade stations with seats and screens. Rejected vehicle-shaped first generation and replaced a lettered marquee texture with abstract unbranded panels.",
+  "sha256": "9464ae5a4fc744bb7be15b4c623009bc9f58be2c06e3f6b1a67931479fc983f8",
+  "unity_front_axis": "-X",
+  "orientation_review": "Compared coarse GLB projections from Unity axis views; glTF X mirrored for glTFast. Final camera visibility is checked in Unity."
+}

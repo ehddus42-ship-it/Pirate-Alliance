@@ -1,0 +1,143 @@
+{
+  "character_name": "문루나",
+  "input": "Temp/MoonLuna/Meshy/peaceful_walk_retargeted.fbx",
+  "source_frame_rate": 30.0,
+  "source_frame_range": [
+    1.0,
+    120.0
+  ],
+  "selected_source_frame_range": [
+    1,
+    51
+  ],
+  "loop_frame_range": [
+    1,
+    51
+  ],
+  "loop_duration_seconds": 1.6666666666666667,
+  "idle_source_frame": 85,
+  "idle_duration_seconds": 2.0,
+  "armature_name": "Armature",
+  "root_bone": "Hips",
+  "bones": [
+    {
+      "name": "Hips",
+      "parent": null
+    },
+    {
+      "name": "Spine02",
+      "parent": "Hips"
+    },
+    {
+      "name": "Spine01",
+      "parent": "Spine02"
+    },
+    {
+      "name": "Spine",
+      "parent": "Spine01"
+    },
+    {
+      "name": "neck",
+      "parent": "Spine"
+    },
+    {
+      "name": "Head",
+      "parent": "neck"
+    },
+    {
+      "name": "head_end",
+      "parent": "Head"
+    },
+    {
+      "name": "headfront",
+      "parent": "Head"
+    },
+    {
+      "name": "LeftShoulder",
+      "parent": "Spine"
+    },
+    {
+      "name": "LeftArm",
+      "parent": "LeftShoulder"
+    },
+    {
+      "name": "LeftForeArm",
+      "parent": "LeftArm"
+    },
+    {
+      "name": "LeftHand",
+      "parent": "LeftForeArm"
+    },
+    {
+      "name": "RightShoulder",
+      "parent": "Spine"
+    },
+    {
+      "name": "RightArm",
+      "parent": "RightShoulder"
+    },
+    {
+      "name": "RightForeArm",
+      "parent": "RightArm"
+    },
+    {
+      "name": "RightHand",
+      "parent": "RightForeArm"
+    },
+    {
+      "name": "LeftUpLeg",
+      "parent": "Hips"
+    },
+    {
+      "name": "LeftLeg",
+      "parent": "LeftUpLeg"
+    },
+    {
+      "name": "LeftFoot",
+      "parent": "LeftLeg"
+    },
+    {
+      "name": "LeftToeBase",
+      "parent": "LeftFoot"
+    },
+    {
+      "name": "RightUpLeg",
+      "parent": "Hips"
+    },
+    {
+      "name": "RightLeg",
+      "parent": "RightUpLeg"
+    },
+    {
+      "name": "RightFoot",
+      "parent": "RightLeg"
+    },
+    {
+      "name": "RightToeBase",
+      "parent": "RightFoot"
+    }
+  ],
+  "source_root_translation": [
+    -0.124228292144835,
+    -0.47112415730953217,
+    0.01599186658859253
+  ],
+  "processing": "Selected one steady gait cycle. Removed horizontal root travel; preserved vertical weight transfer. Smooth distributed quaternion/position correction makes start and end poses match. Exported armature and action only.",
+  "outputs": [
+    {
+      "path": "Assets/Characters/MoonLuna/Peaceful/Animations/LunaPeacefulWalk_Source.fbx",
+      "bytes": 358732,
+      "sha256": "a88b789d86a0be40711a41c02fa60a738e7eed06f4f9c39f726086593c990fa7"
+    },
+    {
+      "path": "Assets/Characters/MoonLuna/Peaceful/Animations/LunaPeacefulWalk_Loop.fbx",
+      "bytes": 249996,
+      "sha256": "5d99d52cde9614c4d510ebdb4ebee1d2d6d2ffbdaa06ef5cd620241bec4aaa45"
+    },
+    {
+      "path": "Assets/Characters/MoonLuna/Peaceful/Animations/LunaPeacefulIdle.fbx",
+      "bytes": 245292,
+      "sha256": "b5a1967f671dd413ef50f5bf74d6f815aa8fd3534102a9760a79608ab897e250"
+    }
+  ]
+}

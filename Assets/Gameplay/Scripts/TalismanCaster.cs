@@ -84,6 +84,14 @@ namespace AcRoguelike
             return true;
         }
 
+        /// <summary>Melee swings (MeleeSlash) count as casts so cast-based systems keep working.</summary>
+        public void RegisterMeleeHit(TrainingEnemy target)
+        {
+            LastTarget = target;
+            CastCount++;
+            nextCastTime = Time.time + cooldown;
+        }
+
         bool CanSee(TrainingEnemy enemy)
         {
             Vector3 from = castOrigin ? castOrigin.position : transform.position + Vector3.up * 1.2f;

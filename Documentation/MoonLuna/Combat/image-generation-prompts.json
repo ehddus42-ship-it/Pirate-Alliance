@@ -1,0 +1,24 @@
+{
+  "mode": "built-in imagegen",
+  "date": "2026-10-16",
+  "transparent_background": true,
+  "prompts": [
+    [
+      "moon",
+      "Use case: stylized-concept. Asset type: production game VFX lunar surface sprite texture. Create ONE centered full moon disc, front orthographic view, filling 82 percent of a square canvas with generous transparent padding. Rich physically convincing cratered lunar surface and marbled maria, elegant mystical Korean anime dark-fantasy character palette: pearlescent ivory, pale champagne gold highlights, cool lavender-silver shadow pockets, very subtle indigo spectral veins. Fine readable crater detail, sculptural relief with soft grazing light, luminous but preserve surface contrast. Soft thin irregular vapor fringe only, no starfield, no background, no frame, no letters, no icon border, no geometric rings, no separate objects. The circular lunar silhouette must be crisp with genuine transparent exterior and tiny soft bloom, game-ready high quality hand-painted realism. No crescent or phases here: full round lunar surface only; phase geometry will be implemented in the game shader."
+    ],
+    [
+      "wisp",
+      "Use case: stylized-concept. Asset type: game particle VFX texture with genuine transparency. Create one organic elliptical turbulent spectral smoke plume, not a scene or an illustration of an object. Curling delicate wisps and layered fibrous vapor, wispy breakup at all edges, soft feathered alpha, flowing from a dense luminous lower-left region toward a tapering upper-right vapor tail. Deep indigo to lavender to moon-white, faint champagne gold motes embedded. Mysterious lunar madness, elegant ethereal light, intricate fine filament structure with several larger readable swirls. Occupy central 75 percent of a square transparent canvas with empty margins; no hard edge clipping. No circles, no magic runes, no straight lines, no geometric primitives, no text, no stars as symbols, no character, no environment. High dynamic detail with varied density; useful as layered particle and textured trail."
+    ],
+    [
+      "flame",
+      "Use case: stylized-concept. Asset type: production game eye-fire particle sprite on genuine transparent background. ONE compact vertical golden spectral flame plume. Bright small white-yellow source centered near bottom, three curling uneven tongues climbing upward, white hot golden center transitioning to rich yellow, amber, subtly violet transparent feathered tips. Sinister mystical lunar possession rather than ordinary campfire. Detailed fluid wisps, turbulent lacy edges and a few tiny glowing ember specks close to flame. Centered, isolated, fills 60 percent width and 75 percent height of square canvas, substantial empty transparent border, no object supporting fire. This will emanate from a character's eyes, so vertical silhouette and delicate small-scale readable detail are crucial. NO horizontal wings, NO side-to-side beam, NO lightning bolt, NO lens flare star, NO geometrical line or ring, NO letters, no character, no background."
+    ]
+  ],
+  "eye_afterimage_revision": {
+    "mode": "built-in imagegen edit",
+    "prompt": "Edit the referenced game VFX texture into a calm lunar eye-light AFTERIMAGE texture, completely replacing the fiery visual language. Preserve the square transparent canvas, centered narrow vertical layout and tiny source at bottom center, with visible content approximately U .29-.73 and V .06-.96 (bottom-up UV coordinates). Replace every orange/red/amber flame and ember with delicate pale champagne-white and very pale lemon light dissolving into translucent pearl-lavender and silver. It should look like a spectral echo or a long-exposure ghost of moonlight floating upward, NOT a fire: broad soft silky translucent light filaments, gently drifting smoke-like ribbons with feathered edges, restrained low contrast, no sharp pointed flame tongues, no burning core, no sparks or detached embers, no hot orange. A small softly luminous light source at bottom blends into semi-transparent luminous vapor above. About two or three overlapping ghosted wisps, elegant, mysterious, weightless, calm and faintly uncanny. Readable at small game-particle scale; genuine alpha transparency and empty margins. No background, character, eye drawing, magic circle, symbol, text, straight beam or geometric outline. Keep overall source position and footprint compatible with the original texture, but make the material unmistakably light afterimage rather than combustion.",
+    "texture": "Assets/Characters/MoonLuna/Combat/Textures/LunaEyeAfterimage.png"
+  }
+}

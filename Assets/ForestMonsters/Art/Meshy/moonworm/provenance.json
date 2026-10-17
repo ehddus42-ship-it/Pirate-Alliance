@@ -1,0 +1,81 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "forest/moonlit",
+  "role": "Telegraphed burrow eruption and writhing charge; longitudinal vertex deformation in Unity.",
+  "prompt": "Long giant EARTHWORM, soft smooth fleshy cylindrical tube with many thin shallow annular wrinkles, natural segmented earthworm anatomy. Horizontal gently S-shaped body stretched out along Z, length five times diameter. Rounded tapered head at +Z, slightly raised above ground, narrow tapered tail behind. One smooth wide clitellum band behind head. No eyes, teeth, armor, plates, scales, spikes or legs. Soft organic creature, not a snake, larva, tire or machine. Single isolated original stylized realistic fantasy game monster, complete visible object, centered, forward faces +Z, up +Y. No floor, pedestal, text or logos. Strong readable silhouette from an elevated three-quarter action game camera, sculpted organic detail, clear large forms, elegant moonlit enchanted forest quality.",
+  "texture_prompt": "Soft moist organic earthworm skin, rich muted jade green back blending into pale sage green underside, thin warm brown folds and small mint luminous freckles. Smooth satin skin with fine shallow annular wrinkles and natural fleshy color variation. NONMETALLIC soft organic flesh, no armor plates, no stone, no grey slabs, no scales, no metal, no writing.",
+  "preview_task_id": "01a10a77-4a46-73f5-839d-f8bb20c7ccb7",
+  "refine_task_id": "01a10a78-4157-72e4-8bd9-63d2ef9a3eb6",
+  "created_utc": "2026-10-05T05:11:39.963351+00:00",
+  "requested_triangles": 14000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 14650,
+    "vertices": 12635,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.39015698432922363,
+      -0.6450979709625244,
+      -0.9517179727554321
+    ],
+    "unity_bounds_max": [
+      0.38526198267936707,
+      0.6440430283546448,
+      0.9506649971008301
+    ],
+    "bytes": 6797496
+  },
+  "consumed_credits": 30,
+  "target_size_m": [
+    0.85,
+    0.85,
+    3.4
+  ],
+  "unity_front_axis": "+Z verified using the raised head of the longitudinal mesh",
+  "recommended_ground_offset_y": 0.6450979709625244,
+  "review": "Pending thumbnail and Unity assembly review.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 7492064,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 2048px; tangent normals renormalized; binary payload compactly repacked.",
+  "form_preparation": "Rotated source X-long body around Y so the raised head is +Z and the tapered tail is -Z.",
+  "rejected_attempts": [
+    "First preview/refine: gray armored shell, rejected for not reading as organic earthworm."
+  ],
+  "recommended_uniform_scale": 1.7872321471932082,
+  "recommended_local_offset_after_scale": [
+    0.0043742521545937245,
+    1.1529398317933344,
+    0.0009409559700582986
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "cave",
+  "role": "prop",
+  "prompt": "Abandoned miners camp, ring of stones around a burned out campfire with charred logs, a cooking pot on a small iron tripod, a rolled bedroll and a wooden stool beside it, an old oil lantern on a flat rock. Low wide camp prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Grey fieldstones, black charred wood with faint orange embers, dark iron pot, faded brown canvas bedroll, worn wood, warm amber lantern glass, dust.",
+  "preview_task_id": "01a102ba-ec46-77cf-afe9-a1cef917ebcf",
+  "refine_task_id": "01a102bc-d9c9-759e-ad1e-e8f6c2090879",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:09:18.272801+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.6,
+    1.0,
+    2.6
+  ],
+  "long_horizontal_axis": null,
+  "actual": {
+    "triangles": 15324,
+    "vertices": 20555,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3118763,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 1976729,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2292603,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9499348998069763,
+      -0.24372494220733643,
+      -0.9488499164581299
+    ],
+    "unity_bounds_max": [
+      0.9514269232749939,
+      0.251617968082428,
+      0.9442889094352722
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 8232040
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

@@ -1,0 +1,52 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "ruins",
+  "prompt": "Destroyed modern office tower ruin, narrow five-story concrete building shell, shattered upper floors at jagged diagonal, exposed horizontal floor slabs, broken window openings, partly collapsed facade, twisted reinforcing rods, small rubble foot. Post apocalyptic Earth city, no signs, no people. Single isolated complete game environment prop, full object visible, no background scene, no ground plane, no pedestal, no characters. Strong readable silhouette, efficient low polygon game mesh, large clean forms, fine detail in PBR normal textures, realistic stylized fantasy game quality.",
+  "texture_prompt": "Dusty pale grey cracked concrete, dark empty windows, rusty exposed rebar, scorched dark patches, faded blue glass remnants, chipped surface detailed normal maps, abandoned urban ruin.",
+  "preview_task_id": "01a0f173-400e-76ab-8b8f-17a80618a84f",
+  "refine_task_id": "01a0f174-78d6-7474-8dce-42da629be11c",
+  "created_utc": "2026-09-30T08:36:33.495259+00:00",
+  "requested_triangles": 6000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 5862,
+    "vertices": 10954,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "bytes": 6128352
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 2048px; tangent normals renormalized; binary payload compactly repacked.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 6768988
+}

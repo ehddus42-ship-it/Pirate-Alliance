@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "ruins",
+  "role": "prop",
+  "prompt": "Ruined city bus stop shelter, rectangular metal frame with a slanted roof, the back and side panels shattered leaving only frame edges, a long bench inside, a bent sign pole beside it, small rubble and dry leaves on its floor slab. Post apocalyptic street furniture, complete grounded structure, no advertisement. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Rust streaked grey green painted steel frame, a few cracked frosted panel pieces, weathered wooden bench slats, dusty concrete slab, dried leaves, fine rust normal detail.",
+  "preview_task_id": "01a0f2c8-d317-7267-8fc8-f8c210efc42f",
+  "refine_task_id": "01a0f2ca-20e4-765a-ac48-49b23088c132",
+  "attempt": 1,
+  "created_utc": "2026-09-30T14:50:54.711983+00:00",
+  "requested_triangles": 18000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    4.2,
+    2.8,
+    1.8
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 13386,
+    "vertices": 20938,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 3200834,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2280587,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2250124,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9507380127906799,
+      -0.7386900782585144,
+      -0.5362019538879395
+    ],
+    "unity_bounds_max": [
+      0.9517369866371155,
+      0.7387630343437195,
+      0.558405876159668
+    ],
+    "longest_horizontal_axis": "x",
+    "bytes": 8564428
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

@@ -16,6 +16,8 @@ namespace AcRoguelike.Liminal.EditorTests
     {
         const string ActiveKey = "Liminal.Validation.Active";
         const string ReportKey = "Liminal.Validation.Report";
+        const string BatchKey = "Liminal.Validation.Batch";
+        const string PrefsKey = "Liminal.Validation.Prefs";
         const string ScenePath = "Assets/Liminal/Scenes/LiminalRun.unity";
         const string ReportPath = "Documentation/liminal-validation.json";
         [Serializable] public sealed class Report
@@ -23,6 +25,9 @@ namespace AcRoguelike.Liminal.EditorTests
             public string status = "running";
             public string utc;
             public string unityVersion;
+            public int runSeed;
+            public string route;
+            public List<string> enteredRooms = new List<string>();
             public int stagesCompleted;
             public int combatRoomsCleared;
             public bool bossTelegraphObserved;
@@ -30,6 +35,8 @@ namespace AcRoguelike.Liminal.EditorTests
             public List<string> checks = new List<string>();
             public List<string> errors = new List<string>();
         }
+        [Serializable] sealed class Pref { public string key; public bool existed; public int value; }
+        [Serializable] sealed class Snapshot { public List<Pref> values = new List<Pref>(); }
 
         static Report report;
         static LiminalRunDirector run;
@@ -38,21 +45,89 @@ namespace AcRoguelike.Liminal.EditorTests
         static double nextTick;
         static int wantedRoom, originalSeed, healthBeforeBoss;
         static string initialRoute;
-        static VendingMonster arrivalAmbush;
 
         static LiminalPlayValidation()
         {
             EditorApplication.update += Update;
             EditorApplication.playModeStateChanged += mode =>
             {
-                if (mode == PlayModeStateChange.EnteredEditMode && SessionState.GetBool(ActiveKey, false))
-                    Finish(false, "Play Mode ended before the validation completed.");
+                if (mode != PlayModeStateChange.EnteredEditMode) return;
+                if (SessionState.GetBool(ActiveKey, false)) Finish(false, "Play Mode ended before the validation completed.");
+                if (SessionState.GetBool(BatchKey, false)) CompleteBatch();
             };
+            EditorApplication.quitting += RestoreBatchPrefs;
             if (SessionState.GetBool(ActiveKey, false))
             {
                 report = JsonUtility.FromJson<Report>(SessionState.GetString(ReportKey, "{}"));
                 stateStarted = EditorApplication.timeSinceStartup;
             }
+        }
+
+        /// <summary>Runs the existing integration checks in a separate batch editor, restoring user progression on exit.</summary>
+        public static void RunBatch()
+        {
+            if (!Application.isBatchMode || EditorApplication.isPlayingOrWillChangePlaymode || SessionState.GetBool(ActiveKey, false))
+                throw new InvalidOperationException("Use a separate batch editor in Edit Mode, without -quit.");
+            SessionState.SetBool(BatchKey, true);
+            report = NewReport();
+            try
+            {
+                CaptureBatchPrefs();
+                Start();
+                // Structural failure returns its report without entering Play Mode.
+                if (!SessionState.GetBool(ActiveKey, false)) CompleteBatch();
+            }
+            catch (Exception ex)
+            {
+                report ??= NewReport();
+                report.status = "failed"; report.errors.Add(ex.ToString());
+                SaveReport(); SessionState.SetBool(ActiveKey, false);
+                CompleteBatch();
+            }
+        }
+
+        static void CaptureBatchPrefs()
+        {
+            if (!string.IsNullOrEmpty(SessionState.GetString(PrefsKey, "")))
+                throw new InvalidOperationException("A progression snapshot already exists; restore it before starting another batch validation.");
+            var keys = new HashSet<string> { "Hunter.MagicStones" };
+            foreach (HunterProgress.Upgrade upgrade in Enum.GetValues(typeof(HunterProgress.Upgrade)))
+                keys.Add("Hunter.Upgrade." + upgrade);
+            var catalog = Resources.Load<GateMissionCatalog>("GateMissions");
+            if (catalog)
+                foreach (var mission in catalog.Missions)
+                    if (mission != null) keys.Add(HunterProgress.DestinationDiscoveryKey(mission.destinationId));
+            foreach (string guid in AssetDatabase.FindAssets("t:LiminalStageDefinition"))
+            {
+                var stage = AssetDatabase.LoadAssetAtPath<LiminalStageDefinition>(AssetDatabase.GUIDToAssetPath(guid));
+                if (stage) keys.Add(HunterProgress.StageDiscoveryKey(stage.stageId));
+            }
+            var snapshot = new Snapshot();
+            foreach (var key in keys)
+                snapshot.values.Add(new Pref { key = key, existed = PlayerPrefs.HasKey(key), value = PlayerPrefs.GetInt(key) });
+            SessionState.SetString(PrefsKey, JsonUtility.ToJson(snapshot));
+            // The existing health-reset assertions require the authored base health, with upgrades temporarily zeroed.
+            foreach (var key in keys) PlayerPrefs.DeleteKey(key);
+            PlayerPrefs.Save();
+        }
+
+        static void RestoreBatchPrefs()
+        {
+            string json = SessionState.GetString(PrefsKey, "");
+            if (string.IsNullOrEmpty(json)) return;
+            foreach (var item in JsonUtility.FromJson<Snapshot>(json).values)
+                if (item.existed) PlayerPrefs.SetInt(item.key, item.value); else PlayerPrefs.DeleteKey(item.key);
+            PlayerPrefs.Save();
+        }
+
+        static void CompleteBatch()
+        {
+            report ??= JsonUtility.FromJson<Report>(SessionState.GetString(ReportKey, "{}"));
+            RestoreBatchPrefs();
+            SessionState.EraseString(PrefsKey);
+            SessionState.SetBool(BatchKey, false);
+            SessionState.SetBool(ActiveKey, false);
+            EditorApplication.Exit(report != null && report.status == "passed" && report.errors.Count == 0 ? 0 : 1);
         }
 
         public static string Start()
@@ -92,8 +167,32 @@ namespace AcRoguelike.Liminal.EditorTests
         static void CheckStructure(Report result)
         {
             var source = UnityEngine.Object.FindFirstObjectByType<LiminalRunDirector>();
-            Require(source && source.stages != null && source.stages.Length == 4, "Four stages must be connected in the run scene.");
-            Require(source.stages[3].isBossStage, "The final stage must be the boss stage.");
+            Require(source && source.stages != null && source.stages.Length == 1, "The run scene must connect one four-room liminal session.");
+            var session = source.stages[0];
+            Require(session && AssetDatabase.GetAssetPath(session) == "Assets/Liminal/Stages/Stage_Liminal.asset",
+                "The run scene must use the consolidated Stage_Liminal asset.");
+            Require(session.stageId == "liminal_1" && session.middleRoomCount == 3 && session.isBossStage,
+                "The liminal session must preserve discovery, select three middle rooms and enable its final boss HUD.");
+            Require(session.startRoom && AssetDatabase.GetAssetPath(session.startRoom) == "Assets/Liminal/Prefabs/Rooms/01_Arrival_TicketHall.prefab",
+                "The original arrival ticket hall reference must remain available for authored content, outside the played route.");
+            Require(session.endRoom && session.endRoom.kind == LiminalRoomKind.Boss &&
+                AssetDatabase.GetAssetPath(session.endRoom) == "Assets/Liminal/Prefabs/Rooms/12_Boss_DepartureConcourse.prefab",
+                "The original departure concourse boss room must remain the fixed final room.");
+            var originalStages = Enumerable.Range(1, 3).Select(i => AssetDatabase.LoadAssetAtPath<LiminalStageDefinition>(
+                "Assets/Liminal/Stages/Stage_" + i.ToString("00") + ".asset")).ToArray();
+            Require(originalStages.All(stage => stage && stage.roomPool != null), "The three original room-category assets must remain available.");
+            var expectedPool = new HashSet<LiminalRoom>(originalStages.SelectMany(stage => stage.roomPool).Where(room => room));
+            Require(expectedPool.Count >= 16 && session.roomPool != null && session.roomPool.Length >= 16 &&
+                session.roomPool.All(room => room && room.kind != LiminalRoomKind.Boss && room != session.startRoom && room != session.endRoom),
+                "The session pool must preserve at least sixteen ordinary room variations and exclude the fixed arrival and boss.");
+            var sessionPool = new HashSet<LiminalRoom>(session.roomPool);
+            Require(sessionPool.Count == session.roomPool.Length && expectedPool.IsSubsetOf(sessionPool),
+                "The session pool must contain every original variation exactly once and may include additional ordinary rooms.");
+            var catalog = Resources.Load<GateMissionCatalog>("GateMissions");
+            var mission = catalog ? catalog.Missions.FirstOrDefault(candidate => candidate != null && candidate.id == "liminal_campaign") : null;
+            Require(mission != null && mission.StageCount == 1 && mission.RoomCount == 4 && mission.stages[0] == session,
+                "The liminal gate mission and run scene must share the same one-stage, four-room session.");
+            result.checks.Add($"Liminal scene and mission share one four-room session: three of {sessionPool.Count} variations beginning with combat, then the fixed original boss room.");
             var previewScene = EditorSceneManager.NewPreviewScene();
             GameObject host = null;
             try
@@ -110,13 +209,22 @@ namespace AcRoguelike.Liminal.EditorTests
                     string route = RouteIds(definition.ChooseRoute(73029, s));
                     Require(route == RouteIds(definition.ChooseRoute(73029, s)), $"Stage {s + 1} is not deterministic.");
                     var distinctRoutes = new HashSet<string>();
-                    for (int seed = 1; seed <= 32; seed++) distinctRoutes.Add(RouteIds(definition.ChooseRoute(seed, s)));
-                    if (definition.roomPool.Length > 1 && definition.middleRoomCount > 0)
-                        Require(distinctRoutes.Count > 1, $"Stage {s + 1} ignores the seed.");
-                    var chosen = definition.ChooseRoute(73029, s);
-                    if (definition.middleRoomCount <= definition.roomPool.Distinct().Count())
-                        Require(chosen.Skip(1).Take(definition.middleRoomCount).Distinct().Count() == definition.middleRoomCount,
-                            $"Stage {s + 1} repeats a room before its pool is exhausted.");
+                    var visitedVariations = new HashSet<LiminalRoom>();
+                    int seedSamples = Mathf.Max(128, sessionPool.Count * 8);
+                    for (int seed = 1; seed <= seedSamples; seed++)
+                    {
+                        var chosen = definition.ChooseRoute(seed, s);
+                        string signature = RouteIds(chosen);
+                        distinctRoutes.Add(signature);
+                        Require(signature == RouteIds(definition.ChooseRoute(seed, s)), $"Seed {seed} is not deterministic.");
+                        Require(chosen.Length == 4 && chosen[0].kind == LiminalRoomKind.Combat && chosen[3] == session.endRoom && !chosen.Contains(session.startRoom),
+                            $"Seed {seed} must begin directly in random combat, omit the old arrival, and finish at the fixed boss.");
+                        Require(chosen.Distinct().Count() == 4 && chosen.Take(3).All(sessionPool.Contains),
+                            $"Seed {seed} repeats a room or selects an ordinary room outside the session variation pool.");
+                        visitedVariations.UnionWith(chosen.Take(3));
+                    }
+                    Require(distinctRoutes.Count > 1, $"Stage {s + 1} ignores the seed.");
+                    Require(visitedVariations.SetEquals(sessionPool), $"All {sessionPool.Count} session room variations must appear across {seedSamples} seeds.");
                     preview.GeneratePreview(s);
                     Physics.SyncTransforms();
                     for (int i = 0; i < preview.Rooms.Count; i++)
@@ -154,7 +262,7 @@ namespace AcRoguelike.Liminal.EditorTests
                             }
                         }
                     }
-                    result.checks.Add($"Stage {s + 1}: deterministic route, {distinctRoutes.Count} seeded routes, unique shuffle bag, sockets aligned, rooms do not overlap, spawn markers clear.");
+                    result.checks.Add($"Stage {s + 1}: {seedSamples} deterministic seed checks, {distinctRoutes.Count} distinct routes, all {sessionPool.Count} variations reached without repeats, fixed boss, sockets aligned, rooms do not overlap, spawn markers clear.");
                 }
             }
             finally
@@ -359,41 +467,41 @@ namespace AcRoguelike.Liminal.EditorTests
                 switch (state)
                 {
                     case "AwaitRun":
+                        // The run now starts in the walkable hunter lobby; the gate starts the dungeon.
+                        if (run.Phase == LiminalRunPhase.Lobby)
+                        {
+                            Require(run.Lobby && run.Lobby.Agent, "The hunter lobby or its association agent is missing.");
+                            Require(run.Rooms.Count == 0, "The lobby kept a dungeon route alive.");
+                            report.checks.Add("Run starts in the hunter lobby with the association agent and the gate.");
+                            int departureSeed = run.seed;
+                            run.EnterDungeon();
+                            Require(run.seed != departureSeed && run.Phase == LiminalRunPhase.Exploring && run.Rooms.Count == 4,
+                                "The first liminal departure must choose a fresh seed and start a four-room session.");
+                            report.checks.Add("The first liminal departure chooses a fresh seed and generates four rooms.");
+                            return;
+                        }
                         if (run.Rooms.Count == 0 || run.ActiveRoomIndex != 0) return;
+                        Require(run.stages.Length == 1 && run.Rooms.Count == 4 && run.Rooms[3].kind == LiminalRoomKind.Boss,
+                            "The live liminal session must contain four rooms ending at the fixed boss.");
+                        Require(run.Rooms[0].kind == LiminalRoomKind.Combat && run.LivingEnemyCount > 0 && run.ClearedRoomCount == 0,
+                            "The first random room must immediately activate enemies instead of an empty arrival room.");
                         originalSeed = run.seed;
                         initialRoute = RouteIds(run.Rooms);
+                        report.runSeed = originalSeed;
+                        report.route = initialRoute;
+                        Debug.Log($"LIMINAL_PLAY_ROUTE: seed={originalSeed}, rooms={initialRoute}");
                         Require(!run.TryUseExit(), "The stage exited before the route was cleared.");
                         report.checks.Add("Premature stage exit rejected.");
-                        arrivalAmbush = run.Rooms[0].GetComponentInChildren<VendingMonster>();
-                        Require(arrivalAmbush && arrivalAmbush.enabled, "Stage 1 arrival has no enabled authored vending ambush.");
-                        Require(arrivalAmbush.State == VendingMonsterState.Dormant && !arrivalAmbush.Health.CanBeTargeted,
-                            "Authored appliance was not dormant at the player spawn.");
                         Require(run.Rooms.Skip(1).SelectMany(r => r.GetComponentsInChildren<VendingMonster>()).All(m => !m.enabled),
                             "A future room's ambush was activated early.");
-                        Require(!run.Rooms.SelectMany(r => r.GetComponentsInChildren<Transform>(true)).Any(t => t.name == "MeshySlot__vending_machine"),
-                            "An old decoration was left alongside the monster.");
-                        motor.ResetAt(arrivalAmbush.transform.position + arrivalAmbush.transform.forward * 4 + Vector3.up * .05f);
-                        Next("AwaitArrivalAmbush");
-                        break;
-                    case "AwaitArrivalAmbush":
-                        if (arrivalAmbush.State == VendingMonsterState.Dormant) return;
-                        Require(arrivalAmbush.State == VendingMonsterState.Awakening, "Arrival ambush skipped its emergence.");
-                        report.checks.Add("Stage 1 authored appliance is dormant at spawn and awakens on approach at its original placement.");
-                        Next("ObserveArrivalAmbush");
-                        break;
-                    case "ObserveArrivalAmbush":
-                        if (arrivalAmbush.State == VendingMonsterState.Awakening) return;
-                        Require(arrivalAmbush.Health.CanBeTargeted && arrivalAmbush.limbRenderers.All(r => r.enabled),
-                            "Arrival ambush did not finish unfolding into a targetable monster.");
-                        arrivalAmbush.Health.TakeDamage(arrivalAmbush.Health.maxHealth + 1);
-                        Require(run.LivingEnemyCount == 0, "Optional arrival ambush changed the room-clear counter.");
-                        report.checks.Add("Unvisited rooms stay dormant; existing decorations are removed; arrival ambush death preserves route progress.");
-                        wantedRoom = 1;
-                        EnterWantedRoom(motor);
+                        report.checks.Add("First random room immediately starts combat; future rooms stay dormant.");
+                        wantedRoom = 0;
+                        Next("AwaitEntry");
                         break;
                     case "AwaitEntry":
                         if (run.ActiveRoomIndex != wantedRoom) return;
                         var room = run.Rooms[wantedRoom];
+                        report.enteredRooms.Add(room.name);
                         bool combat = room.kind == LiminalRoomKind.Combat || room.kind == LiminalRoomKind.Boss;
                         var placedAmbushes = room.GetComponentsInChildren<VendingMonster>();
                         Require(placedAmbushes.All(m => m.enabled && m.Target == run.PlayerHealth), "Authored ambushes were not initialized on room entry.");
@@ -401,15 +509,29 @@ namespace AcRoguelike.Liminal.EditorTests
                             "Runtime duplicated an authored vending monster.");
                         if (combat)
                         {
-                            int regularEnemies = room.kind == LiminalRoomKind.Boss ? 1 : Mathf.Max(1, room.enemySpawns.Length);
-                            Require(run.LivingEnemyCount == regularEnemies + placedAmbushes.Length,
-                                "Room-clear count does not include its authored vending monsters exactly once.");
+                            int roomEnemies = room.GetComponentsInChildren<TrainingEnemy>().Count(e => e.IsAlive);
+                            Require(run.LivingEnemyCount == roomEnemies,
+                                "Room-clear count does not include every monster in the room (vending ambushes, office monsters, monitors) exactly once.");
+                            Require(room.kind == LiminalRoomKind.Boss || room.GetComponentsInChildren<LiminalPropMonster>().Length >= Mathf.Max(1, room.enemySpawns.Length),
+                                "A combat room did not spawn its office monsters.");
+                            if (room.kind == LiminalRoomKind.Combat)
+                            {
+                                // Kit.Build retains these named slots inside each monster's cloned prop model.
+                                // Only active room decorations outside monster hierarchies should have been replaced.
+                                // Authored boss rooms skip SpawnOfficeMonsters and keep their ordinary scenery.
+                                var duplicateProps = room.GetComponentsInChildren<Transform>(true).Where(t => t.gameObject.activeInHierarchy &&
+                                    (t.name == "MeshySlot__photocopier" || t.name == "MeshySlot__lockers") &&
+                                    !t.GetComponentInParent<LiminalPropMonster>()).ToArray();
+                                Require(duplicateProps.Length == 0,
+                                    $"Active copier/locker room decorations remain outside monster hierarchies in {room.name}, seed {run.seed}: " +
+                                    string.Join(", ", duplicateProps.Select(t => AnimationUtility.CalculateTransformPath(t, room.transform))));
+                            }
                             Require(run.LivingEnemyCount > 0, room.name + " spawned no enemies.");
                             Require(room.entranceGate && room.entranceGate.activeSelf && room.exitGate && room.exitGate.activeSelf, room.name + " did not lock its gates.");
                             Require(!run.TryUseExit(), "An uncleared combat room permitted a stage exit.");
                             if (room.kind == LiminalRoomKind.Boss)
                             {
-                                var boss = room.GetComponentsInChildren<LiminalEnemy>().First(e => e.isBoss);
+                                var boss = room.GetComponentsInChildren<TrafficLightBoss>().First();
                                 healthBeforeBoss = run.PlayerHealth.Health;
                                 motor.ResetAt(boss.transform.position + room.transform.right * 5);
                                 Next("ObserveBoss");
@@ -419,8 +541,9 @@ namespace AcRoguelike.Liminal.EditorTests
                         else Next("CheckClear");
                         break;
                     case "ObserveBoss":
-                        var activeBoss = run.Rooms[wantedRoom].GetComponentsInChildren<LiminalEnemy>().First(e => e.isBoss);
-                        report.bossTelegraphObserved |= activeBoss.IsWindingUp;
+                        var activeBoss = run.Rooms[wantedRoom].GetComponentsInChildren<TrafficLightBoss>().First();
+                        report.bossTelegraphObserved |= activeBoss.State == TrafficLightBossState.FieldCast || activeBoss.State == TrafficLightBossState.CarThrow
+                            || (activeBoss.warning && activeBoss.warning.enabled);
                         if (run.PlayerHealth.Health < healthBeforeBoss)
                         {
                             report.bossDamageObserved = true;
@@ -438,6 +561,24 @@ namespace AcRoguelike.Liminal.EditorTests
                     case "CheckClear":
                         Require(run.LivingEnemyCount == 0, "Dead enemies still block the route.");
                         var clearedRoom = run.Rooms[wantedRoom];
+                        if (clearedRoom.kind == LiminalRoomKind.Combat)
+                        {
+                            // A cleared normal combat room deals up to three different common augments and pauses for the pick.
+                            Require(run.Phase == LiminalRunPhase.AugmentChoice, "A cleared combat room did not offer augments.");
+                            var offers = run.AugmentOffers;
+                            Require(offers.Count > 0 && offers.Count <= LiminalRunDirector.AugmentChoices
+                                && offers.Select(o => o.id).Distinct().Count() == offers.Count && offers.All(o => o.IsCommon),
+                                "Augment offers must be one to three different common augments for the test hunter.");
+                            Require(Time.timeScale == 0, "The augment pick did not pause the run.");
+                            int picksBefore = run.Augments.PickCount;
+                            string picked = offers[0].id;
+                            run.SelectAugment(0);
+                            Require(run.Phase == LiminalRunPhase.Exploring && run.Augments.PickCount == picksBefore + 1 && run.Augments.Has(picked),
+                                "Picking an augment did not grant it and resume the run.");
+                            run.SelectAugment(0);
+                            Require(run.Augments.PickCount == picksBefore + 1, "A second pick was granted from one offer.");
+                            report.checks.Add($"Combat room {wantedRoom + 1}: augment offer ({offers.Count} cards) picked '{picked}' and resumed.");
+                        }
                         Require(!clearedRoom.entranceGate || !clearedRoom.entranceGate.activeSelf, "Entrance stayed locked after clear.");
                         if (wantedRoom < run.Rooms.Count - 1)
                         {
@@ -454,32 +595,30 @@ namespace AcRoguelike.Liminal.EditorTests
                     case "UseExit":
                         Require(run.ExitAvailable && run.TryUseExit(), "Cleared stage exit was unavailable.");
                         report.stagesCompleted++;
-                        if (run.StageIndex == 3)
+                        if (run.StageIndex == run.stages.Length - 1)
                         {
                             Require(run.Phase == LiminalRunPhase.Victory, "Final boss exit did not enter Victory.");
-                            report.checks.Add("All four stages completed with sequential room gates and a final boss victory.");
+                            Require(report.stagesCompleted == 1, "The liminal session must complete after one stage.");
+                            report.checks.Add("One four-room liminal session completed with immediate combat, sequential room gates and a fixed final boss victory.");
                             run.StartNewRun(originalSeed);
                             Require(run.StageIndex == 0 && run.Phase == LiminalRunPhase.Exploring, "Victory restart failed.");
                             Require(RouteIds(run.Rooms) == initialRoute, "Same-seed restart changed the first route.");
                             Require(run.PlayerHealth.maximumHealth == 100 && run.PlayerHealth.Health == 100, "Restart retained health upgrades.");
+                            Require(run.Augments.PickCount == 0 && run.AugmentHistory == "증강 없음"
+                                && run.player.GetComponent<PlayerCombat>().comboStartIndex == 0, "Restart retained augments.");
                             Next("TestDefeat");
                         }
                         else Next("SelectAugment");
                         break;
                     case "SelectAugment":
-                        Require(run.Phase == LiminalRunPhase.AugmentChoice, "Stage clear skipped augment choice.");
+                        // Augments come from cleared combat rooms; a non-final stage exit goes straight to the next gate.
+                        Require(run.Phase == LiminalRunPhase.NextStageChoice, "Stage exit did not reveal the next stage.");
                         int stage = run.StageIndex;
-                        run.SelectAugment(stage % 3);
-                        Require(run.Phase == LiminalRunPhase.NextStageChoice, "Augment choice did not reveal the next stage.");
-                        float cooldown = caster.cooldown;
-                        int flames = caster.flameCount, maxHealth = run.PlayerHealth.maximumHealth;
-                        run.SelectAugment((stage + 1) % 3);
-                        Require(caster.cooldown == cooldown && caster.flameCount == flames && run.PlayerHealth.maximumHealth == maxHealth, "A duplicate augment was awarded.");
                         run.ContinueToNextStage();
                         run.ContinueToNextStage();
                         Require(run.StageIndex == stage + 1 && run.Phase == LiminalRunPhase.Exploring, "Next-stage choice skipped or duplicated a stage.");
-                        report.checks.Add($"Stage {stage + 1}: one augment only, one next-stage choice only.");
-                        wantedRoom = 1;
+                        report.checks.Add($"Stage {stage + 1}: one next-stage choice only.");
+                        wantedRoom = 0;
                         EnterWantedRoom(motor);
                         break;
                     case "TestDefeat":
@@ -488,13 +627,17 @@ namespace AcRoguelike.Liminal.EditorTests
                         Require(run.Phase == LiminalRunPhase.Defeat, "Player death did not enter Defeat.");
                         run.StartNewRun(unchecked(originalSeed + 104729));
                         Require(run.seed == unchecked(originalSeed + 104729) && run.StageIndex == 0 && run.PlayerHealth.IsAlive, "New-seed restart failed.");
-                        report.checks.Add("Defeat, same-seed restart, new-seed restart, and augment reset passed.");
+                        report.checks.Add("Defeat, same-seed restart, new-seed restart, and restored player health passed.");
                         motor.ReleaseAutomation();
                         Finish(true, null);
                         break;
                 }
             }
-            catch (Exception ex) { Finish(false, ex.ToString()); }
+            catch (Exception ex)
+            {
+                string roomName = run && wantedRoom >= 0 && wantedRoom < run.Rooms.Count ? run.Rooms[wantedRoom].name : "none";
+                Finish(false, $"State={state}, seed={(run ? run.seed : 0)}, room={wantedRoom}:{roomName}\n{ex}");
+            }
         }
 
         static void EnterWantedRoom(PlayerMotor motor)
@@ -516,6 +659,7 @@ namespace AcRoguelike.Liminal.EditorTests
             if (!string.IsNullOrEmpty(error)) report.errors.Add(error);
             SaveReport();
             SessionState.SetBool(ActiveKey, false);
+            if (SessionState.GetBool(BatchKey, false)) RestoreBatchPrefs();
             if (success) Debug.Log("Liminal validation passed: " + ReportPath);
             else Debug.LogError("Liminal validation failed: " + error);
             if (EditorApplication.isPlaying) EditorApplication.isPlaying = false;
@@ -524,7 +668,9 @@ namespace AcRoguelike.Liminal.EditorTests
         static void SaveReport()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(ReportPath));
-            File.WriteAllText(ReportPath, JsonUtility.ToJson(report, true));
+            string json = JsonUtility.ToJson(report, true);
+            SessionState.SetString(ReportKey, json);
+            File.WriteAllText(ReportPath, json);
         }
     }
 }

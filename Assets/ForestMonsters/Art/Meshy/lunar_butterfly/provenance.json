@@ -1,0 +1,85 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "theme": "forest/moonlit",
+  "role": "Airborne caster; separated left/right wing sections flap, powder burst and vortex projectile in Unity.",
+  "prompt": "Large magical luna butterfly with slender fuzzy insect body horizontally aligned along Z, small head at front +Z, tapered segmented abdomen behind, two delicate curved antennae. Four broad elegant butterfly wings fully spread flat horizontally left and right, clear narrow wing roots at the slender thorax, paired leaf-shaped forewings and smaller rounded hindwings, gently scalloped edges and raised organic wing veins. No support stalk, no branches, no flowers. Single isolated original stylized realistic fantasy game monster, complete visible object, centered, forward faces +Z, up +Y. No floor, pedestal, text or logos. Strong readable silhouette from an elevated three-quarter action game camera, sculpted organic detail, clear large forms, elegant moonlit enchanted forest quality.",
+  "texture_prompt": "Velvety dark teal insect body and pearl mint antennae. Butterfly wings with rich turquoise emerald gradients, pale moonlit mint veins, broad ivory crescent markings and subtle gold dust near scalloped edges. Matte iridescent biological wing scales and delicate raised veins, elegant magical forest palette, no flat icons or printed lettering.",
+  "preview_task_id": "01a10a74-37fb-744d-81ab-f0f26870a1eb",
+  "refine_task_id": "01a10a75-3048-77f1-bc94-2f074a50ed44",
+  "created_utc": "2026-10-05T05:07:38.989390+00:00",
+  "requested_triangles": 12000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "actual": {
+    "triangles": 12085,
+    "vertices": 16049,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": 3,
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9509770274162292,
+      -0.0706920251250267,
+      -0.5581300258636475
+    ],
+    "unity_bounds_max": [
+      0.9507820010185242,
+      0.09424297511577606,
+      0.5504639744758606
+    ],
+    "bytes": 9251172
+  },
+  "consumed_credits": 30,
+  "target_size_m": [
+    3.0,
+    0.5,
+    1.9
+  ],
+  "unity_front_axis": "+Z verified after flight-pose normalization; dorsal surface +Y",
+  "recommended_ground_offset_y": 0.5581300258636475,
+  "review": "Pending thumbnail and Unity assembly review.",
+  "texture_images": [
+    {
+      "image": 0,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 1,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": false
+    },
+    {
+      "image": 2,
+      "size": [
+        2048,
+        2048
+      ],
+      "normal_map": true
+    }
+  ],
+  "original_bytes": 10533204,
+  "optimization": "Meshy triangle remesh before PBR texturing; embedded normal maps preserve surface detail. All textures capped to 2048px; tangent normals renormalized; binary payload compactly repacked.",
+  "form_preparation": "Rotated vertical specimen into horizontal flight pose; optional articulated GLB preserves all triangles and PBR UVs.",
+  "articulated_model": "lunar_butterfly_articulated.glb",
+  "articulated_parts_triangles": {
+    "Body": 1983,
+    "LeftWing": 4923,
+    "RightWing": 5179
+  },
+  "wing_animation": "Body static; LeftWing and RightWing rotate around their local Z hinge with opposite signs. Start around +/-30 degrees, cap at 65.",
+  "recommended_uniform_scale": 1.5774869240237845,
+  "recommended_local_offset_after_scale": [
+    0.0001538257961096115,
+    0.11151574526749046,
+    0.006046547911564083
+  ]
+}

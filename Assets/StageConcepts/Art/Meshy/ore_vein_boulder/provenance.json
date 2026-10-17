@@ -1,0 +1,71 @@
+{
+  "provider": "Meshy AI",
+  "api": "text-to-3d v2",
+  "model": "meshy-7.1",
+  "kit": "stage-concept variations",
+  "theme": "cave",
+  "role": "prop",
+  "prompt": "Large cracked cave boulder split by bright glowing blue ore veins, a few raw crystal points breaking out of the cracks, small rock chips around the base, heavy grounded rock prop. Single isolated complete game environment prop, whole object visible, no background scene, no ground plane, no people, no text or logos. Clear readable silhouette from an elevated three-quarter top-down game camera, clean game-ready mesh with solid well-defined forms, fine surface detail carried by PBR normal textures, stylized realistic fantasy game quality.",
+  "texture_prompt": "Dark charcoal stone with rough grain, vivid electric blue glowing ore veins, pale blue crystal tips, grey rock dust, strong rock normal detail.",
+  "preview_task_id": "01a102ba-4052-72ce-93ac-d7e5f6c5d748",
+  "refine_task_id": "01a102bb-dd39-7291-87e4-2b92acf8e2d7",
+  "attempt": 1,
+  "created_utc": "2026-10-03T17:08:13.160394+00:00",
+  "requested_triangles": 15000,
+  "texture_resolution": "2K",
+  "enable_pbr": true,
+  "target_size_m": [
+    2.4,
+    1.6,
+    2.0
+  ],
+  "long_horizontal_axis": "x",
+  "actual": {
+    "triangles": 15468,
+    "vertices": 18003,
+    "mesh_count": 1,
+    "material_count": 1,
+    "embedded_images": [
+      {
+        "mime": "image/jpeg",
+        "bytes": 4165709,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2300044,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "mime": "image/jpeg",
+        "bytes": 2954226,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "normal_mapped_materials": 1,
+    "unity_bounds_min": [
+      -0.9493430256843567,
+      -0.5698740482330322,
+      -0.9518219828605652
+    ],
+    "unity_bounds_max": [
+      0.9512640237808228,
+      0.5684069991111755,
+      0.9539890885353088
+    ],
+    "longest_horizontal_axis": "z",
+    "bytes": 10184004
+  },
+  "consumed_credits": 30,
+  "optimization": "Meshy triangle remesh to the requested budget before PBR texturing; original 2K maps kept.",
+  "review": "pending: inspect thumbnail and in-room capture, then keep or reject"
+}

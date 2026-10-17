@@ -23,10 +23,16 @@ namespace AcRoguelike
         [Tooltip("The original caster cooldown. Cooldown upgrades speed up both the attack motion and its hit timing.")]
         public float referenceCooldown = .7f;
         public float animationBlend = .07f;
+        [Tooltip("Cross-fade from the last attack pose back to locomotion.")]
+        public float returnBlend = .1f;
 
         public bool IsAttacking => AttackIndex >= 0;
-        /// <summary>Zero-based attack index, or -1 when idle. Maps to Animator states Attack1, Attack2 and Attack3.</summary>
+        /// <summary>Zero-based attack index, or -1 when idle. Maps to Animator states Attack1 to Attack6.</summary>
         public int AttackIndex { get; private set; } = -1;
+        [Tooltip("First swing of a combo. Run modifiers (augments) can skip the opening swings.")]
+        public int comboStartIndex;
+        /// <summary>The swing a fresh combo starts on (comboStartIndex clamped into the combo).</summary>
+        public int ComboStart => Mathf.Clamp(comboStartIndex, 0, ComboLength - 1);
         public Vector3 AttackDirection { get; private set; }
         public float AnimationSpeed => 1f / attackTimeScale;
         public float MovementMultiplier => IsAttacking ? attackMovementMultiplier : 1;
@@ -34,9 +40,12 @@ namespace AcRoguelike
         public int CompletedComboCount { get; private set; }
         public int SuccessfulCastCount { get; private set; }
         public InputAction AttackAction => attack;
+        /// <summary>Hits in one combo: one per configured attack duration, at most the four Animator attack states.</summary>
+        public int ComboLength => Mathf.Clamp(attackDurations != null ? attackDurations.Length : 3, 1, AttackStates.Length);
 
         PlayerMotor motor;
         TalismanCaster caster;
+        MeleeSlash melee;
         TrainingEnemy attackTarget;
         InputAction attack;
         Animator cachedAnimator;
@@ -54,13 +63,19 @@ namespace AcRoguelike
         {
             Animator.StringToHash("Base Layer.Attack1"),
             Animator.StringToHash("Base Layer.Attack2"),
-            Animator.StringToHash("Base Layer.Attack3")
+            Animator.StringToHash("Base Layer.Attack3"),
+            Animator.StringToHash("Base Layer.Attack4"),
+            Animator.StringToHash("Base Layer.Attack5"),
+            Animator.StringToHash("Base Layer.Attack6")
         };
 
         void Awake()
         {
             motor = GetComponent<PlayerMotor>();
             caster = GetComponent<TalismanCaster>();
+            // The basic attack is a katana combo; the caster still provides target selection and cast counting.
+            melee = GetComponent<MeleeSlash>();
+            if (!melee) melee = gameObject.AddComponent<MeleeSlash>();
             previousExternalInput = caster.externalInput;
             attack = new InputAction("Attack", InputActionType.Button);
             attack.AddBinding("<Mouse>/leftButton");
@@ -112,7 +127,7 @@ namespace AcRoguelike
             recoveryRemaining = Mathf.Max(0, recoveryRemaining - dt);
             bufferRemaining = Mathf.Max(0, bufferRemaining - dt);
             if (pressed) bufferRemaining = Mathf.Max(.01f, inputBuffer);
-            if (motor.IsDashing)
+            if (motor.IsDashing || motor.IsHeld || motor.IsLaunched)
             {
                 if (IsAttacking) CancelAttack(false);
                 // A fresh press during the end of a dodge may carry into the next action.
@@ -121,7 +136,7 @@ namespace AcRoguelike
 
             if (!IsAttacking)
             {
-                if (recoveryRemaining <= 0 && (bufferRemaining > 0 || (holdToAttack && held))) BeginAttack(0);
+                if (recoveryRemaining <= 0 && (bufferRemaining > 0 || (holdToAttack && held))) BeginAttack(ComboStart);
                 return;
             }
 
@@ -130,21 +145,25 @@ namespace AcRoguelike
             if (!hitResolved && attackClock >= HitTime(AttackIndex))
             {
                 hitResolved = true;
-                if (caster.TryCastFromAnimation(attackTarget)) SuccessfulCastCount++;
+                if (melee && melee.isActiveAndEnabled)
+                {
+                    if (melee.ResolveSwing(AttackIndex, attackTarget, AttackDirection)) SuccessfulCastCount++;
+                }
+                else if (caster.TryCastFromAnimation(attackTarget)) SuccessfulCastCount++;
             }
-            if (AttackIndex < AttackStates.Length - 1 && attackClock >= duration - Mathf.Max(0, comboQueueWindow))
+            if (AttackIndex < ComboLength - 1 && attackClock >= duration - Mathf.Max(0, comboQueueWindow))
             {
                 if (bufferRemaining > 0 || (holdToAttack && held))
                 { nextQueued = true; bufferRemaining = 0; }
             }
             if (attackClock < duration) return;
-            if (nextQueued && AttackIndex < AttackStates.Length - 1)
+            if (nextQueued && AttackIndex < ComboLength - 1)
             {
                 BeginAttack(AttackIndex + 1);
                 return;
             }
 
-            bool finishedCombo = AttackIndex == AttackStates.Length - 1;
+            bool finishedCombo = AttackIndex == ComboLength - 1;
             if (finishedCombo) CompletedComboCount++;
             EndAttack();
             recoveryRemaining = finishedCombo ? Mathf.Max(0, comboRecovery) * attackTimeScale : 0;
@@ -169,6 +188,7 @@ namespace AcRoguelike
                 Vector3 targetDirection = Vector3.ProjectOnPlane(attackTarget.transform.position - transform.position, Vector3.up);
                 if (targetDirection.sqrMagnitude > .01f) AttackDirection = targetDirection.normalized;
             }
+            if (melee && melee.isActiveAndEnabled) melee.BeginSwing(index, attackTarget, AttackDirection);
             if (Has(Attacking, AnimatorControllerParameterType.Bool)) cachedAnimator.SetBool(Attacking, true);
             if (Has(AttackIndexParameter, AnimatorControllerParameterType.Int)) cachedAnimator.SetInteger(AttackIndexParameter, index);
             if (Has(AttackSpeed, AnimatorControllerParameterType.Float)) cachedAnimator.SetFloat(AttackSpeed, 1f / attackTimeScale);
@@ -183,6 +203,7 @@ namespace AcRoguelike
 
         void EndAttack(bool returnToLocomotion = true)
         {
+            if (melee && AttackIndex >= 0) melee.EndSwing();
             AttackIndex = -1;
             attackTarget = null;
             attackClock = 0;
@@ -191,7 +212,7 @@ namespace AcRoguelike
             if (Has(AttackIndexParameter, AnimatorControllerParameterType.Int)) cachedAnimator.SetInteger(AttackIndexParameter, -1);
             if (Has(AttackTrigger, AnimatorControllerParameterType.Trigger)) cachedAnimator.ResetTrigger(AttackTrigger);
             if (returnToLocomotion && CanAnimate && cachedAnimator.HasState(0, Locomotion))
-                cachedAnimator.CrossFadeInFixedTime(Locomotion, .10f, 0);
+                cachedAnimator.CrossFadeInFixedTime(Locomotion, Mathf.Max(0, returnBlend), 0);
         }
 
         public void CancelAttack(bool returnToLocomotion = true)
