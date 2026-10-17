@@ -30,7 +30,7 @@ namespace AcRoguelike.Liminal
         public bool movementOnly;
         [Tooltip("The visual owns attack input and damage. Shared sword/talisman combat stays disabled; a controller and sword combo are optional.")]
         public bool customCombat;
-        [Tooltip("Keep the dash on a movement-only hunter, for a body with its own dash motion (Namgung Luna's battle form leaps).")]
+        [Tooltip("Keep the dash on a movement-only hunter, for a body with its own dash motion (Moon Luna's battle form leaps).")]
         public bool keepDash;
         [Min(0), Tooltip("Movement speed for this hunter. Zero keeps the shared player's speed.")]
         public float moveSpeedOverride;

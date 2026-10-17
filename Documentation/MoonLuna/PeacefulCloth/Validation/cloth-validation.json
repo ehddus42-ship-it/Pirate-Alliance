@@ -1,0 +1,3643 @@
+{
+    "status": "passed",
+    "utc": "2026-10-15T07:21:27.3809399Z",
+    "error": "",
+    "prefab": "Assets/Characters/MoonLuna/Stage/MoonLuna_Peaceful.prefab",
+    "method": "Paused Play mode, one Editor Step per captured frame; samples after Magica afterRenderingDelegate. BakeMesh(true) on the custom skin and a cloth-free ghost with identical bone transforms. Penetration is geometric surface depth, relative to that same animated ghost, without particle thickness.",
+    "options": {
+        "framesPerSecond": 60,
+        "expectedClothCount": 5,
+        "sampleEveryFrames": 1,
+        "warmupSeconds": 2.0,
+        "buildTimeoutSeconds": 12.0,
+        "wallTimeoutSeconds": 600.0,
+        "walkSpeed": 0.6499999761581421,
+        "dashSpeed": 13.0,
+        "dashSeconds": 0.1899999976158142,
+        "maxDisplacement": 0.18000000715255738,
+        "maxFrameOffsetChange": 0.10000000149011612,
+        "maxPenetrationWorsening": 0.009999999776482582,
+        "maxIdleDrift": 0.02500000037252903,
+        "minimumMotion": 0.0005000000237487257,
+        "maxRecoveryRmsSpeed": 0.05999999865889549,
+        "maxRecoveryDisplacement": 0.07999999821186066,
+        "minimumWorldY": -0.004999999888241291,
+        "requirePreBuild": true,
+        "captureVideoFrames": true,
+        "videoEveryFrames": 2
+    },
+    "cloths": [
+        {
+            "name": "Cloth_CollarRibbon",
+            "buildResult": "Success",
+            "renderers": [
+                "LunaPeaceful_CollarRibbon"
+            ],
+            "colliders": [
+                "Armature/Hips/Spine02/Spine01/Spine/PeacefulCollider_torso",
+                "Armature/Hips/Spine02/Spine01/Spine/neck/PeacefulCollider_neck"
+            ],
+            "preBuild": true,
+            "built": true,
+            "usingCustomMesh": true,
+            "maxDisplacement": 0.01407349668443203,
+            "maxDynamicOffsetChange": 0.014307733625173569
+        },
+        {
+            "name": "Cloth_Cuff_L",
+            "buildResult": "Success",
+            "renderers": [
+                "LunaLeftForeArmSleeve"
+            ],
+            "colliders": [
+                "Armature/Hips/Spine02/Spine01/Spine/LunaLeftPrayerForeArm/PeacefulCollider_left_cuff_wrist"
+            ],
+            "preBuild": true,
+            "built": true,
+            "usingCustomMesh": true,
+            "maxDisplacement": 0.007425705436617136,
+            "maxDynamicOffsetChange": 0.007500034291297197
+        },
+        {
+            "name": "Cloth_Cuff_R",
+            "buildResult": "Success",
+            "renderers": [
+                "LunaRightForeArmSleeve"
+            ],
+            "colliders": [
+                "Armature/Hips/Spine02/Spine01/Spine/LunaRightPrayerForeArm/PeacefulCollider_right_cuff_wrist"
+            ],
+            "preBuild": true,
+            "built": true,
+            "usingCustomMesh": true,
+            "maxDisplacement": 0.007148286793380976,
+            "maxDynamicOffsetChange": 0.007066642865538597
+        },
+        {
+            "name": "Cloth_Skirt",
+            "buildResult": "Success",
+            "renderers": [
+                "LunaPeaceful_Skirt"
+            ],
+            "colliders": [
+                "Armature/Hips/PeacefulCollider_pelvis",
+                "Armature/Hips/LunaLeftThigh/PeacefulCollider_left_thigh",
+                "Armature/Hips/LunaRightThigh/PeacefulCollider_right_thigh",
+                "Armature/Hips/LunaLeftShin/PeacefulCollider_left_shin",
+                "Armature/Hips/LunaRightShin/PeacefulCollider_right_shin"
+            ],
+            "preBuild": true,
+            "built": true,
+            "usingCustomMesh": true,
+            "maxDisplacement": 0.06811501085758209,
+            "maxDynamicOffsetChange": 0.06837833672761917
+        },
+        {
+            "name": "Cloth_Veil",
+            "buildResult": "Success",
+            "renderers": [
+                "LunaPeaceful_Veil"
+            ],
+            "colliders": [
+                "Armature/Hips/Spine02/Spine01/Spine/PeacefulCollider_torso",
+                "Armature/Hips/Spine02/Spine01/Spine/neck/PeacefulCollider_neck",
+                "Armature/Hips/Spine02/Spine01/Spine/neck/Head/PeacefulCollider_head"
+            ],
+            "preBuild": true,
+            "built": true,
+            "usingCustomMesh": true,
+            "maxDisplacement": 0.06232643499970436,
+            "maxDynamicOffsetChange": 0.08022736012935639
+        }
+    ],
+    "measurements": [
+        {
+            "scenario": "idle",
+            "renderer": "LunaPeaceful_CollarRibbon",
+            "samples": 120,
+            "vertexSamples": 37560,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.0024536862038075926,
+            "rmsDisplacement": 0.00041962251998484135,
+            "maxOffsetChange": 0.00029748305678367615,
+            "rmsOffsetSpeed": 0.002058973303064704,
+            "maxPenetration": 0.02712695300579071,
+            "ghostMaxPenetration": 0.02712695300579071,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.00044406461529433727,
+            "finalRmsDisplacement": 0.0004561857203952968,
+            "maxIdleDrift": 0.0036215775180608036,
+            "lateRmsOffsetSpeed": 0.002040107734501362,
+            "lateMaxDisplacement": 0.001720051164738834,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 105,
+            "worstOffsetChangeScenarioFrame": 30,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.07552360743284226,
+                "y": 1.2878457307815552,
+                "z": 0.15514416992664338
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.07458656281232834,
+                "y": 1.2885560989379883,
+                "z": 0.15466973185539246
+            },
+            "worstOffsetChangeTime": 2.5333333015441896,
+            "minActualWorldY": 1.1734602451324463,
+            "minGhostWorldY": 1.1734602451324463,
+            "minActualVertex": 75,
+            "minGhostVertex": 75,
+            "minActualSourceAttribute": "Fixed",
+            "minGhostSourceAttribute": "Fixed",
+            "minActualBodyLocal": {
+                "x": 0.10026413202285767,
+                "y": 1.1734602451324463,
+                "z": 0.12390130013227463
+            },
+            "minGhostBodyLocal": {
+                "x": 0.10026413202285767,
+                "y": 1.1734602451324463,
+                "z": 0.12390130013227463
+            },
+            "minFixedWorldY": 1.1734602451324463,
+            "minMoveWorldY": 1.2007687091827393,
+            "minFixedVertex": 75,
+            "minMoveVertex": 9,
+            "minFixedActualBodyLocal": {
+                "x": 0.10026413202285767,
+                "y": 1.1734602451324463,
+                "z": 0.12390130013227463
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.10026413202285767,
+                "y": 1.1734602451324463,
+                "z": 0.12390130013227463
+            },
+            "minMoveActualBodyLocal": {
+                "x": 0.09175138175487519,
+                "y": 1.2007687091827393,
+                "z": 0.13988305628299714
+            },
+            "minMoveGhostBodyLocal": {
+                "x": 0.09090844541788101,
+                "y": 1.2004544734954835,
+                "z": 0.14056240022182465
+            }
+        },
+        {
+            "scenario": "idle",
+            "renderer": "LunaLeftForeArmSleeve",
+            "samples": 120,
+            "vertexSamples": 23040,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.00020139364642091095,
+            "rmsDisplacement": 0.00008062117558438331,
+            "maxOffsetChange": 0.000026277635697624646,
+            "rmsOffsetSpeed": 0.0003057331487070769,
+            "maxPenetration": 0.0,
+            "ghostMaxPenetration": 0.0,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.00006653748278040439,
+            "finalRmsDisplacement": 0.00006709349690936506,
+            "maxIdleDrift": 0.00030534176039509475,
+            "lateRmsOffsetSpeed": 0.0001766335917636752,
+            "lateMaxDisplacement": 0.00019502534996718168,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 150,
+            "worstOffsetChangeScenarioFrame": 14,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.05143914744257927,
+                "y": 1.046170949935913,
+                "z": 0.28233736753463747
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.05146190524101257,
+                "y": 1.0463006496429444,
+                "z": 0.28240299224853518
+            },
+            "worstOffsetChangeTime": 2.2666666507720949,
+            "minActualWorldY": 0.9980860948562622,
+            "minGhostWorldY": 0.9981511235237122,
+            "minActualVertex": 135,
+            "minGhostVertex": 135,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": -0.06347869336605072,
+                "y": 0.9980860948562622,
+                "z": 0.24188655614852906
+            },
+            "minGhostBodyLocal": {
+                "x": -0.06346888840198517,
+                "y": 0.9981511235237122,
+                "z": 0.24197512865066529
+            },
+            "minFixedWorldY": 1.0586220026016236,
+            "minMoveWorldY": 0.9980860948562622,
+            "minFixedVertex": 15,
+            "minMoveVertex": 135,
+            "minFixedActualBodyLocal": {
+                "x": -0.08896622061729431,
+                "y": 1.0586220026016236,
+                "z": 0.18731212615966798
+            },
+            "minFixedGhostBodyLocal": {
+                "x": -0.08896622061729431,
+                "y": 1.0586220026016236,
+                "z": 0.18731212615966798
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.06347869336605072,
+                "y": 0.9980860948562622,
+                "z": 0.24188655614852906
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.06355485320091248,
+                "y": 0.9981577396392822,
+                "z": 0.24195092916488648
+            }
+        },
+        {
+            "scenario": "idle",
+            "renderer": "LunaRightForeArmSleeve",
+            "samples": 120,
+            "vertexSamples": 23040,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.000172186060808599,
+            "rmsDisplacement": 0.00007365521742030978,
+            "maxOffsetChange": 0.000018892404114012606,
+            "rmsOffsetSpeed": 0.0002651518734637648,
+            "maxPenetration": 0.0,
+            "ghostMaxPenetration": 0.0,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.00006823084549978375,
+            "finalRmsDisplacement": 0.00006690494774375111,
+            "maxIdleDrift": 0.00028001164901070297,
+            "lateRmsOffsetSpeed": 0.00025120776263065636,
+            "lateMaxDisplacement": 0.00017158409173134714,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 157,
+            "worstOffsetChangeScenarioFrame": 6,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.0302091296762228,
+                "y": 1.0824601650238038,
+                "z": 0.30029428005218508
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.030305515974760057,
+                "y": 1.0825438499450684,
+                "z": 0.30030906200408938
+            },
+            "worstOffsetChangeTime": 2.133333444595337,
+            "minActualWorldY": 1.0313947200775147,
+            "minGhostWorldY": 1.0315003395080567,
+            "minActualVertex": 139,
+            "minGhostVertex": 139,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": -0.01771104708313942,
+                "y": 1.0313947200775147,
+                "z": 0.25473034381866457
+            },
+            "minGhostBodyLocal": {
+                "x": -0.017698202282190324,
+                "y": 1.0315003395080567,
+                "z": 0.2547757029533386
+            },
+            "minFixedWorldY": 1.0921050310134888,
+            "minMoveWorldY": 1.0313947200775147,
+            "minFixedVertex": 19,
+            "minMoveVertex": 139,
+            "minFixedActualBodyLocal": {
+                "x": 0.016515608876943589,
+                "y": 1.0921050310134888,
+                "z": 0.2073715329170227
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.016515608876943589,
+                "y": 1.0921050310134888,
+                "z": 0.2073715329170227
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.01771104708313942,
+                "y": 1.0313947200775147,
+                "z": 0.25473034381866457
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.01778518781065941,
+                "y": 1.0315003395080567,
+                "z": 0.2547699213027954
+            }
+        },
+        {
+            "scenario": "idle",
+            "renderer": "LunaPeaceful_Skirt",
+            "samples": 120,
+            "vertexSamples": 1153440,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.004220032133162022,
+            "rmsDisplacement": 0.001132359728217125,
+            "maxOffsetChange": 0.00023326146765612066,
+            "rmsOffsetSpeed": 0.003572844434529543,
+            "maxPenetration": 0.002770364284515381,
+            "ghostMaxPenetration": 0.002770364284515381,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.001496243174187839,
+            "finalRmsDisplacement": 0.0014710254035890103,
+            "maxIdleDrift": 0.007810250390321016,
+            "lateRmsOffsetSpeed": 0.003969206009060144,
+            "lateMaxDisplacement": 0.0034068336244672539,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 3336,
+            "worstOffsetChangeScenarioFrame": 40,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.13756422698497773,
+                "y": 0.4537476599216461,
+                "z": -0.29724904894828799
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.13792310655117036,
+                "y": 0.4544188380241394,
+                "z": -0.29739636182785036
+            },
+            "worstOffsetChangeTime": 2.700000047683716,
+            "minActualWorldY": 0.08624961972236633,
+            "minGhostWorldY": 0.08613903820514679,
+            "minActualVertex": 4181,
+            "minGhostVertex": 4181,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": 0.07676520943641663,
+                "y": 0.08624961972236633,
+                "z": -0.28546836972236636
+            },
+            "minGhostBodyLocal": {
+                "x": 0.07672347128391266,
+                "y": 0.08613903820514679,
+                "z": -0.28542646765708926
+            },
+            "minFixedWorldY": 0.38470572233200076,
+            "minMoveWorldY": 0.08624961972236633,
+            "minFixedVertex": 4253,
+            "minMoveVertex": 4181,
+            "minFixedActualBodyLocal": {
+                "x": 0.10309253633022309,
+                "y": 0.38470572233200076,
+                "z": 0.1786244958639145
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.10309253633022309,
+                "y": 0.38470572233200076,
+                "z": 0.1786244958639145
+            },
+            "minMoveActualBodyLocal": {
+                "x": 0.07676520943641663,
+                "y": 0.08624961972236633,
+                "z": -0.28546836972236636
+            },
+            "minMoveGhostBodyLocal": {
+                "x": 0.07647770643234253,
+                "y": 0.08621629327535629,
+                "z": -0.2866603136062622
+            }
+        },
+        {
+            "scenario": "idle",
+            "renderer": "LunaPeaceful_Veil",
+            "samples": 120,
+            "vertexSamples": 825120,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.003861596342176199,
+            "rmsDisplacement": 0.0009549236856400967,
+            "maxOffsetChange": 0.0006276759668253362,
+            "rmsOffsetSpeed": 0.0030421919655054809,
+            "maxPenetration": 0.037645041942596439,
+            "ghostMaxPenetration": 0.037645041942596439,
+            "maxPenetrationWorsening": 7.450580596923828e-9,
+            "firstRmsDisplacement": 0.0011738048633560539,
+            "finalRmsDisplacement": 0.0011776300380006433,
+            "maxIdleDrift": 0.004422989208251238,
+            "lateRmsOffsetSpeed": 0.003195707919076085,
+            "lateMaxDisplacement": 0.002890051808208227,
+            "worstPenetrationVertex": 551,
+            "worstPenetrationScenarioFrame": 6,
+            "worstPenetrationCollider": "Armature/Hips/Spine02/Spine01/Spine/PeacefulCollider_torso",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.010236919857561589,
+                "y": 1.1202363967895508,
+                "z": -0.015922751277685167
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.010236921720206738,
+                "y": 1.1202365159988404,
+                "z": -0.015922756865620614
+            },
+            "worstPenetrationActualDepth": 0.03346520662307739,
+            "worstPenetrationGhostDepth": 0.033465199172496799,
+            "worstPenetrationTime": 2.133333444595337,
+            "worstOffsetChangeVertex": 4066,
+            "worstOffsetChangeScenarioFrame": 10,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.02159537374973297,
+                "y": 1.439050555229187,
+                "z": -0.07395090907812119
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.020608989521861078,
+                "y": 1.4397374391555787,
+                "z": -0.07398399710655213
+            },
+            "worstOffsetChangeTime": 2.200000047683716,
+            "minActualWorldY": 0.9815627932548523,
+            "minGhostWorldY": 0.9815627932548523,
+            "minActualVertex": 4413,
+            "minGhostVertex": 4413,
+            "minActualSourceAttribute": "Fixed",
+            "minGhostSourceAttribute": "Fixed",
+            "minActualBodyLocal": {
+                "x": 0.014158236794173718,
+                "y": 0.9815627932548523,
+                "z": -0.09160400182008743
+            },
+            "minGhostBodyLocal": {
+                "x": 0.014158236794173718,
+                "y": 0.9815627932548523,
+                "z": -0.09160400182008743
+            },
+            "minFixedWorldY": 0.9815627932548523,
+            "minMoveWorldY": 1.0290460586547852,
+            "minFixedVertex": 4413,
+            "minMoveVertex": 769,
+            "minFixedActualBodyLocal": {
+                "x": 0.014158236794173718,
+                "y": 0.9815627932548523,
+                "z": -0.09160400182008743
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.014158236794173718,
+                "y": 0.9815627932548523,
+                "z": -0.09160400182008743
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.09373638778924942,
+                "y": 1.0290460586547852,
+                "z": -0.21053510904312135
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.09441348910331726,
+                "y": 1.02963387966156,
+                "z": -0.20969557762145997
+            }
+        },
+        {
+            "scenario": "walk",
+            "renderer": "LunaPeaceful_CollarRibbon",
+            "samples": 180,
+            "vertexSamples": 56340,
+            "customMeshSamples": 180,
+            "allFinite": true,
+            "maxDisplacement": 0.002504394156858325,
+            "rmsDisplacement": 0.0004621632397174835,
+            "maxOffsetChange": 0.0008503306307829917,
+            "rmsOffsetSpeed": 0.002089499728754163,
+            "maxPenetration": 0.02712695300579071,
+            "ghostMaxPenetration": 0.02712695300579071,
+            "maxPenetrationWorsening": 1.043081283569336e-7,
+            "firstRmsDisplacement": 0.0005095499800518155,
+            "finalRmsDisplacement": 0.00046946629299782217,
+            "maxIdleDrift": 0.002024901332333684,
+            "lateRmsOffsetSpeed": 0.00029312566039152443,
+            "lateMaxDisplacement": 0.001664845272898674,
+            "worstPenetrationVertex": 225,
+            "worstPenetrationScenarioFrame": 71,
+            "worstPenetrationCollider": "Armature/Hips/Spine02/Spine01/Spine/PeacefulCollider_torso",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": -0.019076000899076463,
+                "y": 1.3047462701797486,
+                "z": 0.14213377237319947
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": -0.019076000899076463,
+                "y": 1.3047462701797486,
+                "z": 0.142133891582489
+            },
+            "worstPenetrationActualDepth": 0.005730293691158295,
+            "worstPenetrationGhostDepth": 0.005730189383029938,
+            "worstPenetrationTime": 5.2166666984558109,
+            "worstOffsetChangeVertex": 121,
+            "worstOffsetChangeScenarioFrame": 3,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.09673672169446945,
+                "y": 1.2484259605407715,
+                "z": 0.13969171047210694
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.09679613262414932,
+                "y": 1.2485171556472779,
+                "z": 0.13967815041542054
+            },
+            "worstOffsetChangeTime": 4.083333492279053,
+            "minActualWorldY": 1.1734613180160523,
+            "minGhostWorldY": 1.1734613180160523,
+            "minActualVertex": 75,
+            "minGhostVertex": 75,
+            "minActualSourceAttribute": "Fixed",
+            "minGhostSourceAttribute": "Fixed",
+            "minActualBodyLocal": {
+                "x": 0.1002223864197731,
+                "y": 1.1734613180160523,
+                "z": 0.12392950057983399
+            },
+            "minGhostBodyLocal": {
+                "x": 0.1002223864197731,
+                "y": 1.1734613180160523,
+                "z": 0.12392950057983399
+            },
+            "minFixedWorldY": 1.1734613180160523,
+            "minMoveWorldY": 1.200660228729248,
+            "minFixedVertex": 75,
+            "minMoveVertex": 9,
+            "minFixedActualBodyLocal": {
+                "x": 0.1002223864197731,
+                "y": 1.1734613180160523,
+                "z": 0.12392950057983399
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.1002223864197731,
+                "y": 1.1734613180160523,
+                "z": 0.12392950057983399
+            },
+            "minMoveActualBodyLocal": {
+                "x": 0.09010910242795944,
+                "y": 1.200660228729248,
+                "z": 0.14097504317760468
+            },
+            "minMoveGhostBodyLocal": {
+                "x": 0.09035586565732956,
+                "y": 1.2006479501724244,
+                "z": 0.14101511240005494
+            }
+        },
+        {
+            "scenario": "walk",
+            "renderer": "LunaLeftForeArmSleeve",
+            "samples": 180,
+            "vertexSamples": 34560,
+            "customMeshSamples": 180,
+            "allFinite": true,
+            "maxDisplacement": 0.004614531062543392,
+            "rmsDisplacement": 0.0010436890879645944,
+            "maxOffsetChange": 0.0007994832703843713,
+            "rmsOffsetSpeed": 0.0028030441608279945,
+            "maxPenetration": 0.0,
+            "ghostMaxPenetration": 0.0,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.00012519342999439687,
+            "finalRmsDisplacement": 0.0009361263364553452,
+            "maxIdleDrift": 0.004429519176483154,
+            "lateRmsOffsetSpeed": 0.0010970591101795436,
+            "lateMaxDisplacement": 0.0024478458799421789,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 149,
+            "worstOffsetChangeScenarioFrame": 7,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.05838635191321373,
+                "y": 1.0507023334503174,
+                "z": 0.2877538204193115
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.05883951485157013,
+                "y": 1.051560640335083,
+                "z": 0.29092860221862795
+            },
+            "worstOffsetChangeTime": 4.150000095367432,
+            "minActualWorldY": 0.9972811341285706,
+            "minGhostWorldY": 0.9981523752212524,
+            "minActualVertex": 135,
+            "minGhostVertex": 135,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": -0.06348226964473725,
+                "y": 0.9972811341285706,
+                "z": 0.2402273416519165
+            },
+            "minGhostBodyLocal": {
+                "x": -0.06343293935060501,
+                "y": 0.9981523752212524,
+                "z": 0.2419847846031189
+            },
+            "minFixedWorldY": 1.058626413345337,
+            "minMoveWorldY": 0.9972811341285706,
+            "minFixedVertex": 15,
+            "minMoveVertex": 135,
+            "minFixedActualBodyLocal": {
+                "x": -0.08902633190155029,
+                "y": 1.058626413345337,
+                "z": 0.18731772899627686
+            },
+            "minFixedGhostBodyLocal": {
+                "x": -0.08902633190155029,
+                "y": 1.058626413345337,
+                "z": 0.18731772899627686
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.06348226964473725,
+                "y": 0.9972811341285706,
+                "z": 0.2402273416519165
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.06358902901411057,
+                "y": 0.9981620907783508,
+                "z": 0.24194133281707765
+            }
+        },
+        {
+            "scenario": "walk",
+            "renderer": "LunaRightForeArmSleeve",
+            "samples": 180,
+            "vertexSamples": 34560,
+            "customMeshSamples": 180,
+            "allFinite": true,
+            "maxDisplacement": 0.0036424940917640926,
+            "rmsDisplacement": 0.0010825219796970487,
+            "maxOffsetChange": 0.0005027062143199146,
+            "rmsOffsetSpeed": 0.002708217827603221,
+            "maxPenetration": 0.0,
+            "ghostMaxPenetration": 0.0,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.00011197935964446515,
+            "finalRmsDisplacement": 0.0009789655450731516,
+            "maxIdleDrift": 0.0035799331963062288,
+            "lateRmsOffsetSpeed": 0.0008157600532285869,
+            "lateMaxDisplacement": 0.0025373988319188358,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 128,
+            "worstOffsetChangeScenarioFrame": 5,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.04060676693916321,
+                "y": 1.0441516637802125,
+                "z": 0.24996691942214967
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.040677376091480258,
+                "y": 1.0443503856658936,
+                "z": 0.252091646194458
+            },
+            "worstOffsetChangeTime": 4.116666793823242,
+            "minActualWorldY": 1.0306514501571656,
+            "minGhostWorldY": 1.0315014123916627,
+            "minActualVertex": 139,
+            "minGhostVertex": 139,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": -0.018563255667686464,
+                "y": 1.0306514501571656,
+                "z": 0.2522417902946472
+            },
+            "minGhostBodyLocal": {
+                "x": -0.017767027020454408,
+                "y": 1.0315014123916627,
+                "z": 0.25477105379104617
+            },
+            "minFixedWorldY": 1.0921066999435425,
+            "minMoveWorldY": 1.0306514501571656,
+            "minFixedVertex": 19,
+            "minMoveVertex": 139,
+            "minFixedActualBodyLocal": {
+                "x": 0.016591884195804597,
+                "y": 1.0921066999435425,
+                "z": 0.20735149085521699
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.016591884195804597,
+                "y": 1.0921066999435425,
+                "z": 0.20735149085521699
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.018563255667686464,
+                "y": 1.0306514501571656,
+                "z": 0.2522417902946472
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.018308032304048539,
+                "y": 1.0317063331604005,
+                "z": 0.25473523139953616
+            }
+        },
+        {
+            "scenario": "walk",
+            "renderer": "LunaPeaceful_Skirt",
+            "samples": 180,
+            "vertexSamples": 1730160,
+            "customMeshSamples": 180,
+            "allFinite": true,
+            "maxDisplacement": 0.03650228679180145,
+            "rmsDisplacement": 0.008624390698969365,
+            "maxOffsetChange": 0.007832403294742108,
+            "rmsOffsetSpeed": 0.016036760061979295,
+            "maxPenetration": 0.032016806304454806,
+            "ghostMaxPenetration": 0.032016806304454806,
+            "maxPenetrationWorsening": 0.0027000512927770616,
+            "firstRmsDisplacement": 0.001510613365098834,
+            "finalRmsDisplacement": 0.009332274086773396,
+            "maxIdleDrift": 0.03909210488200188,
+            "lateRmsOffsetSpeed": 0.010678865015506745,
+            "lateMaxDisplacement": 0.02979988045990467,
+            "worstPenetrationVertex": 6102,
+            "worstPenetrationScenarioFrame": 179,
+            "worstPenetrationCollider": "Armature/Hips/LunaLeftShin/PeacefulCollider_left_shin",
+            "worstPenetrationSourceAttribute": "Move",
+            "worstPenetrationActualBodyLocal": {
+                "x": -0.03936220705509186,
+                "y": 0.4119439125061035,
+                "z": -0.13016843795776368
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": -0.039373110979795459,
+                "y": 0.4100411832332611,
+                "z": -0.12814700603485108
+            },
+            "worstPenetrationActualDepth": 0.02649148367345333,
+            "worstPenetrationGhostDepth": 0.02379143238067627,
+            "worstPenetrationTime": 7.016666889190674,
+            "worstOffsetChangeVertex": 6501,
+            "worstOffsetChangeScenarioFrame": 3,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.10031595826148987,
+                "y": 0.38815027475357058,
+                "z": 0.18495714664459229
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.10417438298463822,
+                "y": 0.3910716772079468,
+                "z": 0.18332700431346894
+            },
+            "worstOffsetChangeTime": 4.083333492279053,
+            "minActualWorldY": 0.0864039734005928,
+            "minGhostWorldY": 0.08613792061805725,
+            "minActualVertex": 4181,
+            "minGhostVertex": 4181,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": 0.07528658211231232,
+                "y": 0.0864039734005928,
+                "z": -0.2949371635913849
+            },
+            "minGhostBodyLocal": {
+                "x": 0.07668003439903259,
+                "y": 0.08613792061805725,
+                "z": -0.2856442630290985
+            },
+            "minFixedWorldY": 0.3847101926803589,
+            "minMoveWorldY": 0.0864039734005928,
+            "minFixedVertex": 4253,
+            "minMoveVertex": 4181,
+            "minFixedActualBodyLocal": {
+                "x": 0.10315347462892533,
+                "y": 0.3847101926803589,
+                "z": 0.17883214354515077
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.10315347462892533,
+                "y": 0.3847101926803589,
+                "z": 0.17883214354515077
+            },
+            "minMoveActualBodyLocal": {
+                "x": 0.07528658211231232,
+                "y": 0.0864039734005928,
+                "z": -0.2949371635913849
+            },
+            "minMoveGhostBodyLocal": {
+                "x": 0.07631208002567291,
+                "y": 0.08635041862726212,
+                "z": -0.2874819338321686
+            }
+        },
+        {
+            "scenario": "walk",
+            "renderer": "LunaPeaceful_Veil",
+            "samples": 180,
+            "vertexSamples": 1237680,
+            "customMeshSamples": 180,
+            "allFinite": true,
+            "maxDisplacement": 0.05526258423924446,
+            "rmsDisplacement": 0.01996823586523533,
+            "maxOffsetChange": 0.0060597495175898079,
+            "rmsOffsetSpeed": 0.027156108990311624,
+            "maxPenetration": 0.03764507919549942,
+            "ghostMaxPenetration": 0.03764507919549942,
+            "maxPenetrationWorsening": 5.960464477539063e-8,
+            "firstRmsDisplacement": 0.0013503789668902755,
+            "finalRmsDisplacement": 0.020951829850673677,
+            "maxIdleDrift": 0.05467846244573593,
+            "lateRmsOffsetSpeed": 0.01029264833778143,
+            "lateMaxDisplacement": 0.04664503037929535,
+            "worstPenetrationVertex": 550,
+            "worstPenetrationScenarioFrame": 71,
+            "worstPenetrationCollider": "Armature/Hips/Spine02/Spine01/Spine/PeacefulCollider_torso",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.003766728797927499,
+                "y": 1.0798771381378174,
+                "z": -0.03317075967788696
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.003766728797927499,
+                "y": 1.079877257347107,
+                "z": -0.03317081928253174
+            },
+            "worstPenetrationActualDepth": 0.015691369771957399,
+            "worstPenetrationGhostDepth": 0.015691310167312623,
+            "worstPenetrationTime": 5.2166666984558109,
+            "worstOffsetChangeVertex": 6270,
+            "worstOffsetChangeScenarioFrame": 28,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.16390639543533326,
+                "y": 1.083598017692566,
+                "z": -0.21849384903907777
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.1646232306957245,
+                "y": 1.0788007974624634,
+                "z": -0.18212372064590455
+            },
+            "worstOffsetChangeTime": 4.5,
+            "minActualWorldY": 0.9815641045570374,
+            "minGhostWorldY": 0.9815641045570374,
+            "minActualVertex": 4413,
+            "minGhostVertex": 4413,
+            "minActualSourceAttribute": "Fixed",
+            "minGhostSourceAttribute": "Fixed",
+            "minActualBodyLocal": {
+                "x": 0.014173527248203755,
+                "y": 0.9815641045570374,
+                "z": -0.09159862995147705
+            },
+            "minGhostBodyLocal": {
+                "x": 0.014173527248203755,
+                "y": 0.9815641045570374,
+                "z": -0.09159862995147705
+            },
+            "minFixedWorldY": 0.9815641045570374,
+            "minMoveWorldY": 1.0302711725234986,
+            "minFixedVertex": 4413,
+            "minMoveVertex": 769,
+            "minFixedActualBodyLocal": {
+                "x": 0.014173527248203755,
+                "y": 0.9815641045570374,
+                "z": -0.09159862995147705
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.014173527248203755,
+                "y": 0.9815641045570374,
+                "z": -0.09159862995147705
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.09427715837955475,
+                "y": 1.0302711725234986,
+                "z": -0.21083198487758637
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.09585832059383393,
+                "y": 1.0314539670944214,
+                "z": -0.20980167388916017
+            }
+        },
+        {
+            "scenario": "dash",
+            "renderer": "LunaPeaceful_CollarRibbon",
+            "samples": 120,
+            "vertexSamples": 37560,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.01205246802419424,
+            "rmsDisplacement": 0.0009554432472214103,
+            "maxOffsetChange": 0.0029232206288725139,
+            "rmsOffsetSpeed": 0.012665462680161,
+            "maxPenetration": 0.027127131819725038,
+            "ghostMaxPenetration": 0.027127131819725038,
+            "maxPenetrationWorsening": 4.3213367462158205e-7,
+            "firstRmsDisplacement": 0.0008258132147602737,
+            "finalRmsDisplacement": 0.00037371713551692665,
+            "maxIdleDrift": 0.009612509049475193,
+            "lateRmsOffsetSpeed": 0.002265750430524349,
+            "lateMaxDisplacement": 0.0024413960054516794,
+            "worstPenetrationVertex": 243,
+            "worstPenetrationScenarioFrame": 23,
+            "worstPenetrationCollider": "Armature/Hips/Spine02/Spine01/Spine/PeacefulCollider_torso",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": -0.01968831941485405,
+                "y": 1.291933536529541,
+                "z": 0.1468653678894043
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": -0.01968831941485405,
+                "y": 1.291933536529541,
+                "z": 0.1468658447265625
+            },
+            "worstPenetrationActualDepth": 0.003680706024169922,
+            "worstPenetrationGhostDepth": 0.0036802738904953005,
+            "worstPenetrationTime": 7.416666507720947,
+            "worstOffsetChangeVertex": 19,
+            "worstOffsetChangeScenarioFrame": 2,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.08353295922279358,
+                "y": 1.2308136224746705,
+                "z": 0.15207314491271974
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.08243181556463242,
+                "y": 1.2286572456359864,
+                "z": 0.15946435928344727
+            },
+            "worstOffsetChangeTime": 7.066666603088379,
+            "minActualWorldY": 1.1734570264816285,
+            "minGhostWorldY": 1.1734570264816285,
+            "minActualVertex": 75,
+            "minGhostVertex": 75,
+            "minActualSourceAttribute": "Fixed",
+            "minGhostSourceAttribute": "Fixed",
+            "minActualBodyLocal": {
+                "x": 0.1016487330198288,
+                "y": 1.1734570264816285,
+                "z": 0.1265416145324707
+            },
+            "minGhostBodyLocal": {
+                "x": 0.1016487330198288,
+                "y": 1.1734570264816285,
+                "z": 0.1265416145324707
+            },
+            "minFixedWorldY": 1.1734570264816285,
+            "minMoveWorldY": 1.1997231245040894,
+            "minFixedVertex": 75,
+            "minMoveVertex": 9,
+            "minFixedActualBodyLocal": {
+                "x": 0.1016487330198288,
+                "y": 1.1734570264816285,
+                "z": 0.1265416145324707
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.1016487330198288,
+                "y": 1.1734570264816285,
+                "z": 0.1265416145324707
+            },
+            "minMoveActualBodyLocal": {
+                "x": 0.09249769151210785,
+                "y": 1.1997231245040894,
+                "z": 0.14287567138671876
+            },
+            "minMoveGhostBodyLocal": {
+                "x": 0.0920131504535675,
+                "y": 1.2002861499786378,
+                "z": 0.14184236526489259
+            }
+        },
+        {
+            "scenario": "dash",
+            "renderer": "LunaLeftForeArmSleeve",
+            "samples": 120,
+            "vertexSamples": 23040,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.007050961721688509,
+            "rmsDisplacement": 0.0008909760508686304,
+            "maxOffsetChange": 0.0020978664979338648,
+            "rmsOffsetSpeed": 0.010599908418953419,
+            "maxPenetration": 0.0,
+            "ghostMaxPenetration": 0.0,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.0013202809495851398,
+            "finalRmsDisplacement": 0.00009205494279740378,
+            "maxIdleDrift": 0.007500034291297197,
+            "lateRmsOffsetSpeed": 0.0002971272333525121,
+            "lateMaxDisplacement": 0.00020128632604610175,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 149,
+            "worstOffsetChangeScenarioFrame": 1,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.05210224911570549,
+                "y": 1.0546778440475464,
+                "z": 0.2858762741088867
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.05692131817340851,
+                "y": 1.0534487962722779,
+                "z": 0.2908744812011719
+            },
+            "worstOffsetChangeTime": 7.050000190734863,
+            "minActualWorldY": 0.9928147792816162,
+            "minGhostWorldY": 0.9939061403274536,
+            "minActualVertex": 135,
+            "minGhostVertex": 135,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": -0.060904014855623248,
+                "y": 0.9928147792816162,
+                "z": 0.23595428466796876
+            },
+            "minGhostBodyLocal": {
+                "x": -0.06282073259353638,
+                "y": 0.9939061403274536,
+                "z": 0.23838520050048829
+            },
+            "minFixedWorldY": 1.0572565793991089,
+            "minMoveWorldY": 0.9928147792816162,
+            "minFixedVertex": 15,
+            "minMoveVertex": 135,
+            "minFixedActualBodyLocal": {
+                "x": -0.08661691099405289,
+                "y": 1.0572565793991089,
+                "z": 0.18796110153198243
+            },
+            "minFixedGhostBodyLocal": {
+                "x": -0.08661691099405289,
+                "y": 1.0572565793991089,
+                "z": 0.18796110153198243
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.060904014855623248,
+                "y": 0.9928147792816162,
+                "z": 0.23595428466796876
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.06071864813566208,
+                "y": 0.9939482808113098,
+                "z": 0.23879337310791017
+            }
+        },
+        {
+            "scenario": "dash",
+            "renderer": "LunaRightForeArmSleeve",
+            "samples": 120,
+            "vertexSamples": 23040,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.004749122075736523,
+            "rmsDisplacement": 0.0008703185594640672,
+            "maxOffsetChange": 0.0021131637040525676,
+            "rmsOffsetSpeed": 0.010388717986643315,
+            "maxPenetration": 0.0,
+            "ghostMaxPenetration": 0.0,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.00129951280541718,
+            "finalRmsDisplacement": 0.0000789350742707029,
+            "maxIdleDrift": 0.005548393353819847,
+            "lateRmsOffsetSpeed": 0.00022263932623900473,
+            "lateMaxDisplacement": 0.00017415205365978181,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 146,
+            "worstOffsetChangeScenarioFrame": 1,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.04161439090967178,
+                "y": 1.0845104455947877,
+                "z": 0.2846643924713135
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.04221443086862564,
+                "y": 1.08251953125,
+                "z": 0.28885984420776369
+            },
+            "worstOffsetChangeTime": 7.050000190734863,
+            "minActualWorldY": 1.0253344774246216,
+            "minGhostWorldY": 1.0262640714645386,
+            "minActualVertex": 139,
+            "minGhostVertex": 139,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": -0.017499824985861779,
+                "y": 1.0253344774246216,
+                "z": 0.2506413459777832
+            },
+            "minGhostBodyLocal": {
+                "x": -0.016016047447919847,
+                "y": 1.0262640714645386,
+                "z": 0.2536897659301758
+            },
+            "minFixedWorldY": 1.0896331071853638,
+            "minMoveWorldY": 1.0253344774246216,
+            "minFixedVertex": 19,
+            "minMoveVertex": 139,
+            "minFixedActualBodyLocal": {
+                "x": 0.015506893396377564,
+                "y": 1.0896331071853638,
+                "z": 0.20948457717895509
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.015506893396377564,
+                "y": 1.0896331071853638,
+                "z": 0.20948457717895509
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.017499824985861779,
+                "y": 1.0253344774246216,
+                "z": 0.2506413459777832
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.017191516235470773,
+                "y": 1.0262641906738282,
+                "z": 0.2536897659301758
+            }
+        },
+        {
+            "scenario": "dash",
+            "renderer": "LunaPeaceful_Skirt",
+            "samples": 120,
+            "vertexSamples": 1153440,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.05649157986044884,
+            "rmsDisplacement": 0.006829156074672937,
+            "maxOffsetChange": 0.012624384835362435,
+            "rmsOffsetSpeed": 0.040619589388370517,
+            "maxPenetration": 0.02755507454276085,
+            "ghostMaxPenetration": 0.029700472950935365,
+            "maxPenetrationWorsening": 0.0006307885050773621,
+            "firstRmsDisplacement": 0.00929215271025896,
+            "finalRmsDisplacement": 0.000677837582770735,
+            "maxIdleDrift": 0.03739671781659126,
+            "lateRmsOffsetSpeed": 0.005598890129476786,
+            "lateMaxDisplacement": 0.006119789555668831,
+            "worstPenetrationVertex": 5137,
+            "worstPenetrationScenarioFrame": 9,
+            "worstPenetrationCollider": "Armature/Hips/LunaRightShin/PeacefulCollider_right_shin",
+            "worstPenetrationSourceAttribute": "Move",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.06326518207788468,
+                "y": 0.36617812514305117,
+                "z": 0.2032628059387207
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.06321899592876435,
+                "y": 0.3663124442100525,
+                "z": 0.20389318466186524
+            },
+            "worstPenetrationActualDepth": 0.0017192699015140534,
+            "worstPenetrationGhostDepth": 0.0010884813964366913,
+            "worstPenetrationTime": 7.183333396911621,
+            "worstOffsetChangeVertex": 3240,
+            "worstOffsetChangeScenarioFrame": 14,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.16423028707504273,
+                "y": 0.4088040292263031,
+                "z": -0.38964176177978518
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.17915964126586915,
+                "y": 0.3957710266113281,
+                "z": -0.34273386001586916
+            },
+            "worstOffsetChangeTime": 7.266666889190674,
+            "minActualWorldY": 0.08649133890867233,
+            "minGhostWorldY": 0.08615436404943466,
+            "minActualVertex": 4181,
+            "minGhostVertex": 4181,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": 0.07696384936571121,
+                "y": 0.08649133890867233,
+                "z": -0.2843003273010254
+            },
+            "minGhostBodyLocal": {
+                "x": 0.07677098363637924,
+                "y": 0.08615436404943466,
+                "z": -0.2851753234863281
+            },
+            "minFixedWorldY": 0.38377436995506289,
+            "minMoveWorldY": 0.08649133890867233,
+            "minFixedVertex": 4253,
+            "minMoveVertex": 4181,
+            "minFixedActualBodyLocal": {
+                "x": 0.10488612949848175,
+                "y": 0.38377436995506289,
+                "z": 0.16651535034179688
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.10488612949848175,
+                "y": 0.38377436995506289,
+                "z": 0.16651535034179688
+            },
+            "minMoveActualBodyLocal": {
+                "x": 0.07696384936571121,
+                "y": 0.08649133890867233,
+                "z": -0.2843003273010254
+            },
+            "minMoveGhostBodyLocal": {
+                "x": 0.07677098363637924,
+                "y": 0.08615436404943466,
+                "z": -0.2851753234863281
+            }
+        },
+        {
+            "scenario": "dash",
+            "renderer": "LunaPeaceful_Veil",
+            "samples": 120,
+            "vertexSamples": 825120,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.0566076822578907,
+            "rmsDisplacement": 0.013207771815359593,
+            "maxOffsetChange": 0.007806259207427502,
+            "rmsOffsetSpeed": 0.06002361327409744,
+            "maxPenetration": 0.03764559328556061,
+            "ghostMaxPenetration": 0.03764559328556061,
+            "maxPenetrationWorsening": 4.6938657760620119e-7,
+            "firstRmsDisplacement": 0.021784698590636255,
+            "finalRmsDisplacement": 0.0013627149164676667,
+            "maxIdleDrift": 0.08022736012935639,
+            "lateRmsOffsetSpeed": 0.010587075725197792,
+            "lateMaxDisplacement": 0.01291709765791893,
+            "worstPenetrationVertex": 550,
+            "worstPenetrationScenarioFrame": 23,
+            "worstPenetrationCollider": "Armature/Hips/Spine02/Spine01/Spine/PeacefulCollider_torso",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.004535016603767872,
+                "y": 1.079043984413147,
+                "z": -0.03331136703491211
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.004535016603767872,
+                "y": 1.079043984413147,
+                "z": -0.03331184387207031
+            },
+            "worstPenetrationActualDepth": 0.015691593289375306,
+            "worstPenetrationGhostDepth": 0.0156911239027977,
+            "worstPenetrationTime": 7.416666507720947,
+            "worstOffsetChangeVertex": 6270,
+            "worstOffsetChangeScenarioFrame": 3,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.16024264693260194,
+                "y": 1.0831224918365479,
+                "z": -0.22336792945861817
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.16536901891231538,
+                "y": 1.082932949066162,
+                "z": -0.1811974048614502
+            },
+            "worstOffsetChangeTime": 7.083333492279053,
+            "minActualWorldY": 0.9818381667137146,
+            "minGhostWorldY": 0.9818381667137146,
+            "minActualVertex": 4413,
+            "minGhostVertex": 4413,
+            "minActualSourceAttribute": "Fixed",
+            "minGhostSourceAttribute": "Fixed",
+            "minActualBodyLocal": {
+                "x": 0.014680878259241581,
+                "y": 0.9818381667137146,
+                "z": -0.0914297103881836
+            },
+            "minGhostBodyLocal": {
+                "x": 0.014680878259241581,
+                "y": 0.9818381667137146,
+                "z": -0.0914297103881836
+            },
+            "minFixedWorldY": 0.9818381667137146,
+            "minMoveWorldY": 1.0259135961532593,
+            "minFixedVertex": 4413,
+            "minMoveVertex": 769,
+            "minFixedActualBodyLocal": {
+                "x": 0.014680878259241581,
+                "y": 0.9818381667137146,
+                "z": -0.0914297103881836
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.014680878259241581,
+                "y": 0.9818381667137146,
+                "z": -0.0914297103881836
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.09904754906892777,
+                "y": 1.0259135961532593,
+                "z": -0.18581056594848634
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.09765946865081787,
+                "y": 1.037144660949707,
+                "z": -0.20990896224975587
+            }
+        },
+        {
+            "scenario": "turn_180",
+            "renderer": "LunaPeaceful_CollarRibbon",
+            "samples": 120,
+            "vertexSamples": 37560,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.01407349668443203,
+            "rmsDisplacement": 0.001190754002891481,
+            "maxOffsetChange": 0.00837692804634571,
+            "rmsOffsetSpeed": 0.028154250234365464,
+            "maxPenetration": 0.027127191424369813,
+            "ghostMaxPenetration": 0.027127191424369813,
+            "maxPenetrationWorsening": 2.8312206268310549e-7,
+            "firstRmsDisplacement": 0.0004254745726939291,
+            "finalRmsDisplacement": 0.00045292763388715684,
+            "maxIdleDrift": 0.014307733625173569,
+            "lateRmsOffsetSpeed": 0.0004376797005534172,
+            "lateMaxDisplacement": 0.0015789836179465056,
+            "worstPenetrationVertex": 90,
+            "worstPenetrationScenarioFrame": 33,
+            "worstPenetrationCollider": "Armature/Hips/Spine02/Spine01/Spine/PeacefulCollider_torso",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.061741843819618228,
+                "y": 1.3261126279830933,
+                "z": 0.11419463157653809
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.06174180656671524,
+                "y": 1.3261131048202515,
+                "z": 0.11419466137886048
+            },
+            "worstPenetrationActualDepth": 0.015289239585399628,
+            "worstPenetrationGhostDepth": 0.015288956463336945,
+            "worstPenetrationTime": 9.583333015441895,
+            "worstOffsetChangeVertex": 19,
+            "worstOffsetChangeScenarioFrame": 37,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.08846165239810944,
+                "y": 1.2317835092544556,
+                "z": 0.16046620905399323
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.08185869455337525,
+                "y": 1.2328026294708253,
+                "z": 0.15765666961669923
+            },
+            "worstOffsetChangeTime": 9.649999618530274,
+            "minActualWorldY": 1.1734611988067628,
+            "minGhostWorldY": 1.1734611988067628,
+            "minActualVertex": 75,
+            "minGhostVertex": 75,
+            "minActualSourceAttribute": "Fixed",
+            "minGhostSourceAttribute": "Fixed",
+            "minActualBodyLocal": {
+                "x": 0.10022246092557907,
+                "y": 1.1734611988067628,
+                "z": 0.12392950057983399
+            },
+            "minGhostBodyLocal": {
+                "x": 0.10022246092557907,
+                "y": 1.1734611988067628,
+                "z": 0.12392950057983399
+            },
+            "minFixedWorldY": 1.1734611988067628,
+            "minMoveWorldY": 1.200626254081726,
+            "minFixedVertex": 75,
+            "minMoveVertex": 9,
+            "minFixedActualBodyLocal": {
+                "x": 0.10022246092557907,
+                "y": 1.1734611988067628,
+                "z": 0.12392950057983399
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.10022246092557907,
+                "y": 1.1734611988067628,
+                "z": 0.12392950057983399
+            },
+            "minMoveActualBodyLocal": {
+                "x": 0.09152001142501831,
+                "y": 1.200626254081726,
+                "z": 0.13976192474365235
+            },
+            "minMoveGhostBodyLocal": {
+                "x": 0.09173774719238281,
+                "y": 1.2005648612976075,
+                "z": 0.13988351821899415
+            }
+        },
+        {
+            "scenario": "turn_180",
+            "renderer": "LunaLeftForeArmSleeve",
+            "samples": 120,
+            "vertexSamples": 23040,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.007425705436617136,
+            "rmsDisplacement": 0.0013789522927254439,
+            "maxOffsetChange": 0.00972861796617508,
+            "rmsOffsetSpeed": 0.028925372287631036,
+            "maxPenetration": 0.0,
+            "ghostMaxPenetration": 0.0,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.000171905558090657,
+            "finalRmsDisplacement": 0.0009377978858537972,
+            "maxIdleDrift": 0.007391596212983131,
+            "lateRmsOffsetSpeed": 0.001059647765941918,
+            "lateMaxDisplacement": 0.0024802619591355325,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 161,
+            "worstOffsetChangeScenarioFrame": 37,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.030620718374848367,
+                "y": 1.0528321266174317,
+                "z": 0.2812933921813965
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.03396226093173027,
+                "y": 1.0537655353546143,
+                "z": 0.27778053283691409
+            },
+            "worstOffsetChangeTime": 9.649999618530274,
+            "minActualWorldY": 0.9969226717948914,
+            "minGhostWorldY": 0.9981521368026733,
+            "minActualVertex": 135,
+            "minGhostVertex": 135,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": -0.06329762935638428,
+                "y": 0.9969226717948914,
+                "z": 0.23990774154663087
+            },
+            "minGhostBodyLocal": {
+                "x": -0.06343293935060501,
+                "y": 0.9981521368026733,
+                "z": 0.24198484420776368
+            },
+            "minFixedWorldY": 1.058626413345337,
+            "minMoveWorldY": 0.9969226717948914,
+            "minFixedVertex": 15,
+            "minMoveVertex": 135,
+            "minFixedActualBodyLocal": {
+                "x": -0.08902610093355179,
+                "y": 1.058626413345337,
+                "z": 0.1873178333044052
+            },
+            "minFixedGhostBodyLocal": {
+                "x": -0.08902610093355179,
+                "y": 1.058626413345337,
+                "z": 0.1873178333044052
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.06329762935638428,
+                "y": 0.9969226717948914,
+                "z": 0.23990774154663087
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.06343293935060501,
+                "y": 0.9981521368026733,
+                "z": 0.24198484420776368
+            }
+        },
+        {
+            "scenario": "turn_180",
+            "renderer": "LunaRightForeArmSleeve",
+            "samples": 120,
+            "vertexSamples": 23040,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.007148286793380976,
+            "rmsDisplacement": 0.0013851491967216135,
+            "maxOffsetChange": 0.009287192486226559,
+            "rmsOffsetSpeed": 0.0289455633610487,
+            "maxPenetration": 0.0,
+            "ghostMaxPenetration": 0.0,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.00014747699606232345,
+            "finalRmsDisplacement": 0.001007953891530633,
+            "maxIdleDrift": 0.007066642865538597,
+            "lateRmsOffsetSpeed": 0.0008123718434944749,
+            "lateMaxDisplacement": 0.0025501807685941459,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 162,
+            "worstOffsetChangeScenarioFrame": 37,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.014330964535474778,
+                "y": 1.0748796463012696,
+                "z": 0.29926252365112307
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.0188293419778347,
+                "y": 1.0743359327316285,
+                "z": 0.29612207412719729
+            },
+            "worstOffsetChangeTime": 9.649999618530274,
+            "minActualWorldY": 1.0304005146026612,
+            "minGhostWorldY": 1.0315018892288209,
+            "minActualVertex": 139,
+            "minGhostVertex": 139,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": -0.017808716744184495,
+                "y": 1.0304005146026612,
+                "z": 0.2525153160095215
+            },
+            "minGhostBodyLocal": {
+                "x": -0.017819739878177644,
+                "y": 1.0315018892288209,
+                "z": 0.25476741790771487
+            },
+            "minFixedWorldY": 1.0921083688735963,
+            "minMoveWorldY": 1.0304005146026612,
+            "minFixedVertex": 19,
+            "minMoveVertex": 139,
+            "minFixedActualBodyLocal": {
+                "x": 0.016535725444555284,
+                "y": 1.0921083688735963,
+                "z": 0.2073664665222168
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.016535725444555284,
+                "y": 1.0921083688735963,
+                "z": 0.2073664665222168
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.017808716744184495,
+                "y": 1.0304005146026612,
+                "z": 0.2525153160095215
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.01766192726790905,
+                "y": 1.0315037965774537,
+                "z": 0.2547783851623535
+            }
+        },
+        {
+            "scenario": "turn_180",
+            "renderer": "LunaPeaceful_Skirt",
+            "samples": 120,
+            "vertexSamples": 1153440,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.06811501085758209,
+            "rmsDisplacement": 0.010455864481627941,
+            "maxOffsetChange": 0.016180194914340974,
+            "rmsOffsetSpeed": 0.09208481013774872,
+            "maxPenetration": 0.03201638162136078,
+            "ghostMaxPenetration": 0.03201638162136078,
+            "maxPenetrationWorsening": 0.002536788582801819,
+            "firstRmsDisplacement": 0.0006764924619346857,
+            "finalRmsDisplacement": 0.009541451930999756,
+            "maxIdleDrift": 0.06837833672761917,
+            "lateRmsOffsetSpeed": 0.013337315060198307,
+            "lateMaxDisplacement": 0.02974848262965679,
+            "worstPenetrationVertex": 6102,
+            "worstPenetrationScenarioFrame": 57,
+            "worstPenetrationCollider": "Armature/Hips/LunaLeftShin/PeacefulCollider_left_shin",
+            "worstPenetrationSourceAttribute": "Move",
+            "worstPenetrationActualBodyLocal": {
+                "x": -0.03949538990855217,
+                "y": 0.4119485318660736,
+                "z": -0.13010072708129884
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": -0.0393962524831295,
+                "y": 0.4101387858390808,
+                "z": -0.12821531295776368
+            },
+            "worstPenetrationActualDepth": 0.02836744673550129,
+            "worstPenetrationGhostDepth": 0.02583065815269947,
+            "worstPenetrationTime": 9.983333587646485,
+            "worstOffsetChangeVertex": 3263,
+            "worstOffsetChangeScenarioFrame": 40,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.29298898577690127,
+                "y": 0.36537396907806399,
+                "z": -0.3117775619029999
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.2737635672092438,
+                "y": 0.3666766285896301,
+                "z": -0.3129548728466034
+            },
+            "worstOffsetChangeTime": 9.699999809265137,
+            "minActualWorldY": 0.08639879524707794,
+            "minGhostWorldY": 0.08613793551921845,
+            "minActualVertex": 4181,
+            "minGhostVertex": 4181,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": 0.07683847099542618,
+                "y": 0.08639879524707794,
+                "z": -0.2853512763977051
+            },
+            "minGhostBodyLocal": {
+                "x": 0.07668006420135498,
+                "y": 0.08613793551921845,
+                "z": -0.2856440544128418
+            },
+            "minFixedWorldY": 0.3847101330757141,
+            "minMoveWorldY": 0.08639879524707794,
+            "minFixedVertex": 4253,
+            "minMoveVertex": 4181,
+            "minFixedActualBodyLocal": {
+                "x": 0.10321319848299027,
+                "y": 0.3847101330757141,
+                "z": 0.17904092371463777
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.10321319848299027,
+                "y": 0.3847101330757141,
+                "z": 0.17904092371463777
+            },
+            "minMoveActualBodyLocal": {
+                "x": 0.07683847099542618,
+                "y": 0.08639879524707794,
+                "z": -0.2853512763977051
+            },
+            "minMoveGhostBodyLocal": {
+                "x": 0.07656934857368469,
+                "y": 0.08616785705089569,
+                "z": -0.28618860244750979
+            }
+        },
+        {
+            "scenario": "turn_180",
+            "renderer": "LunaPeaceful_Veil",
+            "samples": 120,
+            "vertexSamples": 825120,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.06232643499970436,
+            "rmsDisplacement": 0.020387232303619386,
+            "maxOffsetChange": 0.02316421829164028,
+            "rmsOffsetSpeed": 0.14433328807353974,
+            "maxPenetration": 0.03764545917510986,
+            "ghostMaxPenetration": 0.03764545917510986,
+            "maxPenetrationWorsening": 1.1920928955078126e-7,
+            "firstRmsDisplacement": 0.001462731510400772,
+            "finalRmsDisplacement": 0.020633116364479066,
+            "maxIdleDrift": 0.059828922152519229,
+            "lateRmsOffsetSpeed": 0.019150396808981897,
+            "lateMaxDisplacement": 0.046920403838157657,
+            "worstPenetrationVertex": 3762,
+            "worstPenetrationScenarioFrame": 33,
+            "worstPenetrationCollider": "Armature/Hips/Spine02/Spine01/Spine/neck/Head/PeacefulCollider_head",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.02377891167998314,
+                "y": 1.5896059274673463,
+                "z": -0.03084002062678337
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.023778852075338365,
+                "y": 1.5896062850952149,
+                "z": -0.030839962884783746
+            },
+            "worstPenetrationActualDepth": 0.01968933641910553,
+            "worstPenetrationGhostDepth": 0.01968921720981598,
+            "worstPenetrationTime": 9.583333015441895,
+            "worstOffsetChangeVertex": 478,
+            "worstOffsetChangeScenarioFrame": 26,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.0943479910492897,
+                "y": 1.0768970251083375,
+                "z": -0.3203635513782501
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.04689614474773407,
+                "y": 1.065696358680725,
+                "z": -0.28153765201568606
+            },
+            "worstOffsetChangeTime": 9.466666221618653,
+            "minActualWorldY": 0.9815639853477478,
+            "minGhostWorldY": 0.9815639853477478,
+            "minActualVertex": 4413,
+            "minGhostVertex": 4413,
+            "minActualSourceAttribute": "Fixed",
+            "minGhostSourceAttribute": "Fixed",
+            "minActualBodyLocal": {
+                "x": 0.0141736576333642,
+                "y": 0.9815639853477478,
+                "z": -0.0915985107421875
+            },
+            "minGhostBodyLocal": {
+                "x": 0.0141736576333642,
+                "y": 0.9815639853477478,
+                "z": -0.0915985107421875
+            },
+            "minFixedWorldY": 0.9815639853477478,
+            "minMoveWorldY": 1.0289758443832398,
+            "minFixedVertex": 4413,
+            "minMoveVertex": 769,
+            "minFixedActualBodyLocal": {
+                "x": 0.0141736576333642,
+                "y": 0.9815639853477478,
+                "z": -0.0915985107421875
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.0141736576333642,
+                "y": 0.9815639853477478,
+                "z": -0.0915985107421875
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.0950295627117157,
+                "y": 1.0289758443832398,
+                "z": -0.21414661407470704
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.09449484199285507,
+                "y": 1.0296870470046998,
+                "z": -0.2097020149230957
+            }
+        },
+        {
+            "scenario": "recovery",
+            "renderer": "LunaPeaceful_CollarRibbon",
+            "samples": 180,
+            "vertexSamples": 56340,
+            "customMeshSamples": 180,
+            "allFinite": true,
+            "maxDisplacement": 0.002991405548527837,
+            "rmsDisplacement": 0.00042340648360550404,
+            "maxOffsetChange": 0.0008296386222355068,
+            "rmsOffsetSpeed": 0.0030353334732353689,
+            "maxPenetration": 0.027127116918563844,
+            "ghostMaxPenetration": 0.027127116918563844,
+            "maxPenetrationWorsening": 2.384185791015625e-7,
+            "firstRmsDisplacement": 0.0004152677720412612,
+            "finalRmsDisplacement": 0.00039156206184998155,
+            "maxIdleDrift": 0.0024986648932099344,
+            "lateRmsOffsetSpeed": 0.0022108606062829496,
+            "lateMaxDisplacement": 0.00177329545840621,
+            "worstPenetrationVertex": 165,
+            "worstPenetrationScenarioFrame": 24,
+            "worstPenetrationCollider": "Armature/Hips/Spine02/Spine01/Spine/PeacefulCollider_torso",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.06415815651416779,
+                "y": 1.2940396070480347,
+                "z": 0.13623642921447755
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.06415815651416779,
+                "y": 1.2940397262573243,
+                "z": 0.13623666763305665
+            },
+            "worstPenetrationActualDepth": 0.007701963186264038,
+            "worstPenetrationGhostDepth": 0.0077017247676849369,
+            "worstPenetrationTime": 11.433333396911621,
+            "worstOffsetChangeVertex": 30,
+            "worstOffsetChangeScenarioFrame": 53,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.08357779681682587,
+                "y": 1.2229845523834229,
+                "z": 0.14897727966308595
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.08241604268550873,
+                "y": 1.222564458847046,
+                "z": 0.14963674545288087
+            },
+            "worstOffsetChangeTime": 11.916666984558106,
+            "minActualWorldY": 1.1734603643417359,
+            "minGhostWorldY": 1.1734603643417359,
+            "minActualVertex": 75,
+            "minGhostVertex": 75,
+            "minActualSourceAttribute": "Fixed",
+            "minGhostSourceAttribute": "Fixed",
+            "minActualBodyLocal": {
+                "x": 0.10026402026414871,
+                "y": 1.1734603643417359,
+                "z": 0.1239013746380806
+            },
+            "minGhostBodyLocal": {
+                "x": 0.10026402026414871,
+                "y": 1.1734603643417359,
+                "z": 0.1239013746380806
+            },
+            "minFixedWorldY": 1.1734603643417359,
+            "minMoveWorldY": 1.2006386518478394,
+            "minFixedVertex": 75,
+            "minMoveVertex": 9,
+            "minFixedActualBodyLocal": {
+                "x": 0.10026402026414871,
+                "y": 1.1734603643417359,
+                "z": 0.1239013746380806
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.10026402026414871,
+                "y": 1.1734603643417359,
+                "z": 0.1239013746380806
+            },
+            "minMoveActualBodyLocal": {
+                "x": 0.09076014906167984,
+                "y": 1.2006386518478394,
+                "z": 0.1407165676355362
+            },
+            "minMoveGhostBodyLocal": {
+                "x": 0.09051855653524399,
+                "y": 1.2005634307861329,
+                "z": 0.14088155329227448
+            }
+        },
+        {
+            "scenario": "recovery",
+            "renderer": "LunaLeftForeArmSleeve",
+            "samples": 180,
+            "vertexSamples": 34560,
+            "customMeshSamples": 180,
+            "allFinite": true,
+            "maxDisplacement": 0.0019445408834144474,
+            "rmsDisplacement": 0.000198836307390593,
+            "maxOffsetChange": 0.0004808303783647716,
+            "rmsOffsetSpeed": 0.0026569184847176077,
+            "maxPenetration": 0.0,
+            "ghostMaxPenetration": 0.0,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.0008510825573466718,
+            "finalRmsDisplacement": 0.00007431828998960555,
+            "maxIdleDrift": 0.0034489405807107689,
+            "lateRmsOffsetSpeed": 0.00033879169495776296,
+            "lateMaxDisplacement": 0.0001871013082563877,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 140,
+            "worstOffsetChangeScenarioFrame": 4,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.05183601379394531,
+                "y": 1.0102293491363526,
+                "z": 0.24523448944091798
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.052310243248939517,
+                "y": 1.0107389688491822,
+                "z": 0.2455272674560547
+            },
+            "worstOffsetChangeTime": 11.100000381469727,
+            "minActualWorldY": 0.9980919361114502,
+            "minGhostWorldY": 0.9981510043144226,
+            "minActualVertex": 135,
+            "minGhostVertex": 135,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": -0.06357231736183167,
+                "y": 0.9980919361114502,
+                "z": 0.24185872077941895
+            },
+            "minGhostBodyLocal": {
+                "x": -0.06346911191940308,
+                "y": 0.9981510043144226,
+                "z": 0.2419750690460205
+            },
+            "minFixedWorldY": 1.058622121810913,
+            "minMoveWorldY": 0.9980919361114502,
+            "minFixedVertex": 15,
+            "minMoveVertex": 135,
+            "minFixedActualBodyLocal": {
+                "x": -0.08896630257368088,
+                "y": 1.058622121810913,
+                "z": 0.18731211125850678
+            },
+            "minFixedGhostBodyLocal": {
+                "x": -0.08896630257368088,
+                "y": 1.058622121810913,
+                "z": 0.18731211125850678
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.06357231736183167,
+                "y": 0.9980919361114502,
+                "z": 0.24185872077941895
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.06364145874977112,
+                "y": 0.9981671571731567,
+                "z": 0.2419276237487793
+            }
+        },
+        {
+            "scenario": "recovery",
+            "renderer": "LunaRightForeArmSleeve",
+            "samples": 180,
+            "vertexSamples": 34560,
+            "customMeshSamples": 180,
+            "allFinite": true,
+            "maxDisplacement": 0.0020758467726409437,
+            "rmsDisplacement": 0.0002032540796790272,
+            "maxOffsetChange": 0.0004878529580309987,
+            "rmsOffsetSpeed": 0.002719809068366885,
+            "maxPenetration": 0.0,
+            "ghostMaxPenetration": 0.0,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.0009076646529138088,
+            "finalRmsDisplacement": 0.00007304827158804983,
+            "maxIdleDrift": 0.0036836108192801477,
+            "lateRmsOffsetSpeed": 0.0003047415229957551,
+            "lateMaxDisplacement": 0.0001559556258143857,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 162,
+            "worstOffsetChangeScenarioFrame": 4,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.016049738973379136,
+                "y": 1.0762890577316285,
+                "z": 0.29538917541503909
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.015856977552175523,
+                "y": 1.0766005516052247,
+                "z": 0.29569482803344729
+            },
+            "worstOffsetChangeTime": 11.100000381469727,
+            "minActualWorldY": 1.0313987731933594,
+            "minGhostWorldY": 1.0315003395080567,
+            "minActualVertex": 139,
+            "minGhostVertex": 139,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": -0.017790786921977998,
+                "y": 1.0313987731933594,
+                "z": 0.25472593307495119
+            },
+            "minGhostBodyLocal": {
+                "x": -0.017698392271995546,
+                "y": 1.0315003395080567,
+                "z": 0.2547755241394043
+            },
+            "minFixedWorldY": 1.0921051502227784,
+            "minMoveWorldY": 1.0313987731933594,
+            "minFixedVertex": 19,
+            "minMoveVertex": 139,
+            "minFixedActualBodyLocal": {
+                "x": 0.016515512019395829,
+                "y": 1.0921051502227784,
+                "z": 0.20737171173095704
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.016515512019395829,
+                "y": 1.0921051502227784,
+                "z": 0.20737171173095704
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.017790786921977998,
+                "y": 1.0313987731933594,
+                "z": 0.25472593307495119
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.017872363328933717,
+                "y": 1.0315030813217164,
+                "z": 0.2547643184661865
+            }
+        },
+        {
+            "scenario": "recovery",
+            "renderer": "LunaPeaceful_Skirt",
+            "samples": 180,
+            "vertexSamples": 1730160,
+            "customMeshSamples": 180,
+            "allFinite": true,
+            "maxDisplacement": 0.029605478048324586,
+            "rmsDisplacement": 0.0025847116485238077,
+            "maxOffsetChange": 0.0034997130278497936,
+            "rmsOffsetSpeed": 0.011409574188292027,
+            "maxPenetration": 0.002770565450191498,
+            "ghostMaxPenetration": 0.002770565450191498,
+            "maxPenetrationWorsening": 2.3096799850463868e-7,
+            "firstRmsDisplacement": 0.00934610515832901,
+            "finalRmsDisplacement": 0.0013166209682822228,
+            "maxIdleDrift": 0.034833770245313647,
+            "lateRmsOffsetSpeed": 0.0027347675058990719,
+            "lateMaxDisplacement": 0.004086528904736042,
+            "worstPenetrationVertex": 5517,
+            "worstPenetrationScenarioFrame": 24,
+            "worstPenetrationCollider": "Armature/Hips/PeacefulCollider_pelvis",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.03780139237642288,
+                "y": 0.9763988852500916,
+                "z": 0.15253734588623048
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.03780139237642288,
+                "y": 0.9763990044593811,
+                "z": 0.15253734588623048
+            },
+            "worstPenetrationActualDepth": 0.0014672279357910157,
+            "worstPenetrationGhostDepth": 0.001466996967792511,
+            "worstPenetrationTime": 11.433333396911621,
+            "worstOffsetChangeVertex": 2508,
+            "worstOffsetChangeScenarioFrame": 1,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.318896621465683,
+                "y": 0.3885592222213745,
+                "z": -0.055052731186151507
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.31947675347328188,
+                "y": 0.3888966739177704,
+                "z": -0.05048081651329994
+            },
+            "worstOffsetChangeTime": 11.050000190734864,
+            "minActualWorldY": 0.08504561334848404,
+            "minGhostWorldY": 0.08613898605108261,
+            "minActualVertex": 4181,
+            "minGhostVertex": 4181,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": 0.07697874307632446,
+                "y": 0.08504561334848404,
+                "z": -0.2827935218811035
+            },
+            "minGhostBodyLocal": {
+                "x": 0.07672332972288132,
+                "y": 0.08613898605108261,
+                "z": -0.2854270935058594
+            },
+            "minFixedWorldY": 0.38470563292503359,
+            "minMoveWorldY": 0.08504561334848404,
+            "minFixedVertex": 4253,
+            "minMoveVertex": 4181,
+            "minFixedActualBodyLocal": {
+                "x": 0.10309242457151413,
+                "y": 0.38470563292503359,
+                "z": 0.17862416803836823
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.10309242457151413,
+                "y": 0.38470563292503359,
+                "z": 0.17862416803836823
+            },
+            "minMoveActualBodyLocal": {
+                "x": 0.07697874307632446,
+                "y": 0.08504561334848404,
+                "z": -0.2827935218811035
+            },
+            "minMoveGhostBodyLocal": {
+                "x": 0.07632961124181748,
+                "y": 0.08633317053318024,
+                "z": -0.28740358352661135
+            }
+        },
+        {
+            "scenario": "recovery",
+            "renderer": "LunaPeaceful_Veil",
+            "samples": 180,
+            "vertexSamples": 1237680,
+            "customMeshSamples": 180,
+            "allFinite": true,
+            "maxDisplacement": 0.04533614218235016,
+            "rmsDisplacement": 0.005837928969413042,
+            "maxOffsetChange": 0.0023229573853313925,
+            "rmsOffsetSpeed": 0.02696233056485653,
+            "maxPenetration": 0.03764525055885315,
+            "ghostMaxPenetration": 0.03764525055885315,
+            "maxPenetrationWorsening": 2.3096799850463868e-7,
+            "firstRmsDisplacement": 0.020462488755583764,
+            "finalRmsDisplacement": 0.0010739461285993457,
+            "maxIdleDrift": 0.06678245216608048,
+            "lateRmsOffsetSpeed": 0.0027349248994141819,
+            "lateMaxDisplacement": 0.003337860805913806,
+            "worstPenetrationVertex": 551,
+            "worstPenetrationScenarioFrame": 97,
+            "worstPenetrationCollider": "Armature/Hips/Spine02/Spine01/Spine/PeacefulCollider_torso",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.010237076319754124,
+                "y": 1.124897837638855,
+                "z": -0.01592278480529785
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.010237076319754124,
+                "y": 1.1248979568481446,
+                "z": -0.01592278480529785
+            },
+            "worstPenetrationActualDepth": 0.03346545994281769,
+            "worstPenetrationGhostDepth": 0.03346522897481918,
+            "worstPenetrationTime": 12.649999618530274,
+            "worstOffsetChangeVertex": 479,
+            "worstOffsetChangeScenarioFrame": 18,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.0466640330851078,
+                "y": 1.0690563917160035,
+                "z": -0.297910213470459
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.04957966133952141,
+                "y": 1.0600130558013917,
+                "z": -0.2850961685180664
+            },
+            "worstOffsetChangeTime": 11.333333015441895,
+            "minActualWorldY": 0.9815627932548523,
+            "minGhostWorldY": 0.9815627932548523,
+            "minActualVertex": 4413,
+            "minGhostVertex": 4413,
+            "minActualSourceAttribute": "Fixed",
+            "minGhostSourceAttribute": "Fixed",
+            "minActualBodyLocal": {
+                "x": 0.014158160425722599,
+                "y": 0.9815627932548523,
+                "z": -0.09160399436950684
+            },
+            "minGhostBodyLocal": {
+                "x": 0.014158160425722599,
+                "y": 0.9815627932548523,
+                "z": -0.09160399436950684
+            },
+            "minFixedWorldY": 0.9815627932548523,
+            "minMoveWorldY": 1.0254125595092774,
+            "minFixedVertex": 4413,
+            "minMoveVertex": 769,
+            "minFixedActualBodyLocal": {
+                "x": 0.014158160425722599,
+                "y": 0.9815627932548523,
+                "z": -0.09160399436950684
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.014158160425722599,
+                "y": 0.9815627932548523,
+                "z": -0.09160399436950684
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.09279454499483109,
+                "y": 1.0254125595092774,
+                "z": -0.19235874712467194
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.09546145051717758,
+                "y": 1.0308037996292115,
+                "z": -0.20977427065372468
+            }
+        },
+        {
+            "scenario": "teleport_20m",
+            "renderer": "LunaPeaceful_CollarRibbon",
+            "samples": 120,
+            "vertexSamples": 37560,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.002474195323884487,
+            "rmsDisplacement": 0.00040742786950431764,
+            "maxOffsetChange": 0.0002820479858200997,
+            "rmsOffsetSpeed": 0.0022214578930288555,
+            "maxPenetration": 0.027127891778945924,
+            "ghostMaxPenetration": 0.027127891778945924,
+            "maxPenetrationWorsening": 2.60770320892334e-7,
+            "firstRmsDisplacement": 0.000020265422790544108,
+            "finalRmsDisplacement": 0.00039683617069385946,
+            "maxIdleDrift": 0.0024711855221539737,
+            "lateRmsOffsetSpeed": 0.0021358297672122719,
+            "lateMaxDisplacement": 0.002021397463977337,
+            "worstPenetrationVertex": 89,
+            "worstPenetrationScenarioFrame": 83,
+            "worstPenetrationCollider": "Armature/Hips/Spine02/Spine01/Spine/PeacefulCollider_torso",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.07843589037656784,
+                "y": 1.3110671043395997,
+                "z": 0.12228298932313919
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.07843589037656784,
+                "y": 1.3110673427581788,
+                "z": 0.12228322774171829
+            },
+            "worstPenetrationActualDepth": 0.005546584725379944,
+            "worstPenetrationGhostDepth": 0.0055463239550590519,
+            "worstPenetrationTime": 15.416666984558106,
+            "worstOffsetChangeVertex": 10,
+            "worstOffsetChangeScenarioFrame": 39,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.09862898290157318,
+                "y": 1.2156038284301758,
+                "z": 0.13656474649906159
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.09946821630001068,
+                "y": 1.216125726699829,
+                "z": 0.1358034759759903
+            },
+            "worstOffsetChangeTime": 14.683333396911621,
+            "minActualWorldY": 1.1734603643417359,
+            "minGhostWorldY": 1.1734603643417359,
+            "minActualVertex": 75,
+            "minGhostVertex": 75,
+            "minActualSourceAttribute": "Fixed",
+            "minGhostSourceAttribute": "Fixed",
+            "minActualBodyLocal": {
+                "x": 0.10026358813047409,
+                "y": 1.1734603643417359,
+                "z": 0.1239013746380806
+            },
+            "minGhostBodyLocal": {
+                "x": 0.10026358813047409,
+                "y": 1.1734603643417359,
+                "z": 0.1239013746380806
+            },
+            "minFixedWorldY": 1.1734603643417359,
+            "minMoveWorldY": 1.2007663249969483,
+            "minFixedVertex": 75,
+            "minMoveVertex": 9,
+            "minFixedActualBodyLocal": {
+                "x": 0.10026358813047409,
+                "y": 1.1734603643417359,
+                "z": 0.1239013746380806
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.10026358813047409,
+                "y": 1.1734603643417359,
+                "z": 0.1239013746380806
+            },
+            "minMoveActualBodyLocal": {
+                "x": 0.0910796970129013,
+                "y": 1.2007663249969483,
+                "z": 0.14045406877994538
+            },
+            "minMoveGhostBodyLocal": {
+                "x": 0.09033773839473725,
+                "y": 1.200657606124878,
+                "z": 0.14102937281131745
+            }
+        },
+        {
+            "scenario": "teleport_20m",
+            "renderer": "LunaLeftForeArmSleeve",
+            "samples": 120,
+            "vertexSamples": 23040,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.0003849335771519691,
+            "rmsDisplacement": 0.00008882718248059973,
+            "maxOffsetChange": 0.0000817966865724884,
+            "rmsOffsetSpeed": 0.00068650086177513,
+            "maxPenetration": 0.0,
+            "ghostMaxPenetration": 0.0,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.000001232239810633473,
+            "finalRmsDisplacement": 0.00007553483737865463,
+            "maxIdleDrift": 0.0003865515172947198,
+            "lateRmsOffsetSpeed": 0.00035305178607814014,
+            "lateMaxDisplacement": 0.00016435986617580056,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 124,
+            "worstOffsetChangeScenarioFrame": 16,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.07983019202947617,
+                "y": 1.0103604793548585,
+                "z": 0.25905919075012209
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.07974817603826523,
+                "y": 1.0105458498001099,
+                "z": 0.25921130180358889
+            },
+            "worstOffsetChangeTime": 14.300000190734864,
+            "minActualWorldY": 0.9980923533439636,
+            "minGhostWorldY": 0.9981511831283569,
+            "minActualVertex": 135,
+            "minGhostVertex": 135,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": -0.06354906409978867,
+                "y": 0.9980923533439636,
+                "z": 0.241865873336792
+            },
+            "minGhostBodyLocal": {
+                "x": -0.06346895545721054,
+                "y": 0.9981511831283569,
+                "z": 0.2419748306274414
+            },
+            "minFixedWorldY": 1.0586220026016236,
+            "minMoveWorldY": 0.9980923533439636,
+            "minFixedVertex": 15,
+            "minMoveVertex": 135,
+            "minFixedActualBodyLocal": {
+                "x": -0.08896638453006745,
+                "y": 1.0586220026016236,
+                "z": 0.18731187283992768
+            },
+            "minFixedGhostBodyLocal": {
+                "x": -0.08896638453006745,
+                "y": 1.0586220026016236,
+                "z": 0.18731187283992768
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.06354906409978867,
+                "y": 0.9980923533439636,
+                "z": 0.241865873336792
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.06364061683416367,
+                "y": 0.998167097568512,
+                "z": 0.2419273853302002
+            }
+        },
+        {
+            "scenario": "teleport_20m",
+            "renderer": "LunaRightForeArmSleeve",
+            "samples": 120,
+            "vertexSamples": 23040,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.0004218703543301672,
+            "rmsDisplacement": 0.00008390751463593915,
+            "maxOffsetChange": 0.00006699997175019234,
+            "rmsOffsetSpeed": 0.000633752322755754,
+            "maxPenetration": 0.0,
+            "ghostMaxPenetration": 0.0,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.0000010789374300657074,
+            "finalRmsDisplacement": 0.00007415690924972296,
+            "maxIdleDrift": 0.00042038856190629303,
+            "lateRmsOffsetSpeed": 0.00036626902874559164,
+            "lateMaxDisplacement": 0.0001643701980356127,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 130,
+            "worstOffsetChangeScenarioFrame": 17,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.058673880994319919,
+                "y": 1.0712958574295045,
+                "z": 0.2672574520111084
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.058689139783382419,
+                "y": 1.0715172290802003,
+                "z": 0.26731204986572268
+            },
+            "worstOffsetChangeTime": 14.316666603088379,
+            "minActualWorldY": 1.0314042568206788,
+            "minGhostWorldY": 1.0315003395080567,
+            "minActualVertex": 139,
+            "minGhostVertex": 139,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": -0.01770784705877304,
+                "y": 1.0314042568206788,
+                "z": 0.25473737716674807
+            },
+            "minGhostBodyLocal": {
+                "x": -0.01769831031560898,
+                "y": 1.0315003395080567,
+                "z": 0.2547755241394043
+            },
+            "minFixedWorldY": 1.0921053886413575,
+            "minMoveWorldY": 1.0314042568206788,
+            "minFixedVertex": 19,
+            "minMoveVertex": 139,
+            "minFixedActualBodyLocal": {
+                "x": 0.016515713185071946,
+                "y": 1.0921053886413575,
+                "z": 0.20737123489379884
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.016515713185071946,
+                "y": 1.0921053886413575,
+                "z": 0.20737123489379884
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.01770784705877304,
+                "y": 1.0314042568206788,
+                "z": 0.25473737716674807
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.017786048352718355,
+                "y": 1.0315003395080567,
+                "z": 0.25476980209350588
+            }
+        },
+        {
+            "scenario": "teleport_20m",
+            "renderer": "LunaPeaceful_Skirt",
+            "samples": 120,
+            "vertexSamples": 1153440,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.004201894626021385,
+            "rmsDisplacement": 0.0010444674408063293,
+            "maxOffsetChange": 0.0002650371170602739,
+            "rmsOffsetSpeed": 0.003624507924541831,
+            "maxPenetration": 0.002770937979221344,
+            "ghostMaxPenetration": 0.002770937979221344,
+            "maxPenetrationWorsening": 2.2351741790771485e-7,
+            "firstRmsDisplacement": 0.0000020467587091843599,
+            "finalRmsDisplacement": 0.0013139971997588873,
+            "maxIdleDrift": 0.0042018648236989979,
+            "lateRmsOffsetSpeed": 0.0028636010829359295,
+            "lateMaxDisplacement": 0.004201894626021385,
+            "worstPenetrationVertex": 5518,
+            "worstPenetrationScenarioFrame": 65,
+            "worstPenetrationCollider": "Armature/Hips/PeacefulCollider_pelvis",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.04620550572872162,
+                "y": 0.9730257391929627,
+                "z": 0.14940214157104493
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.04620550572872162,
+                "y": 0.9730258584022522,
+                "z": 0.14940214157104493
+            },
+            "worstPenetrationActualDepth": 0.0027702972292900087,
+            "worstPenetrationGhostDepth": 0.002770073711872101,
+            "worstPenetrationTime": 15.116666793823243,
+            "worstOffsetChangeVertex": 3339,
+            "worstOffsetChangeScenarioFrame": 90,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.13998034596443177,
+                "y": 0.4553219974040985,
+                "z": -0.27402734756469729
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.13933756947517396,
+                "y": 0.45518651604652407,
+                "z": -0.27451372146606448
+            },
+            "worstOffsetChangeTime": 15.533333778381348,
+            "minActualWorldY": 0.08625157177448273,
+            "minGhostWorldY": 0.08613905310630799,
+            "minActualVertex": 4181,
+            "minGhostVertex": 4181,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": 0.0768451914191246,
+                "y": 0.08625157177448273,
+                "z": -0.28538084030151369
+            },
+            "minGhostBodyLocal": {
+                "x": 0.0767231211066246,
+                "y": 0.08613905310630799,
+                "z": -0.28542661666870119
+            },
+            "minFixedWorldY": 0.3847056031227112,
+            "minMoveWorldY": 0.08625157177448273,
+            "minFixedVertex": 4253,
+            "minMoveVertex": 4181,
+            "minFixedActualBodyLocal": {
+                "x": 0.10309217870235443,
+                "y": 0.3847056031227112,
+                "z": 0.17862416803836823
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.10309217870235443,
+                "y": 0.3847056031227112,
+                "z": 0.17862416803836823
+            },
+            "minMoveActualBodyLocal": {
+                "x": 0.0768451914191246,
+                "y": 0.08625157177448273,
+                "z": -0.28538084030151369
+            },
+            "minMoveGhostBodyLocal": {
+                "x": 0.07647707313299179,
+                "y": 0.0862162858247757,
+                "z": -0.28666067123413088
+            }
+        },
+        {
+            "scenario": "teleport_20m",
+            "renderer": "LunaPeaceful_Veil",
+            "samples": 120,
+            "vertexSamples": 825120,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.0037952722050249578,
+            "rmsDisplacement": 0.0009300130186602473,
+            "maxOffsetChange": 0.0008558960980735719,
+            "rmsOffsetSpeed": 0.003940348979085684,
+            "maxPenetration": 0.03764551132917404,
+            "ghostMaxPenetration": 0.03764551132917404,
+            "maxPenetrationWorsening": 2.5331974029541018e-7,
+            "firstRmsDisplacement": 0.000003920630661014002,
+            "finalRmsDisplacement": 0.0009264229447580874,
+            "maxIdleDrift": 0.003713018959388137,
+            "lateRmsOffsetSpeed": 0.002771763363853097,
+            "lateMaxDisplacement": 0.0034255769569426777,
+            "worstPenetrationVertex": 4091,
+            "worstPenetrationScenarioFrame": 65,
+            "worstPenetrationCollider": "Armature/Hips/Spine02/Spine01/Spine/neck/Head/PeacefulCollider_head",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.02094460092484951,
+                "y": 1.5631273984909058,
+                "z": -0.053846120834350589
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.02094460092484951,
+                "y": 1.5631275177001954,
+                "z": -0.05384635925292969
+            },
+            "worstPenetrationActualDepth": 0.01515333354473114,
+            "worstPenetrationGhostDepth": 0.015153080224990845,
+            "worstPenetrationTime": 15.116666793823243,
+            "worstOffsetChangeVertex": 3655,
+            "worstOffsetChangeScenarioFrame": 101,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.030988702550530435,
+                "y": 1.3966597318649293,
+                "z": -0.10567617416381836
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.03025437332689762,
+                "y": 1.3971277475357056,
+                "z": -0.10511183738708496
+            },
+            "worstOffsetChangeTime": 15.716666221618653,
+            "minActualWorldY": 0.9815627932548523,
+            "minGhostWorldY": 0.9815627932548523,
+            "minActualVertex": 4413,
+            "minGhostVertex": 4413,
+            "minActualSourceAttribute": "Fixed",
+            "minGhostSourceAttribute": "Fixed",
+            "minActualBodyLocal": {
+                "x": 0.014158257283270359,
+                "y": 0.9815627932548523,
+                "z": -0.09160423278808594
+            },
+            "minGhostBodyLocal": {
+                "x": 0.014158257283270359,
+                "y": 0.9815627932548523,
+                "z": -0.09160423278808594
+            },
+            "minFixedWorldY": 0.9815627932548523,
+            "minMoveWorldY": 1.0290472507476807,
+            "minFixedVertex": 4413,
+            "minMoveVertex": 769,
+            "minFixedActualBodyLocal": {
+                "x": 0.014158257283270359,
+                "y": 0.9815627932548523,
+                "z": -0.09160423278808594
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.014158257283270359,
+                "y": 0.9815627932548523,
+                "z": -0.09160423278808594
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.09360693395137787,
+                "y": 1.0290472507476807,
+                "z": -0.21073605120182038
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.0944957584142685,
+                "y": 1.0296870470046998,
+                "z": -0.209702268242836
+            }
+        },
+        {
+            "scenario": "reactivation",
+            "renderer": "LunaPeaceful_CollarRibbon",
+            "samples": 120,
+            "vertexSamples": 37560,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.0024253486189991237,
+            "rmsDisplacement": 0.0004017727915197611,
+            "maxOffsetChange": 0.0002664278435986489,
+            "rmsOffsetSpeed": 0.002170237945392728,
+            "maxPenetration": 0.02712784707546234,
+            "ghostMaxPenetration": 0.02712784707546234,
+            "maxPenetrationWorsening": 1.1920928955078126e-7,
+            "firstRmsDisplacement": 0.00002022902663156856,
+            "finalRmsDisplacement": 0.00046451983507722616,
+            "maxIdleDrift": 0.0024233751464635135,
+            "lateRmsOffsetSpeed": 0.0021553770639002325,
+            "lateMaxDisplacement": 0.001741543528623879,
+            "worstPenetrationVertex": 4,
+            "worstPenetrationScenarioFrame": 50,
+            "worstPenetrationCollider": "Armature/Hips/Spine02/Spine01/Spine/PeacefulCollider_torso",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.10573004931211472,
+                "y": 1.2068252563476563,
+                "z": 0.10647798329591751
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.10573004931211472,
+                "y": 1.2068251371383668,
+                "z": 0.10647798329591751
+            },
+            "worstPenetrationActualDepth": 0.002700403332710266,
+            "worstPenetrationGhostDepth": 0.0027002841234207155,
+            "worstPenetrationTime": 16.899999618530275,
+            "worstOffsetChangeVertex": 105,
+            "worstOffsetChangeScenarioFrame": 26,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.07567213475704193,
+                "y": 1.2873684167861939,
+                "z": 0.1548910140991211
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.07460783421993256,
+                "y": 1.2880409955978394,
+                "z": 0.15464186668395997
+            },
+            "worstOffsetChangeTime": 16.5,
+            "minActualWorldY": 1.1734602451324463,
+            "minGhostWorldY": 1.1734602451324463,
+            "minActualVertex": 75,
+            "minGhostVertex": 75,
+            "minActualSourceAttribute": "Fixed",
+            "minGhostSourceAttribute": "Fixed",
+            "minActualBodyLocal": {
+                "x": 0.10026358813047409,
+                "y": 1.1734602451324463,
+                "z": 0.1239011362195015
+            },
+            "minGhostBodyLocal": {
+                "x": 0.10026358813047409,
+                "y": 1.1734602451324463,
+                "z": 0.1239011362195015
+            },
+            "minFixedWorldY": 1.1734602451324463,
+            "minMoveWorldY": 1.2004510164260865,
+            "minFixedVertex": 75,
+            "minMoveVertex": 9,
+            "minFixedActualBodyLocal": {
+                "x": 0.10026358813047409,
+                "y": 1.1734602451324463,
+                "z": 0.1239011362195015
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.10026358813047409,
+                "y": 1.1734602451324463,
+                "z": 0.1239011362195015
+            },
+            "minMoveActualBodyLocal": {
+                "x": 0.09122084081172943,
+                "y": 1.2004510164260865,
+                "z": 0.14031101763248444
+            },
+            "minMoveGhostBodyLocal": {
+                "x": 0.0912170261144638,
+                "y": 1.2004411220550538,
+                "z": 0.14031006395816804
+            }
+        },
+        {
+            "scenario": "reactivation",
+            "renderer": "LunaLeftForeArmSleeve",
+            "samples": 120,
+            "vertexSamples": 23040,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.000483075826196,
+            "rmsDisplacement": 0.00009502308967057616,
+            "maxOffsetChange": 0.00009385799785377458,
+            "rmsOffsetSpeed": 0.0007942026131786406,
+            "maxPenetration": 0.0,
+            "ghostMaxPenetration": 0.0,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.0000014346383068186697,
+            "finalRmsDisplacement": 0.00007311307854251936,
+            "maxIdleDrift": 0.00048664730275049806,
+            "lateRmsOffsetSpeed": 0.0003327159211039543,
+            "lateMaxDisplacement": 0.000246374896960333,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 150,
+            "worstOffsetChangeScenarioFrame": 18,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.051692988723516467,
+                "y": 1.0463171005249024,
+                "z": 0.2823619842529297
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.05172541365027428,
+                "y": 1.0464539527893067,
+                "z": 0.2824063301086426
+            },
+            "worstOffsetChangeTime": 16.366666793823243,
+            "minActualWorldY": 0.9982354640960693,
+            "minGhostWorldY": 0.9981511235237122,
+            "minActualVertex": 135,
+            "minGhostVertex": 135,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": -0.06324388831853867,
+                "y": 0.9982354640960693,
+                "z": 0.24201107025146485
+            },
+            "minGhostBodyLocal": {
+                "x": -0.06346895545721054,
+                "y": 0.9981511235237122,
+                "z": 0.2419748306274414
+            },
+            "minFixedWorldY": 1.0586220026016236,
+            "minMoveWorldY": 0.9982354640960693,
+            "minFixedVertex": 15,
+            "minMoveVertex": 135,
+            "minFixedActualBodyLocal": {
+                "x": -0.08896638453006745,
+                "y": 1.0586220026016236,
+                "z": 0.18731187283992768
+            },
+            "minFixedGhostBodyLocal": {
+                "x": -0.08896638453006745,
+                "y": 1.0586220026016236,
+                "z": 0.18731187283992768
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.06324388831853867,
+                "y": 0.9982354640960693,
+                "z": 0.24201107025146485
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.0635547861456871,
+                "y": 0.9981577396392822,
+                "z": 0.24195075035095216
+            }
+        },
+        {
+            "scenario": "reactivation",
+            "renderer": "LunaRightForeArmSleeve",
+            "samples": 120,
+            "vertexSamples": 23040,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.0004127224674448371,
+            "rmsDisplacement": 0.00008521905692759901,
+            "maxOffsetChange": 0.0001094426988856867,
+            "rmsOffsetSpeed": 0.0007620351971127093,
+            "maxPenetration": 0.0,
+            "ghostMaxPenetration": 0.0,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.0000012090465588698863,
+            "finalRmsDisplacement": 0.00007287209155037999,
+            "maxIdleDrift": 0.00041650698403827846,
+            "lateRmsOffsetSpeed": 0.0003477951104287058,
+            "lateMaxDisplacement": 0.000190660372027196,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 146,
+            "worstOffsetChangeScenarioFrame": 14,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": -0.043964412063360217,
+                "y": 1.080597162246704,
+                "z": 0.2891237735748291
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": -0.0441761277616024,
+                "y": 1.0806798934936524,
+                "z": 0.28906965255737307
+            },
+            "worstOffsetChangeTime": 16.299999237060548,
+            "minActualWorldY": 1.03145170211792,
+            "minGhostWorldY": 1.0315003395080567,
+            "minActualVertex": 139,
+            "minGhostVertex": 139,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": -0.01795961707830429,
+                "y": 1.03145170211792,
+                "z": 0.2547931671142578
+            },
+            "minGhostBodyLocal": {
+                "x": -0.01769831031560898,
+                "y": 1.0315003395080567,
+                "z": 0.2547755241394043
+            },
+            "minFixedWorldY": 1.0921051502227784,
+            "minMoveWorldY": 1.03145170211792,
+            "minFixedVertex": 19,
+            "minMoveVertex": 139,
+            "minFixedActualBodyLocal": {
+                "x": 0.016515713185071946,
+                "y": 1.0921051502227784,
+                "z": 0.20737123489379884
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.016515713185071946,
+                "y": 1.0921051502227784,
+                "z": 0.20737123489379884
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.01795961707830429,
+                "y": 1.03145170211792,
+                "z": 0.2547931671142578
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.018106482923030855,
+                "y": 1.0315698385238648,
+                "z": 0.2547483444213867
+            }
+        },
+        {
+            "scenario": "reactivation",
+            "renderer": "LunaPeaceful_Skirt",
+            "samples": 120,
+            "vertexSamples": 1153440,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.004660549107939005,
+            "rmsDisplacement": 0.0010778605937957764,
+            "maxOffsetChange": 0.0002716057642828673,
+            "rmsOffsetSpeed": 0.00432100472971797,
+            "maxPenetration": 0.0027709007263183595,
+            "ghostMaxPenetration": 0.0027709007263183595,
+            "maxPenetrationWorsening": 0.0,
+            "firstRmsDisplacement": 0.0000016713789818822989,
+            "finalRmsDisplacement": 0.0014782074140384794,
+            "maxIdleDrift": 0.004660502541810274,
+            "lateRmsOffsetSpeed": 0.004082448314875364,
+            "lateMaxDisplacement": 0.003518639598041773,
+            "worstPenetrationVertex": -1,
+            "worstPenetrationScenarioFrame": -1,
+            "worstPenetrationCollider": "",
+            "worstPenetrationSourceAttribute": "",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worstPenetrationActualDepth": 0.0,
+            "worstPenetrationGhostDepth": 0.0,
+            "worstPenetrationTime": 0.0,
+            "worstOffsetChangeVertex": 3347,
+            "worstOffsetChangeScenarioFrame": 56,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.1316223293542862,
+                "y": 0.4697892963886261,
+                "z": -0.23415707051753999
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.1324157863855362,
+                "y": 0.46922096610069277,
+                "z": -0.23281286656856538
+            },
+            "worstOffsetChangeTime": 17.0,
+            "minActualWorldY": 0.08625198155641556,
+            "minGhostWorldY": 0.08613903820514679,
+            "minActualVertex": 4181,
+            "minGhostVertex": 4181,
+            "minActualSourceAttribute": "Move",
+            "minGhostSourceAttribute": "Move",
+            "minActualBodyLocal": {
+                "x": 0.07681658118963242,
+                "y": 0.08625198155641556,
+                "z": -0.28544139862060549
+            },
+            "minGhostBodyLocal": {
+                "x": 0.0767231211066246,
+                "y": 0.08613903820514679,
+                "z": -0.28542661666870119
+            },
+            "minFixedWorldY": 0.38470572233200076,
+            "minMoveWorldY": 0.08625198155641556,
+            "minFixedVertex": 4253,
+            "minMoveVertex": 4181,
+            "minFixedActualBodyLocal": {
+                "x": 0.10309217870235443,
+                "y": 0.38470572233200076,
+                "z": 0.17862440645694734
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.10309217870235443,
+                "y": 0.38470572233200076,
+                "z": 0.17862440645694734
+            },
+            "minMoveActualBodyLocal": {
+                "x": 0.07681658118963242,
+                "y": 0.08625198155641556,
+                "z": -0.28544139862060549
+            },
+            "minMoveGhostBodyLocal": {
+                "x": 0.07647707313299179,
+                "y": 0.08621629327535629,
+                "z": -0.28666067123413088
+            }
+        },
+        {
+            "scenario": "reactivation",
+            "renderer": "LunaPeaceful_Veil",
+            "samples": 120,
+            "vertexSamples": 825120,
+            "customMeshSamples": 120,
+            "allFinite": true,
+            "maxDisplacement": 0.0037728799507021906,
+            "rmsDisplacement": 0.0009536475408822298,
+            "maxOffsetChange": 0.0004507336125243455,
+            "rmsOffsetSpeed": 0.004182759672403336,
+            "maxPenetration": 0.03764557093381882,
+            "ghostMaxPenetration": 0.03764557093381882,
+            "maxPenetrationWorsening": 2.384185791015625e-7,
+            "firstRmsDisplacement": 0.0000036896931305818727,
+            "finalRmsDisplacement": 0.0011764845112338663,
+            "maxIdleDrift": 0.0036905042361468078,
+            "lateRmsOffsetSpeed": 0.003279215656220913,
+            "lateMaxDisplacement": 0.00285234022885561,
+            "worstPenetrationVertex": 551,
+            "worstPenetrationScenarioFrame": 64,
+            "worstPenetrationCollider": "Armature/Hips/Spine02/Spine01/Spine/PeacefulCollider_torso",
+            "worstPenetrationSourceAttribute": "Fixed",
+            "worstPenetrationActualBodyLocal": {
+                "x": 0.011468889191746712,
+                "y": 1.1242122650146485,
+                "z": -0.016410110518336297
+            },
+            "worstPenetrationGhostBodyLocal": {
+                "x": 0.011468889191746712,
+                "y": 1.124212384223938,
+                "z": -0.016410348936915399
+            },
+            "worstPenetrationActualDepth": 0.03346545994281769,
+            "worstPenetrationGhostDepth": 0.033465221524238589,
+            "worstPenetrationTime": 17.133333206176759,
+            "worstOffsetChangeVertex": 3352,
+            "worstOffsetChangeScenarioFrame": 73,
+            "worstOffsetChangeSourceAttribute": "Move",
+            "worstOffsetChangeActualBodyLocal": {
+                "x": 0.07669831067323685,
+                "y": 1.4205683469772339,
+                "z": -0.0663609430193901
+            },
+            "worstOffsetChangeGhostBodyLocal": {
+                "x": 0.0755157545208931,
+                "y": 1.4206141233444214,
+                "z": -0.0663151666522026
+            },
+            "worstOffsetChangeTime": 17.28333282470703,
+            "minActualWorldY": 0.9815628528594971,
+            "minGhostWorldY": 0.9815628528594971,
+            "minActualVertex": 4413,
+            "minGhostVertex": 4413,
+            "minActualSourceAttribute": "Fixed",
+            "minGhostSourceAttribute": "Fixed",
+            "minActualBodyLocal": {
+                "x": 0.014158257283270359,
+                "y": 0.9815628528594971,
+                "z": -0.09160423278808594
+            },
+            "minGhostBodyLocal": {
+                "x": 0.014158257283270359,
+                "y": 0.9815628528594971,
+                "z": -0.09160423278808594
+            },
+            "minFixedWorldY": 0.9815628528594971,
+            "minMoveWorldY": 1.0290393829345704,
+            "minFixedVertex": 4413,
+            "minMoveVertex": 769,
+            "minFixedActualBodyLocal": {
+                "x": 0.014158257283270359,
+                "y": 0.9815628528594971,
+                "z": -0.09160423278808594
+            },
+            "minFixedGhostBodyLocal": {
+                "x": 0.014158257283270359,
+                "y": 0.9815628528594971,
+                "z": -0.09160423278808594
+            },
+            "minMoveActualBodyLocal": {
+                "x": -0.09360693395137787,
+                "y": 1.0290393829345704,
+                "z": -0.21050263941287995
+            },
+            "minMoveGhostBodyLocal": {
+                "x": -0.09441374242305756,
+                "y": 1.02963387966156,
+                "z": -0.20969559252262116
+            }
+        }
+    ],
+    "checks": [
+        "The shipped peaceful Animator controller is present.",
+        "The controller contains Speed and Dashing parameters.",
+        "Expected cloth count: 5.",
+        "Cloth_CollarRibbon uses MeshCloth.",
+        "Cloth_CollarRibbon has skinned source renderers.",
+        "Cloth_CollarRibbon has enabled prebuild data.",
+        "Cloth_Cuff_L uses MeshCloth.",
+        "Cloth_Cuff_L has skinned source renderers.",
+        "Cloth_Cuff_L has enabled prebuild data.",
+        "Cloth_Cuff_R uses MeshCloth.",
+        "Cloth_Cuff_R has skinned source renderers.",
+        "Cloth_Cuff_R has enabled prebuild data.",
+        "Cloth_Skirt uses MeshCloth.",
+        "Cloth_Skirt has skinned source renderers.",
+        "Cloth_Skirt has enabled prebuild data.",
+        "Cloth_Veil uses MeshCloth.",
+        "Cloth_Veil has skinned source renderers.",
+        "Cloth_Veil has enabled prebuild data.",
+        "All cloth groups finished building and are running.",
+        "LunaPeaceful_CollarRibbon: custom mesh is currently assigned.",
+        "LunaLeftForeArmSleeve: custom mesh is currently assigned.",
+        "LunaRightForeArmSleeve: custom mesh is currently assigned.",
+        "LunaPeaceful_Skirt: custom mesh is currently assigned.",
+        "LunaPeaceful_Veil: custom mesh is currently assigned.",
+        "Every source renderer displays Magica's custom mesh, distinct from its original mesh.",
+        "LunaPeaceful_CollarRibbon: custom mesh is currently assigned.",
+        "LunaLeftForeArmSleeve: custom mesh is currently assigned.",
+        "LunaRightForeArmSleeve: custom mesh is currently assigned.",
+        "LunaPeaceful_Skirt: custom mesh is currently assigned.",
+        "LunaPeaceful_Veil: custom mesh is currently assigned.",
+        "idle/LunaPeaceful_CollarRibbon: all sampled vertices are finite.",
+        "idle/LunaPeaceful_CollarRibbon: cloth stays above the floor (1.1735 m).",
+        "idle/LunaPeaceful_CollarRibbon: custom mesh stayed assigned during every sample.",
+        "idle/LunaPeaceful_CollarRibbon: displacement is within limit (0.0025 m).",
+        "idle/LunaPeaceful_CollarRibbon: per-sample cloth change is within limit (0.0003 m).",
+        "idle/LunaPeaceful_CollarRibbon: collider penetration worsening is within limit (0.0000 m).",
+        "idle/LunaPeaceful_CollarRibbon: settled idle drift is within limit (0.0036 m).",
+        "idle/LunaLeftForeArmSleeve: all sampled vertices are finite.",
+        "idle/LunaLeftForeArmSleeve: cloth stays above the floor (0.9981 m).",
+        "idle/LunaLeftForeArmSleeve: custom mesh stayed assigned during every sample.",
+        "idle/LunaLeftForeArmSleeve: displacement is within limit (0.0002 m).",
+        "idle/LunaLeftForeArmSleeve: per-sample cloth change is within limit (0.0000 m).",
+        "idle/LunaLeftForeArmSleeve: collider penetration worsening is within limit (0.0000 m).",
+        "idle/LunaLeftForeArmSleeve: settled idle drift is within limit (0.0003 m).",
+        "idle/LunaRightForeArmSleeve: all sampled vertices are finite.",
+        "idle/LunaRightForeArmSleeve: cloth stays above the floor (1.0314 m).",
+        "idle/LunaRightForeArmSleeve: custom mesh stayed assigned during every sample.",
+        "idle/LunaRightForeArmSleeve: displacement is within limit (0.0002 m).",
+        "idle/LunaRightForeArmSleeve: per-sample cloth change is within limit (0.0000 m).",
+        "idle/LunaRightForeArmSleeve: collider penetration worsening is within limit (0.0000 m).",
+        "idle/LunaRightForeArmSleeve: settled idle drift is within limit (0.0003 m).",
+        "idle/LunaPeaceful_Skirt: all sampled vertices are finite.",
+        "idle/LunaPeaceful_Skirt: cloth stays above the floor (0.0862 m).",
+        "idle/LunaPeaceful_Skirt: custom mesh stayed assigned during every sample.",
+        "idle/LunaPeaceful_Skirt: displacement is within limit (0.0042 m).",
+        "idle/LunaPeaceful_Skirt: per-sample cloth change is within limit (0.0002 m).",
+        "idle/LunaPeaceful_Skirt: collider penetration worsening is within limit (0.0000 m).",
+        "idle/LunaPeaceful_Skirt: settled idle drift is within limit (0.0078 m).",
+        "idle/LunaPeaceful_Veil: all sampled vertices are finite.",
+        "idle/LunaPeaceful_Veil: cloth stays above the floor (0.9816 m).",
+        "idle/LunaPeaceful_Veil: custom mesh stayed assigned during every sample.",
+        "idle/LunaPeaceful_Veil: displacement is within limit (0.0039 m).",
+        "idle/LunaPeaceful_Veil: per-sample cloth change is within limit (0.0006 m).",
+        "idle/LunaPeaceful_Veil: collider penetration worsening is within limit (0.0000 m).",
+        "idle/LunaPeaceful_Veil: settled idle drift is within limit (0.0044 m).",
+        "LunaPeaceful_CollarRibbon: custom mesh is currently assigned.",
+        "LunaLeftForeArmSleeve: custom mesh is currently assigned.",
+        "LunaRightForeArmSleeve: custom mesh is currently assigned.",
+        "LunaPeaceful_Skirt: custom mesh is currently assigned.",
+        "LunaPeaceful_Veil: custom mesh is currently assigned.",
+        "walk/LunaPeaceful_CollarRibbon: all sampled vertices are finite.",
+        "walk/LunaPeaceful_CollarRibbon: cloth stays above the floor (1.1735 m).",
+        "walk/LunaPeaceful_CollarRibbon: custom mesh stayed assigned during every sample.",
+        "walk/LunaPeaceful_CollarRibbon: displacement is within limit (0.0025 m).",
+        "walk/LunaPeaceful_CollarRibbon: per-sample cloth change is within limit (0.0009 m).",
+        "walk/LunaPeaceful_CollarRibbon: collider penetration worsening is within limit (0.0000 m).",
+        "walk/LunaLeftForeArmSleeve: all sampled vertices are finite.",
+        "walk/LunaLeftForeArmSleeve: cloth stays above the floor (0.9973 m).",
+        "walk/LunaLeftForeArmSleeve: custom mesh stayed assigned during every sample.",
+        "walk/LunaLeftForeArmSleeve: displacement is within limit (0.0046 m).",
+        "walk/LunaLeftForeArmSleeve: per-sample cloth change is within limit (0.0008 m).",
+        "walk/LunaLeftForeArmSleeve: collider penetration worsening is within limit (0.0000 m).",
+        "walk/LunaRightForeArmSleeve: all sampled vertices are finite.",
+        "walk/LunaRightForeArmSleeve: cloth stays above the floor (1.0307 m).",
+        "walk/LunaRightForeArmSleeve: custom mesh stayed assigned during every sample.",
+        "walk/LunaRightForeArmSleeve: displacement is within limit (0.0036 m).",
+        "walk/LunaRightForeArmSleeve: per-sample cloth change is within limit (0.0005 m).",
+        "walk/LunaRightForeArmSleeve: collider penetration worsening is within limit (0.0000 m).",
+        "walk/LunaPeaceful_Skirt: all sampled vertices are finite.",
+        "walk/LunaPeaceful_Skirt: cloth stays above the floor (0.0864 m).",
+        "walk/LunaPeaceful_Skirt: custom mesh stayed assigned during every sample.",
+        "walk/LunaPeaceful_Skirt: displacement is within limit (0.0365 m).",
+        "walk/LunaPeaceful_Skirt: per-sample cloth change is within limit (0.0078 m).",
+        "walk/LunaPeaceful_Skirt: collider penetration worsening is within limit (0.0027 m).",
+        "walk/LunaPeaceful_Veil: all sampled vertices are finite.",
+        "walk/LunaPeaceful_Veil: cloth stays above the floor (0.9816 m).",
+        "walk/LunaPeaceful_Veil: custom mesh stayed assigned during every sample.",
+        "walk/LunaPeaceful_Veil: displacement is within limit (0.0553 m).",
+        "walk/LunaPeaceful_Veil: per-sample cloth change is within limit (0.0061 m).",
+        "walk/LunaPeaceful_Veil: collider penetration worsening is within limit (0.0000 m).",
+        "The actual controller has a Dash state.",
+        "Dash translates exactly speed × duration (2.470 m).",
+        "LunaPeaceful_CollarRibbon: custom mesh is currently assigned.",
+        "LunaLeftForeArmSleeve: custom mesh is currently assigned.",
+        "LunaRightForeArmSleeve: custom mesh is currently assigned.",
+        "LunaPeaceful_Skirt: custom mesh is currently assigned.",
+        "LunaPeaceful_Veil: custom mesh is currently assigned.",
+        "dash/LunaPeaceful_CollarRibbon: all sampled vertices are finite.",
+        "dash/LunaPeaceful_CollarRibbon: cloth stays above the floor (1.1735 m).",
+        "dash/LunaPeaceful_CollarRibbon: custom mesh stayed assigned during every sample.",
+        "dash/LunaPeaceful_CollarRibbon: displacement is within limit (0.0121 m).",
+        "dash/LunaPeaceful_CollarRibbon: per-sample cloth change is within limit (0.0029 m).",
+        "dash/LunaPeaceful_CollarRibbon: collider penetration worsening is within limit (0.0000 m).",
+        "dash/LunaLeftForeArmSleeve: all sampled vertices are finite.",
+        "dash/LunaLeftForeArmSleeve: cloth stays above the floor (0.9928 m).",
+        "dash/LunaLeftForeArmSleeve: custom mesh stayed assigned during every sample.",
+        "dash/LunaLeftForeArmSleeve: displacement is within limit (0.0071 m).",
+        "dash/LunaLeftForeArmSleeve: per-sample cloth change is within limit (0.0021 m).",
+        "dash/LunaLeftForeArmSleeve: collider penetration worsening is within limit (0.0000 m).",
+        "dash/LunaRightForeArmSleeve: all sampled vertices are finite.",
+        "dash/LunaRightForeArmSleeve: cloth stays above the floor (1.0253 m).",
+        "dash/LunaRightForeArmSleeve: custom mesh stayed assigned during every sample.",
+        "dash/LunaRightForeArmSleeve: displacement is within limit (0.0047 m).",
+        "dash/LunaRightForeArmSleeve: per-sample cloth change is within limit (0.0021 m).",
+        "dash/LunaRightForeArmSleeve: collider penetration worsening is within limit (0.0000 m).",
+        "dash/LunaPeaceful_Skirt: all sampled vertices are finite.",
+        "dash/LunaPeaceful_Skirt: cloth stays above the floor (0.0865 m).",
+        "dash/LunaPeaceful_Skirt: custom mesh stayed assigned during every sample.",
+        "dash/LunaPeaceful_Skirt: displacement is within limit (0.0565 m).",
+        "dash/LunaPeaceful_Skirt: per-sample cloth change is within limit (0.0126 m).",
+        "dash/LunaPeaceful_Skirt: collider penetration worsening is within limit (0.0006 m).",
+        "dash/LunaPeaceful_Veil: all sampled vertices are finite.",
+        "dash/LunaPeaceful_Veil: cloth stays above the floor (0.9818 m).",
+        "dash/LunaPeaceful_Veil: custom mesh stayed assigned during every sample.",
+        "dash/LunaPeaceful_Veil: displacement is within limit (0.0566 m).",
+        "dash/LunaPeaceful_Veil: per-sample cloth change is within limit (0.0078 m).",
+        "dash/LunaPeaceful_Veil: collider penetration worsening is within limit (0.0000 m).",
+        "LunaPeaceful_CollarRibbon: custom mesh is currently assigned.",
+        "LunaLeftForeArmSleeve: custom mesh is currently assigned.",
+        "LunaRightForeArmSleeve: custom mesh is currently assigned.",
+        "LunaPeaceful_Skirt: custom mesh is currently assigned.",
+        "LunaPeaceful_Veil: custom mesh is currently assigned.",
+        "turn_180/LunaPeaceful_CollarRibbon: all sampled vertices are finite.",
+        "turn_180/LunaPeaceful_CollarRibbon: cloth stays above the floor (1.1735 m).",
+        "turn_180/LunaPeaceful_CollarRibbon: custom mesh stayed assigned during every sample.",
+        "turn_180/LunaPeaceful_CollarRibbon: displacement is within limit (0.0141 m).",
+        "turn_180/LunaPeaceful_CollarRibbon: per-sample cloth change is within limit (0.0084 m).",
+        "turn_180/LunaPeaceful_CollarRibbon: collider penetration worsening is within limit (0.0000 m).",
+        "turn_180/LunaLeftForeArmSleeve: all sampled vertices are finite.",
+        "turn_180/LunaLeftForeArmSleeve: cloth stays above the floor (0.9969 m).",
+        "turn_180/LunaLeftForeArmSleeve: custom mesh stayed assigned during every sample.",
+        "turn_180/LunaLeftForeArmSleeve: displacement is within limit (0.0074 m).",
+        "turn_180/LunaLeftForeArmSleeve: per-sample cloth change is within limit (0.0097 m).",
+        "turn_180/LunaLeftForeArmSleeve: collider penetration worsening is within limit (0.0000 m).",
+        "turn_180/LunaRightForeArmSleeve: all sampled vertices are finite.",
+        "turn_180/LunaRightForeArmSleeve: cloth stays above the floor (1.0304 m).",
+        "turn_180/LunaRightForeArmSleeve: custom mesh stayed assigned during every sample.",
+        "turn_180/LunaRightForeArmSleeve: displacement is within limit (0.0071 m).",
+        "turn_180/LunaRightForeArmSleeve: per-sample cloth change is within limit (0.0093 m).",
+        "turn_180/LunaRightForeArmSleeve: collider penetration worsening is within limit (0.0000 m).",
+        "turn_180/LunaPeaceful_Skirt: all sampled vertices are finite.",
+        "turn_180/LunaPeaceful_Skirt: cloth stays above the floor (0.0864 m).",
+        "turn_180/LunaPeaceful_Skirt: custom mesh stayed assigned during every sample.",
+        "turn_180/LunaPeaceful_Skirt: displacement is within limit (0.0681 m).",
+        "turn_180/LunaPeaceful_Skirt: per-sample cloth change is within limit (0.0162 m).",
+        "turn_180/LunaPeaceful_Skirt: collider penetration worsening is within limit (0.0025 m).",
+        "turn_180/LunaPeaceful_Veil: all sampled vertices are finite.",
+        "turn_180/LunaPeaceful_Veil: cloth stays above the floor (0.9816 m).",
+        "turn_180/LunaPeaceful_Veil: custom mesh stayed assigned during every sample.",
+        "turn_180/LunaPeaceful_Veil: displacement is within limit (0.0623 m).",
+        "turn_180/LunaPeaceful_Veil: per-sample cloth change is within limit (0.0232 m).",
+        "turn_180/LunaPeaceful_Veil: collider penetration worsening is within limit (0.0000 m).",
+        "LunaPeaceful_CollarRibbon: custom mesh is currently assigned.",
+        "LunaLeftForeArmSleeve: custom mesh is currently assigned.",
+        "LunaRightForeArmSleeve: custom mesh is currently assigned.",
+        "LunaPeaceful_Skirt: custom mesh is currently assigned.",
+        "LunaPeaceful_Veil: custom mesh is currently assigned.",
+        "recovery/LunaPeaceful_CollarRibbon: all sampled vertices are finite.",
+        "recovery/LunaPeaceful_CollarRibbon: cloth stays above the floor (1.1735 m).",
+        "recovery/LunaPeaceful_CollarRibbon: custom mesh stayed assigned during every sample.",
+        "recovery/LunaPeaceful_CollarRibbon: displacement is within limit (0.0030 m).",
+        "recovery/LunaPeaceful_CollarRibbon: per-sample cloth change is within limit (0.0008 m).",
+        "recovery/LunaPeaceful_CollarRibbon: collider penetration worsening is within limit (0.0000 m).",
+        "recovery/LunaPeaceful_CollarRibbon: late residual speed is within limit (0.0022 m/s).",
+        "recovery/LunaPeaceful_CollarRibbon: late displacement is within limit (0.0018 m).",
+        "recovery/LunaLeftForeArmSleeve: all sampled vertices are finite.",
+        "recovery/LunaLeftForeArmSleeve: cloth stays above the floor (0.9981 m).",
+        "recovery/LunaLeftForeArmSleeve: custom mesh stayed assigned during every sample.",
+        "recovery/LunaLeftForeArmSleeve: displacement is within limit (0.0019 m).",
+        "recovery/LunaLeftForeArmSleeve: per-sample cloth change is within limit (0.0005 m).",
+        "recovery/LunaLeftForeArmSleeve: collider penetration worsening is within limit (0.0000 m).",
+        "recovery/LunaLeftForeArmSleeve: late residual speed is within limit (0.0003 m/s).",
+        "recovery/LunaLeftForeArmSleeve: late displacement is within limit (0.0002 m).",
+        "recovery/LunaRightForeArmSleeve: all sampled vertices are finite.",
+        "recovery/LunaRightForeArmSleeve: cloth stays above the floor (1.0314 m).",
+        "recovery/LunaRightForeArmSleeve: custom mesh stayed assigned during every sample.",
+        "recovery/LunaRightForeArmSleeve: displacement is within limit (0.0021 m).",
+        "recovery/LunaRightForeArmSleeve: per-sample cloth change is within limit (0.0005 m).",
+        "recovery/LunaRightForeArmSleeve: collider penetration worsening is within limit (0.0000 m).",
+        "recovery/LunaRightForeArmSleeve: late residual speed is within limit (0.0003 m/s).",
+        "recovery/LunaRightForeArmSleeve: late displacement is within limit (0.0002 m).",
+        "recovery/LunaPeaceful_Skirt: all sampled vertices are finite.",
+        "recovery/LunaPeaceful_Skirt: cloth stays above the floor (0.0850 m).",
+        "recovery/LunaPeaceful_Skirt: custom mesh stayed assigned during every sample.",
+        "recovery/LunaPeaceful_Skirt: displacement is within limit (0.0296 m).",
+        "recovery/LunaPeaceful_Skirt: per-sample cloth change is within limit (0.0035 m).",
+        "recovery/LunaPeaceful_Skirt: collider penetration worsening is within limit (0.0000 m).",
+        "recovery/LunaPeaceful_Skirt: late residual speed is within limit (0.0027 m/s).",
+        "recovery/LunaPeaceful_Skirt: late displacement is within limit (0.0041 m).",
+        "recovery/LunaPeaceful_Veil: all sampled vertices are finite.",
+        "recovery/LunaPeaceful_Veil: cloth stays above the floor (0.9816 m).",
+        "recovery/LunaPeaceful_Veil: custom mesh stayed assigned during every sample.",
+        "recovery/LunaPeaceful_Veil: displacement is within limit (0.0453 m).",
+        "recovery/LunaPeaceful_Veil: per-sample cloth change is within limit (0.0023 m).",
+        "recovery/LunaPeaceful_Veil: collider penetration worsening is within limit (0.0000 m).",
+        "recovery/LunaPeaceful_Veil: late residual speed is within limit (0.0027 m/s).",
+        "recovery/LunaPeaceful_Veil: late displacement is within limit (0.0033 m).",
+        "LunaPeaceful_CollarRibbon: custom mesh is currently assigned.",
+        "LunaLeftForeArmSleeve: custom mesh is currently assigned.",
+        "LunaRightForeArmSleeve: custom mesh is currently assigned.",
+        "LunaPeaceful_Skirt: custom mesh is currently assigned.",
+        "LunaPeaceful_Veil: custom mesh is currently assigned.",
+        "teleport_20m/LunaPeaceful_CollarRibbon: all sampled vertices are finite.",
+        "teleport_20m/LunaPeaceful_CollarRibbon: cloth stays above the floor (1.1735 m).",
+        "teleport_20m/LunaPeaceful_CollarRibbon: custom mesh stayed assigned during every sample.",
+        "teleport_20m/LunaPeaceful_CollarRibbon: displacement is within limit (0.0025 m).",
+        "teleport_20m/LunaPeaceful_CollarRibbon: per-sample cloth change is within limit (0.0003 m).",
+        "teleport_20m/LunaPeaceful_CollarRibbon: collider penetration worsening is within limit (0.0000 m).",
+        "teleport_20m/LunaPeaceful_CollarRibbon: late residual speed is within limit (0.0021 m/s).",
+        "teleport_20m/LunaPeaceful_CollarRibbon: late displacement is within limit (0.0020 m).",
+        "teleport_20m/LunaLeftForeArmSleeve: all sampled vertices are finite.",
+        "teleport_20m/LunaLeftForeArmSleeve: cloth stays above the floor (0.9981 m).",
+        "teleport_20m/LunaLeftForeArmSleeve: custom mesh stayed assigned during every sample.",
+        "teleport_20m/LunaLeftForeArmSleeve: displacement is within limit (0.0004 m).",
+        "teleport_20m/LunaLeftForeArmSleeve: per-sample cloth change is within limit (0.0001 m).",
+        "teleport_20m/LunaLeftForeArmSleeve: collider penetration worsening is within limit (0.0000 m).",
+        "teleport_20m/LunaLeftForeArmSleeve: late residual speed is within limit (0.0004 m/s).",
+        "teleport_20m/LunaLeftForeArmSleeve: late displacement is within limit (0.0002 m).",
+        "teleport_20m/LunaRightForeArmSleeve: all sampled vertices are finite.",
+        "teleport_20m/LunaRightForeArmSleeve: cloth stays above the floor (1.0314 m).",
+        "teleport_20m/LunaRightForeArmSleeve: custom mesh stayed assigned during every sample.",
+        "teleport_20m/LunaRightForeArmSleeve: displacement is within limit (0.0004 m).",
+        "teleport_20m/LunaRightForeArmSleeve: per-sample cloth change is within limit (0.0001 m).",
+        "teleport_20m/LunaRightForeArmSleeve: collider penetration worsening is within limit (0.0000 m).",
+        "teleport_20m/LunaRightForeArmSleeve: late residual speed is within limit (0.0004 m/s).",
+        "teleport_20m/LunaRightForeArmSleeve: late displacement is within limit (0.0002 m).",
+        "teleport_20m/LunaPeaceful_Skirt: all sampled vertices are finite.",
+        "teleport_20m/LunaPeaceful_Skirt: cloth stays above the floor (0.0863 m).",
+        "teleport_20m/LunaPeaceful_Skirt: custom mesh stayed assigned during every sample.",
+        "teleport_20m/LunaPeaceful_Skirt: displacement is within limit (0.0042 m).",
+        "teleport_20m/LunaPeaceful_Skirt: per-sample cloth change is within limit (0.0003 m).",
+        "teleport_20m/LunaPeaceful_Skirt: collider penetration worsening is within limit (0.0000 m).",
+        "teleport_20m/LunaPeaceful_Skirt: late residual speed is within limit (0.0029 m/s).",
+        "teleport_20m/LunaPeaceful_Skirt: late displacement is within limit (0.0042 m).",
+        "teleport_20m/LunaPeaceful_Veil: all sampled vertices are finite.",
+        "teleport_20m/LunaPeaceful_Veil: cloth stays above the floor (0.9816 m).",
+        "teleport_20m/LunaPeaceful_Veil: custom mesh stayed assigned during every sample.",
+        "teleport_20m/LunaPeaceful_Veil: displacement is within limit (0.0038 m).",
+        "teleport_20m/LunaPeaceful_Veil: per-sample cloth change is within limit (0.0009 m).",
+        "teleport_20m/LunaPeaceful_Veil: collider penetration worsening is within limit (0.0000 m).",
+        "teleport_20m/LunaPeaceful_Veil: late residual speed is within limit (0.0028 m/s).",
+        "teleport_20m/LunaPeaceful_Veil: late displacement is within limit (0.0034 m).",
+        "LunaPeaceful_CollarRibbon: custom mesh is currently assigned.",
+        "LunaLeftForeArmSleeve: custom mesh is currently assigned.",
+        "LunaRightForeArmSleeve: custom mesh is currently assigned.",
+        "LunaPeaceful_Skirt: custom mesh is currently assigned.",
+        "LunaPeaceful_Veil: custom mesh is currently assigned.",
+        "reactivation/LunaPeaceful_CollarRibbon: all sampled vertices are finite.",
+        "reactivation/LunaPeaceful_CollarRibbon: cloth stays above the floor (1.1735 m).",
+        "reactivation/LunaPeaceful_CollarRibbon: custom mesh stayed assigned during every sample.",
+        "reactivation/LunaPeaceful_CollarRibbon: displacement is within limit (0.0024 m).",
+        "reactivation/LunaPeaceful_CollarRibbon: per-sample cloth change is within limit (0.0003 m).",
+        "reactivation/LunaPeaceful_CollarRibbon: collider penetration worsening is within limit (0.0000 m).",
+        "reactivation/LunaPeaceful_CollarRibbon: late residual speed is within limit (0.0022 m/s).",
+        "reactivation/LunaPeaceful_CollarRibbon: late displacement is within limit (0.0017 m).",
+        "reactivation/LunaLeftForeArmSleeve: all sampled vertices are finite.",
+        "reactivation/LunaLeftForeArmSleeve: cloth stays above the floor (0.9982 m).",
+        "reactivation/LunaLeftForeArmSleeve: custom mesh stayed assigned during every sample.",
+        "reactivation/LunaLeftForeArmSleeve: displacement is within limit (0.0005 m).",
+        "reactivation/LunaLeftForeArmSleeve: per-sample cloth change is within limit (0.0001 m).",
+        "reactivation/LunaLeftForeArmSleeve: collider penetration worsening is within limit (0.0000 m).",
+        "reactivation/LunaLeftForeArmSleeve: late residual speed is within limit (0.0003 m/s).",
+        "reactivation/LunaLeftForeArmSleeve: late displacement is within limit (0.0002 m).",
+        "reactivation/LunaRightForeArmSleeve: all sampled vertices are finite.",
+        "reactivation/LunaRightForeArmSleeve: cloth stays above the floor (1.0315 m).",
+        "reactivation/LunaRightForeArmSleeve: custom mesh stayed assigned during every sample.",
+        "reactivation/LunaRightForeArmSleeve: displacement is within limit (0.0004 m).",
+        "reactivation/LunaRightForeArmSleeve: per-sample cloth change is within limit (0.0001 m).",
+        "reactivation/LunaRightForeArmSleeve: collider penetration worsening is within limit (0.0000 m).",
+        "reactivation/LunaRightForeArmSleeve: late residual speed is within limit (0.0003 m/s).",
+        "reactivation/LunaRightForeArmSleeve: late displacement is within limit (0.0002 m).",
+        "reactivation/LunaPeaceful_Skirt: all sampled vertices are finite.",
+        "reactivation/LunaPeaceful_Skirt: cloth stays above the floor (0.0863 m).",
+        "reactivation/LunaPeaceful_Skirt: custom mesh stayed assigned during every sample.",
+        "reactivation/LunaPeaceful_Skirt: displacement is within limit (0.0047 m).",
+        "reactivation/LunaPeaceful_Skirt: per-sample cloth change is within limit (0.0003 m).",
+        "reactivation/LunaPeaceful_Skirt: collider penetration worsening is within limit (0.0000 m).",
+        "reactivation/LunaPeaceful_Skirt: late residual speed is within limit (0.0041 m/s).",
+        "reactivation/LunaPeaceful_Skirt: late displacement is within limit (0.0035 m).",
+        "reactivation/LunaPeaceful_Veil: all sampled vertices are finite.",
+        "reactivation/LunaPeaceful_Veil: cloth stays above the floor (0.9816 m).",
+        "reactivation/LunaPeaceful_Veil: custom mesh stayed assigned during every sample.",
+        "reactivation/LunaPeaceful_Veil: displacement is within limit (0.0038 m).",
+        "reactivation/LunaPeaceful_Veil: per-sample cloth change is within limit (0.0005 m).",
+        "reactivation/LunaPeaceful_Veil: collider penetration worsening is within limit (0.0000 m).",
+        "reactivation/LunaPeaceful_Veil: late residual speed is within limit (0.0033 m/s).",
+        "reactivation/LunaPeaceful_Veil: late displacement is within limit (0.0029 m).",
+        "Cloth_CollarRibbon: dynamic cloth movement exceeds 0.0005 m.",
+        "Cloth_Cuff_L: dynamic cloth movement exceeds 0.0005 m.",
+        "Cloth_Cuff_R: dynamic cloth movement exceeds 0.0005 m.",
+        "Cloth_Skirt: dynamic cloth movement exceeds 0.0005 m.",
+        "Cloth_Veil: dynamic cloth movement exceeds 0.0005 m."
+    ],
+    "failures": [],
+    "captures": [
+        "Documentation/MoonLuna/PeacefulCloth/Validation/idle_end.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/idle_rear.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/idle_side.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/walk_end.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/walk_rear.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/walk_side.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/dash_peak.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/dash_end.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/dash_rear.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/dash_side.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/turn_180_end.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/turn_180_rear.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/turn_180_side.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/recovery_end.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/recovery_rear.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/recovery_side.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/teleport_20m_end.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/teleport_20m_rear.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/teleport_20m_side.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/reactivation_end.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/reactivation_rear.png",
+        "Documentation/MoonLuna/PeacefulCloth/Validation/reactivation_side.png"
+    ],
+    "steppedFrames": 1083,
+    "videoFrames": 480,
+    "simulatedSeconds": 18.049999237060548,
+    "actualDashDistance": 2.4700002670288088
+}

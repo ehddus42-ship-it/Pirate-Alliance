@@ -29,7 +29,7 @@
 
 | 요청 | 변경 |
 | --- | --- |
-| YHS_TEST 의 평시 프로이 모델을 로비에서, 던전에서는 전투복 | YHS_TEST `5c0257c` 에서 평시복 자산만 가져옴 (`Proi_General.fbx` / 머티리얼 / 텍스처 / `Proi_General.controller` / `ProiGeneralHands` / `ProiGeneralHunterKit`, `ProiToon` 의 양면 옵션). 궁극기 · 플레이그라운드 변경은 가져오지 않음. 평시복은 남궁루나와 같은 방식의 로비 전용 몸: `ProiEveryday.asset` (이동만) → `Proi.asset` 의 `lobbyForm` |
+| YHS_TEST 의 평시 프로이 모델을 로비에서, 던전에서는 전투복 | YHS_TEST `5c0257c` 에서 평시복 자산만 가져옴 (`Proi_General.fbx` / 머티리얼 / 텍스처 / `Proi_General.controller` / `ProiGeneralHands` / `ProiGeneralHunterKit`, `ProiToon` 의 양면 옵션). 궁극기 · 플레이그라운드 변경은 가져오지 않음. 평시복은 문루나와 같은 방식의 로비 전용 몸: `ProiEveryday.asset` (이동만) → `Proi.asset` 의 `lobbyForm` |
 | G 로 두 버전 전환 (테스트) | `HunterRoster`: G / 게임패드 십자키 위. 로비 형태가 있는 헌터면 지금 자리와 반대 옷으로. 로비 · 게이트 입장 · 교체 때 원래대로 |
 | 평시복 옷과 머리카락도 Magica Cloth 2, 머리는 전투복과 비슷한 규모 | `ProiMagicaSetup` 을 두 옷 모두 만들도록 정리 (`EverydayPlans`). 페인트 / 콜라이더 `Tools/Proi/proi_general_magica_data.py` |
 

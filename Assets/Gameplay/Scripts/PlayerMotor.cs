@@ -38,7 +38,7 @@ namespace AcRoguelike
         [Tooltip("Face the movement direction while exploring, then face the aim point during attacks.")]
         public bool faceMovementDirection;
         public bool IsDashing => dashRemaining > 0 || dashMovedThisFrame;
-        /// <summary>0..1 through the current dash, negative when not dashing. Procedural bodies (Namgung Luna) play their dash pose from it.</summary>
+        /// <summary>0..1 through the current dash, negative when not dashing. Procedural bodies (Moon Luna) play their dash pose from it.</summary>
         public float DashPhase => dashRemaining > 0 ? 1f - dashRemaining / Mathf.Max(.01f, dashDuration) : dashMovedThisFrame ? 1f : -1f;
         /// <summary>Burst at the start, most of the distance by 60%, and an end speed that matches the run (4.2 m/s at 12.5 m/s).</summary>
         public static AnimationCurve DefaultDashSpeedCurve() => new AnimationCurve(
