@@ -323,6 +323,8 @@ namespace MoonLuna.Magica
                 a.rotationMatrix = Matrix4x4.Rotate(a.rotation);
             }
 
+            // Every part deforms in parallel; the frame waits once for all of them.
+            JobHandle all = default;
             foreach (var b in bindings)
             {
                 // per anchor: M = targetToFollower * [R | t] as a row-major 3x4
@@ -345,8 +347,13 @@ namespace MoonLuna.Magica
                 }
 
                 b.jobMatrices.CopyFrom(m);
-                new DeformJob { rest = b.jobRest, normals = b.jobNormals, anchor = b.jobAnchors, weight = b.jobWeights,
-                    matrices = b.jobMatrices, vertices = b.jobVertices, outputNormals = b.jobOutputNormals }.Schedule(b.rest.Length, 128).Complete();
+                var handle = new DeformJob { rest = b.jobRest, normals = b.jobNormals, anchor = b.jobAnchors, weight = b.jobWeights,
+                    matrices = b.jobMatrices, vertices = b.jobVertices, outputNormals = b.jobOutputNormals }.Schedule(b.rest.Length, 128);
+                all = JobHandle.CombineDependencies(all, handle);
+            }
+            all.Complete();
+            foreach (var b in bindings)
+            {
                 b.deformed.SetVertices(b.jobVertices);
                 b.deformed.SetNormals(b.jobOutputNormals);
             }

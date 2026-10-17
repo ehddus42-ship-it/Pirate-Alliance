@@ -75,7 +75,8 @@ namespace MoonLuna
         readonly Sprite[] flames = new Sprite[4];
         readonly Remnant[] particles = new Remnant[FlameCapacity + WispCapacity];
         MaterialPropertyBlock properties;
-        Transform visual, effectRoot;
+        Transform visual, effectRoot, lastCandidate;
+        bool candidateHasFace;
         LunaMoonGait gait;
         LunaCombatController combat;
         Mesh bottomPivotQuad, flameTongue, irisCore;
@@ -145,10 +146,15 @@ namespace MoonLuna
                 if (gait == null) gait = GetComponentInParent<LunaMoonGait>();
                 if (gait == null) gait = GetComponentInChildren<LunaMoonGait>(true);
             }
-            Transform next = gait != null ? gait.visual : transform.Find("Visual");
+            Transform candidate = gait != null ? gait.visual : transform.Find("Visual");
             // Never attach combat eyes to the peaceful humanoid when a form is replaced.
-            if (next != null && next.Find("MoonLuna_Toon/Head/Face_Head") == null)
-                next = null;
+            // The face lookup only runs when the body changes, not every frame of the ultimate.
+            if (candidate != lastCandidate)
+            {
+                lastCandidate = candidate;
+                candidateHasFace = candidate != null && candidate.Find("MoonLuna_Toon/Head/Face_Head") != null;
+            }
+            Transform next = candidateHasFace ? candidate : null;
             if (next != visual)
             {
                 ClearEffect();

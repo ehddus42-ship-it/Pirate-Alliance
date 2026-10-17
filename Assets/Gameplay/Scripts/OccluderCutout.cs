@@ -42,6 +42,8 @@ namespace AcRoguelike
             public Renderer renderer;
             public bool eligible;
             public bool cut;
+            /// <summary>The target the eligibility was decided for; it is decided again only for a new target.</summary>
+            public Transform checkedFor;
             public Material[] original;
             public Material[] swapped;
         }
@@ -162,7 +164,12 @@ namespace AcRoguelike
                     byRenderer.Add(renderer, candidate);
                     candidates.Add(candidate);
                 }
-                if (!candidate.cut) candidate.eligible = IsStructure(renderer, target);
+                // Hierarchy and material checks run once per renderer, not on every rescan.
+                if (!candidate.cut && candidate.checkedFor != target)
+                {
+                    candidate.eligible = IsStructure(renderer, target);
+                    candidate.checkedFor = target;
+                }
             }
         }
 

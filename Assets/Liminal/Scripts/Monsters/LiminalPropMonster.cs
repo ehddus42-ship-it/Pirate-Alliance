@@ -185,8 +185,9 @@ namespace AcRoguelike.Liminal
         protected bool Clear(Vector3 direction, float distance)
         {
             float radius = body ? body.radius * .85f : .4f;
-            foreach (var hit in Physics.SphereCastAll(transform.position + Vector3.up * .9f, radius, direction, distance, ~0, QueryTriggerInteraction.Ignore))
+            for (int h = 0, hitCount = PhysicsCasts.SphereCast(transform.position + Vector3.up * .9f, radius, direction, distance, ~0, QueryTriggerInteraction.Ignore); h < hitCount; h++)
             {
+                var hit = PhysicsCasts.Hits[h];
                 if (hit.transform == transform || hit.transform.IsChildOf(transform)) continue;
                 if (hit.collider.GetComponentInParent<LiminalPlayerHealth>()) continue;
                 return false;
@@ -206,8 +207,9 @@ namespace AcRoguelike.Liminal
             if (!player) return false;
             Vector3 origin = transform.position + Vector3.up * height;
             Vector3 to = player.transform.position + Vector3.up * .9f - origin;
-            foreach (var hit in Physics.RaycastAll(origin, to.normalized, to.magnitude, ~0, QueryTriggerInteraction.Ignore))
+            for (int h = 0, hitCount = PhysicsCasts.Raycast(origin, to.normalized, to.magnitude, ~0, QueryTriggerInteraction.Ignore); h < hitCount; h++)
             {
+                var hit = PhysicsCasts.Hits[h];
                 if (hit.transform == transform || hit.transform.IsChildOf(transform)) continue;
                 if (hit.collider.GetComponentInParent<LiminalPlayerHealth>()) continue;
                 if (hit.collider.GetComponentInParent<LiminalPropMonster>()) continue;

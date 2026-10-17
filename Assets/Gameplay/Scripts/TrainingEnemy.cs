@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace AcRoguelike
@@ -36,8 +37,32 @@ namespace AcRoguelike
         Collider[] colliders;
         float incomingDamageMultiplier = 1;
 
+        static readonly List<TrainingEnemy> loaded = new List<TrainingEnemy>();
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetRegistry() => loaded.Clear();
+
+        /// <summary>
+        /// Fills the list with the enemies on active objects (the set FindObjectsByType returns) without
+        /// searching the scene or allocating, for callers that look for targets every frame.
+        /// </summary>
+        public static void CollectActive(List<TrainingEnemy> into)
+        {
+            into.Clear();
+            bool stale = false;
+            foreach (var enemy in loaded)
+            {
+                if (!enemy) { stale = true; continue; }
+                if (enemy.gameObject.activeInHierarchy) into.Add(enemy);
+            }
+            if (stale) loaded.RemoveAll(enemy => !enemy);
+        }
+
+        void OnDestroy() => loaded.Remove(this);
+
         void Awake()
         {
+            loaded.Add(this);
             Health = maxHealth;
             colliders = GetComponentsInChildren<Collider>();
             if (visibleRenderers == null || visibleRenderers.Length == 0)

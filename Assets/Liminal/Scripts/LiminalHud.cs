@@ -38,6 +38,8 @@ namespace AcRoguelike.Liminal
         TMP_FontAsset font;
         Font ownedSourceFont;
         GameObject canvasObject, modal, combatGroup, lobbyGroup, bossGroup;
+        // Last values written to the number labels, so their strings are only built when they change.
+        int shownCurrency = int.MinValue, shownEnemies = int.MinValue, shownHealth = int.MinValue;
         RectTransform modalContent, promptRoot, stamp;
         TextMeshProUGUI gateLabel, roomLabel, healthLabel, enemyLabel, bossName, bossValue, counterLabel, currencyLabel, lobbyTitle, promptLabel, promptKey, hunterName, skillLabel, dashLabel, lobbyMovementLabel;
         Image healthFill, healthGhost, bossFill;
@@ -57,6 +59,7 @@ namespace AcRoguelike.Liminal
         public void Initialize(LiminalRunDirector director, Font sourceFont)
         {
             run = director;
+            shownCurrency = shownEnemies = shownHealth = int.MinValue;
             font = HunterUi.CreateFont(sourceFont, out ownedSourceFont);
             canvasObject = new GameObject("HunterHUD", typeof(RectTransform), typeof(UnityEngine.Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             canvasObject.transform.SetParent(transform, false);
@@ -176,7 +179,11 @@ namespace AcRoguelike.Liminal
             if (lobbyMovementLabel) lobbyMovementLabel.gameObject.SetActive(movementOnly);
             if (combatGroup) combatGroup.SetActive(!lobby && run.CurrentStage);
             if (lobbyGroup) lobbyGroup.SetActive(lobby && !(run.Lobby && run.Lobby.WindowOpen));
-            if (currencyLabel) currencyLabel.text = HunterProgress.Currency.ToString("N0");
+            if (currencyLabel && HunterProgress.Currency != shownCurrency)
+            {
+                shownCurrency = HunterProgress.Currency;
+                currencyLabel.text = shownCurrency.ToString("N0");
+            }
             UpdateStamp();
             indicators?.Tick(run, run.Phase == LiminalRunPhase.Exploring && combatGroup && combatGroup.activeSelf && run.LivingEnemyCount > 0);
             UpdateAugmentReveal();
@@ -187,7 +194,7 @@ namespace AcRoguelike.Liminal
                 ? $"{run.ActiveMission.code}  ·  {run.ActiveMission.difficultyName}"
                 : $"GATE  {run.StageIndex + 1:00}";
             roomLabel.text = $"{run.CurrentStage.title}   {Mathf.Max(0, run.ActiveRoomIndex + 1):00} / {run.Rooms.Count:00}";
-            enemyLabel.text = run.LivingEnemyCount.ToString();
+            if (run.LivingEnemyCount != shownEnemies) { shownEnemies = run.LivingEnemyCount; enemyLabel.text = shownEnemies.ToString(); }
             if (run.Roster) hunterName.text = run.Roster.CurrentName;
             UpdateSkill(run.Roster ? run.Roster.CurrentSkill : null);
             if (run.PlayerHealth)
@@ -198,19 +205,20 @@ namespace AcRoguelike.Liminal
                 // The lost part lingers as a pale ghost, then drains.
                 ghost = Mathf.Max(h, Mathf.MoveTowards(ghost, h, Time.unscaledDeltaTime * .5f));
                 healthGhost.rectTransform.sizeDelta = new Vector2(232 * ghost, 10);
-                healthLabel.text = $"{run.PlayerHealth.Health}";
+                if (run.PlayerHealth.Health != shownHealth) { shownHealth = run.PlayerHealth.Health; healthLabel.text = shownHealth.ToString(); }
             }
             if (motor) UpdateStamina();
             bool dashAvailable = motor && motor.allowDash;
             if (dashLabel) dashLabel.gameObject.SetActive(dashAvailable);
             if (dashTrack) dashTrack.gameObject.SetActive(dashAvailable);
             counterLabel.text = !movementOnly && melee && melee.isActiveAndEnabled && melee.CounterActive ? "COUNTER" : "";
-            bossGroup.SetActive(false);
+            // Decided first and applied once: toggling the group off and on every frame rebuilt the canvas.
+            bool showBoss = false;
             if (run.CurrentStage.isBossStage && run.LivingEnemyCount > 0)
                 foreach (var signal in FindObjectsByType<TrafficLightBoss>(FindObjectsSortMode.None))
                     if (signal.enabled && signal.Health && signal.Health.IsAlive && signal.State != TrafficLightBossState.Dormant)
                     {
-                        bossGroup.SetActive(true);
+                        showBoss = true;
                         bossName.text = signal.displayName + (signal.Enraged ? "   <color=#ff6b5f>ENRAGED</color>" : "");
                         bossValue.text = $"{signal.Health.Health} / {signal.Health.maxHealth}";
                         bossFill.rectTransform.sizeDelta = new Vector2(688f * signal.Health.Health / Mathf.Max(1, signal.Health.maxHealth), 10);
@@ -221,7 +229,7 @@ namespace AcRoguelike.Liminal
                 foreach (var keeper in run.Rooms[run.ActiveRoomIndex].GetComponentsInChildren<AcRoguelike.GameTheme.GameTetrominoBoss>())
                     if (keeper.enabled && keeper.Health && keeper.Health.IsAlive)
                     {
-                        bossGroup.SetActive(true);
+                        showBoss = true;
                         bossName.text = keeper.displayName;
                         bossValue.text = $"{keeper.Health.Health} / {keeper.Health.maxHealth}";
                         bossFill.rectTransform.sizeDelta = new Vector2(688f * keeper.Health.Health / Mathf.Max(1, keeper.Health.maxHealth), 10);
@@ -232,12 +240,13 @@ namespace AcRoguelike.Liminal
                 foreach (var storm in run.Rooms[run.ActiveRoomIndex].GetComponentsInChildren<AcRoguelike.RuinsBoss.RuinsStormBoss>())
                     if (storm.enabled && storm.Health && storm.Health.IsAlive && !storm.EncounterCancelled)
                     {
-                        bossGroup.SetActive(true);
+                        showBoss = true;
                         bossName.text = storm.displayName + $"   <color=#70DCEA>기계 각성 {storm.MachinesActivated}/2</color>";
                         bossValue.text = $"{storm.Health.Health} / {storm.Health.maxHealth}";
                         bossFill.rectTransform.sizeDelta = new Vector2(688f * storm.Health.Health / Mathf.Max(1, storm.Health.maxHealth), 10);
                         break;
                     }
+            if (bossGroup.activeSelf != showBoss) bossGroup.SetActive(showBoss);
             if (run.Phase == LiminalRunPhase.AugmentChoice && augmentsUnlocked && Keyboard.current != null)
             {
                 if (Keyboard.current.digit1Key.wasPressedThisFrame) run.SelectAugment(0);

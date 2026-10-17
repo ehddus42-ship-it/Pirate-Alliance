@@ -164,3 +164,20 @@ Magica 클로스 렌더 정점(코너 분할 기준 추정): 머리 4개 163,009
 - 금장식이 치마를 그대로 따라가는지 대시·급회전에서 눈으로 확인.
 - 감량 후: Console에 FBX 재임포트 경고가 없는지, Battle 프리팹에서 Missing Mesh가 없는지, 머리·겉치마·랜턴 텍스처가 원래대로 보이는지,
   `Setup Magica Cloth` 보고서(`Magica/MagicaSetupReport.txt`)의 클로스별 정점 수가 위 추정치와 비슷한지 확인.
+
+## 2026-10-17 던전 렉 추가 최적화 (문루나 + 공용)
+코드·설정을 읽어서 찾은 항목입니다. 이 작업 환경에는 Unity가 없어 Profiler 수치는 아직 측정하지 않았습니다.
+
+| 항목 | 파일 | 바꾼 내용 |
+| --- | --- | --- |
+| 그림자 범위 | `Assets/Settings/PC_RPAsset.asset` | 거리 150 m → 60 m, 캐스케이드 4 → 2(분할 0.33). 쿼터뷰 카메라가 보는 범위는 약 32~48 m라 3·4번 캐스케이드는 화면에 거의 나오지 않으면서 매 프레임 그림자를 다시 그렸습니다. 근거리 그림자 해상도는 거의 같습니다. |
+| 달빛 조준 | `Combat/Runtime/LunaCombatController.cs` | 시야 검사 `RaycastAll` → 재사용 버퍼(`RaycastNonAlloc`). 적 검색 `FindObjectsByType` → `TrainingEnemy.CollectActive`(씬 검색·할당 없음). 사거리 안에 적이 없을 때 검색은 매 프레임 대신 0.1초마다. 각성 라벨 문자열은 1초에 한 번만 생성. |
+| 피격 이펙트 | `Combat/Runtime/LunaCombatVfx.cs` | 이펙트 재생마다 하던 `GetComponentsInChildren<ParticleSystem>`을 풀 생성 시 한 번만. |
+| 눈불꽃 | `Combat/Runtime/LunaEyeFire.cs` | 궁극기 중 매 프레임 하던 `Find(".../Face_Head")`를 몸이 바뀔 때만. |
+| 장식 따라가기 | `Magica/Scripts/LunaClothFollower.cs` | 파츠별로 작업을 하나씩 기다리던 것을 모두 병렬로 돌리고 한 번만 대기. |
+| 적 목록 | `Gameplay/Scripts/TrainingEnemy.cs` | 활성 적 등록부(`CollectActive`) 추가. 결과는 `FindObjectsByType`와 같은 집합입니다. |
+| 가림 컷아웃 | `Gameplay/Scripts/OccluderCutout.cs` | 1초마다 모든 렌더러에 다시 하던 계층·재질 검사를 렌더러당 한 번(대상이 바뀌면 다시)만. 1초 주기 끊김의 원인이었습니다. |
+| 몬스터 AI | `LiminalPropMonster` · `VendingMonster` · `TrafficLightBoss` | 길찾기·시야 검사의 `SphereCastAll`/`RaycastAll` → 공용 버퍼 `PhysicsCasts`(할당 없음, 결과 동일). |
+| HUD | `Liminal/Scripts/LiminalHud.cs` | 보스 체력바를 매 프레임 껐다 켜서 캔버스를 다시 만들던 것을 상태가 바뀔 때만 전환. 마석·적 수·체력 숫자는 값이 바뀔 때만 문자열 생성. |
+
+Unity에서 확인할 것: LiminalRun에서 문루나로 달빛·각성을 쓰며 `GC.Alloc`/프레임, `OccluderCutout.LateUpdate`의 1초 주기 스파이크, `Shadows`/`MainLightShadow` 시간, 보스전 `Canvas.BuildBatch`를 수정 전후로 비교합니다. 그림자가 너무 가깝게 끊겨 보이면 `m_ShadowDistance`만 80 정도로 늘립니다.

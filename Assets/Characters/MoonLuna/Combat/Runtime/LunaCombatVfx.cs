@@ -14,7 +14,8 @@ namespace MoonLuna
         public bool Awakened { get; private set; }
         public LunaEyeFire EyeFire => eyes;
         public int ActiveBursts { get { int n=0; foreach(var b in bursts) if(b.instance && b.instance.activeSelf) n++; return n; } }
-        class Burst { public GameObject source, instance; public float expires; }
+        class Burst { public GameObject source, instance; public ParticleSystem[] systems; public float expires; }
+        static readonly int IntensityId=Shader.PropertyToID("_Intensity");
         readonly List<Burst> bursts = new List<Burst>();
         Transform world;
         GameObject field, ornament;
@@ -115,6 +116,7 @@ namespace MoonLuna
                 else
                 {
                     selected=new Burst { source=source, instance=Instantiate(source,world) };
+                    selected.systems=selected.instance.GetComponentsInChildren<ParticleSystem>(true);
                     bursts.Add(selected);
                 }
             }
@@ -122,7 +124,7 @@ namespace MoonLuna
             selected.instance.transform.SetPositionAndRotation(position,Quaternion.identity);
             selected.expires=Time.time+life;
             selected.instance.SetActive(true);
-            foreach(var ps in selected.instance.GetComponentsInChildren<ParticleSystem>(true)) { ps.Clear(true); ps.Play(true); }
+            foreach(var ps in selected.systems) { ps.Clear(true); ps.Play(true); }
         }
         public void SetMoonlight(bool active, float duration)
         {
@@ -173,7 +175,7 @@ namespace MoonLuna
                 ornament.transform.rotation=transform.rotation*Quaternion.Euler(0,0,Mathf.Sin(Time.time*.4f)*5);
                 ornament.transform.localScale=Vector3.one*(Awakened ? .92f : .82f);
                 float pulse=1+Mathf.Sin(Time.time*(Awakened?4.8f:1.5f))*(Awakened?.1f:.025f);
-                ornamentBlock.SetFloat("_Intensity",(reveal>.5f?1.65f:1.15f)*pulse);
+                ornamentBlock.SetFloat(IntensityId,(reveal>.5f?1.65f:1.15f)*pulse);
                 ornamentRenderer.SetPropertyBlock(ornamentBlock);
             }
         }

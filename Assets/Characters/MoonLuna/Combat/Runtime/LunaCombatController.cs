@@ -58,6 +58,11 @@ namespace MoonLuna
         readonly List<Shot> shots = new List<Shot>();
         readonly RaycastHit[] sweepHits = new RaycastHit[64];
         readonly Collider[] overlapHits = new Collider[64];
+        readonly RaycastHit[] sightHits = new RaycastHit[32];
+        readonly List<TrainingEnemy> targetScan = new List<TrainingEnemy>(), blastScan = new List<TrainingEnemy>();
+        float nextMoonlightSearchAt;
+        int labelSeconds = -1;
+        string awakenedLabel;
         float attackReadyAt, moonlightReadyAt, ultimateReadyAt, lastAttackAt = -100;
         float moonlightUntil, awakenedUntil, nextMoonlightShotAt, busyUntil;
         int nextPhase;
@@ -77,7 +82,17 @@ namespace MoonLuna
             public readonly HashSet<TrainingEnemy> hit = new HashSet<TrainingEnemy>();
         }
 
-        public string Label => IsAwakened ? "각성 " + Mathf.CeilToInt(UltimateRemaining) : "ULT · R";
+        public string Label
+        {
+            get
+            {
+                if (!IsAwakened) return "ULT · R";
+                // The HUD reads this every frame; build the text once per second.
+                int seconds = Mathf.CeilToInt(UltimateRemaining);
+                if (seconds != labelSeconds) { labelSeconds = seconds; awakenedLabel = "각성 " + seconds; }
+                return awakenedLabel;
+            }
+        }
         public bool Busy => isActiveAndEnabled && Time.time < busyUntil;
         public float CooldownRemaining => Mathf.Max(0, ultimateReadyAt - Time.time);
         public float AttackCooldownRemaining => Mathf.Max(0, attackReadyAt - Time.time);
@@ -255,6 +270,7 @@ namespace MoonLuna
             moonlightReadyAt = Time.time + Mathf.Max(.1f, moonlightCooldown);
             nextMoonlightShotAt = Time.time;
             moonlightTarget = null;
+            nextMoonlightSearchAt = 0;
             UpdateMoonlightTarget();
             moonlightFx = true;
             MoonlightCount++;
@@ -301,7 +317,15 @@ namespace MoonLuna
             }
             if (!Valid(moonlightTarget) || (moonlightTarget.AimPoint - origin).sqrMagnitude > moonlightRadius * moonlightRadius
                 || !CanSee(origin, moonlightTarget.AimPoint, moonlightTarget))
-                moonlightTarget = FindTarget(MoonlightCenter, moonlightRadius, Vector3.zero, -1);
+            {
+                // With nobody in reach, look again a few times a second instead of every frame.
+                if (Valid(moonlightTarget) || Time.time >= nextMoonlightSearchAt)
+                {
+                    moonlightTarget = FindTarget(MoonlightCenter, moonlightRadius, Vector3.zero, -1);
+                    if (!moonlightTarget) nextMoonlightSearchAt = Time.time + .1f;
+                }
+                else moonlightTarget = null;
+            }
         }
 
         static bool Valid(TrainingEnemy enemy) => enemy && enemy.isActiveAndEnabled && enemy.IsAlive
@@ -319,7 +343,8 @@ namespace MoonLuna
             TrainingEnemy best = null;
             float score = float.PositiveInfinity;
             Vector3 origin = center + Vector3.up * projectileHeight;
-            foreach (var enemy in FindObjectsByType<TrainingEnemy>(FindObjectsSortMode.None))
+            TrainingEnemy.CollectActive(targetScan);
+            foreach (var enemy in targetScan)
             {
                 if (!Valid(enemy)) continue;
                 Vector3 offset = enemy.AimPoint - origin;
@@ -341,9 +366,16 @@ namespace MoonLuna
         {
             Vector3 delta = to - from;
             if (delta.sqrMagnitude < .0001f) return true;
-            var hits = Physics.RaycastAll(from, delta.normalized, delta.magnitude, collisionMask, QueryTriggerInteraction.Ignore);
-            foreach (var hit in hits)
+            float length = delta.magnitude;
+            Vector3 direction = delta / length;
+            int count = Physics.RaycastNonAlloc(from, direction, sightHits, length, collisionMask, QueryTriggerInteraction.Ignore);
+            RaycastHit[] hits = count == sightHits.Length
+                ? Physics.RaycastAll(from, direction, length, collisionMask, QueryTriggerInteraction.Ignore)
+                : sightHits;
+            if (hits != sightHits) count = hits.Length;
+            for (int i = 0; i < count; i++)
             {
+                var hit = hits[i];
                 if (OwnCollider(hit.collider)) continue;
                 var other = hit.collider.GetComponentInParent<TrainingEnemy>();
                 if (other == target || (other && !other.IsAlive)) continue;
@@ -464,7 +496,8 @@ namespace MoonLuna
             if (fx) fx.PlayImpact(at, shot.phase, shot.awakened);
             if (Valid(direct)) Damage(shot, direct);
             if (shot.phase != 2 || explosionRadius <= 0 || !CombatAvailable || Time.timeScale <= 0) return;
-            foreach (var enemy in FindObjectsByType<TrainingEnemy>(FindObjectsSortMode.None))
+            TrainingEnemy.CollectActive(blastScan);
+            foreach (var enemy in blastScan)
             {
                 if (!CombatAvailable || Time.timeScale <= 0) break;
                 if (!Valid(enemy) || shot.hit.Contains(enemy)) continue;

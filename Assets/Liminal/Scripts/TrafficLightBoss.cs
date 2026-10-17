@@ -420,8 +420,9 @@ namespace AcRoguelike.Liminal
                 float angle = i == 0 ? 0 : (i % 2 == 0 ? -1 : 1) * ((i + 1) / 2) * 30;
                 Vector3 candidate = Quaternion.Euler(0, angle, 0) * direction;
                 bool blocked = false;
-                foreach (var hit in Physics.SphereCastAll(transform.position + Vector3.up * 2.6f, body.radius * .9f, candidate, 2.5f, ~0, QueryTriggerInteraction.Ignore))
+                for (int h = 0, hitCount = PhysicsCasts.SphereCast(transform.position + Vector3.up * 2.6f, body.radius * .9f, candidate, 2.5f, ~0, QueryTriggerInteraction.Ignore); h < hitCount; h++)
                 {
+                    var hit = PhysicsCasts.Hits[h];
                     if (hit.transform.IsChildOf(transform) || hit.transform == transform || hit.collider.GetComponentInParent<LiminalPlayerHealth>()) continue;
                     blocked = true; break;
                 }
@@ -434,8 +435,9 @@ namespace AcRoguelike.Liminal
         {
             Vector3 origin = transform.position + Vector3.up * 6;
             Vector3 to = player.transform.position + Vector3.up * .85f - origin;
-            foreach (var hit in Physics.RaycastAll(origin, to.normalized, to.magnitude, ~0, QueryTriggerInteraction.Ignore))
+            for (int h = 0, hitCount = PhysicsCasts.Raycast(origin, to.normalized, to.magnitude, ~0, QueryTriggerInteraction.Ignore); h < hitCount; h++)
             {
+                var hit = PhysicsCasts.Hits[h];
                 if (hit.transform == transform || hit.transform.IsChildOf(transform) || hit.collider.GetComponentInParent<LiminalPlayerHealth>()) continue;
                 return false;
             }
