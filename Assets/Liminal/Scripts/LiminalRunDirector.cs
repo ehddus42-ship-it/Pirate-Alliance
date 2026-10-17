@@ -80,6 +80,9 @@ namespace AcRoguelike.Liminal
         bool initialized;
         LiminalRunPhase resumePhase = LiminalRunPhase.Exploring;
         int escapeFrame = -1;
+        // The final boss's fall opens the results (return to lobby) by itself after a short beat; -1 when not pending.
+        float bossVictoryAt = -1;
+        const float BossVictoryDelay = 2f;
         LiminalStageDefinition[] originalStages;
 
         void Start()
@@ -151,6 +154,11 @@ namespace AcRoguelike.Liminal
             if (Phase == LiminalRunPhase.Lobby) return;
             if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) HandleEscape();
             if (Phase != LiminalRunPhase.Exploring || !player || rooms.Count == 0) return;
+            if (bossVictoryAt >= 0 && Time.time >= bossVictoryAt)
+            {
+                bossVictoryAt = -1;
+                if (AllRoomsCleared()) { LeaveStage(); return; }
+            }
             int next = ActiveRoomIndex + 1;
             if (next < rooms.Count && (ActiveRoomIndex < 0 || cleared[ActiveRoomIndex]) && rooms[next].Contains(player.position, 1.3f)) ActivateRoom(next);
             if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame) TryUseExit();
@@ -169,6 +177,7 @@ namespace AcRoguelike.Liminal
                 if (!player || !motor || !caster || stages == null || index < 0 || index >= stages.Length || !stages[index])
                     throw new InvalidOperationException("플레이어와 스테이지 설정을 확인해 줘.");
                 StageIndex = index;
+                bossVictoryAt = -1;
                 ClearProjectiles();
                 BuildRoute(index, false);
                 RenderSettings.ambientLight = CurrentStage.ambientColor;
@@ -525,7 +534,10 @@ namespace AcRoguelike.Liminal
             {
                 MarkRoomCleared(ActiveRoomIndex);
                 bool bossRoom = rooms[ActiveRoomIndex].kind == LiminalRoomKind.Boss;
-                hud.Notify(bossRoom
+                // The last gate's boss ends the mission on the spot: no walk back to the exit door.
+                bool finalBoss = bossRoom && StageIndex >= stages.Length - 1;
+                if (finalBoss) bossVictoryAt = Time.time + BossVictoryDelay;
+                hud.Notify(finalBoss ? "게이트의 주인이 쓰러졌어.\n곧 귀환 준비가 끝나." : bossRoom
                     ? "마지막 문이 응답했어.\n출구로 이동해 E를 눌러 줘." : "공간이 조용해졌어.\n열린 문으로 계속 이동해.", 3.5f);
                 // Every cleared normal (non-boss) combat room offers an augment.
                 if (!bossRoom && rooms[ActiveRoomIndex].kind == LiminalRoomKind.Combat && Phase == LiminalRunPhase.Exploring) OfferAugments();
@@ -560,10 +572,16 @@ namespace AcRoguelike.Liminal
         public bool TryUseExit()
         {
             if (!ExitAvailable) return false;
+            LeaveStage();
+            return true;
+        }
+
+        void LeaveStage()
+        {
+            bossVictoryAt = -1;
             PendingReward += 40;
             // Augments come from cleared combat rooms; a stage exit goes straight to the next gate.
             SetPhase(StageIndex >= stages.Length - 1 ? LiminalRunPhase.Victory : LiminalRunPhase.NextStageChoice);
-            return true;
         }
 
         /// <summary>Magic stones earned mid-run (augments such as 예금), paid out with the rest in the lobby.</summary>
@@ -677,6 +695,7 @@ namespace AcRoguelike.Liminal
             if (!initialized) return;
             if (PendingReward > 0) HunterProgress.Earn(PendingReward);
             PendingReward = 0;
+            bossVictoryAt = -1;
             ClearRoute();
             ActiveMission = null;
             stages = originalStages == null ? Array.Empty<LiminalStageDefinition>() : (LiminalStageDefinition[])originalStages.Clone();
